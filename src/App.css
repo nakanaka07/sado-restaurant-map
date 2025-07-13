@@ -1,0 +1,131 @@
+/* 佐渡飲食店マップ - メインスタイル */
+
+* {
+  box-sizing: border-box;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.app-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 2rem;
+  text-align: center;
+}
+
+.app-header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+}
+
+.app-header p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1rem;
+}
+
+.app-content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 1rem;
+  height: calc(100vh - 200px);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.filter-panel {
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 1rem;
+  height: fit-content;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.filter-panel h2 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.filter-section {
+  margin-bottom: 1rem;
+}
+
+.filter-section label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.filter-section input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.filter-section input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.map-container {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 500px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #666;
+}
+
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  color: #d73a49;
+}
+
+.error-container h1 {
+  color: #d73a49;
+  margin-bottom: 1rem;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .app-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+  }
+
+  .app-header {
+    padding: 1rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .map-container {
+    height: 400px;
+  }
+}
