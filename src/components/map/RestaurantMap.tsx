@@ -48,14 +48,30 @@ export function RestaurantMap({
         style={{
           height: "500px",
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: "#fee",
           borderRadius: "8px",
           border: "1px solid #fcc",
+          padding: "20px",
+          textAlign: "center",
         }}
       >
-        <p>❌ Map ID が設定されていません</p>
+        <p style={{ color: "#d63031", fontSize: "18px", marginBottom: "12px" }}>
+          ❌ Map ID が設定されていません
+        </p>
+        <p style={{ color: "#636e72", fontSize: "14px", marginBottom: "16px" }}>
+          Google Maps API の Map ID を設定してください
+        </p>
+        <div style={{ fontSize: "12px", color: "#636e72" }}>
+          <p>
+            環境変数: <code>VITE_GOOGLE_MAPS_MAP_ID</code>
+          </p>
+          <p>
+            現在の値: <code>{mapId || "未設定"}</code>
+          </p>
+        </div>
       </div>
     );
   }

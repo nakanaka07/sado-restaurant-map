@@ -44,6 +44,7 @@ jobs:
         env:
           VITE_BASE_URL: /${{ github.event.repository.name }}/
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'placeholder-for-build' }}
+          VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID || 'placeholder-for-build' }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
