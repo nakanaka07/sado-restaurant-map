@@ -111,19 +111,29 @@ export const trackEvent = (
     return;
   }
 
-  // イベント送信
-  window.gtag("event", eventName, {
-    ...parameters,
-  } as GtagConfig);
+  try {
+    // イベント送信
+    window.gtag("event", eventName, {
+      ...parameters,
+    } as GtagConfig);
 
-  // 開発環境でのみ詳細ログ、本番環境では簡潔なログ
-  if (import.meta.env.DEV) {
-    console.log("GA Event (Dev):", eventName, parameters);
-  } else {
-    // 本番環境では特定のイベントのみ簡潔にログ出力
-    if (eventName === "app_initialized" || eventName === "page_view") {
-      console.log("GA Event:", eventName);
+    // 開発環境でのみ詳細ログ、本番環境では簡潔なログ
+    if (import.meta.env.DEV) {
+      console.log("GA Event (Dev):", eventName, parameters);
+    } else {
+      // 本番環境では重要なイベントのみ簡潔にログ出力
+      if (
+        eventName === "app_initialized" ||
+        eventName === "page_view" ||
+        eventName === "restaurant_click" ||
+        eventName === "search" ||
+        eventName === "filter_applied"
+      ) {
+        console.log("GA Event:", eventName);
+      }
     }
+  } catch (error) {
+    console.error("Google Analytics イベント送信エラー:", error);
   }
 };
 

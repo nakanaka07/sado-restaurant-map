@@ -26,6 +26,7 @@ export function RestaurantMap({
 
   // レストランマーカークリック時の処理
   const handleMarkerClick = useCallback((restaurant: Restaurant) => {
+    console.log("マーカークリック:", restaurant.name); // デバッグ用ログ
     setSelectedRestaurant(restaurant);
 
     // Analytics: レストランクリック追跡
@@ -38,6 +39,8 @@ export function RestaurantMap({
 
     // Analytics: 地図操作追跡
     trackMapInteraction("marker_click");
+
+    console.log("Analytics イベント送信完了"); // デバッグ用ログ
   }, []);
 
   if (loading) {
