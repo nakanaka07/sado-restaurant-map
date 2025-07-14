@@ -42,15 +42,37 @@ export default defineConfig({
             name: "全ての飲食店",
             short_name: "全店舗",
             description: "佐渡島の全飲食店を表示",
-            url: "/?filter=all",
-            icons: [{ src: "/favicon.svg", sizes: "192x192" }],
+            url:
+              process.env.NODE_ENV === "production"
+                ? "/sado-restaurant-map/?filter=all"
+                : "/?filter=all",
+            icons: [
+              {
+                src:
+                  process.env.NODE_ENV === "production"
+                    ? "/sado-restaurant-map/favicon.svg"
+                    : "/favicon.svg",
+                sizes: "192x192",
+              },
+            ],
           },
           {
             name: "近くの店舗",
             short_name: "近くの店",
             description: "現在地周辺の飲食店を検索",
-            url: "/?filter=nearby",
-            icons: [{ src: "/favicon.svg", sizes: "192x192" }],
+            url:
+              process.env.NODE_ENV === "production"
+                ? "/sado-restaurant-map/?filter=nearby"
+                : "/?filter=nearby",
+            icons: [
+              {
+                src:
+                  process.env.NODE_ENV === "production"
+                    ? "/sado-restaurant-map/favicon.svg"
+                    : "/favicon.svg",
+                sizes: "192x192",
+              },
+            ],
           },
         ],
       },

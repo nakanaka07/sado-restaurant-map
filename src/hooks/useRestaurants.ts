@@ -150,7 +150,8 @@ export function useRestaurants(
         (restaurant) =>
           restaurant.name.toLowerCase().includes(query) ||
           restaurant.description?.toLowerCase().includes(query) ||
-          restaurant.address.toLowerCase().includes(query)
+          restaurant.address.toLowerCase().includes(query) ||
+          restaurant.cuisineType.toLowerCase().includes(query)
       );
     }
 
