@@ -26,11 +26,13 @@ declare global {
 // Google Analytics初期化
 export const initGA = () => {
   if (!GA_MEASUREMENT_ID || typeof GA_MEASUREMENT_ID !== "string") {
-    console.warn("GA_MEASUREMENT_ID が設定されていません");
+    if (import.meta.env.DEV) {
+      console.warn("GA_MEASUREMENT_ID が設定されていません");
+    }
     return;
   }
 
-  // 開発環境でのみログ出力
+  // 開発環境でのみ詳細ログ出力
   if (import.meta.env.DEV) {
     console.log("開発環境でのGoogle Analytics初期化:", GA_MEASUREMENT_ID);
   }
@@ -58,7 +60,12 @@ export const initGA = () => {
     },
   });
 
-  console.log("Google Analytics 4 初期化完了:", GA_MEASUREMENT_ID);
+  // 本番環境では測定IDを表示しない
+  if (import.meta.env.DEV) {
+    console.log("Google Analytics 4 初期化完了:", GA_MEASUREMENT_ID);
+  } else {
+    console.log("Google Analytics 4 初期化完了");
+  }
 
   // 初期化完了を確認するためのテストイベント送信
   setTimeout(() => {
@@ -77,21 +84,26 @@ export const trackEvent = (
   parameters: Record<string, unknown> = {}
 ) => {
   if (!GA_MEASUREMENT_ID || !window.gtag) {
-    console.warn("Google Analytics が初期化されていません");
+    if (import.meta.env.DEV) {
+      console.warn("Google Analytics が初期化されていません");
+    }
     return;
   }
 
-  // 全ての環境でイベント送信（開発環境ではログも出力）
-  if (import.meta.env.DEV) {
-    console.log("GA Event (Dev):", eventName, parameters);
-  }
-
+  // イベント送信
   window.gtag("event", eventName, {
     ...parameters,
   } as GtagConfig);
 
-  // 本番環境でもログ出力（デバッグ用）
-  console.log("GA Event sent:", eventName, parameters);
+  // 開発環境でのみ詳細ログ、本番環境では簡潔なログ
+  if (import.meta.env.DEV) {
+    console.log("GA Event (Dev):", eventName, parameters);
+  } else {
+    // 本番環境では特定のイベントのみ簡潔にログ出力
+    if (eventName === "app_initialized" || eventName === "page_view") {
+      console.log("GA Event:", eventName);
+    }
+  }
 };
 
 // 佐渡飲食店マップ専用イベント関数
