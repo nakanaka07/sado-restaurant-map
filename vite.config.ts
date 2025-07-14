@@ -5,6 +5,7 @@ import { fileURLToPath, URL } from "node:url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
   plugins: [
     react({
       // React Compiler RC対応（将来）
@@ -30,8 +31,10 @@ export default defineConfig({
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait-primary",
-        start_url: "/",
-        scope: "/",
+        start_url:
+          process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
+        scope:
+          process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
         lang: "ja",
         categories: ["food", "travel", "utilities"],
         shortcuts: [

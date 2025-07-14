@@ -12,14 +12,14 @@
 
 ### ⚙️ 環境設定
 
-**手順1: 環境変数ファイルの設定**
+#### 手順1: 環境変数ファイルの設定
 
 ```bash
 # .env.local.example を .env.local にコピー
 cp .env.local.example .env.local
 ```
 
-**手順2: APIキーの設定**
+#### 手順2: APIキーの設定
 
 `.env.local` ファイルを開いて、以下の値を実際のAPIキーに置き換えてください：
 
@@ -32,13 +32,13 @@ VITE_GOOGLE_SHEETS_API_KEY=your_sheets_api_key_here
 VITE_SPREADSHEET_ID=your_spreadsheet_id_here
 ```
 
-**手順3: 依存関係のインストール**
+#### 手順3: 依存関係のインストール
 
 ```bash
 pnpm install
 ```
 
-**手順4: 開発サーバーの起動**
+#### 手順4: 開発サーバーの起動
 
 ```bash
 pnpm dev

@@ -1,5 +1,15 @@
 /* 佐渡飲食店マップ - メインスタイル */
 
+/* アニメーション */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 * {
   box-sizing: border-box;
 }

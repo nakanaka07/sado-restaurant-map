@@ -16,7 +16,7 @@ const MOCK_RESTAURANTS: readonly Restaurant[] = [
     priceRange: "2000-3000円",
     address: "新潟県佐渡市両津湊119",
     phone: "0259-27-5938",
-    coordinates: { lat: 38.0463, lng: 138.4348 },
+    coordinates: { lat: 38.018611, lng: 138.367222 }, // 佐渡島中心部
     rating: 4.2,
     reviewCount: 85,
     openingHours: [
@@ -32,14 +32,49 @@ const MOCK_RESTAURANTS: readonly Restaurant[] = [
     cuisineType: "そば・うどん",
     priceRange: "1000-2000円",
     address: "新潟県佐渡市小木町1956",
-    coordinates: { lat: 37.7567, lng: 138.2871 },
+    coordinates: { lat: 37.9, lng: 138.25 }, // 佐渡島南部
     rating: 4.5,
     reviewCount: 123,
     openingHours: [
       { day: "火-日", open: "11:30", close: "20:00", isHoliday: false },
       { day: "月", open: "", close: "", isHoliday: true },
     ],
-    features: ["テラス席", "禁煙", "手打ちそば"],
+    features: ["テラス席", "禁煙", "手打ちそば", "テイクアウト可"],
+    lastUpdated: "2025-07-10",
+  },
+  {
+    id: "3",
+    name: "佐渡カフェ",
+    description: "佐渡の絶景を眺めながらゆったりできるカフェ",
+    cuisineType: "カフェ・喫茶店",
+    priceRange: "～1000円",
+    address: "新潟県佐渡市両津夷269-1",
+    phone: "0259-23-4567",
+    coordinates: { lat: 38.05, lng: 138.38 }, // 佐渡島北東部
+    rating: 4.3,
+    reviewCount: 67,
+    openingHours: [
+      { day: "月-日", open: "9:00", close: "18:00", isHoliday: false },
+    ],
+    features: ["Wi-Fiあり", "テラス席", "駐車場あり", "禁煙", "テイクアウト可"],
+    lastUpdated: "2025-07-10",
+  },
+  {
+    id: "4",
+    name: "寿司処 金峰",
+    description: "佐渡近海の新鮮なネタが自慢の老舗寿司店",
+    cuisineType: "寿司",
+    priceRange: "3000円～",
+    address: "新潟県佐渡市相川下戸村358",
+    phone: "0259-74-2109",
+    coordinates: { lat: 38.03, lng: 138.23 }, // 佐渡島西部（相川）
+    rating: 4.6,
+    reviewCount: 142,
+    openingHours: [
+      { day: "火-日", open: "17:00", close: "22:00", isHoliday: false },
+      { day: "月", open: "", close: "", isHoliday: true },
+    ],
+    features: ["カウンター席", "個室あり", "予約可能"],
     lastUpdated: "2025-07-10",
   },
 ] as const;
