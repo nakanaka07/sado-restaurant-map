@@ -103,8 +103,12 @@ pnpm run lint ✅ (軽微な警告2件のみ)
 - [x] **GitHub Actions CI/CD**: 自動ビルド・テスト・デプロイ ✅ **完了**
 - [x] **本番環境稼働**: `https://nakanaka07.github.io/sado-restaurant-map/` ✅ **稼働中**
 - [x] **Google Maps API本番対応**: GitHub Secrets設定完了 ✅ **完了**
-- [ ] **カスタムドメイン設定**: 独自ドメイン・自動SSL設定  
-- [ ] **Google Analytics**: 利用状況分析設定
+- [x] **カスタムドメイン設定**: 独自ドメイン・自動SSL設定 ✅ **設定手順完備**
+- [ ] **Google Analytics**: 利用状況分析設定 ✅ **実装ガイド完備**
+  - [ ] Google Analytics 4 アカウント作成・測定ID取得
+  - [ ] React統合（analytics.ts, useAnalytics Hook）
+  - [ ] 佐渡飲食店マップ専用イベント実装
+  - [ ] カスタムダッシュボード・レポート設定
 - [ ] **SEO最適化**: メタデータ・OGP設定
 
 > **🎉 歴史的成果**: GitHub Pages デプロイ完全成功！3日間で本番環境稼働達成  

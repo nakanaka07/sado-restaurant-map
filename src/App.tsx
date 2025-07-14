@@ -1,9 +1,11 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
+import { useEffect } from "react";
 import { useRestaurants } from "./hooks/useRestaurants";
 import { RestaurantMap } from "./components/map/RestaurantMap";
 import { SimpleMapTest } from "./components/map/SimpleMapTest";
 import { FilterPanel } from "./components/restaurant/FilterPanel";
 import { SkipLink } from "./components/common/AccessibilityComponents";
+import { initGA } from "./utils/analytics";
 import PWABadge from "./PWABadge";
 import type { CuisineType, PriceRange } from "./types";
 import "./App.css";
@@ -16,6 +18,11 @@ function App() {
     useRestaurants();
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  // Google Analytics初期化
+  useEffect(() => {
+    initGA();
+  }, []);
 
   // フィルター関数
   const handleCuisineFilter = (cuisine: CuisineType | "") => {
