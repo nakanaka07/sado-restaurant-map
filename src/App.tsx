@@ -5,7 +5,7 @@ import { RestaurantMap } from "./components/map/RestaurantMap";
 import { SimpleMapTest } from "./components/map/SimpleMapTest";
 import { FilterPanel } from "./components/restaurant/FilterPanel";
 import { SkipLink } from "./components/common/AccessibilityComponents";
-import { initGA } from "./utils/analytics";
+import { initGA, checkGAStatus } from "./utils/analytics";
 import PWABadge from "./PWABadge";
 import type { CuisineType, PriceRange } from "./types";
 import "./App.css";
@@ -22,6 +22,13 @@ function App() {
   // Google Analytics初期化
   useEffect(() => {
     initGA();
+
+    // 開発環境でのみデバッグ情報を表示
+    if (import.meta.env.DEV) {
+      setTimeout(() => {
+        checkGAStatus();
+      }, 3000);
+    }
   }, []);
 
   // フィルター関数

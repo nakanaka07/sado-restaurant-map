@@ -25,22 +25,46 @@ declare global {
 
 // Google Analytics初期化
 export const initGA = () => {
-  if (!GA_MEASUREMENT_ID || typeof GA_MEASUREMENT_ID !== "string") {
+  // 環境変数の確認
+  if (
+    !GA_MEASUREMENT_ID ||
+    typeof GA_MEASUREMENT_ID !== "string" ||
+    GA_MEASUREMENT_ID === "undefined"
+  ) {
     if (import.meta.env.DEV) {
-      console.warn("GA_MEASUREMENT_ID が設定されていません");
+      console.warn(
+        "GA_MEASUREMENT_ID が設定されていません:",
+        GA_MEASUREMENT_ID
+      );
+    } else {
+      console.warn("Google Analytics: 測定IDが未設定");
     }
+    return;
+  }
+
+  // 測定IDの形式確認（G- で始まるかチェック）
+  if (!GA_MEASUREMENT_ID.startsWith("G-")) {
+    console.warn("Google Analytics: 無効な測定ID形式:", GA_MEASUREMENT_ID);
     return;
   }
 
   // 開発環境でのみ詳細ログ出力
   if (import.meta.env.DEV) {
     console.log("開発環境でのGoogle Analytics初期化:", GA_MEASUREMENT_ID);
+  } else {
+    console.log("Google Analytics 初期化開始");
   }
 
   // gtag script動的追加
   const script = document.createElement("script");
   script.async = true;
   script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  script.onload = () => {
+    console.log("Google Analytics スクリプト読み込み完了");
+  };
+  script.onerror = () => {
+    console.error("Google Analytics スクリプト読み込み失敗");
+  };
   document.head.appendChild(script);
 
   // gtag設定
@@ -53,11 +77,7 @@ export const initGA = () => {
     page_title: "佐渡飲食店マップ",
     page_location: window.location.href,
     send_page_view: true,
-    custom_map: {
-      custom_parameter_1: "restaurant_id",
-      custom_parameter_2: "search_query",
-      custom_parameter_3: "filter_category",
-    },
+    // カスタムパラメータの削除（Google Analytics 4では不要）
   });
 
   // 本番環境では測定IDを表示しない
@@ -67,15 +87,16 @@ export const initGA = () => {
     console.log("Google Analytics 4 初期化完了");
   }
 
-  // 初期化完了を確認するためのテストイベント送信
+  // 初期化確認用のテストイベント（遅延して送信）
   setTimeout(() => {
     trackPageView("アプリ初期化完了");
     trackEvent("app_initialized", {
       app_name: "佐渡飲食店マップ",
       version: "1.0.0",
       timestamp: new Date().toISOString(),
+      environment: import.meta.env.MODE,
     });
-  }, 1000);
+  }, 2000); // 2秒後に送信して確実に初期化を完了
 };
 
 // カスタムイベント送信
@@ -162,4 +183,36 @@ export const trackPageView = (pageName: string) => {
     page_location: window.location.href,
     event_category: "navigation",
   });
+};
+
+// デバッグ用：Google Analytics状態確認
+export const checkGAStatus = () => {
+  const status = {
+    measurementId: GA_MEASUREMENT_ID,
+    measurementIdValid: GA_MEASUREMENT_ID && GA_MEASUREMENT_ID.startsWith("G-"),
+    gtagLoaded: typeof window !== "undefined" && !!window.gtag,
+    dataLayerExists: typeof window !== "undefined" && !!window.dataLayer,
+    environment: import.meta.env.MODE,
+  };
+
+  console.log("Google Analytics Status:", status);
+  return status;
+};
+
+// デバッグ用：強制初期化確認
+export const debugGA = () => {
+  const status = checkGAStatus();
+
+  if (status.gtagLoaded) {
+    // テストイベント送信
+    trackEvent("debug_test", {
+      timestamp: new Date().toISOString(),
+      test_message: "Google Analytics Debug Test",
+    });
+    console.log("Debug test event sent");
+  } else {
+    console.warn("Google Analytics not properly loaded");
+  }
+
+  return status;
 };
