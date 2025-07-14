@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CuisineType, PriceRange, SortOrder } from "@/types";
+import { trackSearch, trackFilter } from "@/utils/analytics";
 
 interface FilterPanelProps {
   loading?: boolean;
@@ -55,21 +56,35 @@ export function FilterPanel({
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     onSearchFilter?.(value);
+
+    // Analytics: 検索追跡
+    if (value.trim() !== "") {
+      trackSearch(value, resultCount);
+    }
   };
 
   const handleCuisineChange = (value: CuisineType | "") => {
     setSelectedCuisine(value);
     onCuisineFilter?.(value);
+
+    // Analytics: フィルター追跡
+    trackFilter("cuisine", value || "all");
   };
 
   const handlePriceChange = (value: PriceRange | "") => {
     setSelectedPrice(value);
     onPriceFilter?.(value);
+
+    // Analytics: フィルター追跡
+    trackFilter("price_range", value || "all");
   };
 
   const handleSortChange = (value: SortOrder) => {
     setSelectedSort(value);
     onSortChange?.(value);
+
+    // Analytics: ソート追跡
+    trackFilter("sort_order", value);
   };
 
   const handleFeatureToggle = (feature: string) => {
@@ -78,6 +93,9 @@ export function FilterPanel({
       : [...selectedFeatures, feature];
     setSelectedFeatures(newFeatures);
     onFeatureFilter?.(newFeatures);
+
+    // Analytics: 特徴フィルター追跡
+    trackFilter("features", newFeatures.join(",") || "none");
   };
 
   const handleReset = () => {
@@ -87,6 +105,9 @@ export function FilterPanel({
     setSelectedSort("name");
     setSelectedFeatures([]);
     onResetFilters?.();
+
+    // Analytics: リセット追跡
+    trackFilter("reset", "all_filters_cleared");
   };
 
   if (loading) {

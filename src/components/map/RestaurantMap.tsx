@@ -4,8 +4,9 @@ import {
   Pin,
   InfoWindow,
 } from "@vis.gl/react-google-maps";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type { Restaurant } from "@/types";
+import { trackRestaurantClick, trackMapInteraction } from "@/utils/analytics";
 
 interface RestaurantMapProps {
   restaurants: readonly Restaurant[];
@@ -22,6 +23,22 @@ export function RestaurantMap({
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
+
+  // レストランマーカークリック時の処理
+  const handleMarkerClick = useCallback((restaurant: Restaurant) => {
+    setSelectedRestaurant(restaurant);
+
+    // Analytics: レストランクリック追跡
+    trackRestaurantClick({
+      id: restaurant.id,
+      name: restaurant.name,
+      category: restaurant.cuisineType,
+      priceRange: restaurant.priceRange,
+    });
+
+    // Analytics: 地図操作追跡
+    trackMapInteraction("marker_click");
+  }, []);
 
   if (loading) {
     return (
@@ -105,7 +122,7 @@ export function RestaurantMap({
             key={restaurant.id}
             position={restaurant.coordinates}
             title={restaurant.name}
-            onClick={() => setSelectedRestaurant(restaurant)}
+            onClick={() => handleMarkerClick(restaurant)}
           >
             <Pin
               background="#ff6b6b"

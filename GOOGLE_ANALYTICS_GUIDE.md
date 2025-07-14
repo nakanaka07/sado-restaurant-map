@@ -68,29 +68,39 @@ VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 ```typescript
 // Google Analytics 4 設定
-export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as string;
+
+// Google Analytics gtag設定の型定義
+interface GtagConfig {
+  page_title?: string;
+  page_location?: string;
+  custom_map?: Record<string, string>;
+  measurement_id?: string;
+  [key: string]: unknown;
+}
 
 // gtag関数の型定義
 declare global {
   interface Window {
     gtag: (
-      command: 'config' | 'event',
+      command: "config" | "event",
       targetId: string,
-      config?: {
-        page_title?: string;
-        page_location?: string;
-        custom_map?: Record<string, string>;
-        [key: string]: any;
-      }
+      config?: GtagConfig
     ) => void;
-    dataLayer: any[];
+    dataLayer: unknown[];
   }
 }
 
 // Google Analytics初期化
 export const initGA = () => {
-  if (!GA_MEASUREMENT_ID) {
+  if (!GA_MEASUREMENT_ID || typeof GA_MEASUREMENT_ID !== 'string') {
     console.warn('GA_MEASUREMENT_ID が設定されていません');
+    return;
+  }
+
+  // 本番環境以外では初期化しない（オプション）
+  if (import.meta.env.DEV) {
+    console.log('開発環境のため Google Analytics は無効化されています');
     return;
   }
 
@@ -102,7 +112,7 @@ export const initGA = () => {
 
   // gtag設定
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: any[]) {
+  window.gtag = function gtag(...args: unknown[]) {
     window.dataLayer.push(args);
   };
 
@@ -114,19 +124,27 @@ export const initGA = () => {
       custom_parameter_3: 'filter_category',
     },
   });
+
+  console.log('Google Analytics 4 初期化完了:', GA_MEASUREMENT_ID);
 };
 
 // カスタムイベント送信
 export const trackEvent = (
   eventName: string,
-  parameters: Record<string, any> = {}
+  parameters: Record<string, unknown> = {}
 ) => {
   if (!GA_MEASUREMENT_ID || !window.gtag) return;
+
+  // 開発環境ではコンソールログのみ
+  if (import.meta.env.DEV) {
+    console.log('GA Event (Dev):', eventName, parameters);
+    return;
+  }
 
   window.gtag('event', eventName, {
     measurement_id: GA_MEASUREMENT_ID,
     ...parameters,
-  });
+  } as GtagConfig);
 };
 
 // 佐渡飲食店マップ専用イベント関数
@@ -165,6 +183,23 @@ export const trackMapInteraction = (action: 'zoom' | 'pan' | 'marker_click') => 
   trackEvent('map_interaction', {
     interaction_type: action,
     event_category: 'map_usage',
+  });
+};
+
+// PWA関連追跡
+export const trackPWAUsage = (action: 'install' | 'standalone_mode') => {
+  trackEvent('pwa_usage', {
+    pwa_action: action,
+    event_category: 'pwa_interaction',
+  });
+};
+
+// ページビュー追跡（SPA対応）
+export const trackPageView = (pageName: string) => {
+  trackEvent('page_view', {
+    page_title: pageName,
+    page_location: window.location.href,
+    event_category: 'navigation',
   });
 };
 ```
@@ -416,18 +451,22 @@ export const configurePrivacy = () => {
 
 ## ✅ **実装チェックリスト**
 
-- [ ] Google Analytics 4 アカウント作成
-- [ ] 測定ID取得・環境変数設定
-- [ ] analytics.ts実装
-- [ ] useAnalytics Hook実装
-- [ ] App.tsx統合
+- [x] **Google Analytics 4 アカウント作成** ✅ **完了**
+- [x] **測定ID取得・環境変数設定** ✅ **完了**
+- [x] **analytics.ts実装** ✅ **完了 - TypeScript厳格型定義対応**
+- [x] **useAnalytics Hook実装** ✅ **完了**
+- [x] **App.tsx統合** ✅ **完了**
 - [ ] RestaurantMap.tsx統合
 - [ ] FilterPanel.tsx統合
-- [ ] GitHub Secrets設定
+- [x] **GitHub Secrets設定** ✅ **完了**
 - [ ] カスタムレポート作成
 - [ ] 目標・コンバージョン設定
-- [ ] プライバシー設定
-- [ ] 本番環境デプロイ確認
+- [x] **プライバシー設定** ✅ **完了**
+- [x] **本番環境デプロイ確認** ✅ **完了**
+
+### 🎉 **実装状況**: 70%完了（コア機能100%稼働中）
+
+**✅ 本番環境で稼働中**: `https://nakanaka07.github.io/sado-restaurant-map/`
 
 ---
 
