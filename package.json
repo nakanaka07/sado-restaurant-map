@@ -37,8 +37,10 @@
     "workbox-core": "^7.3.0",
     "workbox-window": "^7.3.0"
   },
-  "resolutions": {
-    "sharp": "0.32.6",
-    "sharp-ico": "0.1.5"
+  "pnpm": {
+    "overrides": {
+      "sharp": "0.32.6",
+      "sharp-ico": "0.1.5"
+    }
   }
 }
