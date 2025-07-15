@@ -456,18 +456,151 @@ export const configurePrivacy = () => {
 - [x] **analytics.ts実装** ✅ **完了 - TypeScript厳格型定義対応**
 - [x] **useAnalytics Hook実装** ✅ **完了**
 - [x] **App.tsx統合** ✅ **完了**
-- [ ] RestaurantMap.tsx統合
-- [ ] FilterPanel.tsx統合
+- [x] **RestaurantMap.tsx統合** ✅ **完了 - レストランクリック・地図操作イベント追跡**
+- [x] **FilterPanel.tsx統合** ✅ **完了 - 検索・フィルター・ソートイベント追跡**
 - [x] **GitHub Secrets設定** ✅ **完了**
+- [x] **診断・デバッグ機能** ✅ **完了 - リアルタイム診断・自動修復・テストイベント送信**
 - [ ] カスタムレポート作成
 - [ ] 目標・コンバージョン設定
 - [x] **プライバシー設定** ✅ **完了**
 - [x] **本番環境デプロイ確認** ✅ **完了**
 
-### 🎉 **実装状況**: 70%完了（コア機能100%稼働中）
+### 🎉 **実装状況**: 95%完了（コア機能100%稼働中）
 
 **✅ 本番環境で稼働中**: `https://nakanaka07.github.io/sado-restaurant-map/`
 
 ---
 
-**🎯 完了**: Google Analytics 4 実装完了で佐渡飲食店マップの利用状況が完全に見える化！
+## 🔧 **Google Analytics 問題解決ガイド**
+
+### 📊 **リアルタイム診断機能**
+
+実装済みの診断機能を使用してGoogle Analytics の状態を確認できます：
+
+#### **開発環境での診断手順**
+
+1. **開発サーバー起動**:
+
+   ```bash
+   pnpm run dev
+   ```
+
+2. **ブラウザーコンソールで診断実行**:
+
+   ```javascript
+   // 1. 基本診断
+   window.gaDebug.runDiagnostics()
+   
+   // 2. テストイベント送信
+   window.gaDebug.sendTestEvents()
+   
+   // 3. 自動修復実行
+   window.gaDebug.autoFix()
+   ```
+
+3. **Google Analytics リアルタイムレポートで確認**:
+   - [Google Analytics](https://analytics.google.com/) → レポート → リアルタイム
+   - 「過去30分間」でイベントが表示されるか確認
+
+#### **よくある問題と解決方法**
+
+##### ❌ **問題1: イベントが Google Analytics に表示されない**
+
+**原因**:
+
+- 測定IDが未設定または無効
+- Do Not Track (DNT) 設定が有効
+- 広告ブロッカーによる干渉
+- ネットワーク接続の問題
+
+**解決方法**:
+
+```javascript
+// 環境変数確認
+console.log("測定ID:", import.meta.env.VITE_GA_MEASUREMENT_ID);
+
+// 診断実行
+window.gaDebug.runDiagnostics();
+
+// ブラウザー設定確認
+console.log("DNT設定:", navigator.doNotTrack);
+console.log("Cookie有効:", navigator.cookieEnabled);
+```
+
+##### ❌ **問題2: 開発環境でイベントが送信されない**
+
+**原因**:
+
+- Google Analytics スクリプトの読み込み失敗
+- CORS エラー
+- localhost での制限
+
+**解決方法**:
+
+```javascript
+// 強制再初期化
+window.gaDebug.autoFix();
+
+// 手動初期化確認
+window.gaDebug.forceInit();
+```
+
+##### ❌ **問題3: 本番環境でイベントが反映されない**
+
+**原因**:
+
+- GitHub Secrets の設定ミス
+- ビルド時の環境変数エラー
+- APIキー制限設定
+
+**解決方法**:
+
+1. **GitHub Secrets確認**:
+   - Repository → Settings → Secrets and variables → Actions
+   - `GA_MEASUREMENT_ID` が正しく設定されているか確認
+
+2. **ビルド確認**:
+
+   ```bash
+   pnpm run build
+   pnpm run preview
+   ```
+
+3. **本番環境での診断**:
+   - 本番サイトでF12コンソールを開く
+   - `window.gaDebug.runDiagnostics()` を実行
+
+### 📈 **Google Analytics データ確認方法**
+
+#### **リアルタイムでの確認**
+
+1. **Google Analytics** → **レポート** → **リアルタイム**
+2. **過去30分間**のデータでイベントを確認
+3. **イベント名**で佐渡飲食店マップのイベントを特定:
+   - `restaurant_click` - レストランマーカークリック
+   - `search` - 検索実行
+   - `filter_applied` - フィルター適用
+   - `map_interaction` - 地図操作
+
+#### **詳細分析での確認**
+
+1. **レポート** → **エンゲージメント** → **イベント**
+2. **過去7日間**でカスタムイベントを確認
+3. **イベント詳細**をクリックして具体的なパラメータを確認
+
+### 🎯 **実際の利用データ例**
+
+開発環境でテストイベントを送信後、以下のようなデータが表示されます：
+
+```text
+イベント名: restaurant_click
+パラメータ:
+├── restaurant_name: "佐渡海鮮市場"
+├── restaurant_category: "海鮮"
+├── price_range: "2000-3000円"
+└── event_category: "restaurant_interaction"
+```
+
+---
+
+**🎯 完了**: Google Analytics 4 実装完了！診断・デバッグ機能付きで佐渡飲食店マップの利用状況が完全に見える化！

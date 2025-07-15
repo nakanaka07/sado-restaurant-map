@@ -5,6 +5,18 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>sado-restaurant-map + TS</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      const gaId = '%VITE_GA_MEASUREMENT_ID%';
+      if (gaId && !gaId.startsWith('%VITE_')) {
+        gtag('config', gaId);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

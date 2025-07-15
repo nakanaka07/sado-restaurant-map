@@ -226,3 +226,159 @@ export const debugGA = () => {
 
   return status;
 };
+
+// 🔧 追加: リアルタイム診断機能
+export const runGADiagnostics = () => {
+  console.log("🔍 Google Analytics 診断開始...");
+
+  const diagnostics = {
+    // 基本設定チェック
+    measurementId: GA_MEASUREMENT_ID,
+    measurementIdFormat: GA_MEASUREMENT_ID?.startsWith("G-")
+      ? "✅ 正常"
+      : "❌ 無効",
+    environment: import.meta.env.MODE,
+
+    // スクリプト読み込みチェック
+    gtagScriptExists: !!document.querySelector(
+      'script[src*="googletagmanager.com/gtag/js"]'
+    ),
+    gtagFunctionExists:
+      typeof window !== "undefined" && typeof window.gtag === "function",
+    dataLayerExists:
+      typeof window !== "undefined" && Array.isArray(window.dataLayer),
+
+    // ネットワーク接続チェック
+    isOnline: navigator.onLine,
+    protocol: window.location.protocol,
+    httpsRequired:
+      window.location.protocol === "https:"
+        ? "✅ HTTPS"
+        : "⚠️ HTTP (本番では必須)",
+
+    // ブラウザ設定チェック
+    cookiesEnabled: navigator.cookieEnabled,
+    doNotTrack: navigator.doNotTrack === "1" ? "⚠️ DNT有効" : "✅ 追跡許可",
+
+    // タイミング情報
+    timestamp: new Date().toISOString(),
+    pageLoadTime: performance.now(),
+  };
+
+  console.table(diagnostics);
+
+  // 問題がある場合の推奨アクション
+  const issues = [];
+  if (!diagnostics.measurementId) issues.push("❌ 測定IDが未設定");
+  if (!diagnostics.gtagFunctionExists)
+    issues.push("❌ gtag関数が読み込まれていません");
+  if (!diagnostics.isOnline) issues.push("⚠️ オフライン状態");
+  if (diagnostics.doNotTrack === "⚠️ DNT有効")
+    issues.push("⚠️ Do Not Track設定が有効");
+
+  if (issues.length > 0) {
+    console.warn("🚨 検出された問題:", issues);
+  } else {
+    console.log("✅ 診断完了: Google Analytics は正常に動作可能です");
+  }
+
+  return diagnostics;
+};
+
+// 🧪 追加: 強制テストイベント送信
+export const sendTestEvents = () => {
+  console.log("🧪 テストイベント送信開始...");
+
+  const testEvents = [
+    { name: "test_app_start", data: { test_type: "initialization" } },
+    {
+      name: "test_search",
+      data: { search_term: "テスト検索", result_count: 5 },
+    },
+    {
+      name: "test_filter",
+      data: { filter_type: "cuisine", filter_value: "寿司" },
+    },
+    {
+      name: "test_restaurant_click",
+      data: { restaurant_id: "test-001", restaurant_name: "テスト店舗" },
+    },
+    {
+      name: "test_map_interaction",
+      data: { interaction_type: "marker_click" },
+    },
+  ];
+
+  testEvents.forEach((event, index) => {
+    setTimeout(() => {
+      trackEvent(event.name, event.data);
+      console.log(
+        `✅ テストイベント ${index + 1}/${testEvents.length} 送信:`,
+        event.name
+      );
+    }, index * 1000); // 1秒間隔で送信
+  });
+
+  console.log(
+    "🎯 テストイベント送信完了！Google Analytics リアルタイムレポートで確認してください"
+  );
+};
+
+// 🔄 追加: 自動診断・修復機能
+export const autoFixGA = () => {
+  console.log("🔧 Google Analytics 自動修復開始...");
+
+  const diagnostics = runGADiagnostics();
+
+  // 問題の自動修復を試行
+  if (!diagnostics.gtagFunctionExists && diagnostics.measurementId) {
+    console.log("🔧 gtag関数が存在しません。再初期化を試行...");
+
+    // 既存のスクリプトを削除
+    const existingScript = document.querySelector(
+      'script[src*="googletagmanager.com/gtag/js"]'
+    );
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    // 再初期化
+    setTimeout(() => {
+      initGA();
+      console.log("🔄 Google Analytics 再初期化完了");
+    }, 1000);
+  }
+
+  return diagnostics;
+};
+
+// 🎯 追加: Window オブジェクトにデバッグ関数を公開（開発環境のみ）
+declare global {
+  interface Window {
+    gaDebug?: {
+      runDiagnostics: typeof runGADiagnostics;
+      sendTestEvents: typeof sendTestEvents;
+      autoFix: typeof autoFixGA;
+      checkStatus: typeof checkGAStatus;
+      forceInit: typeof initGA;
+    };
+  }
+}
+
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  window.gaDebug = {
+    runDiagnostics: runGADiagnostics,
+    sendTestEvents: sendTestEvents,
+    autoFix: autoFixGA,
+    checkStatus: checkGAStatus,
+    forceInit: initGA,
+  };
+
+  console.log(
+    "🛠️ Google Analytics デバッグツールを window.gaDebug で利用可能です"
+  );
+  console.log("使用例:");
+  console.log("  window.gaDebug.runDiagnostics() - 診断実行");
+  console.log("  window.gaDebug.sendTestEvents() - テストイベント送信");
+  console.log("  window.gaDebug.autoFix() - 自動修復実行");
+}
