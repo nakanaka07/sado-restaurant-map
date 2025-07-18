@@ -14,12 +14,14 @@ load_dotenv()
 # --- 設定項目 ---
 # スクリプト自身の場所を基準に、ローカル開発用のサービスアカウントキーファイルへのパスを構築
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-# ローカル開発用のサービスアカウントキーファイル
-SERVICE_ACCOUNT_FILE = os.path.join(SCRIPT_DIR, 'your-service-account-key.json')
-# 更新したいスプレッドシートの名前
-SPREADSHEET_NAME = '佐渡飲食店マップデータベース'
+
+# --- 環境変数から設定を読み込む ---
+# ローカル開発用のサービスアカウントキーファイルパス (環境変数から取得、なければデフォルト)
+SERVICE_ACCOUNT_FILE_PATH = os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', os.path.join(SCRIPT_DIR, 'your-service-account-key.json'))
+# 更新したいスプレッドシートのID (環境変数から取得)
+SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 # Google Geocoding APIキー (環境変数から取得)
-GEOCODING_API_KEY = os.environ.get('GEOCODING_API_KEY') 
+GEOCODING_API_KEY = os.environ.get('GEOCODING_API_KEY')
 
 # --- スクレイピング関数 (例: 佐渡観光協会のサイトを想定) ---
 def scrape_sado_tourism_site(url):
@@ -93,19 +95,23 @@ def update_spreadsheet(restaurant_list):
             gc = gspread.service_account_from_dict(creds_dict)
         else:
             # ローカル開発用にファイルから読み込む
-            print(f"Authenticating with local file: {SERVICE_ACCOUNT_FILE}")
-            gc = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
+            print(f"Authenticating with local file: {SERVICE_ACCOUNT_FILE_PATH}")
+            gc = gspread.service_account(filename=SERVICE_ACCOUNT_FILE_PATH)
     except Exception as e:
         print(f"Google認証に失敗しました: {e}")
         if not creds_json_str:
-             print(f"ローカルの `{SERVICE_ACCOUNT_FILE}` ファイルが存在するか、パスが正しいか確認してください。")
+             print(f"ローカルの `{SERVICE_ACCOUNT_FILE_PATH}` ファイルが存在するか、パスが正しいか確認してください。")
         else:
              print("GitHub Actionsの`GOOGLE_SERVICE_ACCOUNT_KEY` secretが正しいJSON形式か確認してください。")
         return
 
     try:
         # スプレッドシートを開く
-        spreadsheet = gc.open(SPREADSHEET_NAME)
+        if not SPREADSHEET_ID:
+            print("エラー: 環境変数 `SPREADSHEET_ID` が設定されていません。")
+            return
+        print(f"Opening spreadsheet with ID: {SPREADSHEET_ID[:10]}...") # IDが長いので一部だけ表示
+        spreadsheet = gc.open_by_key(SPREADSHEET_ID)
         # 最初のワークシートを選択
         worksheet = spreadsheet.sheet1
 
@@ -170,20 +176,30 @@ def update_spreadsheet(restaurant_list):
             print("No changes detected. Spreadsheet is up-to-date.")
 
     except gspread.exceptions.SpreadsheetNotFound:
-        print(f"エラー: スプレッドシート '{SPREADSHEET_NAME}' が見つかりません。")
+        print(f"エラー: スプレッドシートID '{SPREADSHEET_ID}' が見つかりません。")
         print("または、サービスアカウントのメールアドレスをスプレッドシートの編集者として共有しているか確認してください。")
     except Exception as e:
         print(f"スプレッドシートの更新中にエラーが発生しました: {e}")
 
+# --- URLリスト読み込み関数 ---
+def load_target_urls():
+    urls_file_path = os.path.join(SCRIPT_DIR, 'target_urls.txt')
+    if not os.path.exists(urls_file_path):
+        print(f"URLリストファイルが見つかりません: {urls_file_path}")
+        return []
+    
+    with open(urls_file_path, 'r', encoding='utf-8') as f:
+        # 空行や前後の空白を無視してURLを読み込む
+        urls = [line.strip() for line in f if line.strip()]
+    
+    print(f"Loaded {len(urls)} URLs from target_urls.txt")
+    return urls
+
 # --- メイン処理 ---
 def main():
-    # スクレイピング対象のURLリスト (仮)
-    target_urls = [
-        # ここに佐渡の飲食店情報が掲載されているページのURLを追加
-        'https://www.visitsado.com/spot/detail0346/',
-        'https://www.visitsado.com/spot/detail0950/',
-    ]
-
+    # 外部ファイルからURLリストを読み込む
+    target_urls = load_target_urls()
+    
     if not target_urls:
         print("対象URLが指定されていません。処理をスキップします。")
         return

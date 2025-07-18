@@ -2,7 +2,7 @@
 
 > **策定日**: 2025年7月13日  
 > **対象**: 佐渡飲食店マップ プロジェクト  
-> **技術スタック**: React 19 + TypeScript 5.7 + Google Maps API
+> **技術スタック**: React 19 + TypeScript 5.8 + Vite 7.0 + Google Maps API
 
 ## 🎯 **診断結果を踏まえた優先度対応**
 
