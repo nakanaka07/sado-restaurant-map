@@ -30,3 +30,9 @@ dev-dist
 *.njsproj
 *.sln
 *.sw?
+
+# Python scraper specific
+scraper/.venv/
+scraper/__pycache__/
+scraper/*.pyc
+scraper/*.json

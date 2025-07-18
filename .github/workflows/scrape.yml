@@ -1,0 +1,36 @@
+# .github/workflows/scrape.yml
+
+name: Scrape Sado Restaurant Data
+
+on:
+  # 毎日AM3:00 (JST) に実行
+  # UTCでの指定のため、JST-9時間で指定する (18:00 UTC = 03:00 JST)
+  schedule:
+    - cron: '0 18 * * *'
+  # 手動実行も可能にする
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r scraper/requirements.txt
+
+      - name: Run scraper
+        run: python scraper/scraping_and_sheets_updater.py
+        env:
+          # GitHub SecretsからAPIキーと認証情報を渡す
+          GEOCODING_API_KEY: ${{ secrets.GEOCODING_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
