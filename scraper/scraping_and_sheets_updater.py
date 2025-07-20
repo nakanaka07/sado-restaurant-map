@@ -1,6 +1,5 @@
 # scraping_and_sheets_updater.py
 import requests
-from bs4 import BeautifulSoup
 import gspread
 import time
 import os
@@ -21,64 +20,55 @@ SERVICE_ACCOUNT_FILE_PATH = os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', os.pat
 # 更新したいスプレッドシートのID (環境変数から取得)
 SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 # Google Geocoding APIキー (環境変数から取得)
-GEOCODING_API_KEY = os.environ.get('GEOCODING_API_KEY')
+PLACES_API_KEY = os.environ.get('PLACES_API_KEY') # Places APIキーに変更
 
-# --- スクレイピング関数 (例: 佐渡観光協会のサイトを想定) ---
-def scrape_sado_tourism_site(url):
-    print(f"Scraping: {url}")
-    try:
-        # 偽のユーザーエージェントを設定して、ボットと判定されにくくする
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+# APIリクエスト間の待機時間（秒）
+PLACES_API_REQUEST_DELAY = 1  # Places APIへのリクエスト間隔
+SHEETS_API_DELAY = 1.5        # Google Sheets APIのレート制限対策
+
+# スプレッドシートのヘッダー
+SHEET_HEADERS = ["PlaceID", "Name", "Address", "Latitude", "Longitude", "Rating", "UserRatingsTotal", "LastUpdated", "GoogleMapsURL"]
+
+# --- Google Places API 検索関数 ---
+def search_restaurants_with_places_api(query="佐渡市のレストラン"):
+    """Google Places APIのText Searchを使用してレストラン情報を取得する"""
+    if not PLACES_API_KEY:
+        print("PLACES_API_KEYが設定されていません。処理をスキップします。")
+        return []
+
+    print(f"Searching for '{query}' using Google Places API...")
+    all_results = []
+    next_page_token = None
+
+    while True:
+        params = {
+            'query': query,
+            'key': PLACES_API_KEY,
+            'language': 'ja', # 結果を日本語で取得
         }
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status() # エラーがあれば例外を発生
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # --- 店名の取得 ---
-        # '.main_ttl'クラスの中にある'h1'タグを探す。より堅牢なセレクター。
-        name_tag = soup.select_one('.main_ttl h1')
-        name = name_tag.text.strip() if name_tag else "取得不可"
+        if next_page_token:
+            params['pagetoken'] = next_page_token
+            # pagetokenを使用する際は少し待機が必要
+            time.sleep(2)
 
-        # --- 住所の取得 ---
-        # 'th'タグをすべて探し、テキストが「住所」のものを見つける
-        address = "取得不可"
-        th_list = soup.find_all('th')
-        for th in th_list:
-            if '住所' in th.get_text(strip=True):
-                # 「住所」のthを見つけたら、その次の要素(td)のテキストを取得
-                td = th.find_next_sibling('td')
-                if td:
-                    address = td.get_text(strip=True)
-                break # 住所が見つかったらループを抜ける
-        
-        # 取得した情報と、どのURLから取得したかを辞書で返す
-        # 'url'を返すことで、差分更新の際に役立つ
-        return {'name': name, 'address': address, 'url': url}
-        
-    except requests.RequestException as e:
-        print(f"Error scraping {url}: {e}")
-        return None
-
-# --- ジオコーディング関数 ---
-def get_lat_lng(address):
-    if not GEOCODING_API_KEY:
-        print("Geocoding API key not found. Skipping.")
-        return None, None
-    if address == "取得不可":
-        return None, None
-        
-    params = {'address': address, 'key': GEOCODING_API_KEY}
-    response = requests.get('https://maps.googleapis.com/maps/api/geocode/json', params=params)
-    
-    if response.status_code == 200:
+        response = requests.get('https://maps.googleapis.com/maps/api/place/textsearch/json', params=params)
+        response.raise_for_status()
         data = response.json()
-        if data['status'] == 'OK':
-            location = data['results'][0]['geometry']['location']
-            return location.get('lat'), location.get('lng')
-    
-    print(f"Geocoding failed for address: {address}. Status: {data.get('status')}")
-    return None, None
+
+        if data['status'] in ['OK', 'ZERO_RESULTS']:
+            all_results.extend(data.get('results', []))
+            next_page_token = data.get('next_page_token')
+            if not next_page_token:
+                break # 次のページがなければ終了
+        else:
+            print(f"Places API Error: {data.get('status')}, {data.get('error_message', '')}")
+            break
+
+        print(f"Retrieved {len(all_results)} places so far...")
+        time.sleep(PLACES_API_REQUEST_DELAY)
+
+    print(f"Total {len(all_results)} places found.")
+    return all_results
 
 # --- Google Sheets 更新関数 ---
 def update_spreadsheet(restaurant_list):
@@ -115,20 +105,25 @@ def update_spreadsheet(restaurant_list):
         # 最初のワークシートを選択
         worksheet = spreadsheet.sheet1
 
-        print("Reading existing data from spreadsheet...")
-        all_records = worksheet.get_all_records()
+        print("Checking spreadsheet header...")
+        # ヘッダー行を直接取得して確認
+        try:
+            existing_headers = worksheet.row_values(1)
+        except gspread.exceptions.APIError: # シートが完全に空の場合のエラーをハンドル
+            existing_headers = []
 
-        # ヘッダー行を確認し、なければ作成（SourceURL列も追加）
-        headers = ["ID", "Name", "Address", "Latitude", "Longitude", "LastUpdated", "SourceURL"]
-        if not all_records:
-            worksheet.update('A1', [headers], value_input_option='USER_ENTERED')
-            print("Header row created.")
-
-        # 既存データを高速に検索できるよう、店舗名をキーにした辞書を作成
-        # {店舗名: {データ, 行番号}}
+        if existing_headers != SHEET_HEADERS:
+            worksheet.update(range_name='A1', values=[SHEET_HEADERS], value_input_option='USER_ENTERED')
+            print("Header row has been created or updated.")
+            all_records = [] # ヘッダーを更新した場合は、データがないものとして扱う
+        else:
+            print("Header is correct. Reading existing data...")
+            all_records = worksheet.get_all_records()
+        
+        # 既存データをPlaceIDをキーにした辞書に変換
         existing_data_map = {
-            record['Name']: {'data': record, 'row_num': i + 2} # +2 for header row and 0-based index
-            for i, record in enumerate(all_records) if 'Name' in record
+            record['PlaceID']: {'data': record, 'row_num': i + 2}
+            for i, record in enumerate(all_records) if 'PlaceID' in record and record.get('PlaceID')
         }
         
         updates_to_perform = []
@@ -140,33 +135,42 @@ def update_spreadsheet(restaurant_list):
                 continue
             
             timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
+            place_id = restaurant.get('place_id')
+            address = restaurant.get('formatted_address', '')
+            location = restaurant.get('geometry', {}).get('location', {})
+            lat = location.get('lat')
+            lng = location.get('lng')
+            rating = restaurant.get('rating', '')
+            user_ratings_total = restaurant.get('user_ratings_total', '')
+            # Google MapsのURLを生成
+            google_maps_url = f"https://www.google.com/maps/search/?api=1&query=Google&query_place_id={place_id}" if place_id else ""
 
-            if name in existing_data_map:
+            if place_id in existing_data_map:
                 # --- 既存店舗: 変更があるか確認して更新リストへ ---
-                entry = existing_data_map[name]
+                entry = existing_data_map[place_id]
                 old_data = entry['data']
                 row_num = entry['row_num']
 
-                # 住所、緯度、経度のいずれかが変更されていたら更新対象
-                if (str(old_data.get('Address', '')) != str(restaurant.get('address', '')) or
-                    str(old_data.get('Latitude', '')) != str(restaurant.get('lat', '')) or
-                    str(old_data.get('Longitude', '')) != str(restaurant.get('lng', ''))):
+                # 住所、評価、評価数などが変更されていたら更新
+                if (str(old_data.get('Address', '')) != str(address) or
+                    str(old_data.get('Rating', '')) != str(rating) or
+                    str(old_data.get('UserRatingsTotal', '')) != str(user_ratings_total)):
                     
                     print(f"Updating entry for: {name}")
-                    # IDは既存のものを引き継ぐ
-                    row_content = [old_data.get('ID', ''), name, restaurant.get('address', ''), restaurant.get('lat', ''), restaurant.get('lng', ''), timestamp, restaurant.get('url', '')]
-                    updates_to_perform.append({'range': f'A{row_num}:G{row_num}', 'values': [row_content]})
+                    row_content = [place_id, name, address, lat, lng, rating, user_ratings_total, timestamp, google_maps_url]
+                    # ヘッダーの数に合わせて範囲を調整
+                    range_end_col = chr(ord('A') + len(SHEET_HEADERS) - 1)
+                    updates_to_perform.append({'range': f'A{row_num}:{range_end_col}{row_num}', 'values': [row_content]})
             else:
                 # --- 新規店舗: 追加リストへ ---
                 print(f"Found new entry to append: {name}")
-                new_id = len(all_records) + len(appends_to_perform) + 1
-                row_content = [new_id, name, restaurant.get('address', ''), restaurant.get('lat', ''), restaurant.get('lng', ''), timestamp, restaurant.get('url', '')]
+                row_content = [place_id, name, address, lat, lng, rating, user_ratings_total, timestamp, google_maps_url]
                 appends_to_perform.append(row_content)
 
         if updates_to_perform:
             print(f"Batch updating {len(updates_to_perform)} rows...")
             worksheet.batch_update(updates_to_perform, value_input_option='USER_ENTERED')
-            time.sleep(1.5) # APIレート制限への配慮
+            time.sleep(SHEETS_API_DELAY) # APIレート制限への配慮
 
         if appends_to_perform:
             print(f"Batch appending {len(appends_to_perform)} new rows...")
@@ -181,40 +185,12 @@ def update_spreadsheet(restaurant_list):
     except Exception as e:
         print(f"スプレッドシートの更新中にエラーが発生しました: {e}")
 
-# --- URLリスト読み込み関数 ---
-def load_target_urls():
-    urls_file_path = os.path.join(SCRIPT_DIR, 'target_urls.txt')
-    if not os.path.exists(urls_file_path):
-        print(f"URLリストファイルが見つかりません: {urls_file_path}")
-        return []
-    
-    with open(urls_file_path, 'r', encoding='utf-8') as f:
-        # 空行や前後の空白を無視してURLを読み込む
-        urls = [line.strip() for line in f if line.strip()]
-    
-    print(f"Loaded {len(urls)} URLs from target_urls.txt")
-    return urls
-
 # --- メイン処理 ---
 def main():
-    # 外部ファイルからURLリストを読み込む
-    target_urls = load_target_urls()
-    
-    if not target_urls:
-        print("対象URLが指定されていません。処理をスキップします。")
-        return
-    
-    collected_data = []
-    for url in target_urls:
-        info = scrape_sado_tourism_site(url)
-        if info:
-            lat, lng = get_lat_lng(info['address'])
-            info['lat'] = lat
-            info['lng'] = lng
-            collected_data.append(info)
-        # サーバーへの負荷を考慮した待機
-        print("Waiting 5 seconds before next request...")
-        time.sleep(5) 
+    # Google Places APIでレストラン情報を検索
+    # 必要に応じて検索クエリを変更してください
+    # 例: "佐渡市 カフェ", "佐渡市 ラーメン" など
+    collected_data = search_restaurants_with_places_api(query="佐渡市の飲食店")
 
     if collected_data:
         update_spreadsheet(collected_data)
