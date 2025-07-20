@@ -1,6 +1,6 @@
 # .github/workflows/scrape.yml
 
-name: Scrape Sado Restaurant Data
+name: Update Sado Restaurant Data
 
 on:
   # 毎日AM3:00 (JST) に実行
@@ -29,8 +29,9 @@ jobs:
           pip install -r scraper/requirements.txt
 
       - name: Run scraper
-        run: python scraper/scraping_and_sheets_updater.py
+        run: python scraper/places_data_updater.py
         env:
-          # GitHub SecretsからAPIキーと認証情報を渡す
-          GEOCODING_API_KEY: ${{ secrets.GEOCODING_API_KEY }}
+          # GitHub Secretsから環境変数を渡す
+          PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}
           GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
