@@ -27,14 +27,65 @@ PLACES_API_REQUEST_DELAY = 1  # Places APIへのリクエスト間隔
 SHEETS_API_DELAY = 1.5        # Google Sheets APIのレート制限対策
 
 # スプレッドシートのヘッダー
-SHEET_HEADERS = ["PlaceID", "Name", "Address", "Latitude", "Longitude", "Rating", "UserRatingsTotal", "LastUpdated", "GoogleMapsURL"]
+SHEET_HEADERS = ["PlaceID", "Name", "Category", "Address", "Latitude", "Longitude", "Rating", "UserRatingsTotal", "Website", "PhoneNumber", "PriceLevel", "OpeningHours", "LastUpdated", "GoogleMapsURL"]
+
+# カテゴリマッピング辞書 (より具体的なものを先に記述すると優先されます)
+CATEGORY_MAPPING = {
+    # --- 麺類 ---
+    "ramen_restaurant": "ラーメン",
+    "soba_noodle_shop": "そば",
+    "udon_noodle_shop": "うどん",
+    # --- 和食 ---
+    "sushi_restaurant": "寿司",
+    "yakiniku_restaurant": "焼肉",
+    "yakitori_restaurant": "焼き鳥",
+    "okonomiyaki_restaurant": "お好み焼き",
+    "takoyaki_restaurant": "たこ焼き",
+    "tempura_restaurant": "天ぷら",
+    "tonkatsu_restaurant": "とんかつ",
+    "unagi_restaurant": "うなぎ",
+    "donburi_restaurant": "丼物",
+    "japanese_restaurant": "日本料理",
+    "kappo_restaurant": "割烹",
+    "shabu_shabu_restaurant": "しゃぶしゃぶ",
+    "sukiyaki_restaurant": "すき焼き",
+    # --- 各国料理 ---
+    "italian_restaurant": "イタリアン",
+    "french_restaurant": "フレンチ",
+    "chinese_restaurant": "中華料理",
+    "gyoza_restaurant": "餃子",
+    "korean_restaurant": "韓国料理",
+    "indian_restaurant": "インド料理",
+    "curry_restaurant": "カレー",
+    "pizza_restaurant": "ピザ",
+    "hamburger_restaurant": "ハンバーガー",
+    "steak_house": "ステーキ",
+    # --- カフェ・バー・軽食 ---
+    "cafe": "カフェ",
+    "bar": "バー",
+    "izakaya": "居酒屋",
+    "coffee_shop": "喫茶店",
+    # --- スイーツ・パン ---
+    "bakery": "パン屋",
+    "cake_shop": "ケーキ屋",
+    "ice_cream_shop": "アイスクリーム",
+    "japanese_confectionery_shop": "和菓子",
+    "dessert_shop": "スイーツ",
+    # --- その他 ---
+    "meal_takeaway": "テイクアウト",
+    "bento_shop": "弁当",
+    "supermarket": "スーパー",
+    "convenience_store": "コンビニ",
+    "restaurant": "レストラン",
+    "food": "食事処",
+}
 
 # --- Google Places API 検索関数 ---
 def search_restaurants_with_places_api(query="佐渡市のレストラン"):
     """Google Places APIのText Searchを使用してレストラン情報を取得する"""
     if not PLACES_API_KEY:
         print("PLACES_API_KEYが設定されていません。処理をスキップします。")
-        return []
+        return 'SKIPPED', []
 
     print(f"Searching for '{query}' using Google Places API...")
     all_results = []
@@ -54,21 +105,56 @@ def search_restaurants_with_places_api(query="佐渡市のレストラン"):
         response = requests.get('https://maps.googleapis.com/maps/api/place/textsearch/json', params=params)
         response.raise_for_status()
         data = response.json()
+        status = data.get('status', 'UNKNOWN_ERROR')
 
-        if data['status'] in ['OK', 'ZERO_RESULTS']:
+        if status in ['OK', 'ZERO_RESULTS']:
             all_results.extend(data.get('results', []))
             next_page_token = data.get('next_page_token')
             if not next_page_token:
                 break # 次のページがなければ終了
         else:
-            print(f"Places API Error: {data.get('status')}, {data.get('error_message', '')}")
+            print(f"Places API Error: {status}, {data.get('error_message', '')}")
             break
 
         print(f"Retrieved {len(all_results)} places so far...")
         time.sleep(PLACES_API_REQUEST_DELAY)
 
-    print(f"Total {len(all_results)} places found.")
-    return all_results
+    print(f"Total {len(all_results)} places found for '{query}'. Status: {status}")
+    return status, all_results
+
+def get_place_details(place_id):
+    """Google Places APIのPlace Detailsを使用して詳細情報を取得する"""
+    if not PLACES_API_KEY:
+        print("PLACES_API_KEYが設定されていません。")
+        return None
+
+    print(f"Fetching details for place_id: {place_id}...")
+    fields = [
+        "place_id", "name", "formatted_address", "geometry", "rating",
+        "user_ratings_total", "website", "formatted_phone_number", "price_level",
+        "opening_hours", "types"
+    ]
+    params = {
+        'place_id': place_id,
+        'fields': ",".join(fields),
+        'key': PLACES_API_KEY,
+        'language': 'ja',
+    }
+    response = requests.get('https://maps.googleapis.com/maps/api/place/details/json', params=params)
+    response.raise_for_status()
+    data = response.json()
+
+    return data.get('result') if data.get('status') == 'OK' else None
+
+def get_primary_category(place_types):
+    """Places APIのtypesリストから最も適切なカテゴリを返す"""
+    if not place_types:
+        return ""
+    # CATEGORY_MAPPINGの順序に基づいて、最初に見つかったカテゴリを返す
+    for place_type in place_types:
+        if place_type in CATEGORY_MAPPING:
+            return CATEGORY_MAPPING[place_type]
+    return "" # マッピングに一致するものがなければ空文字
 
 # --- Google Sheets 更新関数 ---
 def update_spreadsheet(restaurant_list):
@@ -136,12 +222,19 @@ def update_spreadsheet(restaurant_list):
             
             timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
             place_id = restaurant.get('place_id')
+            place_types = restaurant.get('types', [])
+            category = get_primary_category(place_types)
             address = restaurant.get('formatted_address', '')
             location = restaurant.get('geometry', {}).get('location', {})
             lat = location.get('lat')
             lng = location.get('lng')
             rating = restaurant.get('rating', '')
             user_ratings_total = restaurant.get('user_ratings_total', '')
+            website = restaurant.get('website', '')
+            phone_number = restaurant.get('formatted_phone_number', '')
+            price_level = restaurant.get('price_level', '')
+            opening_hours_data = restaurant.get('opening_hours', {})
+            opening_hours = "\n".join(opening_hours_data.get('weekday_text', [])) if opening_hours_data else ''
             # Google MapsのURLを生成
             google_maps_url = f"https://www.google.com/maps/search/?api=1&query=Google&query_place_id={place_id}" if place_id else ""
 
@@ -150,21 +243,26 @@ def update_spreadsheet(restaurant_list):
                 entry = existing_data_map[place_id]
                 old_data = entry['data']
                 row_num = entry['row_num']
+                row_content = [place_id, name, category, address, lat, lng, rating, user_ratings_total, website, phone_number, price_level, opening_hours, timestamp, google_maps_url]
 
                 # 住所、評価、評価数などが変更されていたら更新
-                if (str(old_data.get('Address', '')) != str(address) or
+                if (str(old_data.get('Category', '')) != str(category) or
+                    str(old_data.get('Address', '')) != str(address) or
                     str(old_data.get('Rating', '')) != str(rating) or
-                    str(old_data.get('UserRatingsTotal', '')) != str(user_ratings_total)):
+                    str(old_data.get('UserRatingsTotal', '')) != str(user_ratings_total) or
+                    str(old_data.get('Website', '')) != str(website) or
+                    str(old_data.get('PhoneNumber', '')) != str(phone_number) or
+                    str(old_data.get('PriceLevel', '')) != str(price_level) or
+                    str(old_data.get('OpeningHours', '')) != str(opening_hours)):
                     
                     print(f"Updating entry for: {name}")
-                    row_content = [place_id, name, address, lat, lng, rating, user_ratings_total, timestamp, google_maps_url]
                     # ヘッダーの数に合わせて範囲を調整
                     range_end_col = chr(ord('A') + len(SHEET_HEADERS) - 1)
                     updates_to_perform.append({'range': f'A{row_num}:{range_end_col}{row_num}', 'values': [row_content]})
             else:
                 # --- 新規店舗: 追加リストへ ---
                 print(f"Found new entry to append: {name}")
-                row_content = [place_id, name, address, lat, lng, rating, user_ratings_total, timestamp, google_maps_url]
+                row_content = [place_id, name, category, address, lat, lng, rating, user_ratings_total, website, phone_number, price_level, opening_hours, timestamp, google_maps_url]
                 appends_to_perform.append(row_content)
 
         if updates_to_perform:
@@ -187,14 +285,66 @@ def update_spreadsheet(restaurant_list):
 
 # --- メイン処理 ---
 def main():
-    # Google Places APIでレストラン情報を検索
-    # 必要に応じて検索クエリを変更してください
-    # 例: "佐渡市 カフェ", "佐渡市 ラーメン" など
-    collected_data = search_restaurants_with_places_api(query="佐渡市の飲食店")
+    # queries.txtから検索クエリを読み込む
+    queries_file_path = os.path.join(SCRIPT_DIR, 'queries.txt')
+    try:
+        with open(queries_file_path, 'r', encoding='utf-8') as f:
+            # 空行やコメント行(#で始まる行)を無視してリスト化
+            queries = [line.strip() for line in f if line.strip() and not line.strip().startswith('#')]
+        print(f"Loaded {len(queries)} queries from {queries_file_path}")
+    except FileNotFoundError:
+        print(f"Error: '{queries_file_path}' not found. Please create it.")
+        print("Aborting process.")
+        return
 
-    if collected_data:
-        update_spreadsheet(collected_data)
+    if not queries:
+        print("No queries found in queries.txt. Process finished.")
+        return
+
+    all_collected_data = []
+    not_found_queries = []
+    for query in queries:
+        # クエリに「佐渡」が含まれていない場合、自動的に追加して検索精度を向上させる
+        # (例: "しまふうみ" -> "しまふうみ 佐渡")
+        search_query = query
+        if "佐渡" not in query:
+            search_query = f"{query} 佐渡"
+            print(f"\n--- Searching for: {search_query} (refined from '{query}') ---")
+        else:
+            print(f"\n--- Searching for: {query} ---")
+        status, collected_data = search_restaurants_with_places_api(query=search_query)
+        if status == 'ZERO_RESULTS':
+            not_found_queries.append(query)
+
+        all_collected_data.extend(collected_data)
+        time.sleep(PLACES_API_REQUEST_DELAY)
+
+    # 重複を削除 (同じplace_idを持つ店舗が複数のクエリでヒットする可能性があるため)
+    unique_places = list({item['place_id']: item for item in all_collected_data if 'place_id' in item}.values())
+
+    if not unique_places:
+        print("No places found from any query. Process finished.")
+        return
+
+    print(f"\nFetching details for {len(unique_places)} unique places...")
+    detailed_restaurant_list = []
+    for restaurant in unique_places:
+        details = get_place_details(restaurant['place_id'])
+        if details:
+            detailed_restaurant_list.append(details)
+        time.sleep(PLACES_API_REQUEST_DELAY)
+
+    if detailed_restaurant_list:
+        update_spreadsheet(detailed_restaurant_list)
     
+    # ヒットしなかったクエリを出力
+    if not_found_queries:
+        print("\n--------------------------------------------------")
+        print("以下のクエリでは検索結果が0件でした：")
+        for q in sorted(not_found_queries):
+            print(f"- {q}")
+        print("--------------------------------------------------")
+
     print("Process finished.")
 
 if __name__ == '__main__':
