@@ -1,0 +1,145 @@
+# Google Places API フィールド一覧（SKUカテゴリー別）
+
+## 1. Essentials IDs Only SKU（$0.017/1000 requests）
+最も基本的な識別情報のみ
+
+### 基本識別情報
+- `id` - プレイスID（ChIJxxx形式）
+- `name` - プレイスリソース名（places/PLACE_ID形式）
+- `attributions` - 帰属情報
+- `photos` - 写真情報（メタデータのみ）
+
+---
+
+## 2. Essentials SKU（$0.032/1000 requests）
+住所・位置情報を中心とした基本データ
+
+### 住所関連
+- `formattedAddress` - フォーマットされた住所
+- `shortFormattedAddress` - 短縮住所
+- `adrFormatAddress` - 構造化住所（microformats形式）
+- `addressComponents` - 住所構成要素の配列
+- `postalAddress` - 郵便住所
+
+### 位置情報
+- `location` - 緯度経度座標
+- `viewport` - 推奨表示範囲
+- `plusCode` - Plus Code（グローバル・コンパウンド）
+
+### カテゴリ情報
+- `types` - 場所タイプの配列（restaurant, store等）
+
+### その他
+- `addressDescriptor` - 住所記述子（インドで一般提供、他地域は実験的）
+
+---
+
+## 3. Pro SKU（$0.032/1000 requests）
+表示名とビジネス情報
+
+### 表示・名称
+- `displayName` - 表示用の場所名（テキスト形式）
+- `primaryType` - 主要な場所タイプ
+- `primaryTypeDisplayName` - 主要タイプの表示名
+
+### ビジネス情報
+- `businessStatus` - 営業状況（OPERATIONAL, CLOSED_TEMPORARILY等）
+- `pureServiceAreaBusiness` - サービスエリアのみのビジネス判定
+
+### 表示関連
+- `iconBackgroundColor` - アイコン背景色
+- `iconMaskBaseUri` - アイコンマスクURI
+- `googleMapsUri` - Google MapsのURI
+- `googleMapsLinks` - Google Mapsリンク（プレビュー段階、課金なし）
+
+### 地理的関係
+- `containingPlaces` - 包含する場所
+- `subDestinations` - サブ目的地
+
+### その他
+- `utcOffsetMinutes` - UTC時差（分単位）
+- `accessibilityOptions` - アクセシビリティオプション
+
+---
+
+## 4. Enterprise SKU（$0.017/1000 requests）
+コンタクト情報と評価データ
+
+### 連絡先情報
+- `websiteUri` - ウェブサイトURI
+- `nationalPhoneNumber` - 国内電話番号
+- `internationalPhoneNumber` - 国際電話番号
+
+### 営業時間
+- `regularOpeningHours` - 通常営業時間
+- `currentOpeningHours` - 現在の営業時間
+- `regularSecondaryOpeningHours` - 通常の第二営業時間
+- `currentSecondaryOpeningHours` - 現在の第二営業時間
+
+### 評価・価格
+- `rating` - 総合評価（1-5）
+- `userRatingCount` - ユーザー評価数
+- `priceLevel` - 価格レベル（PRICE_LEVEL_FREE等）
+- `priceRange` - 価格範囲
+
+---
+
+## 5. Enterprise + Atmosphere SKU（$0.017/1000 requests）
+詳細なサービス・雰囲気情報
+
+### サービス形態
+- `delivery` - 配達サービス
+- `dineIn` - 店内飲食
+- `takeout` - テイクアウト
+- `curbsidePickup` - カーブサイドピックアップ
+- `reservable` - 予約可能
+
+### 飲食サービス
+- `servesBeer` - ビール提供
+- `servesWine` - ワイン提供
+- `servesCocktails` - カクテル提供
+- `servesCoffee` - コーヒー提供
+- `servesBreakfast` - 朝食提供
+- `servesLunch` - 昼食提供
+- `servesDinner` - 夕食提供
+- `servesBrunch` - ブランチ提供
+- `servesDessert` - デザート提供
+- `servesVegetarianFood` - ベジタリアン料理提供
+
+### 顧客対応
+- `goodForChildren` - 子供向け
+- `goodForGroups` - グループ向け
+- `goodForWatchingSports` - スポーツ観戦向け
+- `allowsDogs` - ペット同伴可
+- `menuForChildren` - 子供メニュー
+
+### 設備・環境
+- `outdoorSeating` - 屋外席
+- `liveMusic` - ライブ音楽
+- `restroom` - トイレ
+- `parkingOptions` - 駐車場オプション
+- `paymentOptions` - 支払いオプション
+- `evChargeOptions` - EV充電オプション
+- `fuelOptions` - 燃料オプション
+
+### コンテンツ
+- `reviews` - レビュー詳細
+- `editorialSummary` - 編集要約
+- `routingSummaries` - ルート要約（Text Search・Nearby Searchのみ）
+
+---
+
+## 課金の重要なルール
+
+1. **最高SKUで課金**: 複数のSKUカテゴリーのフィールドを指定した場合、最も高額なSKUで課金されます
+
+2. **フィールドマスク必須**: 少なくとも1つのフィールドを指定する必要があります。省略するとエラーになります
+
+3. **Data SKU追加課金**: Basic Data、Contact Data、Atmosphere Dataは基本SKUに追加して課金されます
+
+4. **無料使用枠**: 
+   - Essentials: 月間10,000回
+   - Pro: 月間5,000回  
+   - Enterprise: 月間1,000回
+
+5. **ボリューム割引**: 月間10万リクエスト超で20%、500万リクエスト超で最大80%の割引

@@ -1,13 +1,9 @@
-# .github/workflows/scrape.yml
+# .github/workflows/update_data.yml
 
 name: Update Sado Restaurant Data
 
 on:
-  # 毎月1日AM3:00 (JST) に実行
-  # UTCでの指定のため、JST-9時間で指定する (18:00 UTC = 03:00 JST)
-  schedule:
-    - cron: '0 18 1 * *'
-  # 手動実行も可能にする
+  # 手動実行のみに設定
   workflow_dispatch:
 
 jobs:
