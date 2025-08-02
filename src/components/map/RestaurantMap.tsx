@@ -5,7 +5,7 @@ import {
   InfoWindow,
 } from "@vis.gl/react-google-maps";
 import { useState, useCallback } from "react";
-import type { Restaurant } from "@/types";
+import type { Restaurant } from "../../types/restaurant.types";
 import { trackRestaurantClick, trackMapInteraction } from "@/utils/analytics";
 
 interface RestaurantMapProps {

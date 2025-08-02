@@ -1,392 +1,256 @@
-import { z } from "zod";
-import type { Restaurant } from "@/types";
+/**
+ * バリデーションユーティリティ
+ * 軽量バリデーション機能を使用してZodを置き換え
+ */
 
-// スキーマ定義でデータ整合性を保証
-export const CuisineTypeSchema = z.enum([
-  "日本料理",
-  "寿司",
-  "海鮮",
-  "焼肉・焼鳥",
-  "ラーメン",
-  "そば・うどん",
-  "中華",
-  "イタリアン",
-  "フレンチ",
-  "カフェ・喫茶店",
-  "バー・居酒屋",
-  "ファストフード",
-  "デザート・スイーツ",
-  "その他",
-]);
+import {
+  isRestaurant,
+  isRestaurantArray,
+  isValidApiKey,
+  sanitizeInput,
+  isValidSearchQuery,
+  validateRestaurant,
+} from "./lightValidation";
+import type {
+  Restaurant,
+  CuisineType,
+  PriceRange,
+} from "../types/restaurant.types";
 
-export const PriceRangeSchema = z.enum([
-  "～1000円",
-  "1000-2000円",
-  "2000-3000円",
-  "3000円～",
-]);
+// ==============================
+// 公開API（下位互換性のため）
+// ==============================
 
-export const CoordinatesSchema = z.object({
-  lat: z
-    .number()
-    .min(-90, "緯度は-90以上である必要があります")
-    .max(90, "緯度は90以下である必要があります"),
-  lng: z
-    .number()
-    .min(-180, "経度は-180以上である必要があります")
-    .max(180, "経度は180以下である必要があります"),
-});
+/** APIキーの形式バリデーション */
+export const validateApiKey = (apiKey: string): boolean => {
+  return isValidApiKey(apiKey);
+};
 
-export const RestaurantSchema = z.object({
-  id: z
-    .string()
-    .min(1, "IDは必須です")
-    .regex(
-      /^[a-zA-Z0-9_-]+$/,
-      "IDは英数字とハイフン、アンダースコアのみ使用可能です"
-    ),
-  name: z
-    .string()
-    .min(1, "店舗名は必須です")
-    .max(100, "店舗名は100文字以内である必要があります"),
-  description: z
-    .string()
-    .max(500, "説明は500文字以内である必要があります")
-    .optional(),
-  cuisineType: CuisineTypeSchema.default("その他"),
-  priceRange: PriceRangeSchema.default("1000-2000円"),
-  address: z
-    .string()
-    .min(1, "住所は必須です")
-    .max(200, "住所は200文字以内である必要があります"),
-  coordinates: CoordinatesSchema,
-  phone: z
-    .string()
-    .regex(/^[\d\-()s+]+$/, "電話番号の形式が正しくありません")
-    .optional(),
-  website: z.string().url("正しいURL形式で入力してください").optional(),
-  rating: z
-    .number()
-    .min(0, "評価は0以上である必要があります")
-    .max(5, "評価は5以下である必要があります")
-    .optional(),
-  reviewCount: z
-    .number()
-    .min(0, "レビュー数は0以上である必要があります")
-    .default(0),
-  openingHours: z
-    .array(
-      z.object({
-        day: z.string(),
-        open: z.string(),
-        close: z.string(),
-        isHoliday: z.boolean(),
-      })
-    )
-    .default([]),
-  features: z
-    .array(z.string().max(20, "特徴は20文字以内である必要があります"))
-    .default([]),
-  images: z
-    .array(z.string().url("画像URLの形式が正しくありません"))
-    .default([])
-    .optional(),
-  lastUpdated: z.string(),
-});
+/** 入力文字列のサニタイズ */
+export { sanitizeInput };
 
-// Google Sheets APIレスポンス用スキーマ
-export const SheetsApiResponseSchema = z.object({
-  range: z.string(),
-  majorDimension: z.string(),
-  values: z.array(z.array(z.string())),
-});
+/** 検索クエリのバリデーション */
+export const validateSearchQuery = (query: string): boolean => {
+  return isValidSearchQuery(query);
+};
 
-// 環境変数バリデーション
-export const EnvironmentSchema = z.object({
-  VITE_GOOGLE_MAPS_API_KEY: z
-    .string()
-    .min(1, "Google Maps API Keyは必須です")
-    .startsWith("AIza", "Google Maps API Keyの形式が正しくありません"),
-  VITE_GOOGLE_SHEETS_API_KEY: z
-    .string()
-    .min(1, "Google Sheets API Keyは必須です")
-    .startsWith("AIza", "Google Sheets API Keyの形式が正しくありません")
-    .optional(),
-  VITE_SPREADSHEET_ID: z
-    .string()
-    .min(1, "スプレッドシートIDは必須です")
-    .regex(/^[a-zA-Z0-9\-_]+$/, "スプレッドシートIDの形式が正しくありません"),
-});
+/** レストランデータのバリデーション */
+export const validateRestaurantData = (data: unknown): data is Restaurant => {
+  return isRestaurant(data);
+};
 
-// バリデーション関数
-export function validateRestaurantData(data: unknown): Restaurant {
-  return RestaurantSchema.parse(data);
-}
-
-export function validateEnvironment() {
-  return EnvironmentSchema.parse(import.meta.env);
-}
-
-export function validateSheetsApiResponse(data: unknown) {
-  return SheetsApiResponseSchema.parse(data);
-}
-
-// 型ガード関数
-export function isValidRestaurant(data: unknown): data is Restaurant {
-  try {
-    validateRestaurantData(data);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export function isValidCoordinates(
+/** レストラン配列のバリデーション */
+export const validateRestaurantArray = (
   data: unknown
-): data is { lat: number; lng: number } {
-  try {
-    CoordinatesSchema.parse(data);
-    return true;
-  } catch {
-    return false;
+): data is Restaurant[] => {
+  return isRestaurantArray(data);
+};
+
+/** 詳細バリデーション（エラー情報付き） */
+export const validateRestaurantWithErrors = (data: unknown) => {
+  return validateRestaurant(data);
+};
+
+/** 安全な数値変換 */
+export const safeParseNumber = (value: unknown): number | null => {
+  if (typeof value === "number" && !isNaN(value)) {
+    return value;
   }
-}
-
-// サニタイゼーション関数
-export function sanitizeRestaurantInput(
-  input: Partial<Restaurant>
-): Partial<Restaurant> {
-  return {
-    ...input,
-    name: input.name?.trim(),
-    description: input.description?.trim(),
-    address: input.address?.trim(),
-    phone: input.phone?.replace(/[^\d\-()s+]/g, ""),
-    features: input.features?.map((feature: string) =>
-      feature.trim().toLowerCase()
-    ),
-  };
-}
-
-// フィルター入力のバリデーション
-export const FilterInputSchema = z.object({
-  searchQuery: z
-    .string()
-    .max(100, "検索クエリは100文字以内である必要があります")
-    .transform((val) => val.trim())
-    .default(""),
-  cuisineTypes: z
-    .array(CuisineTypeSchema)
-    .max(5, "料理タイプは5個まで選択可能です")
-    .default([]),
-  priceRanges: z
-    .array(PriceRangeSchema)
-    .max(4, "価格帯は4個まで選択可能です")
-    .default([]),
-  features: z
-    .array(z.string().max(20, "特徴は20文字以内である必要があります"))
-    .max(10, "特徴は10個まで選択可能です")
-    .default([]),
-});
-
-// ソート順バリデーション
-export const SortOrderSchema = z.enum([
-  "name",
-  "rating",
-  "distance",
-  "reviewCount",
-  "priceRange",
-]);
-
-// APIリクエストのレート制限チェック
-export function validateApiRequestLimit(
-  lastRequestTime: number,
-  minInterval: number = 1000
-): boolean {
-  const now = Date.now();
-  return now - lastRequestTime >= minInterval;
-}
-
-// 位置情報の佐渡島範囲チェック
-export function isSadoIslandCoordinate(coordinates: {
-  lat: number;
-  lng: number;
-}): boolean {
-  // 佐渡島の大まかな境界
-  const SADO_BOUNDS = {
-    north: 38.32,
-    south: 37.72,
-    east: 138.62,
-    west: 138.05,
-  };
-
-  return (
-    coordinates.lat >= SADO_BOUNDS.south &&
-    coordinates.lat <= SADO_BOUNDS.north &&
-    coordinates.lng >= SADO_BOUNDS.west &&
-    coordinates.lng <= SADO_BOUNDS.east
-  );
-}
-
-// 危険なHTMLタグの検出
-export function containsDangerousContent(input: string): boolean {
-  const dangerousPatterns = [
-    /<script/i,
-    /<iframe/i,
-    /<object/i,
-    /<embed/i,
-    /javascript:/i,
-    /vbscript:/i,
-    /data:text\/html/i,
-    /onclick=/i,
-    /onload=/i,
-    /onerror=/i,
-  ];
-
-  return dangerousPatterns.some((pattern) => pattern.test(input));
-}
-
-// SQLインジェクション検出（将来のDB使用時）
-export function containsSqlInjection(input: string): boolean {
-  const sqlPatterns = [
-    /('|(\\'))|(;)|(\|)|(\*)|(%)/i,
-    /(union|select|insert|update|delete|drop|create|alter)/i,
-    /(script|javascript|vbscript)/i,
-    /(char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare)/i,
-  ];
-
-  return sqlPatterns.some((pattern) => pattern.test(input));
-}
-
-// XSS攻撃検出
-export function containsXssAttempt(input: string): boolean {
-  return containsDangerousContent(input);
-}
-
-// 包括的入力検証
-export function validateUserInput(
-  input: string,
-  context: "search" | "filter" | "general" = "general"
-): {
-  isValid: boolean;
-  errors: string[];
-  sanitized: string;
-} {
-  const errors: string[] = [];
-  let sanitized = input.trim();
-
-  // 長さチェック
-  const maxLength = context === "search" ? 100 : 50;
-  if (sanitized.length > maxLength) {
-    errors.push(`入力は${maxLength}文字以内である必要があります`);
-    sanitized = sanitized.slice(0, maxLength);
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
   }
+  return null;
+};
 
-  // 危険なコンテンツチェック
-  if (containsDangerousContent(sanitized)) {
-    errors.push("不正なコンテンツが含まれています");
+/** 安全な文字列変換 */
+export const safeParseString = (value: unknown): string => {
+  if (typeof value === "string") {
+    return sanitizeInput(value);
   }
-
-  // SQLインジェクションチェック
-  if (containsSqlInjection(sanitized)) {
-    errors.push("不正なSQL文字列が含まれています");
+  if (value === null || value === undefined) {
+    return "";
   }
-
-  // 基本的なサニタイゼーション
-  sanitized = sanitized
-    .replace(/[<>]/g, "") // HTMLタグ除去
-    .replace(/['"]/g, "") // クォート除去
-    .replace(/[;&|*%]/g, ""); // 危険な記号除去
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-    sanitized,
-  };
-}
-
-// レスポンシブ画像URL検証
-export function validateImageUrl(url: string): boolean {
-  try {
-    const urlObj = new URL(url);
-
-    // HTTPS必須
-    if (urlObj.protocol !== "https:") {
-      return false;
-    }
-
-    // 許可されたドメイン
-    const allowedDomains = [
-      "images.unsplash.com",
-      "res.cloudinary.com",
-      "storage.googleapis.com",
-      "lh3.googleusercontent.com", // Google Photos
-    ];
-
-    return allowedDomains.some((domain) => urlObj.hostname.includes(domain));
-  } catch {
-    return false;
-  }
-}
-
-// アクセシビリティ検証
-export function validateAccessibilityText(text: string): {
-  isValid: boolean;
-  suggestions: string[];
-} {
-  const suggestions: string[] = [];
-
-  // 最低文字数
-  if (text.length < 3) {
-    suggestions.push("説明文は3文字以上にしてください");
-  }
-
-  // 最大文字数
-  if (text.length > 200) {
-    suggestions.push("説明文は200文字以内にしてください");
-  }
-
-  // 特殊文字の連続使用
-  if (/[!@#$%^&*()]{3,}/.test(text)) {
-    suggestions.push("特殊文字の連続使用は避けてください");
-  }
-
-  return {
-    isValid: suggestions.length === 0,
-    suggestions,
-  };
-}
-
-// バッチ検証（複数データの一括検証）
-export function validateRestaurantBatch(restaurants: unknown[]): {
-  valid: Restaurant[];
-  invalid: Array<{ index: number; errors: string[]; data: unknown }>;
-} {
-  const valid: Restaurant[] = [];
-  const invalid: Array<{ index: number; errors: string[]; data: unknown }> = [];
-
-  restaurants.forEach((restaurant, index) => {
+  if (typeof value === "object") {
     try {
-      const validRestaurant = validateRestaurantData(restaurant);
-      valid.push(validRestaurant);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        invalid.push({
-          index,
-          errors: error.issues.map(
-            (issue) => `${issue.path.join(".")}: ${issue.message}`
-          ),
-          data: restaurant,
-        });
-      } else {
-        invalid.push({
-          index,
-          errors: ["Unknown validation error"],
-          data: restaurant,
-        });
-      }
+      return sanitizeInput(JSON.stringify(value));
+    } catch {
+      return "";
     }
-  });
+  }
+  if (typeof value === "number" || typeof value === "boolean") {
+    return sanitizeInput(String(value));
+  }
+  return "";
+};
 
-  return { valid, invalid };
-}
+/** 配列の安全な変換 */
+export const safeParseArray = <T>(
+  value: unknown,
+  itemValidator: (item: unknown) => item is T
+): T[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter(itemValidator);
+};
+
+// ==============================
+// Google Sheets データの変換
+// ==============================
+
+/**
+ * Google Sheetsから取得した行データをレストラン情報に変換
+ * エラーハンドリングと型安全性を強化
+ */
+export const parseRestaurantFromSheetRow = (
+  row: readonly string[],
+  rowIndex: number
+): Restaurant | null => {
+  try {
+    // 最低限必要な列数をチェック
+    if (row.length < 8) {
+      console.warn(
+        `行 ${rowIndex}: 必要な列数が不足しています (${row.length} < 8)`
+      );
+      return null;
+    }
+
+    const [
+      id,
+      name,
+      description = "",
+      cuisineType,
+      priceRange,
+      address,
+      phone = "",
+      website = "",
+      latStr,
+      lngStr,
+      ratingStr = "",
+      reviewCountStr = "",
+      featuresStr = "",
+      ...openingHoursData
+    ] = row;
+
+    // 必須フィールドの検証
+    if (!id || !name || !cuisineType || !priceRange || !address) {
+      console.warn(`行 ${rowIndex}: 必須フィールドが不足しています`);
+      return null;
+    }
+
+    // 座標の解析
+    const lat = safeParseNumber(latStr);
+    const lng = safeParseNumber(lngStr);
+
+    if (lat === null || lng === null) {
+      console.warn(
+        `行 ${rowIndex}: 無効な座標データ (lat: ${latStr}, lng: ${lngStr})`
+      );
+      return null;
+    }
+
+    // 評価とレビュー数の解析
+    const rating = safeParseNumber(ratingStr);
+    const reviewCount = safeParseNumber(reviewCountStr);
+
+    // 特徴の解析
+    const features = featuresStr
+      ? featuresStr
+          .split(",")
+          .map((f) => sanitizeInput(f.trim()))
+          .filter((f) => f.length > 0)
+      : [];
+
+    // 営業時間の解析（簡単な形式）
+    const openingHours = openingHoursData
+      .filter((data) => data && data.trim().length > 0)
+      .map((data, index) => ({
+        day:
+          ["月", "火", "水", "木", "金", "土", "日"][index] ||
+          `曜日${index + 1}`,
+        open: "9:00",
+        close: "18:00",
+        isHoliday:
+          data.toLowerCase().includes("休") ||
+          data.toLowerCase().includes("closed"),
+      }));
+
+    const restaurant: Restaurant = {
+      id: sanitizeInput(id),
+      name: sanitizeInput(name),
+      description: description ? sanitizeInput(description) : undefined,
+      cuisineType: cuisineType as CuisineType,
+      priceRange: priceRange as PriceRange,
+      address: sanitizeInput(address),
+      phone: phone ? sanitizeInput(phone) : undefined,
+      website: website ? sanitizeInput(website) : undefined,
+      coordinates: { lat, lng },
+      rating: rating || undefined,
+      reviewCount: reviewCount || undefined,
+      openingHours,
+      features,
+      images: [], // 今回は空配列
+      lastUpdated: new Date().toISOString(),
+    };
+
+    // 最終バリデーション
+    if (!isRestaurant(restaurant)) {
+      const errors = validateRestaurant(restaurant);
+      console.warn(`行 ${rowIndex}: バリデーションエラー`, errors);
+      return null;
+    }
+
+    return restaurant;
+  } catch (error) {
+    console.error(`行 ${rowIndex}: パースエラー`, error);
+    return null;
+  }
+};
+
+/**
+ * Google Sheetsの全データを解析
+ */
+export const parseRestaurantsFromSheetData = (
+  data: readonly (readonly string[])[]
+): Restaurant[] => {
+  const restaurants: Restaurant[] = [];
+
+  // ヘッダー行をスキップ（1行目）
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row || row.length === 0) continue;
+
+    const restaurant = parseRestaurantFromSheetRow(row, i + 1);
+    if (restaurant) {
+      restaurants.push(restaurant);
+    }
+  }
+
+  console.log(
+    `Google Sheetsから ${restaurants.length} 件のレストランデータを取得しました`
+  );
+  return restaurants;
+};
+
+/**
+ * エラーハンドリングの強化
+ */
+export const handleValidationError = (
+  error: unknown,
+  context: string = "データ処理"
+): void => {
+  try {
+    if (error instanceof Error) {
+      console.error(`${context} - エラー:`, {
+        name: error.name,
+        message: error.message,
+        stack: import.meta.env.DEV ? error.stack : undefined,
+      });
+    } else {
+      console.error(`${context} - 不明なエラー:`, error);
+    }
+  } catch (handlingError) {
+    console.error("エラーハンドリング中にエラーが発生しました:", handlingError);
+  }
+};

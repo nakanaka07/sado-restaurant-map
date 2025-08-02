@@ -3,7 +3,11 @@
  * places_data_updater.pyで生成されたスプレッドシートからデータを取得
  */
 
-import type { Restaurant, CuisineType, PriceRange } from "@/types";
+import type {
+  Restaurant,
+  CuisineType,
+  PriceRange,
+} from "../types/restaurant.types";
 
 // 環境変数から設定値を取得
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;

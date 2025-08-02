@@ -11,12 +11,17 @@ import {
   startTransition,
   useEffect,
 } from "react";
-import type { Restaurant, MapFilters, SortOrder, AsyncState } from "@/types";
+import type {
+  Restaurant,
+  MapFilters,
+  SortOrder,
+  AsyncState,
+} from "../types/restaurant.types";
 import {
   fetchRestaurantsFromSheets,
   checkDataFreshness,
   SheetsApiError,
-} from "@/services/sheetsService";
+} from "../services/sheetsService";
 
 // モックデータ（開発用）
 const MOCK_RESTAURANTS: readonly Restaurant[] = [

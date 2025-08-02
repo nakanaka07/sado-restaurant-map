@@ -1,5 +1,9 @@
 import { useState } from "react";
-import type { CuisineType, PriceRange, SortOrder } from "@/types";
+import type {
+  CuisineType,
+  PriceRange,
+  SortOrder,
+} from "../../types/restaurant.types";
 import { trackSearch, trackFilter } from "@/utils/analytics";
 
 interface FilterPanelProps {

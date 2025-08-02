@@ -7,11 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
 dev-dist
-*.local
+coverage
 
 # Environment variables
 .env
@@ -19,10 +22,13 @@ dev-dist
 .env.development.local
 .env.test.local
 .env.production.local
+*.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
 .idea
 .DS_Store
 *.suo
@@ -31,8 +37,28 @@ dev-dist
 *.sln
 *.sw?
 
-# Python scraper specific
-scraper/.venv/
-scraper/__pycache__/
-scraper/*.pyc
-scraper/*.json
+# Python tools specific
+tools/scraper/.venv/
+tools/scraper/__pycache__/
+tools/scraper/*.pyc
+tools/scraper/*.json
+tools/scraper/.env
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# PWA generated files
+sw.js
+sw.js.map
+workbox-*.js
+workbox-*.js.map
+
+# Testing
+coverage/
+.nyc_output

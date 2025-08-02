@@ -8,7 +8,7 @@ import {
   trackPWAUsage,
   trackPageView,
 } from "@/utils/analytics";
-import type { Restaurant } from "@/types";
+import type { Restaurant } from "../types/restaurant.types";
 
 export function useAnalytics() {
   // レストラン詳細表示追跡

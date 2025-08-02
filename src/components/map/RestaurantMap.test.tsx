@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { RestaurantMap } from "./RestaurantMap";
-import type { Restaurant } from "@/types";
+import type { Restaurant } from "../../types/restaurant.types";
 import type { ReactNode } from "react";
 
 // 型定義

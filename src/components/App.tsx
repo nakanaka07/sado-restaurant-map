@@ -1,17 +1,17 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { useEffect, useState, useCallback } from "react";
-import { useRestaurants } from "./hooks/useRestaurants";
-import { RestaurantMap } from "./components/map/RestaurantMap";
-import { FilterPanel } from "./components/restaurant/FilterPanel";
-import { SkipLink } from "./components/common/AccessibilityComponents";
-import { initGA, checkGAStatus } from "./utils/analytics";
-import { sanitizeInput, validateApiKey } from "./utils/securityUtils";
+import { useRestaurants } from "../hooks/useRestaurants";
+import { RestaurantMap } from "./map/RestaurantMap";
+import { FilterPanel } from "./restaurant/FilterPanel";
+import { SkipLink } from "./common/AccessibilityComponents";
+import { initGA, checkGAStatus } from "../utils/analytics";
+import { sanitizeInput, validateApiKey } from "../utils/securityUtils";
 import PWABadge from "./PWABadge";
-import type { CuisineType, PriceRange } from "./types";
-import "./App.css";
+import type { CuisineType, PriceRange } from "../types/restaurant.types";
+import { SADO_CENTER } from "../config/constants";
+import "../styles/App.css";
 
-// 佐渡島の中心座標（セキュリティ考慮: 定数として定義）
-const SADO_CENTER = { lat: 38.018611, lng: 138.367222 } as const;
+// 佐渡島の中心座標（設定ファイルから取得）
 
 // エラー表示コンポーネント
 const ErrorDisplay = ({

@@ -25,6 +25,8 @@
   },
   "include": [
     "vite.config.ts",
-    "pwa-assets.config.ts"
+    "config/pwa-assets.config.ts",
+    "config/vitest.config.ts",
+    "config/eslint.config.js"
   ]
 }

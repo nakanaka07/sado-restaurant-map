@@ -8,7 +8,7 @@ export default defineConfig({
   base: process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
   plugins: [
     react({
-      // React Compiler RC対応（将来）
+      // React Compiler対応（React 19.1 Stable）
       // babel: {
       //   plugins: [['babel-plugin-react-compiler', {}]]
       // }
@@ -18,8 +18,7 @@ export default defineConfig({
       injectRegister: false,
 
       pwaAssets: {
-        disabled: false,
-        config: true,
+        disabled: true, // CLIで生成済みのため無効化
       },
 
       manifest: {
@@ -37,6 +36,29 @@ export default defineConfig({
           process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
         lang: "ja",
         categories: ["food", "travel", "utilities"],
+        icons: [
+          {
+            src: "pwa-64x64.png",
+            sizes: "64x64",
+            type: "image/png",
+          },
+          {
+            src: "pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
         shortcuts: [
           {
             name: "全ての飲食店",
