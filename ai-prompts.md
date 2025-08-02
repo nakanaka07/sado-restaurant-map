@@ -1,7 +1,7 @@
 # AI Assistant Prompts for Code Improvement
 
 > 🎯 **目的**: React+TypeScript開発での効率的なAIアシスタント活用  
-> **最終更新**: 2025年7月9日 | **バージョン**: 4.0 **[大幅最適化版]**
+> **最終更新**: 2025年8月2日 | **バージョン**: 5.0 **[2025年最新版]**
 
 ## 📖 目次
 
@@ -95,14 +95,16 @@
 
 ```text
 このコードをモダナイズしてください：
-- React 19最新機能の採用（React Compiler対応、Concurrent Features）
-- Google Maps Advanced Markers への移行
-- TypeScript 5.8新機能の活用
-- 最新JavaScript/ES2024機能の採用
-- モダンなReactパターンの適用（use hook、Server Components準備）
+- React 19.1最新機能の採用（React Compiler Stable、Concurrent Features）
+- Google Maps Advanced Markers v2 への移行
+- TypeScript 5.9新機能の活用
+- 最新JavaScript/ES2025機能の採用
+- モダンなReactパターンの適用（use hook、Activity API、Server Components対応）
 - 非推奨API・ライブラリの置き換え
 - View Transitions API対応
 - Web Vitals 2025基準への最適化
+- PWA Manifest v3対応
+- CSS4新機能（Container Queries、color-mix、CSS Nesting）の活用
 - 型安全性の向上
 - 最新セキュリティベストプラクティスの適用
 ```
@@ -146,9 +148,10 @@
 - 品質管理ファイルの整理
 
 【ビルド設定】
-- Vite・TypeScript設定の最適化
+- Vite 8.0・TypeScript設定の最適化（Rolldown統合）
 - 依存関係・プラグインの整理
 - ビルド性能の向上
+- ESLint v9・Prettier v3最適化
 ```
 
 ### 8. 🎨 フロントエンド特化指示
@@ -160,12 +163,12 @@
 
 【CSS・スタイリング】
 - Critical CSS の最適化
-- CSS Container Queries対応
-- CSS View Transitions実装
-- レスポンシブ・モバイルファースト対応
+- CSS4新機能の活用（Container Queries、color-mix、CSS Nesting）
+- CSS View Transitions API実装
+- レスポンシブ・モバイルファースト対応（iOS 18 / Android 15）
 - アニメーション・インタラクションの改善
 - CSS変数・デザイントークンの整理
-- モダンCSS機能（color-mix、logical properties）の活用
+- モダンCSS機能（logical properties、:has()セレクタ）の活用
 
 【アクセシビリティ】
 - WCAG 2.2 AA準拠の実装
@@ -336,23 +339,25 @@
 
 #### ⚛️ **React & TypeScript**
 
-- **React 19 公式**: <https://react.dev/> - 最新機能・ベストプラクティス
-- **React Compiler**: <https://react.dev/learn/react-compiler> - パフォーマンス自動最適化
-- **TypeScript 5.8**: <https://www.typescriptlang.org/> - 型安全性・新機能
+- **React 19.1 公式**: <https://react.dev/> - 最新機能・ベストプラクティス
+- **React Compiler Stable**: <https://react.dev/learn/react-compiler> - パフォーマンス自動最適化
+- **TypeScript 5.9**: <https://www.typescriptlang.org/> - 型安全性・新機能
 - **React DevTools**: <https://github.com/facebook/react/tree/main/packages/react-devtools>
-- **React Concurrent Features**: <https://react.dev/reference/react/Suspense> - Suspense、Server Components
+- **React Activity API**: <https://react.dev/reference/react/experimental> - Concurrent Features
+- **View Transitions API**: <https://developer.mozilla.org/docs/Web/API/View_Transitions_API> - 画面遷移
 
 #### 🗺️ **Google Maps API（核心技術）**
 
 - **Maps JavaScript API**: <https://developers.google.com/maps/documentation/javascript> - 日本語ドキュメント
-- **Advanced Markers**: <https://developers.google.com/maps/documentation/javascript/advanced-markers/overview> - 次世代マーカー（推奨）
-- **@vis.gl/react-google-maps**: <https://visgl.github.io/react-google-maps/> - React統合ライブラリ
+- **Advanced Markers v2**: <https://developers.google.com/maps/documentation/javascript/advanced-markers/overview> - 次世代マーカー（推奨）
+- **@vis.gl/react-google-maps v3**: <https://visgl.github.io/react-google-maps/> - React統合ライブラリ
 - **3D Maps & WebGL**: <https://developers.google.com/maps/documentation/javascript/3d/overview> - 3D地図機能
-- **Marker Clustering**: <https://developers.google.com/maps/documentation/javascript/marker-clustering> - マーカークラスタリング（公式ガイド）
+- **Places API (New) v1**: <https://developers.google.com/places/web-service/overview> - 最新Places API
+- **Marker Clustering v2**: <https://developers.google.com/maps/documentation/javascript/marker-clustering> - マーカークラスタリング
 
 #### 🍽️ **佐渡飲食店データベース（プロジェクト特化）**
 
-- **Google Sheets API v4**: <https://developers.google.com/sheets/api> - スプレッドシート連携（2025年7月最新）
+- **Google Sheets API v4**: <https://developers.google.com/sheets/api> - スプレッドシート連携（2025年8月最新）
 - **JavaScript クイックスタート**: <https://developers.google.com/workspace/sheets/api/quickstart/js> - React実装基礎
 - **データソース**: プロジェクト用Google Sheetsスプレッドシート（環境変数で設定）
 
@@ -397,14 +402,13 @@ const fetchRestaurantData = async () => {
 
 #### ⚡ **ビルド・開発ツール**
 
-- **Vite 7.0**: <https://vitejs.dev/> - 高速ビルドツール・最新版
+- **Vite 8.0**: <https://vitejs.dev/> - 高速ビルドツール・最新版（Rolldown統合）
 - **Vite Configuration**: <https://vitejs.dev/config/> - 設定リファレンス
 - **Vite Plugins**: <https://vitejs.dev/plugins/> - 公式プラグイン一覧
-- **Vite PWA**: <https://vite-pwa-org.netlify.app/guide/> - PWA統合ガイド
+- **Vite PWA v0.20**: <https://vite-pwa-org.netlify.app/guide/> - PWA統合ガイド
 - **vite-plugin-pwa**: <https://github.com/vite-pwa/vite-plugin-pwa> - PWAプラグイン
-- **Vitest 3.2**: <https://vitest.dev/> - テストフレームワーク
-- **PWA Guide**: <https://web.dev/progressive-web-apps/> - プログレッシブWebアプリ
-- **View Transitions**: <https://developer.mozilla.org/docs/Web/API/View_Transitions_API> - 新UI遷移技術
+- **Vitest 4.0**: <https://vitest.dev/> - テストフレームワーク
+- **PWA Guide 2025**: <https://web.dev/progressive-web-apps/> - プログレッシブWebアプリ
 - **Web Vitals 2025**: <https://web.dev/vitals/> - 最新パフォーマンス指標
 
 ##### ⚙️ **プロジェクト設定リファレンス**
@@ -449,25 +453,25 @@ pnpm preview
 
 ```text
 # 2025年最新技術調査時の組み合わせ例
-"#10診断 + React 19公式サイト確認" → 現状分析と最新ベストプラクティス比較
-"#5モダナイズ + React Compiler" → パフォーマンス自動最適化の適用
-"#5モダナイズ + Advanced Markers" → Google Maps最新マーカーAPIへの移行
+"#10診断 + React 19.1公式サイト確認" → 現状分析と最新ベストプラクティス比較
+"#5モダナイズ + React Compiler Stable" → パフォーマンス自動最適化の適用
+"#5モダナイズ + Advanced Markers v2" → Google Maps最新マーカーAPIへの移行
 "#8フロントエンド + Web Vitals 2025" → 最新パフォーマンス指標対応
-"#3最適化 + View Transitions" → 最新UI遷移技術の実装
+"#3最適化 + View Transitions API" → 最新UI遷移技術の実装
 
 # Google Maps特化連携
 "#3最適化 + Maps 3D & WebGL" → 3D地図・WebGL機能の活用
 "#1修正 + Advanced Markers移行" → 非推奨マーカーAPIからの移行
 "#4リファクタ + マーカークラスタリング最適化" → 大量マーカー表示の改善
 
-# React 19連携
-"#5モダナイズ + Concurrent Features" → Suspense、Server Components準備
-"#3最適化 + React Compiler" → 自動メモ化・最適化の活用
+# React 19.1連携
+"#5モダナイズ + Activity API" → Concurrent Features・並行レンダリング
+"#3最適化 + React Compiler Stable" → 自動メモ化・最適化の活用
 "#1修正 + 新Hooks API" → use hookなど最新機能への対応
 
 # 佐渡飲食店データベース連携
-"#10診断 + Google Sheets API" → スプレッドシートデータ構造の分析
-"#5モダナイズ + CSV→JSON変換" → データ形式の最適化
+"#10診断 + Google Sheets API v4" → スプレッドシートデータ構造の分析
+"#5モダナイズ + Places API (New) v1" → 最新Places APIへの移行
 "#3最適化 + Geocoding API" → 住所から座標への効率的変換
 "#4リファクタ + 店舗データ型定義" → TypeScript型安全なデータ管理
 "#8フロントエンド + 店舗カード表示" → データ可視化の改善

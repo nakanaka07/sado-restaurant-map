@@ -167,3 +167,226 @@ export function sanitizeRestaurantInput(
     ),
   };
 }
+
+// フィルター入力のバリデーション
+export const FilterInputSchema = z.object({
+  searchQuery: z
+    .string()
+    .max(100, "検索クエリは100文字以内である必要があります")
+    .transform((val) => val.trim())
+    .default(""),
+  cuisineTypes: z
+    .array(CuisineTypeSchema)
+    .max(5, "料理タイプは5個まで選択可能です")
+    .default([]),
+  priceRanges: z
+    .array(PriceRangeSchema)
+    .max(4, "価格帯は4個まで選択可能です")
+    .default([]),
+  features: z
+    .array(z.string().max(20, "特徴は20文字以内である必要があります"))
+    .max(10, "特徴は10個まで選択可能です")
+    .default([]),
+});
+
+// ソート順バリデーション
+export const SortOrderSchema = z.enum([
+  "name",
+  "rating",
+  "distance",
+  "reviewCount",
+  "priceRange",
+]);
+
+// APIリクエストのレート制限チェック
+export function validateApiRequestLimit(
+  lastRequestTime: number,
+  minInterval: number = 1000
+): boolean {
+  const now = Date.now();
+  return now - lastRequestTime >= minInterval;
+}
+
+// 位置情報の佐渡島範囲チェック
+export function isSadoIslandCoordinate(coordinates: {
+  lat: number;
+  lng: number;
+}): boolean {
+  // 佐渡島の大まかな境界
+  const SADO_BOUNDS = {
+    north: 38.32,
+    south: 37.72,
+    east: 138.62,
+    west: 138.05,
+  };
+
+  return (
+    coordinates.lat >= SADO_BOUNDS.south &&
+    coordinates.lat <= SADO_BOUNDS.north &&
+    coordinates.lng >= SADO_BOUNDS.west &&
+    coordinates.lng <= SADO_BOUNDS.east
+  );
+}
+
+// 危険なHTMLタグの検出
+export function containsDangerousContent(input: string): boolean {
+  const dangerousPatterns = [
+    /<script/i,
+    /<iframe/i,
+    /<object/i,
+    /<embed/i,
+    /javascript:/i,
+    /vbscript:/i,
+    /data:text\/html/i,
+    /onclick=/i,
+    /onload=/i,
+    /onerror=/i,
+  ];
+
+  return dangerousPatterns.some((pattern) => pattern.test(input));
+}
+
+// SQLインジェクション検出（将来のDB使用時）
+export function containsSqlInjection(input: string): boolean {
+  const sqlPatterns = [
+    /('|(\\'))|(;)|(\|)|(\*)|(%)/i,
+    /(union|select|insert|update|delete|drop|create|alter)/i,
+    /(script|javascript|vbscript)/i,
+    /(char|nchar|varchar|nvarchar|alter|begin|cast|create|cursor|declare)/i,
+  ];
+
+  return sqlPatterns.some((pattern) => pattern.test(input));
+}
+
+// XSS攻撃検出
+export function containsXssAttempt(input: string): boolean {
+  return containsDangerousContent(input);
+}
+
+// 包括的入力検証
+export function validateUserInput(
+  input: string,
+  context: "search" | "filter" | "general" = "general"
+): {
+  isValid: boolean;
+  errors: string[];
+  sanitized: string;
+} {
+  const errors: string[] = [];
+  let sanitized = input.trim();
+
+  // 長さチェック
+  const maxLength = context === "search" ? 100 : 50;
+  if (sanitized.length > maxLength) {
+    errors.push(`入力は${maxLength}文字以内である必要があります`);
+    sanitized = sanitized.slice(0, maxLength);
+  }
+
+  // 危険なコンテンツチェック
+  if (containsDangerousContent(sanitized)) {
+    errors.push("不正なコンテンツが含まれています");
+  }
+
+  // SQLインジェクションチェック
+  if (containsSqlInjection(sanitized)) {
+    errors.push("不正なSQL文字列が含まれています");
+  }
+
+  // 基本的なサニタイゼーション
+  sanitized = sanitized
+    .replace(/[<>]/g, "") // HTMLタグ除去
+    .replace(/['"]/g, "") // クォート除去
+    .replace(/[;&|*%]/g, ""); // 危険な記号除去
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    sanitized,
+  };
+}
+
+// レスポンシブ画像URL検証
+export function validateImageUrl(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+
+    // HTTPS必須
+    if (urlObj.protocol !== "https:") {
+      return false;
+    }
+
+    // 許可されたドメイン
+    const allowedDomains = [
+      "images.unsplash.com",
+      "res.cloudinary.com",
+      "storage.googleapis.com",
+      "lh3.googleusercontent.com", // Google Photos
+    ];
+
+    return allowedDomains.some((domain) => urlObj.hostname.includes(domain));
+  } catch {
+    return false;
+  }
+}
+
+// アクセシビリティ検証
+export function validateAccessibilityText(text: string): {
+  isValid: boolean;
+  suggestions: string[];
+} {
+  const suggestions: string[] = [];
+
+  // 最低文字数
+  if (text.length < 3) {
+    suggestions.push("説明文は3文字以上にしてください");
+  }
+
+  // 最大文字数
+  if (text.length > 200) {
+    suggestions.push("説明文は200文字以内にしてください");
+  }
+
+  // 特殊文字の連続使用
+  if (/[!@#$%^&*()]{3,}/.test(text)) {
+    suggestions.push("特殊文字の連続使用は避けてください");
+  }
+
+  return {
+    isValid: suggestions.length === 0,
+    suggestions,
+  };
+}
+
+// バッチ検証（複数データの一括検証）
+export function validateRestaurantBatch(restaurants: unknown[]): {
+  valid: Restaurant[];
+  invalid: Array<{ index: number; errors: string[]; data: unknown }>;
+} {
+  const valid: Restaurant[] = [];
+  const invalid: Array<{ index: number; errors: string[]; data: unknown }> = [];
+
+  restaurants.forEach((restaurant, index) => {
+    try {
+      const validRestaurant = validateRestaurantData(restaurant);
+      valid.push(validRestaurant);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        invalid.push({
+          index,
+          errors: error.issues.map(
+            (issue) => `${issue.path.join(".")}: ${issue.message}`
+          ),
+          data: restaurant,
+        });
+      } else {
+        invalid.push({
+          index,
+          errors: ["Unknown validation error"],
+          data: restaurant,
+        });
+      }
+    }
+  });
+
+  return { valid, invalid };
+}

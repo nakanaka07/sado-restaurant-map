@@ -1,76 +1,175 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRestaurants } from "./hooks/useRestaurants";
 import { RestaurantMap } from "./components/map/RestaurantMap";
-import { SimpleMapTest } from "./components/map/SimpleMapTest";
 import { FilterPanel } from "./components/restaurant/FilterPanel";
 import { SkipLink } from "./components/common/AccessibilityComponents";
 import { initGA, checkGAStatus } from "./utils/analytics";
+import { sanitizeInput, validateApiKey } from "./utils/securityUtils";
 import PWABadge from "./PWABadge";
 import type { CuisineType, PriceRange } from "./types";
 import "./App.css";
 
-// 佐渡島の中心座標
-const SADO_CENTER = { lat: 38.018611, lng: 138.367222 };
+// 佐渡島の中心座標（セキュリティ考慮: 定数として定義）
+const SADO_CENTER = { lat: 38.018611, lng: 138.367222 } as const;
+
+// エラー表示コンポーネント
+const ErrorDisplay = ({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) => (
+  <div className="error-container" role="alert" aria-live="assertive">
+    <h1>{title}</h1>
+    <p>{message}</p>
+  </div>
+);
 
 function App() {
   const { filteredRestaurants, asyncState, setFilters, setSortOrder } =
     useRestaurants();
 
+  const [appError, setAppError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // セキュリティ強化: APIキーのバリデーション
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-  // Google Analytics初期化
+  // 初期化処理（エラーハンドリング強化）
   useEffect(() => {
-    initGA();
+    const initializeApp = async () => {
+      try {
+        // APIキーのバリデーション
+        if (!validateApiKey(apiKey)) {
+          throw new Error("無効なGoogle Maps APIキーです");
+        }
 
-    // 開発環境でのみデバッグ情報を表示
-    if (import.meta.env.DEV) {
-      setTimeout(() => {
-        checkGAStatus();
-      }, 3000);
+        // Google Analytics初期化（エラーハンドリング付き）
+        await initGA();
+
+        // 開発環境でのみデバッグ情報を表示
+        if (import.meta.env.DEV) {
+          setTimeout(() => {
+            checkGAStatus().catch(console.warn);
+          }, 3000);
+        }
+
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("アプリケーション初期化エラー:", error);
+        setAppError(
+          error instanceof Error
+            ? error.message
+            : "アプリケーションの初期化に失敗しました"
+        );
+      }
+    };
+
+    void initializeApp();
+  }, [apiKey]);
+
+  // セキュリティ強化: 入力サニタイズ付きフィルター関数
+  const handleCuisineFilter = useCallback(
+    (cuisine: CuisineType | "") => {
+      try {
+        setFilters({
+          cuisineTypes: cuisine ? [cuisine] : [],
+        });
+      } catch (error) {
+        console.error("料理タイプフィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [setFilters]
+  );
+
+  const handlePriceFilter = useCallback(
+    (price: PriceRange | "") => {
+      try {
+        setFilters({
+          priceRanges: price ? [price] : [],
+        });
+      } catch (error) {
+        console.error("価格フィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [setFilters]
+  );
+
+  const handleSearchFilter = useCallback(
+    (search: string) => {
+      try {
+        // セキュリティ: 検索クエリのサニタイズ
+        const sanitizedSearch = sanitizeInput(search);
+        setFilters({
+          searchQuery: sanitizedSearch,
+        });
+      } catch (error) {
+        console.error("検索フィルターエラー:", error);
+        setAppError("検索中にエラーが発生しました");
+      }
+    },
+    [setFilters]
+  );
+
+  const handleFeatureFilter = useCallback(
+    (features: string[]) => {
+      try {
+        // セキュリティ: 特徴フィルターの検証
+        const sanitizedFeatures = features.map((feature) =>
+          sanitizeInput(feature)
+        );
+        setFilters({
+          features: sanitizedFeatures,
+        });
+      } catch (error) {
+        console.error("特徴フィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [setFilters]
+  );
+
+  const handleResetFilters = useCallback(() => {
+    try {
+      setFilters({
+        cuisineTypes: [],
+        priceRanges: [],
+        features: [],
+        searchQuery: "",
+      });
+      // エラー状態もリセット
+      setAppError(null);
+    } catch (error) {
+      console.error("フィルターリセットエラー:", error);
+      setAppError("フィルターのリセット中にエラーが発生しました");
     }
-  }, []);
+  }, [setFilters]);
 
-  // フィルター関数
-  const handleCuisineFilter = (cuisine: CuisineType | "") => {
-    setFilters({
-      cuisineTypes: cuisine ? [cuisine] : [],
-    });
-  };
+  // アプリケーションエラー表示
+  if (appError) {
+    return <ErrorDisplay title="アプリケーションエラー" message={appError} />;
+  }
 
-  const handlePriceFilter = (price: PriceRange | "") => {
-    setFilters({
-      priceRanges: price ? [price] : [],
-    });
-  };
-
-  const handleSearchFilter = (search: string) => {
-    setFilters({
-      searchQuery: search,
-    });
-  };
-
-  const handleFeatureFilter = (features: string[]) => {
-    setFilters({
-      features,
-    });
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      cuisineTypes: [],
-      priceRanges: [],
-      features: [],
-      searchQuery: "",
-    });
-  };
-
+  // APIキー未設定エラー
   if (!apiKey) {
     return (
-      <div className="error-container">
-        <h1>設定エラー</h1>
-        <p>Google Maps APIキーが設定されていません。</p>
-        <p>.env.localファイルにVITE_GOOGLE_MAPS_API_KEYを設定してください。</p>
+      <ErrorDisplay
+        title="設定エラー"
+        message="Google Maps APIキーが設定されていません。.env.localファイルにVITE_GOOGLE_MAPS_API_KEYを設定してください。"
+      />
+    );
+  }
+
+  // 初期化中の表示
+  if (!isInitialized) {
+    return (
+      <div className="loading-container" role="status" aria-live="polite">
+        <h1>🗺️ 佐渡飲食店マップ</h1>
+        <p>読み込み中...</p>
       </div>
     );
   }
@@ -80,7 +179,7 @@ function App() {
       <SkipLink href="#main-content">メインコンテンツにスキップ</SkipLink>
 
       <div className="app">
-        <header className="app-header">
+        <header className="app-header" role="banner">
           <h1>🗺️ 佐渡飲食店マップ</h1>
           <p>佐渡島のおいしいお店を見つけよう</p>
         </header>
@@ -116,6 +215,8 @@ function App() {
                     borderRadius: "8px",
                     border: "1px solid #bae6fd",
                   }}
+                  role="status"
+                  aria-live="polite"
                 >
                   <h3 style={{ margin: "0 0 0.5rem 0", color: "#0369a1" }}>
                     📊 検索結果: {filteredRestaurants.length}件
@@ -139,8 +240,6 @@ function App() {
                       : "フィルターを使って、お探しのお店を見つけてください"}
                   </p>
                 </div>
-
-                <SimpleMapTest />
 
                 <RestaurantMap
                   restaurants={filteredRestaurants}

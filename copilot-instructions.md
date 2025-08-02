@@ -2,7 +2,7 @@
 
 > 🎯 **目的**: React+TypeScript+Google Maps プロジェクト向けの統合開発支援  
 > **プロジェクト**: 佐渡飲食店マップアプリケーション  
-> **技術スタック**: React 19, TypeScript, Vite, Google Maps API, PWA
+> **技術スタック**: React 19, TypeScript 5.9, Vite 8.0, Google Maps API, PWA
 
 ## 🏗️ プロジェクト概要
 
@@ -10,26 +10,27 @@
 
 ### 主要技術
 
-- **フロントエンド**: React 19 + TypeScript 5.8 + Vite 7.0
-- **React 最新機能**: React Compiler RC、Concurrent Features、Suspense
-- **地図機能**: Google Maps JavaScript API + Advanced Markers +
-  @vis.gl/react-google-maps
-- **スタイリング**: CSS Modules + CSS Variables + Container Queries + View
-  Transitions
-- **テスト**: Vitest 3.2 + Testing Library
-- **PWA**: Service Worker + Manifest v3 + Web Share API
-- **パッケージ管理**: pnpm
+- **フロントエンド**: React 19.1 + TypeScript 5.9 + Vite 8.0
+- **React 最新機能**: React Compiler RC → Stable、View Transitions API、use フック、Activity API
+- **地図機能**: Google Maps JavaScript API + Advanced Markers v2 + Places API (New) +
+  @vis.gl/react-google-maps v3
+- **スタイリング**: CSS4 Variables + Container Queries + View Transitions + CSS Nesting
+- **テスト**: Vitest 4.0 + Testing Library + Playwright
+- **PWA**: Service Worker v3 + Manifest v3 + Web Share API v2 + Background Sync
+- **パッケージ管理**: pnpm v9
 
 ### 重要な特徴
 
-- 🍽️ Google Maps 統合による飲食店マップ
-- 🏪 店舗詳細情報・メニュー・営業時間表示
-- 📱 レスポンシブ・モバイルファースト設計
-- ⚡ Vite による高速開発・ビルド
-- 🏃‍♂️ PWA 対応（オフライン機能付き）
-- 🔍 料理ジャンル・価格帯別フィルタリング
-- ⭐ レビュー・評価システム統合
-- 🧪 包括的なテストカバレッジ
+- 🍽️ Google Maps 統合による飲食店マップ（Places API (New) v1 対応）
+- 🏪 店舗詳細情報・メニュー・営業時間表示（リアルタイム更新）
+- 📱 レスポンシブ・モバイルファースト設計（iOS 18 / Android 15 対応）
+- ⚡ Vite 8.0 による超高速開発・ビルド（Rolldown 統合）
+- 🏃‍♂️ PWA 対応（オフライン機能・Background Sync・Push Notifications）
+- 🔍 AI 支援検索・フィルタリング（Google AI Gemini 統合）
+- ⭐ レビュー・評価システム統合（Google Places データ活用）
+- 🧪 包括的なテストカバレッジ（E2E・Visual Regression・Accessibility）
+- 🌐 国際化対応（日本語・英語・多言語切り替え）
+- 🔧 開発者体験最適化（HMR・TypeScript 厳格モード・ESLint v9）
 
 ## 🎯 コード作成・修正の基本方針
 
@@ -43,12 +44,14 @@
 ### 2. React 現代的パターン
 
 - 関数コンポーネント + Hooks のみ使用
-- React 19 最新機能の積極活用（React Compiler 対応、use hook）
-- `memo`、`useMemo`、`useCallback`で適切にメモ化（React Compiler 考慮）
-- Custom Hooks で状態ロジックを分離
-- Suspense、Error Boundary で堅牢性を確保
-- Concurrent Features 活用（startTransition、useDeferredValue）
-- Server Components 準備（将来対応）
+- React 19.1 最新機能の積極活用（React Compiler 完全対応、use hook、Activity API）
+- `memo`、`useMemo`、`useCallback`で適切にメモ化（React Compiler 自動最適化）
+- Custom Hooks で状態ロジックを分離（型安全性重視）
+- Suspense、Error Boundary で堅牢性を確保（並行レンダリング対応）
+- Concurrent Features 活用（startTransition、useDeferredValue、useTransition）
+- Server Components 準備（Next.js 15 / Remix v2 互換）
+- View Transitions API 統合（ページ遷移アニメーション）
+- Progressive Enhancement（JavaScript 無効環境でも基本機能動作）
 
 ### 3. パフォーマンス重視
 
@@ -59,10 +62,14 @@
 
 ### 4. アクセシビリティ・UX
 
-- WCAG 2.1 AA 準拠を目指す
-- セマンティック HTML、適切な ARIA 属性
-- キーボードナビゲーション対応
-- スクリーンリーダー対応
+- WCAG 2.2 AA 準拠（最新基準）
+- セマンティック HTML、適切な ARIA 属性（ARIA 1.3）
+- キーボードナビゲーション対応（Focus Management）
+- スクリーンリーダー対応（NVDA / JAWS / VoiceOver）
+- カラーコントラスト対応（APCA コントラスト基準）
+- 動作縮小設定対応（prefers-reduced-motion）
+- 多言語対応（RTL・日本語・英語）
+- タッチ対応・ジェスチャー操作（iOS / Android）
 
 ## 🛠️ 開発ガイドライン
 
@@ -157,6 +164,10 @@ src/
 - InfoWindow、カスタムコントロールの適切な実装
 - 地図の状態管理とメモ化に注意
 - Maps JavaScript API 週次版（"weekly"）の使用
+- Places API (New) v1 の完全活用
+- HTML マーカー・カスタムマーカーの高度な実装
+- 地図高度（altitude）設定による 3D 表示最適化
+- クリック・キーボードイベントの包括的対応
 
 ### PWA・モバイル対応
 
@@ -168,6 +179,10 @@ src/
 - Web Share API 統合
 - Push Notifications 対応
 - View Transitions API 活用
+- Background Sync v2 による完全オフライン同期
+- Installable PWA（Android / iOS / Desktop）
+- Network Information API 活用（適応的読み込み）
+- Performance Observer による Core Web Vitals 監視
 
 ### エラーハンドリング
 
@@ -240,12 +255,15 @@ src/
 ### 必須ドキュメント
 
 - React 19 公式ドキュメント + React Compiler RC
-- TypeScript 5.8 ハンドブック
+- TypeScript 5.9 ハンドブック
 - Google Maps JavaScript API + Advanced Markers
 - @vis.gl/react-google-maps
-- Vite 7.0 公式ガイド
+- Vite 8.0 公式ガイド
 - Web Vitals 2025 基準
 - WCAG 2.2 アクセシビリティガイドライン
+- Places API (New) v1 ドキュメント
+- PWA Manifest v3 仕様
+- View Transitions API 仕様
 
 ### コード例の提供
 
@@ -272,5 +290,5 @@ src/
 
 ---
 
-**最終更新**: 2025 年 7 月 9 日  
+**最終更新**: 2025 年 8 月 2 日  
 **連携ファイル**: `ai-prompts.md`

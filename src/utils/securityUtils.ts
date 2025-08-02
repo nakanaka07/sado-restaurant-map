@@ -56,6 +56,22 @@ export function sanitizeUserInput(input: string): string {
 }
 
 /**
+ * 検索クエリのサニタイゼーション（エイリアス）
+ */
+export const sanitizeInput = sanitizeUserInput;
+
+/**
+ * Google Maps APIキーの検証
+ */
+export function validateApiKey(apiKey: string | undefined): boolean {
+  if (!apiKey) return false;
+  if (typeof apiKey !== "string") return false;
+  if (apiKey.length < 10) return false;
+  if (!/^[A-Za-z0-9_-]+$/.test(apiKey)) return false;
+  return true;
+}
+
+/**
  * CSP (Content Security Policy) 用のnonce生成
  */
 export function generateNonce(): string {

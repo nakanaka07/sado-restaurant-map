@@ -24,79 +24,101 @@ declare global {
 }
 
 // Google Analytics初期化
-export const initGA = () => {
-  // 環境変数の確認
-  if (
-    !GA_MEASUREMENT_ID ||
-    typeof GA_MEASUREMENT_ID !== "string" ||
-    GA_MEASUREMENT_ID === "undefined"
-  ) {
-    if (import.meta.env.DEV) {
-      console.warn(
-        "GA_MEASUREMENT_ID が設定されていません:",
-        GA_MEASUREMENT_ID
-      );
-    } else {
-      console.warn("Google Analytics: 測定IDが未設定");
+export const initGA = async (): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    try {
+      // 環境変数の確認
+      if (
+        !GA_MEASUREMENT_ID ||
+        typeof GA_MEASUREMENT_ID !== "string" ||
+        GA_MEASUREMENT_ID === "undefined"
+      ) {
+        // 開発環境でのみ詳細ログ出力
+        if (import.meta.env.DEV) {
+          console.warn(
+            "GA_MEASUREMENT_ID が設定されていません",
+            GA_MEASUREMENT_ID
+          );
+        }
+        resolve(); // エラーではなく正常終了として扱う
+        return;
+      }
+
+      // 測定IDの形式確認（G- で始まるかチェック）
+      if (!GA_MEASUREMENT_ID.startsWith("G-")) {
+        // 開発環境でのみ警告
+        if (import.meta.env.DEV) {
+          console.warn(
+            "Google Analytics: 無効な測定ID形式:",
+            GA_MEASUREMENT_ID
+          );
+        }
+        resolve(); // エラーではなく正常終了として扱う
+        return;
+      }
+
+      // 開発環境でのみ詳細ログ出力
+      if (import.meta.env.DEV) {
+        console.log("開発環境でのGoogle Analytics初期化:", GA_MEASUREMENT_ID);
+      }
+      // 本番環境では静粛に初期化
+
+      // gtag script動的追加
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+      script.onload = () => {
+        if (import.meta.env.DEV) {
+          console.log("Google Analytics スクリプト読み込み完了");
+        }
+
+        // gtag設定
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag(...args: unknown[]) {
+          window.dataLayer.push(args);
+        };
+
+        window.gtag("config", GA_MEASUREMENT_ID, {
+          page_title: "佐渡飲食店マップ",
+          page_location: window.location.href,
+          send_page_view: true,
+        });
+
+        // 開発環境でのみ詳細ログ
+        if (import.meta.env.DEV) {
+          console.log("Google Analytics 4 初期化完了:", GA_MEASUREMENT_ID);
+        }
+
+        resolve();
+      };
+      script.onerror = () => {
+        const error = new Error("Google Analytics スクリプト読み込み失敗");
+        console.error(error.message);
+        reject(error);
+      };
+      document.head.appendChild(script);
+
+      // 初期化確認用のテストイベント（開発環境のみ）
+      if (import.meta.env.DEV) {
+        setTimeout(() => {
+          trackPageView("アプリ初期化完了");
+          trackEvent("app_initialized", {
+            app_name: "佐渡飲食店マップ",
+            version: "1.0.0",
+            timestamp: new Date().toISOString(),
+            environment: import.meta.env.MODE,
+          });
+        }, 2000); // 2秒後に送信して確実に初期化を完了
+      }
+    } catch (error) {
+      const initError =
+        error instanceof Error
+          ? error
+          : new Error("Google Analytics 初期化エラー");
+      console.error("Google Analytics 初期化エラー:", initError);
+      reject(initError);
     }
-    return;
-  }
-
-  // 測定IDの形式確認（G- で始まるかチェック）
-  if (!GA_MEASUREMENT_ID.startsWith("G-")) {
-    console.warn("Google Analytics: 無効な測定ID形式:", GA_MEASUREMENT_ID);
-    return;
-  }
-
-  // 開発環境でのみ詳細ログ出力
-  if (import.meta.env.DEV) {
-    console.log("開発環境でのGoogle Analytics初期化:", GA_MEASUREMENT_ID);
-  } else {
-    console.log("Google Analytics 初期化開始");
-  }
-
-  // gtag script動的追加
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  script.onload = () => {
-    console.log("Google Analytics スクリプト読み込み完了");
-  };
-  script.onerror = () => {
-    console.error("Google Analytics スクリプト読み込み失敗");
-  };
-  document.head.appendChild(script);
-
-  // gtag設定
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer.push(args);
-  };
-
-  window.gtag("config", GA_MEASUREMENT_ID, {
-    page_title: "佐渡飲食店マップ",
-    page_location: window.location.href,
-    send_page_view: true,
-    // カスタムパラメータの削除（Google Analytics 4では不要）
   });
-
-  // 本番環境では測定IDを表示しない
-  if (import.meta.env.DEV) {
-    console.log("Google Analytics 4 初期化完了:", GA_MEASUREMENT_ID);
-  } else {
-    console.log("Google Analytics 4 初期化完了");
-  }
-
-  // 初期化確認用のテストイベント（遅延して送信）
-  setTimeout(() => {
-    trackPageView("アプリ初期化完了");
-    trackEvent("app_initialized", {
-      app_name: "佐渡飲食店マップ",
-      version: "1.0.0",
-      timestamp: new Date().toISOString(),
-      environment: import.meta.env.MODE,
-    });
-  }, 2000); // 2秒後に送信して確実に初期化を完了
 };
 
 // カスタムイベント送信
@@ -117,21 +139,11 @@ export const trackEvent = (
       ...parameters,
     } as GtagConfig);
 
-    // 開発環境でのみ詳細ログ、本番環境では簡潔なログ
+    // 開発環境でのみ詳細ログ、本番環境では重要イベントのみ
     if (import.meta.env.DEV) {
-      console.log("GA Event (Dev):", eventName, parameters);
-    } else {
-      // 本番環境では重要なイベントのみ簡潔にログ出力
-      if (
-        eventName === "app_initialized" ||
-        eventName === "page_view" ||
-        eventName === "restaurant_click" ||
-        eventName === "search" ||
-        eventName === "filter_applied"
-      ) {
-        console.log("GA Event:", eventName);
-      }
+      console.log("GA Event:", eventName, parameters);
     }
+    // 本番環境では静粛モード（ログ出力なし）
   } catch (error) {
     console.error("Google Analytics イベント送信エラー:", error);
   }
@@ -195,23 +207,45 @@ export const trackPageView = (pageName: string) => {
   });
 };
 
-// デバッグ用：Google Analytics状態確認
-export const checkGAStatus = () => {
-  const status = {
-    measurementId: GA_MEASUREMENT_ID,
-    measurementIdValid: GA_MEASUREMENT_ID && GA_MEASUREMENT_ID.startsWith("G-"),
-    gtagLoaded: typeof window !== "undefined" && !!window.gtag,
-    dataLayerExists: typeof window !== "undefined" && !!window.dataLayer,
-    environment: import.meta.env.MODE,
-  };
+// デバッグ用：Google Analytics状態確認（開発環境限定）
+export const checkGAStatus = async () => {
+  if (!import.meta.env.DEV) {
+    return { error: "開発環境でのみ利用可能" };
+  }
 
-  console.log("Google Analytics Status:", status);
-  return status;
+  return new Promise<{
+    measurementId: string;
+    measurementIdValid: boolean | "";
+    gtagLoaded: boolean;
+    dataLayerExists: boolean;
+    environment: string;
+  }>((resolve) => {
+    const status = {
+      measurementId: GA_MEASUREMENT_ID,
+      measurementIdValid:
+        GA_MEASUREMENT_ID && GA_MEASUREMENT_ID.startsWith("G-"),
+      gtagLoaded: typeof window !== "undefined" && !!window.gtag,
+      dataLayerExists: typeof window !== "undefined" && !!window.dataLayer,
+      environment: import.meta.env.MODE,
+    };
+
+    console.log("Google Analytics Status:", status);
+    resolve(status);
+  });
 };
 
-// デバッグ用：強制初期化確認
-export const debugGA = () => {
-  const status = checkGAStatus();
+// デバッグ用：強制初期化確認（開発環境限定）
+export const debugGA = async () => {
+  if (!import.meta.env.DEV) {
+    console.warn("debugGA: 開発環境でのみ利用可能");
+    return { error: "開発環境でのみ利用可能" };
+  }
+
+  const status = await checkGAStatus();
+
+  if ("error" in status) {
+    return status;
+  }
 
   if (status.gtagLoaded) {
     // テストイベント送信
@@ -227,8 +261,13 @@ export const debugGA = () => {
   return status;
 };
 
-// 🔧 追加: リアルタイム診断機能
+// 🔧 リアルタイム診断機能（開発環境限定）
 export const runGADiagnostics = () => {
+  if (!import.meta.env.DEV) {
+    console.warn("診断機能は開発環境でのみ利用可能");
+    return { error: "開発環境でのみ利用可能" };
+  }
+
   console.log("🔍 Google Analytics 診断開始...");
 
   const diagnostics = {
@@ -248,33 +287,22 @@ export const runGADiagnostics = () => {
     dataLayerExists:
       typeof window !== "undefined" && Array.isArray(window.dataLayer),
 
-    // ネットワーク接続チェック
+    // 軽量化: 重い計算を削除
     isOnline: navigator.onLine,
-    protocol: window.location.protocol,
-    httpsRequired:
-      window.location.protocol === "https:"
-        ? "✅ HTTPS"
-        : "⚠️ HTTP (本番では必須)",
-
-    // ブラウザ設定チェック
     cookiesEnabled: navigator.cookieEnabled,
-    doNotTrack: navigator.doNotTrack === "1" ? "⚠️ DNT有効" : "✅ 追跡許可",
 
-    // タイミング情報
+    // タイミング情報（軽量化）
     timestamp: new Date().toISOString(),
-    pageLoadTime: performance.now(),
   };
 
   console.table(diagnostics);
 
-  // 問題がある場合の推奨アクション
+  // 軽量化: 基本的な問題チェックのみ
   const issues = [];
   if (!diagnostics.measurementId) issues.push("❌ 測定IDが未設定");
   if (!diagnostics.gtagFunctionExists)
     issues.push("❌ gtag関数が読み込まれていません");
   if (!diagnostics.isOnline) issues.push("⚠️ オフライン状態");
-  if (diagnostics.doNotTrack === "⚠️ DNT有効")
-    issues.push("⚠️ Do Not Track設定が有効");
 
   if (issues.length > 0) {
     console.warn("🚨 検出された問題:", issues);
@@ -285,10 +313,16 @@ export const runGADiagnostics = () => {
   return diagnostics;
 };
 
-// 🧪 追加: 強制テストイベント送信
+// 🧪 強制テストイベント送信（開発環境限定・軽量化版）
 export const sendTestEvents = () => {
+  if (!import.meta.env.DEV) {
+    console.warn("テストイベント機能は開発環境でのみ利用可能");
+    return;
+  }
+
   console.log("🧪 テストイベント送信開始...");
 
+  // 軽量化: 必要最小限のテストイベントのみ
   const testEvents = [
     { name: "test_app_start", data: { test_type: "initialization" } },
     {
@@ -296,16 +330,8 @@ export const sendTestEvents = () => {
       data: { search_term: "テスト検索", result_count: 5 },
     },
     {
-      name: "test_filter",
-      data: { filter_type: "cuisine", filter_value: "寿司" },
-    },
-    {
       name: "test_restaurant_click",
       data: { restaurant_id: "test-001", restaurant_name: "テスト店舗" },
-    },
-    {
-      name: "test_map_interaction",
-      data: { interaction_type: "marker_click" },
     },
   ];
 
@@ -316,7 +342,7 @@ export const sendTestEvents = () => {
         `✅ テストイベント ${index + 1}/${testEvents.length} 送信:`,
         event.name
       );
-    }, index * 1000); // 1秒間隔で送信
+    }, index * 500); // 0.5秒間隔で送信（軽量化）
   });
 
   console.log(
@@ -324,13 +350,23 @@ export const sendTestEvents = () => {
   );
 };
 
-// 🔄 追加: 自動診断・修復機能
+// 🔄 自動診断・修復機能（開発環境限定・軽量化版）
 export const autoFixGA = () => {
+  if (!import.meta.env.DEV) {
+    console.warn("自動修復機能は開発環境でのみ利用可能");
+    return { error: "開発環境でのみ利用可能" };
+  }
+
   console.log("🔧 Google Analytics 自動修復開始...");
 
   const diagnostics = runGADiagnostics();
 
-  // 問題の自動修復を試行
+  // エラーハンドリング
+  if ("error" in diagnostics) {
+    return diagnostics;
+  }
+
+  // 軽量化: 基本的な問題の自動修復のみ
   if (!diagnostics.gtagFunctionExists && diagnostics.measurementId) {
     console.log("🔧 gtag関数が存在しません。再初期化を試行...");
 
@@ -344,8 +380,13 @@ export const autoFixGA = () => {
 
     // 再初期化
     setTimeout(() => {
-      initGA();
-      console.log("🔄 Google Analytics 再初期化完了");
+      void initGA()
+        .then(() => {
+          console.log("🔄 Google Analytics 再初期化完了");
+        })
+        .catch((error) => {
+          console.error("🔄 Google Analytics 再初期化失敗:", error);
+        });
     }, 1000);
   }
 
@@ -375,10 +416,6 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
   };
 
   console.log(
-    "🛠️ Google Analytics デバッグツールを window.gaDebug で利用可能です"
+    "🛠️ 開発環境: window.gaDebug でGoogle Analyticsデバッグ機能を利用可能"
   );
-  console.log("使用例:");
-  console.log("  window.gaDebug.runDiagnostics() - 診断実行");
-  console.log("  window.gaDebug.sendTestEvents() - テストイベント送信");
-  console.log("  window.gaDebug.autoFix() - 自動修復実行");
 }

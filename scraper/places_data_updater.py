@@ -16,9 +16,12 @@ SERVICE_ACCOUNT_FILE_PATH = os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH',
 SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 PLACES_API_KEY = os.environ.get('PLACES_API_KEY')
 
-# APIリクエスト間の待機時間（秒）
-API_REQUEST_DELAY = 1
+# APIリクエスト間の待機時間（秒）- 環境変数で調整可能
+API_REQUEST_DELAY = float(os.environ.get('API_DELAY', '1'))
 SHEETS_API_DELAY = 1.5
+
+# 更新対象データの指定（コスト最適化）
+TARGET_DATA = os.environ.get('TARGET_DATA', 'all')  # 'all', 'restaurants', 'parkings', 'toilets'
 
 # 佐渡島の境界ボックス
 SADO_BOUNDS = {
@@ -493,6 +496,9 @@ def main():
         print("Error: PLACES_API_KEY or SPREADSHEET_ID not set")
         return
     
+    print(f"🎯 Target data: {TARGET_DATA}")
+    print(f"⏱️ API delay: {API_REQUEST_DELAY}s")
+    
     # Google Sheets認証
     gc = authenticate_google_sheets()
     if not gc:
@@ -504,12 +510,28 @@ def main():
         print(f"スプレッドシートオープンエラー: {e}")
         return
     
-    # クエリファイル読み込み
+    # クエリファイル読み込み（TARGET_DATAに基づく選択的処理）
     query_files = {
         '飲食店': 'restaurants.txt',
         '公衆トイレ': 'toilets.txt', 
         '駐車場': 'parkings.txt'
     }
+    
+    # TARGET_DATAによる絞り込み
+    if TARGET_DATA != 'all':
+        category_mapping = {
+            'restaurants': '飲食店',
+            'toilets': '公衆トイレ', 
+            'parkings': '駐車場'
+        }
+        
+        if TARGET_DATA in category_mapping:
+            category = category_mapping[TARGET_DATA]
+            query_files = {category: query_files[category]}
+            print(f"📝 Processing only: {category}")
+        else:
+            print(f"❌ Unknown target data: {TARGET_DATA}")
+            return
     
     all_not_found = []
     total_api_calls = 0
@@ -561,8 +583,14 @@ def main():
         update_not_found_worksheet(spreadsheet, all_not_found)
         print(f"\n{len(all_not_found)} queries had no results")
     
-    print(f"\nProcess completed!")
-    print(f"Total API calls made: approximately {total_api_calls}")
+    # コスト計算表示
+    cost_per_request = 0.017  # Text Search (New) の料金 (USD)
+    estimated_cost = total_api_calls * cost_per_request
+    
+    print(f"\n✅ Process completed!")
+    print(f"📊 Total API calls made: approximately {total_api_calls}")
+    print(f"💰 Estimated cost: ${estimated_cost:.3f} USD (${cost_per_request} per request)")
+    print(f"📅 Target data: {TARGET_DATA}")
 
 if __name__ == '__main__':
     main()

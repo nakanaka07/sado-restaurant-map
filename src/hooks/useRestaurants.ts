@@ -1,10 +1,22 @@
 /**
  * 佐渡飲食店データ管理Hook
  * React 19 + Concurrent Features + TypeScript 5.7対応
+ * Google Sheets API統合版
  */
 
-import { useState, useCallback, useMemo, startTransition } from "react";
+import {
+  useState,
+  useCallback,
+  useMemo,
+  startTransition,
+  useEffect,
+} from "react";
 import type { Restaurant, MapFilters, SortOrder, AsyncState } from "@/types";
+import {
+  fetchRestaurantsFromSheets,
+  checkDataFreshness,
+  SheetsApiError,
+} from "@/services/sheetsService";
 
 // モックデータ（開発用）
 const MOCK_RESTAURANTS: readonly Restaurant[] = [
@@ -182,31 +194,80 @@ export function useRestaurants(
     setSelectedRestaurant(restaurant);
   }, []);
 
-  // データ更新（将来的にAPI連携）
+  // データ更新（Google Sheets API連携）
   const refreshData = useCallback(async () => {
     setAsyncState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      // 将来的にGoogle Sheets APIやその他のAPIから取得
-      // const data = await fetchRestaurantData()
-      await new Promise((resolve) => setTimeout(resolve, 500)); // モック遅延
+      // データ更新チェック
+      const { needsUpdate } = await checkDataFreshness();
 
-      setRestaurants(MOCK_RESTAURANTS);
+      // キャッシュされたデータがある場合はそれを使用
+      const cachedData = localStorage.getItem("restaurantData");
+      if (!needsUpdate && cachedData) {
+        const parsedData = JSON.parse(cachedData) as Restaurant[];
+        setRestaurants(parsedData);
+        setAsyncState({
+          data: parsedData,
+          loading: false,
+          error: null,
+        });
+        return;
+      }
+
+      // Google Sheets APIからデータ取得
+      const data = await fetchRestaurantsFromSheets();
+
+      // データをキャッシュ
+      localStorage.setItem("restaurantData", JSON.stringify(data));
+      localStorage.setItem("restaurantDataTimestamp", new Date().toISOString());
+
+      setRestaurants(data);
       setAsyncState({
-        data: MOCK_RESTAURANTS,
+        data,
         loading: false,
         error: null,
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "データの取得に失敗しました";
-      setAsyncState((prev) => ({
-        ...prev,
+      let errorMessage = "データの取得に失敗しました";
+
+      if (error instanceof SheetsApiError) {
+        errorMessage = `Google Sheets API エラー: ${error.message}`;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      // フォールバック: キャッシュされたデータを使用
+      const cachedData = localStorage.getItem("restaurantData");
+      if (cachedData) {
+        try {
+          const parsedData = JSON.parse(cachedData) as Restaurant[];
+          setRestaurants(parsedData);
+          setAsyncState({
+            data: parsedData,
+            loading: false,
+            error: `${errorMessage}（キャッシュデータを使用中）`,
+          });
+          return;
+        } catch {
+          // キャッシュデータも無効な場合はモックデータを使用
+        }
+      }
+
+      // 最終フォールバック: モックデータ
+      setRestaurants(MOCK_RESTAURANTS);
+      setAsyncState({
+        data: MOCK_RESTAURANTS,
         loading: false,
-        error: errorMessage,
-      }));
+        error: `${errorMessage}（サンプルデータを表示中）`,
+      });
     }
   }, []);
+
+  // 初回データ読み込み
+  useEffect(() => {
+    void refreshData();
+  }, [refreshData]);
 
   return {
     restaurants,
