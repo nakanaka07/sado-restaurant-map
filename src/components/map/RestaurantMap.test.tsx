@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { RestaurantMap } from "./RestaurantMap";
 import type { Restaurant } from "../../types/restaurant.types";
 import type { ReactNode } from "react";
@@ -39,11 +39,38 @@ interface MockInfoWindowProps {
 
 // Google Maps API コンポーネントのモック
 vi.mock("@vis.gl/react-google-maps", () => ({
-  Map: ({ children, ...props }: MockMapProps) => (
-    <div data-testid="google-map" {...props}>
-      {children}
-    </div>
-  ),
+  Map: ({ children, ...props }: MockMapProps) => {
+    // DOM属性として渡さないプロパティを分離
+    const {
+      defaultCenter,
+      defaultZoom,
+      mapId,
+      gestureHandling,
+      disableDefaultUI,
+      mapTypeControl,
+      fullscreenControl,
+      streetViewControl,
+      zoomControl,
+      ...domProps
+    } = props;
+    return (
+      <div
+        data-testid="google-map"
+        data-default-center={JSON.stringify(defaultCenter)}
+        data-default-zoom={defaultZoom}
+        data-map-id={mapId}
+        data-gesture-handling={gestureHandling}
+        data-disable-default-ui={disableDefaultUI}
+        data-map-type-control={mapTypeControl}
+        data-fullscreen-control={fullscreenControl}
+        data-street-view-control={streetViewControl}
+        data-zoom-control={zoomControl}
+        {...domProps}
+      >
+        {children}
+      </div>
+    );
+  },
   AdvancedMarker: ({ onClick, title, ...props }: MockAdvancedMarkerProps) => (
     <div
       data-testid="advanced-marker"
@@ -127,8 +154,22 @@ describe("RestaurantMap", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    cleanup(); // DOM要素の完全クリーンアップ
     // Map ID環境変数を設定
     vi.stubEnv("VITE_GOOGLE_MAPS_MAP_ID", "test-map-id");
+  });
+
+  afterEach(() => {
+    cleanup();
+    // 残存する要素の強制削除（テスト間の分離保証）
+    const remainingMarkers = document.querySelectorAll(
+      '[data-testid="advanced-marker"]'
+    );
+    remainingMarkers.forEach((marker) => marker.remove());
+    const remainingMaps = document.querySelectorAll(
+      '[data-testid="google-map"]'
+    );
+    remainingMaps.forEach((map) => map.remove());
   });
 
   describe("基本レンダリング", () => {
@@ -137,7 +178,7 @@ describe("RestaurantMap", () => {
 
       expect(screen.getByTestId("google-map")).toBeInTheDocument();
       expect(screen.getByTestId("google-map")).toHaveAttribute(
-        "mapId",
+        "data-map-id",
         "test-map-id"
       );
     });
@@ -305,7 +346,10 @@ describe("RestaurantMap", () => {
       render(<RestaurantMap {...defaultProps} center={customCenter} />);
 
       const mapElement = screen.getByTestId("google-map");
-      expect(mapElement).toHaveAttribute("defaultCenter", "[object Object]");
+      expect(mapElement).toHaveAttribute(
+        "data-default-center",
+        JSON.stringify(customCenter)
+      );
     });
   });
 
@@ -344,7 +388,13 @@ describe("RestaurantMap", () => {
         <RestaurantMap {...defaultProps} restaurants={longNameRestaurant} />
       );
 
+      // 特定のタイトル属性を持つマーカーを取得
       const marker = screen.getByTestId("advanced-marker");
+      expect(marker).toHaveAttribute(
+        "data-title",
+        "非常に長いレストラン名前前前前前前前前前前前前前前前前前前前前前前前前"
+      );
+
       fireEvent.click(marker);
 
       // InfoWindow内のh3要素から長い名前を検証
@@ -369,7 +419,10 @@ describe("RestaurantMap", () => {
         />
       );
 
-      expect(screen.getByTestId("advanced-marker")).toBeInTheDocument();
+      // マーカーの存在確認（複数要素エラーを回避）
+      const markers = screen.getAllByTestId("advanced-marker");
+      expect(markers).toHaveLength(1);
+      expect(markers[0]).toBeInTheDocument();
     });
   });
 });

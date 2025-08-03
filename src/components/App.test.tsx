@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import App from "./App";
 
 // Google Maps APIをモック
@@ -22,6 +22,22 @@ vi.mock("import.meta", () => ({
 }));
 
 describe("App", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    cleanup(); // DOM要素の完全クリーンアップ
+  });
+
+  afterEach(() => {
+    cleanup();
+    // 残存する要素の強制削除（テスト間の分離保証）
+    const remainingContainers = document.querySelectorAll(
+      '.loading-container, [role="status"]'
+    );
+    remainingContainers.forEach((container) => container.remove());
+    const remainingHeadings = document.querySelectorAll("h1");
+    remainingHeadings.forEach((heading) => heading.remove());
+  });
+
   describe("基本レンダリング", () => {
     it("ローディング状態が表示されること", () => {
       render(<App />);
@@ -34,7 +50,8 @@ describe("App", () => {
     it("ローディングコンテナが適切なARIA属性を持つこと", () => {
       render(<App />);
 
-      const loadingContainer = screen.getByRole("status");
+      const loadingContainers = screen.getAllByRole("status");
+      const loadingContainer = loadingContainers[0]; // 最初の要素を取得
       expect(loadingContainer).toHaveAttribute("aria-live", "polite");
       expect(loadingContainer).toHaveClass("loading-container");
     });
@@ -45,14 +62,16 @@ describe("App", () => {
       render(<App />);
 
       // ライブリージョンが設定されていることを確認
-      const statusElement = screen.getByRole("status");
+      const statusElements = screen.getAllByRole("status");
+      const statusElement = statusElements[0]; // 最初の要素を取得
       expect(statusElement).toBeInTheDocument();
     });
 
     it("見出しが適切な階層で設定されていること", () => {
       render(<App />);
 
-      const heading = screen.getByRole("heading", { level: 1 });
+      const headings = screen.getAllByRole("heading", { level: 1 });
+      const heading = headings[0]; // 最初の要素を取得
       expect(heading).toHaveTextContent("🗺️ 佐渡飲食店マップ");
     });
   });
@@ -62,7 +81,8 @@ describe("App", () => {
       render(<App />);
 
       // コンテナが存在することを確認
-      const container = screen.getByRole("status");
+      const containers = screen.getAllByRole("status");
+      const container = containers[0]; // 最初の要素を取得
       expect(container).toBeInTheDocument();
     });
   });

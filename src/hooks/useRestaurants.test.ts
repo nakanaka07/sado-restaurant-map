@@ -1,10 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useRestaurants } from "../hooks/useRestaurants";
 
 describe("useRestaurants Hook", () => {
-  it("should initialize with mock data", () => {
+  it("should initialize with mock data", async () => {
     const { result } = renderHook(() => useRestaurants());
+
+    // 非同期処理の完了を待機
+    await waitFor(() => {
+      expect(result.current.asyncState.loading).toBe(false);
+    });
 
     expect(result.current.restaurants).toHaveLength(4);
     expect(result.current.filteredRestaurants).toHaveLength(4);
