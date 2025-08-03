@@ -168,6 +168,35 @@ pnpm dev
 
 詳細な設定手順は [`docs/sheets-integration-setup.md`](./docs/sheets-integration-setup.md) を参照してください。
 
+### **GitHub Actions 自動データ更新**
+
+プロジェクトには自動データ更新機能が組み込まれています。
+
+#### **GitHub Secrets設定**
+
+リポジトリの設定で以下のSecretsを設定してください：
+
+```text
+PLACES_API_KEY          # Google Places API キー
+SPREADSHEET_ID          # Google Sheets スプレッドシートID  
+GOOGLE_SERVICE_ACCOUNT_KEY  # サービスアカウントJSONキー（全体）
+GOOGLE_MAPS_API_KEY     # フロントエンド用Google Maps APIキー
+GOOGLE_MAPS_MAP_ID      # Google Maps マップID（オプション）
+GA_MEASUREMENT_ID       # Google Analytics測定ID（オプション）
+```
+
+#### **自動実行スケジュール**
+
+- **定期実行**: 毎月1日 11:00 JST（API料金管理のため月1回）
+- **手動実行**: GitHub Actions タブから「Run workflow」で実行可能
+
+#### **実行オプション**
+
+- `all`: 全データ更新（飲食店・駐車場・公衆トイレ）
+- `restaurants`: 飲食店のみ
+- `parkings`: 駐車場のみ  
+- `toilets`: 公衆トイレのみ
+
 ### **プロジェクト構造**
 
 ```text

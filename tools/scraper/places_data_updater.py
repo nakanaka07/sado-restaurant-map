@@ -6,15 +6,25 @@ import os
 import json
 from dotenv import load_dotenv
 
-# .envファイルから環境変数を読み込む
-load_dotenv()
+# .envファイルから環境変数を読み込む（ローカル開発用）
+if os.path.exists('.env'):
+    load_dotenv()
 
 # --- 設定項目 ---
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-SERVICE_ACCOUNT_FILE_PATH = os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', 
-                                           os.path.join(SCRIPT_DIR, 'your-service-account-key.json'))
-SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
+
+# GitHub Actions環境での環境変数読み込み
 PLACES_API_KEY = os.environ.get('PLACES_API_KEY')
+SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
+
+# サービスアカウントキーのパス設定
+if 'GOOGLE_SERVICE_ACCOUNT_KEY' in os.environ:
+    # GitHub Actions: 環境変数からJSONキーを取得
+    SERVICE_ACCOUNT_FILE_PATH = os.path.join(SCRIPT_DIR, 'your-service-account-key.json')
+else:
+    # ローカル開発: 既存のJSONファイルを使用
+    SERVICE_ACCOUNT_FILE_PATH = os.environ.get('GOOGLE_SERVICE_ACCOUNT_PATH', 
+                                               os.path.join(SCRIPT_DIR, 'your-service-account-key.json'))
 
 # APIリクエスト間の待機時間（秒）- 環境変数で調整可能
 API_REQUEST_DELAY = float(os.environ.get('API_DELAY', '1'))

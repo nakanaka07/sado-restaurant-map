@@ -36,10 +36,29 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r scraper/requirements.txt
+          pip install -r tools/scraper/requirements.txt
+
+      - name: Verify environment setup
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Tools/scraper directory:"
+          ls -la tools/scraper/
+          echo "Environment variables (sanitized):"
+          echo "PLACES_API_KEY: ${PLACES_API_KEY:+SET}"
+          echo "SPREADSHEET_ID: ${SPREADSHEET_ID:+SET}"
+          echo "GOOGLE_SERVICE_ACCOUNT_KEY: ${GOOGLE_SERVICE_ACCOUNT_KEY:+SET}"
+
+      - name: Setup service account key
+        run: |
+          echo "$GOOGLE_SERVICE_ACCOUNT_KEY" > tools/scraper/your-service-account-key.json
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
 
       - name: Run scraper
-        run: python scraper/places_data_updater.py
+        run: python tools/scraper/places_data_updater.py
+        working-directory: .
         env:
           # GitHub Secretsから環境変数を渡す
           PLACES_API_KEY: ${{ secrets.PLACES_API_KEY }}
