@@ -4,8 +4,8 @@ name: Update Sado Restaurant Data
 
 on:
   # 月1回の自動実行（毎月1日の02:00 UTC = 11:00 JST）
-  schedule:
-    - cron: "0 2 1 * *"
+  # schedule:
+  #   - cron: "0 2 1 * *"
   # 手動実行
   workflow_dispatch:
     inputs:

@@ -3,7 +3,7 @@
 
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("dev", "update-test", "update-all", "restaurants", "parkings", "toilets", "status", "help")]
+    [ValidateSet("dev", "update-test", "update-all", "restaurants", "parkings", "toilets", "fix-districts", "status", "help")]
     [string]$Action = "help",
     
     [switch]$SkipConfirm,
@@ -12,7 +12,7 @@ param(
 
 # 設定
 $VENV_PATH = ".\.venv\Scripts\Activate.ps1"
-$SCRAPER_PATH = "scraper\places_data_updater.py"
+$SCRAPER_PATH = "tools\scraper\places_data_updater.py"
 
 # 色付きログ関数
 function Write-Log {
@@ -42,6 +42,8 @@ function Show-Help {
     Write-Log "  restaurants        飲食店データのみ更新（料金: ~$4）" "Yellow"
     Write-Log "  parkings           駐車場データのみ更新（料金: ~$1-2）" "Yellow"
     Write-Log "  toilets            公衆トイレデータのみ更新（料金: ~$1-2）" "Yellow"
+    Write-Log ""
+    Write-Log "  fix-districts      「その他」地区データの再分類・修正（料金: $0）" "Cyan"
     Write-Log ""
     Write-Log "📊 推奨運用パターン:" "Blue"
     Write-Log ""
@@ -249,6 +251,44 @@ switch ($Action) {
         & $VENV_PATH
         $env:TARGET_DATA = "toilets"
         python $SCRAPER_PATH
+    }
+    
+    "fix-districts" {
+        Write-Info "「その他」地区データの再分類を実行します（API料金なし）"
+        
+        if (-not (Test-Environment)) { exit 1 }
+        
+        Write-Log "🔧 既存データの地区分類を最新の基準で再判定します" "Blue"
+        Write-Log "   - 佐渡市公式サイトの住所表記に基づく更新" "Gray"
+        Write-Log "   - API呼び出しなし、料金発生なし" "Gray"
+        
+        if (-not $SkipConfirm) {
+            $confirm = Read-Host "実行しますか？ (y/N)"
+            if ($confirm -ne "y" -and $confirm -ne "Y") {
+                Write-Warning "実行をキャンセルしました"
+                exit 0
+            }
+        }
+        
+        # Python環境アクティベート & 実行
+        & $VENV_PATH
+        
+        $districtScript = "tools\scraper\update_district_classification.py"
+        
+        if (Test-Path $districtScript) {
+            python $districtScript
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Success "地区分類更新完了"
+                Write-Info "Google Sheetsで結果を確認してください"
+            }
+            else {
+                Write-Error "地区分類更新に失敗しました"
+            }
+        }
+        else {
+            Write-Error "地区分類更新スクリプトが見つかりません: $districtScript"
+        }
     }
     
     default {

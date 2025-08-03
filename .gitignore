@@ -38,7 +38,11 @@ coverage
 *.sw?
 
 # Python tools specific
-tools/scraper/.venv/
+# Python Virtual Environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
 tools/scraper/__pycache__/
 tools/scraper/*.pyc
 tools/scraper/*.json
