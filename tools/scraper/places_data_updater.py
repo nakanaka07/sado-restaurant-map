@@ -95,7 +95,7 @@ SADO_DISTRICTS = {
     '佐和田地区': [
         '佐和田', '沢根', '窪田', '中原', '河原田', '八幡', '八幡新町', '八幡町',
         '河原田本町', '河原田諏訪町', '鍛冶町', '石田', '上長木', '下長木', '長木',
-        '上矢馳', '二宮', '市野沢', '真光寺', '山田', '青野', '東大通', '大通', '８２９',
+        '上矢馳', '二宮', '市野沢', '真光寺', '山田', '青野', '東大通',
         '沢根五十里', '沢根篭町', '沢根炭屋町', '沢根町'
     ],
     '金井地区': [
@@ -177,23 +177,12 @@ CATEGORIES = {
 }
 
 # スプレッドシートヘッダー（最適化版）
-HEADERS = {
-    "飲食店": [
-        "プレイスID", "店舗名", "住所", "緯度", "経度", 
-        "カテゴリ", "カテゴリ詳細", "電話番号", "営業時間", 
-        "評価", "レビュー数", "地区", "GoogleマップURL", "最終更新日時"
-    ],
-    "駐車場": [
-        "プレイスID", "駐車場名", "所在地", "緯度", "経度",
-        "カテゴリ", "カテゴリ詳細", "地区", "GoogleマップURL", "最終更新日時"
-    ],
-    "公衆トイレ": [
-        "プレイスID", "施設名", "所在地", "緯度", "経度", 
-        "カテゴリ", "カテゴリ詳細", "地区", "GoogleマップURL", "最終更新日時"
-    ]
-}
+# 統一ヘッダー定義をインポート
+from config.headers import get_unified_header, get_not_found_header, UNIFIED_HEADERS
 
-NOT_FOUND_HEADERS = ["検索語", "実際の検索語", "検索日", "試行回数", "カテゴリ", "スキップ理由", "改善提案"]
+# 後方互換性のため、従来の変数名も保持
+HEADERS = UNIFIED_HEADERS
+NOT_FOUND_HEADERS = get_not_found_header()
 
 def normalize_address(address):
     """佐渡の住所を正規化"""
@@ -403,6 +392,65 @@ def search_places_new_api(text_query, category):
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}")
         return 'REQUEST_FAILED', []
+
+def get_place_details_from_cid(cid_url, category):
+    """
+    CID URLからPlace詳細を直接取得
+    
+    Args:
+        cid_url: Google Maps CID URL (例: https://maps.google.com/place?cid=1234567890)
+        category: カテゴリ名
+    
+    Returns:
+        tuple: (status, places_list)
+    """
+    if not PLACES_API_KEY:
+        print("PLACES_API_KEYが設定されていません。")
+        return 'SKIPPED', []
+    
+    # CIDをPlace IDに変換（簡略化：CIDをそのままplace_idとして使用）
+    # 実際のCID->Place ID変換は複雑なため、ここではCIDを直接使用
+    import re
+    cid_match = re.search(r'cid=(\d+)', cid_url)
+    if not cid_match:
+        print(f"❌ CID URLの形式が不正: {cid_url}")
+        return 'INVALID_CID', []
+    
+    cid = cid_match.group(1)
+    
+    # CIDからPlace IDを取得する簡易的な方法
+    # Google Maps CIDはそのままPlace IDとして使えない場合があるため、
+    # 実際にはText Searchを使用してCIDに対応するPlaceを検索
+    try:
+        # CIDを使ったURL検索（代替手法）
+        # Note: CID直接検索は Places API (New) では非対応のため、
+        # 将来的にはLegacy Places APIまたは別の手法が必要
+        print(f"🔍 CID URL検索: {cid}")
+        return search_places_new_api(f"place_id:{cid}", category)
+        
+    except Exception as e:
+        print(f"❌ CID検索エラー: {e}")
+        return 'CID_SEARCH_FAILED', []
+
+def process_query(query, category):
+    """
+    クエリを処理（テキスト検索またはCID URL）
+    
+    Args:
+        query: 検索クエリ（店舗名またはCID URL）
+        category: カテゴリ名
+    
+    Returns:
+        tuple: (status, places_list, processed_query)
+    """
+    if 'cid=' in query:
+        # CID URL の場合
+        print(f"🆔 CID URL処理: {query}")
+        status, places = get_place_details_from_cid(query, category)
+        return status, places, query
+    else:
+        # テキスト検索の場合（従来通り）
+        return search_places_multi_pattern(query, category)
 
 def determine_category_from_place(place):
     """場所データからカテゴリを判定（改良版）"""
@@ -753,16 +801,38 @@ def authenticate_google_sheets():
         return None
 
 def load_queries_from_file(filename):
-    """ファイルからクエリを読み込み"""
+    """
+    ファイルからクエリを読み込み（URL対応版）
+    
+    対応形式:
+    - 店舗名（テキスト）
+    - Google Maps URL (cid=XXXXX)
+    """
     file_path = os.path.join(SCRIPT_DIR, filename)
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            queries = [line.strip() for line in f 
-                      if line.strip() and not line.strip().startswith('#')]
-        print(f"Loaded {len(queries)} queries from {filename}")
+            queries = []
+            for line in f:
+                line = line.strip()
+                # コメント行と空行をスキップ
+                if not line or line.startswith('#'):
+                    continue
+                
+                # URL の場合はコメント部分を除去
+                if 'cid=' in line and '#' in line:
+                    url_part = line.split('#')[0].strip()
+                    queries.append(url_part)
+                else:
+                    queries.append(line)
+        
+        # URL と テキストクエリの統計
+        url_count = sum(1 for q in queries if 'cid=' in q)
+        text_count = len(queries) - url_count
+        
+        print(f"📊 {filename}から読み込み: 総計{len(queries)}件 (URL: {url_count}件, テキスト: {text_count}件)")
         return queries
     except FileNotFoundError:
-        print(f"Warning: {filename} not found")
+        print(f"⚠️ ファイルが見つかりません: {filename}")
         return []
 
 def main():
@@ -787,9 +857,9 @@ def main():
     
     # クエリファイル読み込み（TARGET_DATAに基づく選択的処理）
     query_files = {
-        '飲食店': 'restaurants.txt',
-        '公衆トイレ': 'toilets.txt', 
-        '駐車場': 'parkings.txt'
+        '飲食店': 'data/urls/restaurants_merged.txt',  # 🆕 統合ファイルを使用
+        '公衆トイレ': 'data/queries/toilets.txt', 
+        '駐車場': 'data/queries/parkings.txt'
     }
     
     # TARGET_DATAによる絞り込み
@@ -823,7 +893,7 @@ def main():
         for i, query in enumerate(queries, 1):
             print(f"[{i}/{len(queries)}] Processing: {query}")
             
-            status, places, search_query = search_places_multi_pattern(query, category)
+            status, places, search_query = process_query(query, category)
             
             if status == 'SKIPPED':
                 # スキップされたクエリの処理

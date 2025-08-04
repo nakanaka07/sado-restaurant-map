@@ -1,4 +1,94 @@
-# --- 両津・相川地区の店名での検索 ---
+# --- 佐渡飲食店 統合クエリファイル ---
+# 店舗名またはGoogle Maps URL (cid=XXXXX) を記述可能
+# 作成日時: 2025年08月04日 10:14:17
+# 元ファイル: restaurants.txt (389件), restaurants_urls.txt (75件)
+
+# ========================================
+# 高精度検索: Google Maps URL (CID)
+# ========================================
+# これらのURLは直接Place詳細を取得可能（API効率◎）
+
+https://maps.google.com/place?cid=9867684745575651684  # ma_ma
+https://maps.google.com/place?cid=8416518954523348407  # ショッピングプラザ キング 両津店
+https://maps.google.com/place?cid=7946522700936946412  # 中沢仲助商店
+https://maps.google.com/place?cid=16203117374242340545  # 田中餅店・菓子店
+https://maps.google.com/place?cid=12219298688616195805  # ハーティウッズ
+https://maps.google.com/place?cid=17547779949426764979  # CHERRY（チェリー）
+https://maps.google.com/place?cid=4975264153166274067  # 大阪屋 両津店
+https://maps.google.com/place?cid=11284644509976716517  # はなしこう
+https://maps.google.com/place?cid=5696967649906802702  # 佐渡アウトドアベース
+https://maps.google.com/place?cid=7675901652079700357  # トロピカーナ
+https://maps.google.com/place?cid=16563008351093339217  # ショッピングプラザ キング 佐渡サンモールタウン店
+https://maps.google.com/place?cid=7243976830639146151  # あるこーいりす
+https://maps.google.com/place?cid=12815542749554522048  # maSanicoffee（マサニコーヒー）
+https://maps.google.com/place?cid=2113117162090485176  # 珈琲 花園
+https://maps.google.com/place?cid=8189134043102142435  # 茶房 げんざ
+https://maps.google.com/place?cid=15040242976549411046  # かふぇすみよし
+https://maps.google.com/place?cid=9313372549242606025  # caMoco cafe 湖ASOBi
+https://maps.google.com/place?cid=8093071406816666586  # アートサロン和（やわらぎ）
+https://maps.google.com/place?cid=10381242734838423418  # 佐渡発酵 株式会社
+https://maps.google.com/place?cid=6913947945479196255  # エーコープ 佐渡高千店
+https://maps.google.com/place?cid=6913948086244460505  # 金子菓子店
+https://maps.google.com/place?cid=6913947919292979393  # 高千カフェ
+https://maps.google.com/place?cid=6913981952867347115  # ガシマシネマ
+https://maps.google.com/place?cid=6913981115801172979  # cafe 丘の上の雲の向こう
+https://maps.google.com/place?cid=6913981500084383215  # ショッピングプラザ キング 相川店
+https://maps.google.com/place?cid=6913981502395034617  # 珈琲の家 カフェ・ド・カトレア
+https://maps.google.com/place?cid=6913981474149542917  # コロンビア
+https://maps.google.com/place?cid=6913983149357139885  # こども服 oto／Mr.Tono café
+https://maps.google.com/place?cid=6913982878071870005  # ローソン 佐渡中興店
+https://maps.google.com/place?cid=6913984179823924709  # 森のコーヒー屋
+https://maps.google.com/place?cid=6913983103325911859  # 二宮萬友荘 ばんゆうそう
+https://maps.google.com/place?cid=6913983144752637013  # ドッグツアーズtarokich（ドッグラン＆カフェ）
+https://maps.google.com/place?cid=6913980936987019173  # 韓国家庭料理アリラン
+https://maps.google.com/place?cid=6913980905199022717  # 御菓子処しまや
+https://maps.google.com/place?cid=6913982732677028553  # ケーキハウスバニラ
+https://maps.google.com/place?cid=6913981972156174519  # 池田菓子舗
+https://maps.google.com/place?cid=6913982733406574947  # ショッピングプラザ キング 東大通店
+https://maps.google.com/place?cid=6913980905312599617  # 福ふく食堂
+https://maps.google.com/place?cid=6913980903731832617  # 喫茶デイリー
+https://maps.google.com/place?cid=6913979811406861117  # 喜昇堂パン工房・ピュイダムール
+https://maps.google.com/place?cid=6913979828994085695  # モンブラン
+https://maps.google.com/place?cid=6913979873237127101  # アンブレラ
+https://maps.google.com/place?cid=6913979830037587247  # ラブマーケットカフェ
+https://maps.google.com/place?cid=6913979868782226933  # コーヒーハウスらるご
+https://maps.google.com/place?cid=6913981908784112893  # MERROWS SADO（メローズ サド）
+https://maps.google.com/place?cid=6913981688363819037  # へにゃもにゃ
+https://maps.google.com/place?cid=6913973207866834497  # トキのもり売店
+https://maps.google.com/place?cid=6913975284027964371  # トキのむらフード
+https://maps.google.com/place?cid=6913977267957859687  # 新穂青木おやつ店
+https://maps.google.com/place?cid=6913976489241670165  # 島の駅 佐渡特選
+https://maps.google.com/place?cid=6913978959825061575  # 詩茶香愛茶華（しっちゃかめっちゃか）
+https://maps.google.com/place?cid=6913977933839618213  # ガレージカフェ レンスポルト
+https://maps.google.com/place?cid=6913977936291037183  # くりくりや
+https://maps.google.com/place?cid=6913979512325461029  # わたぼうし
+https://maps.google.com/place?cid=6913978200215862969  # (有)真野観光センター
+https://maps.google.com/place?cid=6913979118385188479  # Crescentmoon/KITCHENしろ
+https://maps.google.com/place?cid=6914295577883137615  # 学校蔵Cafe
+https://maps.google.com/place?cid=6913977582607772881  # 馬川亭 ものづくりの拠点
+https://maps.google.com/place?cid=6913976507449922811  # Comolaine コモレーヌ
+https://maps.google.com/place?cid=6913976507501177437  # 犬と暮らす小さなカフェ
+https://maps.google.com/place?cid=6913977789512177443  # さっこりＨＯＵＳＥ三の宮
+https://maps.google.com/place?cid=6914293522338775499  # ＪＡ佐渡 Ａコープ羽茂店
+https://maps.google.com/place?cid=6914300016541321241  # スーパー たんぽぽ
+https://maps.google.com/place?cid=6914300009693156361  # 高津屋庄平
+https://maps.google.com/place?cid=6914299914753530037  # 喜八屋ゴローカフェ
+https://maps.google.com/place?cid=6914299771380643373  # Kaffa 佐渡（カファ さど）
+https://maps.google.com/place?cid=6914300006171903831  # カフェ日和山・南書店
+https://maps.google.com/place?cid=6914300033322276827  # 山本屋みやげ店（みやげ店のみ営業）
+https://maps.google.com/place?cid=6914322655715661737  # はまのかふぇ CoMaDo
+https://maps.google.com/place?cid=6914297246595198857  # エーコープ 佐渡赤泊店
+https://maps.google.com/place?cid=6914297252046001423  # （株）北雪酒造
+https://maps.google.com/place?cid=6914296776685440387  # 後藤ブロイラー
+https://maps.google.com/place?cid=6913972068582192307  # Club Ray's
+https://maps.google.com/place?cid=6913979913795386987  # ＣｏＣｏカラオケスタジオ
+https://maps.google.com/place?cid=6913977191111578245  # 喫茶 スナック花音
+
+# ========================================
+# テキスト検索: 店舗名
+# ========================================
+# Places API のテキスト検索で処理
+
 大野亀ロッジ
 メレパレカイコ
 うんすけ
@@ -7,32 +97,21 @@
 エーコープ 佐渡加茂店
 夢喰の家
 みかわmikawa
-ma_ma
 割烹ふじはら
 リッチ
-ma_ma restaurant 佐渡
-カフェ バー ヘブンズキッチン
-更科
 御食事処 満るか
-ショッピングプラザ キング 両津店
 よし坊
-中沢仲助商店
-田中餅店 菓子店
-ハーティウッズ
 おんでこ
 真夜
 エリーゼ
-cherry
 ラーメン よつば
 酔連
-佐渡喜茶飯店 ランプのあるカフェ
 再会
 鰻 伊豆榮 佐渡天の川荘店
 居酒屋 長運
 天下一
 酒処 銀太郎
 りんか亭
-# SKIPPED: (愛之助へ移転)幸之助
 創作料理 男の台所タロー
 居酒屋しらつゆ
 ゆっ子
@@ -41,27 +120,22 @@ Cafe Bar ミモザ
 いしはら寿司
 八千夜
 ホルモン倶楽部 もっこもこ
-魚春寿司
-鴨湖庵
-タカノ食堂
-大阪屋 両津店
-鉄板のみせ 拓
-はなしこう
-佐渡アウトドアベース
-トロピカーナ
+鴨湖庵のらねこ
+や志満
+こすぎや
+小枡屋
+小木家
+稲よし
+エーコープ 佐渡小木店鉄板のみせ 拓
 居酒屋 ほたる
 星座
 星奈 SENA
 四季
-ショッピングプラザ キング サンモール店
 SUN the BAR
-あるこーいりす
 中国菜館 ファンタオ
 のりば食堂 しおさい 両津店
 カーフェリー船内スナック
 丼屋 らぶじゃん
-maSanicoffee
-高橋幸次郎菓子店
 スタミナ道場みなと
 お食事処 いさりび
 しなしな屋
@@ -71,29 +145,20 @@ t0ki brewery トキブルワリー
 ほっともっと 佐渡両津店
 麺や INABA
 フレッシュ マツヤ 両津店
-珈琲 花園
 おにCafe
 味処 天國
 ローソン 佐渡両津店
 讃岐うどん おけさ
 kaneto
 龍金
-茶房 げんざ
 きさらぎ 本店
 キッチンよろこんで原黒店
 ローソン 佐渡原黒店
-かふぇすみよし
-caMoco cafe 湖ASOBi
 牡蠣漁師料理あきつ丸
-アートサロン和
 ベリーズ
 進栄
-佐渡発酵 株式会社
 お食事処 ラーメン 赤ちょうちん 北田野浦
-エーコープ 佐渡高千店
 焼肉いけの
-金子菓子店
-高千カフェ
 お惣菜ひろ
 あげしま海かふぇ
 食堂 尖閣湾
@@ -106,15 +171,11 @@ caMoco cafe 湖ASOBi
 北沢Terrace
 SABO YAJURO
 そば処 與左エ門〜yozaemon〜
-ガシマシネマ
-cafe 丘の上の雲の向こう
 京町茶屋
 古民家空間 京町亭
-ショッピングプラザ キング 相川店
 金由屋商店
 銀寿司
 ひのき
-珈琲の家 カフェ⭐︎ド カトレア
 磯の家
 パーラーつるや
 板前の店 竹屋
@@ -131,19 +192,14 @@ cafe 丘の上の雲の向こう
 媼と翁
 SPORTS BAR SUSHIKA
 寿司 初
-コロンビア
 ラーメン関口 佐渡本店
 御食事処 夫婦岩
 手打ちそば 徳平 稲鯨
 すし角
 居酒屋 久作
-
-# --- 金井・佐和田・新穂・畑野・真野地区の店名での検索 ---
 しまの縁
 食事処ひぐち 樋口食堂
 椿屋 陶芸館 椿茶屋
-和カフェUZU
-Mr.Tono café
 佐渡うどん 蒼囲
 sabocoffee サボウコーヒー
 割烹 石山
@@ -151,14 +207,12 @@ cafe bar RAIN
 司すし
 のがた
 かとうレストラン
-かけはし やっさん はしもと
 欧風食堂 Kubo屋
 エーコープ 佐渡金井店
 SHIMAYA CAFE
 居酒屋 銀
 コロッケ屋高野 高野コロッケ店
 味彩 たびのホテル佐渡
-喜久や
 こなもん屋 纏
 麺や 龍美
 ちぐさ食堂
@@ -177,39 +231,30 @@ SHIMAYA CAFE
 手打そば 徳平 中興
 割烹 一休
 中国料理 金華楼
-ローソン 佐渡中興店
 パン屋カフェ クレアーレ
 おうちdeカフェ
 フレッシュ マツヤ 金井店
 麺処 若
 麺屋 成
 すしや まるいし
-やわらぎ茶屋 和結
 いちばんどり
-森のコーヒー屋さん
-二宮萬友荘 ばんゆうそう
 はなまるうどん 佐渡佐和田店
 ミスタードーナツ 佐渡佐和田ショップ
 チャイニーズレストラン 昴
-ドックツアーズtarokich
 しまふうみ タリーズコーヒー店
 タリーズコーヒー 佐渡佐和田店
-韓国家庭料理アリラン
-御菓子処しまや
 しまや窪田バイパス店
 かえる食堂
 ほっともっと 佐渡佐和田店
 つぼ八 佐渡佐和田店
 アガン佐渡店
 吉野家 佐渡佐和田店
-ケーキハウスバニラ
 日本料理なかむら
 カラオケ ビッグエコー 佐渡店
 マルイ 佐渡店
 イブ
 焼とり やじま 東大通店
 歌留多
-池田菓子舗
 されどおにぎり
 牛角 佐和田店
 池袋 大勝軒 佐渡店
@@ -217,8 +262,6 @@ SHIMAYA CAFE
 おうちごはん マンマ クゥ
 ローソン 佐渡佐和田店
 しまふうみ coffee tea 22
-ショッピングプラザ キング 東大通店
-島の食堂福ふく
 いわみ亭
 たい夢
 こうめ
@@ -233,11 +276,8 @@ Un Grand Pas アングランパ
 廻転寿司 佐渡弁慶 佐渡本店
 FRENCH La Plage
 大まるラーメン
-喫茶デイリー
 りきすし さわた
 自遊空間 新潟佐渡店
-喜昇堂パン工房 ピュイダムール
-アムールこばやし
 カフェ ドール
 スポーツカフェ ヴァルゴ
 拉麺 餃子 恵比寿
@@ -248,51 +288,39 @@ FRENCH La Plage
 のんのん
 おけさぽてとの店 プチドール
 酔処 アリの巣
-モンブラン
 HIGHER BAR
 レストラン SEISUKE Next Door
 大阪屋 佐和田店
-アンブレラ
 おもいやり
 焼とりやじま Yakitori Yajima
-お弁当 いわさき
 焼肉康
 居酒屋 かっ八
 ラーメン トッキチ
 よねやま
-ラブマーケットカフェ
 山下食堂
 喰いもんやあんとん
 割烹 松山
 蛇の目寿司 佐和田店
 やきにく屋 赤ちょうちん 河原田諏訪町
-# SKIPPED: (現：愛之助)海の見えるレストラン【らぶじゃん】
-コーヒーハウスらるご
-# SKIPPED: (現：愛之助)海の見える海鮮居酒屋【幸之助】
+愛之助
 居酒屋 杏庵
 とんかつ 中堀
 ちよぼ家 無隅庵
 三光亭
 café TRAIN
-MERROWS SADO
 くいものや 丸美亭
-へにゃもにゃ
 福寿司
-SAWATA海のいえ
 いとう
 BAKERY パンピーノ
 おけさ横丁
 三崎そば
 ちゃらくらもん
-トキのもり売店
-トキのむらフード
 蕎麦 茂左衛門
 たまりば 子ども未来舎 りぜむ
 ぎょうざらーめん伝次郎
 okameパン
 デビンコ へんじんもっこ
 mattelato マッテラート
-新穂青木おやつ店
 フルーツ カフェさいとう
 鮨 長三郎
 なっちゃん
@@ -308,22 +336,17 @@ mattelato マッテラート
 呑々元茂 ぐいぐいがんも
 へんじんもっこ
 izakaya 纏
-島の駅 佐渡特選
 ファミリーレストランたいがあ
 ラ パゴッド
 ローソン 佐渡真野店
-詩茶香愛茶華
 里山カフェ パンプキン
 ボヌール
-ガレージカフェ レンスポルト
-くりくりや
 ながい
 風文堂
 レストラン こさど
 たつみ
 割烹ごしま
 ortomare
-わたぼうし
 MANOCAMINO
 フレッシュ マツヤ 真野店
 La Barque de Dionysos
@@ -332,17 +355,12 @@ La Barque de Dionysos
 蛇の目寿司
 夕食堂
 cafe restaurant じんのびカフェ
-Hearts
 お食事処 夕鶴
 ときカフェ
-有限会社 真野観光センター
-Crescentmoon
 しまふうみ
 こめっこ食堂
 米こころ
-学校蔵Cafe 尾畑酒造
 ローソン 佐渡畑野店
-馬川亭 ものづくりの拠点
 有限会社ナカガワ製パン所
 まちの洋食屋 ル アッシュ
 中国料理 味里
@@ -350,33 +368,26 @@ Crescentmoon
 いちりん
 扇寿司
 和食Dining中堀亭
-Comolaine コモレーヌ
 Tomtom
 ＪＡ佐渡Ａコープ佐渡畑野店
 居酒屋 天狗
 四季菜割烹 伝
 味心 神楽
-犬と暮らす小さなカフェ
-さっこりＨＯＵＳＥ三の宮
 さどブレッド ポッポのパン佐渡店
 晴ればい処 松前
 有限会社 佐藤漁業
 あたりきしゃりき堂 佐渡 松ヶ崎店
 手打ちそば処 まるしょう
 パン お菓子工房 六蔵
-
-# --- 赤泊・羽茂・小木地区の店名での検索 ---
 里山カフェ山里
 おいしいドーナツ タガヤス堂
 ちょぼくり
 和食旬
-居酒屋一心
 パルフェ庄三
 和泉商店
 ティーハウス 一里塚
 サウンドハウス
 炭火串焼 えん萬
-ＪＡ佐渡 Ａコープ羽茂店
 T M Bread Delivery SADO Island マーカスのパン屋
 りか亭
 ローソン 佐渡羽茂店
@@ -384,15 +395,12 @@ T M Bread Delivery SADO Island マーカスのパン屋
 パン工房スマイル
 T's Cafe
 串しげ
-スーパー たんぽぽ
 かっさい
-富士乃屋
 KURU CHOPPER
 生そば 七右衛門
 かわしま屋 鮮魚仕出し料理処
 魚料理の店 魚晴
 魚留
-高津屋庄平
 のらねこ
 や志満
 こすぎや
@@ -405,12 +413,9 @@ KURU CHOPPER
 十千万
 山びこ
 山羊Cafe
-Kaffa 佐渡
-カフェ日和山 南書店
 はなゆめ
 まつはま
 中華そば 与三郎
-山本屋みやげ店
 栄寿司
 Origine
 小木番所そば
@@ -421,33 +426,23 @@ Origine
 cafe nano
 宿根木 お料理 あなぐち
 よしかわ屋
-はまのかふぇ CoMaDo
-莚 CACAO CLUB
 春日
 憩いの場 三益
 たい焼き屋 縁
-エーコープ 佐渡赤泊店
-株式会社 北雪酒造
 cafe bar カサブランカ
 赤泊観光センター
 優遊飯店
-後藤ブロイラー
-
-# --- スナックの店名での検索 ---
 トム
 スナックハッピー
 スナックさくら
 スナック とき
 スナック真夜
 スナックＦ
-スイートハニー
-Club Ray's
 スナック きらら
 モナリザ
 Pub オデオン
 スナックうさぎ
 紫
-ママジェニー
 スナックC音
 スナックすみれ
 スナック風花
@@ -461,7 +456,6 @@ Night Spot J1
 テルロード
 のろま
 コルディアinHearts
-CoCoカラオケスタジオ
 ローズ
 スナック川
 スナックパロパロ
@@ -476,7 +470,6 @@ Vogue
 スナック アリス
 しまちゃん
 アブロード
-スナック花音
 フレンズ
 スナック エミーレ
 スナック小佐渡
@@ -484,3 +477,8 @@ Vogue
 スナック京
 胡蝶
 六花
+
+# ========================================
+# 重複検出済み店舗（URL版を優先）
+# ========================================
+# ma_ma restaurant 佐渡 -> 部分一致: ma_ma

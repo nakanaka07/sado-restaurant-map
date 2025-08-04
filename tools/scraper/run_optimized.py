@@ -38,6 +38,7 @@ from dotenv import load_dotenv
 try:
     from places_data_updater import main as original_main, load_queries_from_file, authenticate_google_sheets
     from improved_search_strategy import ImprovedSearchStrategy
+    from utils.output_formatter import OutputFormatter
 except ImportError:
     print("❌ 必要なモジュールが見つかりません")
     sys.exit(1)
@@ -138,7 +139,7 @@ class CostOptimizedRunner:
                     
                     # 住所列と緯度経度列の存在確認
                     address_column = None
-                    for col in ['住所', '所在地', 'address']:
+                    for col in ['所在地', '住所', 'address']:  # 統一：所在地を優先
                         if col in df.columns:
                             address_column = col
                             break
@@ -303,9 +304,9 @@ class CostOptimizedRunner:
     def estimate_cost(self, mode, target_data='all'):
         """実行コストを見積もり"""
         query_files = {
-            'restaurants': 'restaurants.txt',
-            'parkings': 'parkings.txt', 
-            'toilets': 'toilets.txt'
+            'restaurants': 'data/queries/restaurants.txt',
+            'parkings': 'data/queries/parkings.txt', 
+            'toilets': 'data/queries/toilets.txt'
         }
         
         # TARGET_DATAによる絞り込み
@@ -396,12 +397,15 @@ def main():
     
     if args.separate_only:
         # データ分離のみ実行
-        print("🔄 データ分離処理のみ実行します...")
+        OutputFormatter.print_header("データ分離実行", "市内・市外分離")
         runner.separate_by_location()
+        OutputFormatter.print_footer(True, "データ分離処理完了")
         return
     
     if args.estimate_only:
         # 全モードの見積もりを表示
+        OutputFormatter.print_header("コスト見積もり", "全モード比較")
+        
         print("💰 実行モード別コスト見積もり\n")
         for mode in ['quick', 'standard', 'comprehensive']:
             estimation = runner.estimate_cost(mode, args.target)
@@ -410,9 +414,25 @@ def main():
             print(f"   クエリ数: {estimation['total_queries']}")
             print(f"   API呼び出し: {estimation['estimated_api_calls']}")
             print(f"   コスト: ${estimation['estimated_cost_usd']:.3f} USD\n")
+        
+        OutputFormatter.print_footer(True, "全モード見積もり完了")
     else:
         separate_location = not args.no_separate
-        runner.run_optimized(args.mode, args.target, args.dry_run, separate_location)
+        
+        # メイン処理のヘッダー
+        mode_descriptions = {
+            'quick': '高速モード',
+            'standard': '標準モード', 
+            'comprehensive': '包括モード'
+        }
+        mode_desc = mode_descriptions.get(args.mode, args.mode)
+        OutputFormatter.print_header("コスト最適化実行", mode_desc)
+        
+        # 実行
+        success = runner.run_optimized(args.mode, args.target, args.dry_run, separate_location)
+        
+        # フッター
+        OutputFormatter.print_footer(success, "コスト最適化実行完了")
 
 if __name__ == '__main__':
     main()

@@ -45,8 +45,27 @@ __pycache__/
 *.pyo
 tools/scraper/__pycache__/
 tools/scraper/*.pyc
-tools/scraper/*.json
 tools/scraper/.env
+
+# Google Cloud Service Account and API Keys
+*service-account*.json
+*service_account*.json
+*-key.json
+*_key.json
+google-credentials.json
+gcp-credentials.json
+tools/scraper/config/*.json
+tools/scraper/config/*-key.json
+tools/scraper/config/*_key.json
+
+# API Keys and Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*secret*
+*credential*
+*token*
 
 # OS specific
 Thumbs.db
