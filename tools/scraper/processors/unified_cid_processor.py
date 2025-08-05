@@ -309,11 +309,12 @@ class UnifiedCIDProcessor:
             return None
     
     def format_result(self, details: Dict, query_data: Dict, method: str) -> Dict:
-        """結果を整形"""
+        """結果を整形（Places API New v1 拡張フィールド対応）"""
         lat, lng = format_location_data(details.get('geometry', {}).get('location', {}))
         hours_text = format_opening_hours(details.get('opening_hours', {}))
         japanese_types = translate_types(details.get('types', []))
         
+        # 基本データ
         result = {
             'Place ID': details.get('place_id', ''),     # 統一：英語表記
             '店舗名': details.get('name', ''),
@@ -328,9 +329,20 @@ class UnifiedCIDProcessor:
             'ウェブサイト': details.get('website', ''),
             '価格帯': translate_price_level(details.get('price_level')),
             '店舗タイプ': ', '.join(japanese_types),
+        }
+        
+        # Places API (New) v1 拡張フィールド（飲食店のみ）
+        if self._is_restaurant_data(details):
+            result.update(self._format_extended_restaurant_data(details))
+        # 駐車場・公衆トイレの拡張フィールド
+        elif self._is_parking_or_toilet_data(details):
+            result.update(self._format_extended_parking_toilet_data(details))
+        
+        # 共通メタデータ
+        result.update({
             '取得方法': method,
             '更新日時': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        }
+        })
         
         # クエリデータに応じて追加情報を設定
         if query_data['type'] == 'cid_url':
@@ -342,6 +354,230 @@ class UnifiedCIDProcessor:
             result['検索キーワード'] = query_data.get('store_name', '')
         
         return result
+    
+    def _is_restaurant_data(self, details: Dict) -> bool:
+        """飲食店データかどうかを判定"""
+        types = details.get('types', [])
+        restaurant_types = [
+            'restaurant', 'food', 'meal_takeaway', 'cafe', 'bar', 
+            'bakery', 'meal_delivery', 'establishment'
+        ]
+        return any(rtype in types for rtype in restaurant_types)
+    
+    def _is_parking_or_toilet_data(self, details: Dict) -> bool:
+        """駐車場・公衆トイレデータかどうかを判定"""
+        types = details.get('types', [])
+        parking_toilet_types = [
+            'parking', 'tourist_attraction', 'point_of_interest', 
+            'establishment', 'sublocality'
+        ]
+        return any(ptype in types for ptype in parking_toilet_types)
+    
+    def _format_extended_restaurant_data(self, details: Dict) -> Dict:
+        """Places API (New) v1 拡張データを整形（飲食店用）"""
+        extended_data = {}
+        
+        # 店舗説明
+        editorial_summary = details.get('editorialSummary', {})
+        if editorial_summary:
+            extended_data['店舗説明'] = editorial_summary.get('text', '')
+        
+        # サービス対応状況（ブール値を日本語に変換）
+        service_fields = {
+            'takeout': 'テイクアウト',
+            'delivery': 'デリバリー', 
+            'dineIn': '店内飲食',
+            'curbsidePickup': 'カーブサイドピックアップ',
+            'reservable': '予約可能'
+        }
+        
+        for field, japanese_name in service_fields.items():
+            value = details.get(field)
+            if value is not None:
+                extended_data[japanese_name] = '可能' if value else '不可'
+        
+        # 食事時間帯対応
+        meal_fields = {
+            'servesBreakfast': '朝食提供',
+            'servesLunch': '昼食提供', 
+            'servesDinner': '夕食提供'
+        }
+        
+        for field, japanese_name in meal_fields.items():
+            value = details.get(field)
+            if value is not None:
+                extended_data[japanese_name] = '提供' if value else '非提供'
+        
+        # アルコール・飲み物対応
+        beverage_fields = {
+            'servesBeer': 'ビール提供',
+            'servesWine': 'ワイン提供',
+            'servesCocktails': 'カクテル提供',
+            'servesCoffee': 'コーヒー提供'
+        }
+        
+        for field, japanese_name in beverage_fields.items():
+            value = details.get(field)
+            if value is not None:
+                extended_data[japanese_name] = '提供' if value else '非提供'
+        
+        # 特別対応・設備
+        facility_fields = {
+            'servesVegetarianFood': 'ベジタリアン対応',
+            'servesDessert': 'デザート提供',
+            'menuForChildren': '子供向けメニュー',
+            'outdoorSeating': '屋外席',
+            'liveMusic': 'ライブ音楽',
+            'restroom': 'トイレ完備',
+            'goodForChildren': '子供連れ歓迎',
+            'allowsDogs': 'ペット同伴可',
+            'goodForGroups': 'グループ向け',
+            'goodForWatchingSports': 'スポーツ観戦向け'
+        }
+        
+        for field, japanese_name in facility_fields.items():
+            value = details.get(field)
+            if value is not None:
+                extended_data[japanese_name] = '対応' if value else '非対応'
+        
+        # 支払い方法（オブジェクト形式の場合）
+        payment_options = details.get('paymentOptions', {})
+        if payment_options:
+            payment_methods = []
+            if payment_options.get('acceptsCreditCards'):
+                payment_methods.append('クレジットカード')
+            if payment_options.get('acceptsDebitCards'):
+                payment_methods.append('デビットカード')
+            if payment_options.get('acceptsCashOnly'):
+                payment_methods.append('現金のみ')
+            if payment_options.get('acceptsNfc'):
+                payment_methods.append('NFC決済')
+            
+            if payment_methods:
+                extended_data['支払い方法'] = ', '.join(payment_methods)
+        
+        # 駐車場オプション
+        parking_options = details.get('parkingOptions', {})
+        if parking_options:
+            parking_info = []
+            if parking_options.get('freeParking'):
+                parking_info.append('無料駐車場')
+            if parking_options.get('paidParking'):
+                parking_info.append('有料駐車場')
+            if parking_options.get('valetParking'):
+                parking_info.append('バレーパーキング')
+            
+            if parking_info:
+                extended_data['駐車場情報'] = ', '.join(parking_info)
+        
+        # アクセシビリティ
+        accessibility_options = details.get('accessibilityOptions', {})
+        if accessibility_options:
+            accessibility_info = []
+            if accessibility_options.get('wheelchairAccessibleEntrance'):
+                accessibility_info.append('車椅子対応入口')
+            if accessibility_options.get('wheelchairAccessibleParking'):
+                accessibility_info.append('車椅子対応駐車場')
+            if accessibility_options.get('wheelchairAccessibleRestroom'):
+                accessibility_info.append('車椅子対応トイレ')
+            if accessibility_options.get('wheelchairAccessibleSeating'):
+                accessibility_info.append('車椅子対応席')
+            
+            if accessibility_info:
+                extended_data['アクセシビリティ'] = ', '.join(accessibility_info)
+        
+        return extended_data
+    
+    def _format_extended_parking_toilet_data(self, details: Dict) -> Dict:
+        """Places API (New) v1 拡張データを整形（駐車場・公衆トイレ用）"""
+        extended_data = {}
+        
+        # 施設説明
+        editorial_summary = details.get('editorialSummary', {})
+        if editorial_summary:
+            extended_data['施設説明'] = editorial_summary.get('text', '')
+        
+        # 完全住所（より詳細な住所情報）
+        formatted_address = details.get('formattedAddress', '')
+        if formatted_address and formatted_address != details.get('shortFormattedAddress', ''):
+            extended_data['完全住所'] = formatted_address
+        
+        # 営業/開放時間の詳細処理
+        opening_hours = details.get('regularOpeningHours', {})
+        if opening_hours:
+            weekday_text = opening_hours.get('weekdayText', [])
+            if weekday_text:
+                extended_data['詳細営業時間'] = '\n'.join(weekday_text)
+        
+        # アクセシビリティ対応（駐車場・公衆トイレ特化）
+        accessibility_options = details.get('accessibilityOptions', {})
+        if accessibility_options:
+            accessibility_info = []
+            
+            # 駐車場関連
+            if accessibility_options.get('wheelchairAccessibleParking'):
+                accessibility_info.append('車椅子対応駐車場')
+            if accessibility_options.get('wheelchairAccessibleEntrance'):
+                accessibility_info.append('車椅子対応入口')
+            
+            # トイレ関連
+            if accessibility_options.get('wheelchairAccessibleRestroom'):
+                accessibility_info.append('車椅子対応トイレ')
+            
+            if accessibility_info:
+                extended_data['バリアフリー対応'] = ', '.join(accessibility_info)
+        
+        # 支払い方法（主に駐車場向け）
+        payment_options = details.get('paymentOptions', {})
+        if payment_options:
+            payment_methods = []
+            if payment_options.get('acceptsCreditCards'):
+                payment_methods.append('クレジットカード')
+            if payment_options.get('acceptsDebitCards'):
+                payment_methods.append('デビットカード')
+            if payment_options.get('acceptsCashOnly'):
+                payment_methods.append('現金のみ')
+            if payment_options.get('acceptsNfc'):
+                payment_methods.append('NFC決済')
+            
+            if payment_methods:
+                extended_data['支払い方法'] = ', '.join(payment_methods)
+            elif payment_options:
+                # 無料駐車場の場合
+                extended_data['料金体系'] = '詳細不明'
+        
+        # トイレ設備（駐車場向け）
+        restroom = details.get('restroom')
+        if restroom is not None:
+            extended_data['トイレ設備'] = 'あり' if restroom else 'なし'
+        
+        # 子供連れ対応（公衆トイレ向け）
+        good_for_children = details.get('goodForChildren')
+        if good_for_children is not None:
+            extended_data['子供連れ対応'] = '対応' if good_for_children else '非対応'
+        
+        # 駐車場併設情報（公衆トイレ向け）
+        parking_options = details.get('parkingOptions', {})
+        if parking_options:
+            parking_info = []
+            if parking_options.get('freeParking'):
+                parking_info.append('無料駐車場併設')
+            if parking_options.get('paidParking'):
+                parking_info.append('有料駐車場併設')
+            
+            if parking_info:
+                extended_data['駐車場併設'] = ', '.join(parking_info)
+        
+        # 評価情報
+        rating = details.get('rating')
+        if rating:
+            extended_data['施設評価'] = f"{rating} / 5.0"
+        
+        review_count = details.get('userRatingCount')
+        if review_count:
+            extended_data['レビュー数'] = f"{review_count}件"
+        
+        return extended_data
     
     def process_all_queries(self, queries_data: List[Dict]) -> List[Dict]:
         """全クエリを処理"""

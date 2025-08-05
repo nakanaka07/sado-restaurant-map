@@ -43,7 +43,11 @@ coverage
 __pycache__/
 *.pyc
 *.pyo
+
+# Python cache in scraper tools
 tools/scraper/__pycache__/
+tools/scraper/*/__pycache__/
+tools/scraper/*/*/__pycache__/
 tools/scraper/*.pyc
 tools/scraper/.env
 

@@ -9,11 +9,13 @@
 - コスト最適化実行モード
 - 佐渡市内・佐渡市外データの自動分離
 - 段階的実行による安全性確保
+- 複数カテゴリの一括処理
 
 使用例:
     python run_unified.py --mode=standard --target=restaurants
     python run_unified.py --mode=quick --dry-run
     python run_unified.py --separate-only
+    python run_unified.py --no-separate
 """
 
 import os
@@ -38,15 +40,9 @@ else:
 
 # 統合処理クラスをインポート
 from processors.unified_cid_processor import UnifiedCIDProcessor
+from processors.location_separator import create_location_separator
 from utils.google_auth import validate_environment
 from utils.output_formatter import OutputFormatter
-
-# 旧スクリプトとの互換性のため
-try:
-    from run_optimized import CostOptimizedRunner
-except ImportError:
-    print("⚠️ run_optimized.py が見つかりません。基本機能のみ使用します。")
-    CostOptimizedRunner = None
 
 class UnifiedRunner:
     """統合実行制御クラス"""
@@ -54,14 +50,8 @@ class UnifiedRunner:
     def __init__(self):
         self.data_files = {
             'restaurants': 'data/urls/restaurants_merged.txt',  # 🆕 統合ファイルを使用
-            'parkings': 'data/queries/parkings.txt',
-            'toilets': 'data/queries/toilets.txt'
-        }
-        
-        # 旧ファイル構造との互換性（非推奨）
-        self.legacy_files = {
-            'restaurants_txt': 'data/queries/restaurants.txt',
-            'restaurants_urls': 'data/urls/restaurants_urls.txt'
+            'parkings': 'data/urls/parkings_merged.txt',        # 🔄 統合ファイルパスに変更
+            'toilets': 'data/urls/toilets_merged.txt'           # 🔄 統合ファイルパスに変更
         }
         
         # 実行モード設定
@@ -212,10 +202,11 @@ class UnifiedRunner:
                     processed_results = processor.process_all_queries(filtered_queries)
                     
                     if processed_results:
-                        # 結果を保存
-                        sheet_name = f"{category}_統合処理"
+                        # 結果を保存（2シート構成）
+                        sheet_name = category  # メインシート名（佐渡島内・完全版）
                         if processor.save_to_spreadsheet(sheet_name):
                             results[category] = len(processed_results)
+                            print(f"✅ {category}メインシート保存完了")
                         else:
                             print(f"❌ {category}の保存に失敗")
                     else:
@@ -229,11 +220,28 @@ class UnifiedRunner:
         OutputFormatter.print_results_summary(results)
         
         # 佐渡市内・市外分離（オプション）
-        if separate_location and CostOptimizedRunner:
+        if separate_location:
             OutputFormatter.print_section("佐渡市内・市外データ分離", "map")
             try:
-                optimizer = CostOptimizedRunner()
-                optimizer.separate_by_location()
+                separator = create_location_separator()
+                # 処理対象に応じて分離カテゴリを決定
+                if target_data == 'all':
+                    separation_categories = None  # 全カテゴリ
+                else:
+                    separation_categories = [target_data]
+                
+                separation_stats = separator.separate_all_categories(
+                    categories=separation_categories,
+                    backup=True
+                )
+                
+                if separation_stats.total_processed > 0:
+                    print(f"✅ データ分離完了:")
+                    print(f"   📁 メインシート（佐渡島内・完全版）: {separation_stats.total_sado}件")
+                    print(f"   📁 参考シート（佐渡市外・簡略版）: {separation_stats.total_outside}件")
+                else:
+                    print("⚠️ 分離対象データが見つかりませんでした")
+                    
             except Exception as e:
                 print(f"⚠️ データ分離処理でエラー: {e}")
         
@@ -286,13 +294,20 @@ def main():
     
     # データ分離のみ実行
     if args.separate_only:
-        if CostOptimizedRunner:
-            OutputFormatter.print_header("データ分離実行", "市内・市外分離")
-            optimizer = CostOptimizedRunner()
-            optimizer.separate_by_location()
-            OutputFormatter.print_footer(True, "データ分離処理完了")
-        else:
-            print("❌ データ分離機能が利用できません")
+        OutputFormatter.print_header("データ分離実行", "市内・市外分離")
+        try:
+            separator = create_location_separator()
+            categories = None if args.target == 'all' else [args.target]
+            separation_stats = separator.separate_all_categories(
+                categories=categories,
+                backup=True
+            )
+            success = separation_stats.total_processed > 0
+            message = f"分離完了: 佐渡島内{separation_stats.total_sado}件、佐渡島外{separation_stats.total_outside}件" if success else "分離対象データなし"
+            OutputFormatter.print_footer(success, message)
+        except Exception as e:
+            print(f"❌ データ分離エラー: {e}")
+            OutputFormatter.print_footer(False, "データ分離に失敗しました")
         return
     
     # 見積もりのみ表示

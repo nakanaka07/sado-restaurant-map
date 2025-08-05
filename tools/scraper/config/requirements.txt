@@ -1,32 +1,30 @@
-beautifulsoup4
-cachetools
-certifi
-charset-normalizer
-contourpy
-cycler
-fonttools
-google-auth
-google-auth-oauthlib
-gspread
-idna
-kiwisolver
-matplotlib
-numpy
-oauthlib
-packaging
-pandas
-pillow
-pyasn1
-pyasn1_modules
-pyparsing
-python-dateutil
-python-dotenv
-pytz
-requests
-requests-oauthlib
-rsa
-six
-soupsieve
-typing_extensions
-tzdata
-urllib3
+# 佐渡飲食店マップ - Phase 2 最適化済み依存関係
+# 新しいprocessorsシステム対応（2025年8月4日）
+
+# === Google API関連（必須） ===
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+gspread>=5.10.0
+
+# === HTTP通信・API呼び出し（必須） ===
+requests>=2.31.0
+
+# === データ処理（必須） ===
+pandas>=2.1.0
+
+# === 環境変数管理（必須） ===
+python-dotenv>=1.0.0
+
+# === 型ヒント（開発効率向上） ===
+typing_extensions>=4.7.0
+
+# === 新processors対応 ===
+# dataclassesは標準ライブラリ（Python 3.7+）のため不要
+# 以下は最小限の依存関係のみ明記
+
+# 注意: 以下のライブラリは削除済み（未使用のため）
+# numpy>=1.24.0          # データ処理で未使用
+# urllib3>=2.0.0         # requestsが自動管理
+# beautifulsoup4>=4.12.0 # HTMLパース未使用
+# python-dateutil>=2.8.0 # 標準datetimeで十分
+# pytz>=2023.3           # 標準datetimeで十分

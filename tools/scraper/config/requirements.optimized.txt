@@ -1,0 +1,53 @@
+# 佐渡飲食店マップ - 最適化された依存関係
+# 必須ライブラリのみ（2025年8月4日最適化版）
+
+# Google API関連（必須）
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+gspread>=5.10.0
+
+# HTTP通信・API呼び出し（必須）
+requests>=2.31.0
+urllib3>=2.0.0
+
+# データ処理（必須）
+pandas>=2.1.0
+numpy>=1.24.0
+
+# 環境変数管理（必須）
+python-dotenv>=1.0.0
+
+# HTMLパース（Places APIのレスポンス処理用）
+beautifulsoup4>=4.12.0
+
+# 日付・時刻処理（必須）
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# 型ヒント（開発効率向上）
+typing_extensions>=4.7.0
+
+# 可視化（オプション - 削除可能）
+# matplotlib>=3.7.0  # レポート生成時のみ使用
+
+# 以下は自動インストールされる依存関係（明示不要）
+# certifi
+# charset-normalizer
+# idna
+# oauthlib
+# packaging
+# pyasn1
+# pyasn1_modules
+# requests-oauthlib
+# rsa
+# six
+# soupsieve
+# tzdata
+
+# 削除対象（未使用）
+# cachetools    # google-authが自動インストール
+# contourpy     # matplotlibの依存関係
+# cycler        # matplotlibの依存関係
+# fonttools     # matplotlibの依存関係
+# kiwisolver    # matplotlibの依存関係
+# pillow        # 画像処理未使用
