@@ -12,6 +12,7 @@ import type {
   Toilet,
   MapPoint,
 } from "../types/restaurant.types";
+import { getDistrictFromAddress } from "../utils/districtUtils";
 
 // 環境変数から設定値を取得
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
@@ -245,7 +246,7 @@ function convertSheetRowToRestaurant(
   const parsedOpeningHours = parseOpeningHours(openingHours);
 
   // 地区を住所から抽出
-  const district = extractDistrictFromAddress(address);
+  const district = getDistrictFromAddress(address);
 
   // 特徴の抽出（Places APIの詳細データから）
   const features = extractFeaturesFromPlacesData({
@@ -830,7 +831,7 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
   }
 
   // 地区を住所から推定（地区フィールドがある場合はそれを使用）
-  const extractedDistrict = district || extractDistrictFromAddress(address);
+  const extractedDistrict = district || getDistrictFromAddress(address);
 
   // 特徴の抽出
   const extractedFeatures = extractParkingFeatures(
@@ -904,7 +905,7 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
   }
 
   // 地区を住所から推定（地区フィールドがある場合はそれを使用）
-  const extractedDistrict = district || extractDistrictFromAddress(address);
+  const extractedDistrict = district || getDistrictFromAddress(address);
 
   // 特徴の抽出
   const extractedFeatures = extractToiletFeatures(
@@ -980,32 +981,6 @@ function convertToiletToMapPoint(toilet: Toilet): MapPoint {
     features: toilet.features,
     lastUpdated: toilet.lastUpdated,
   };
-}
-
-/**
- * 住所から地区を抽出
- */
-function extractDistrictFromAddress(address: string): SadoDistrict {
-  const districtMap: Record<string, SadoDistrict> = {
-    両津: "両津",
-    相川: "相川",
-    佐和田: "佐和田",
-    金井: "金井",
-    新穂: "新穂",
-    畑野: "畑野",
-    真野: "真野",
-    小木: "小木",
-    羽茂: "羽茂",
-    赤泊: "赤泊",
-  };
-
-  for (const [key, district] of Object.entries(districtMap)) {
-    if (address.includes(key)) {
-      return district;
-    }
-  }
-
-  return "その他";
 }
 
 /**

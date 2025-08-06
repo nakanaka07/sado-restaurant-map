@@ -7,6 +7,7 @@ import type {
   Restaurant,
   CuisineType,
   PriceRange,
+  SadoDistrict,
   LatLngLiteral,
 } from "../types/restaurant.types";
 
@@ -52,6 +53,10 @@ const CUISINE_TYPES: readonly CuisineType[] = [
   "バー・居酒屋",
   "ファストフード",
   "デザート・スイーツ",
+  "カレー・エスニック",
+  "ステーキ・洋食",
+  "弁当・テイクアウト",
+  "レストラン",
   "その他",
 ] as const;
 
@@ -72,6 +77,28 @@ const PRICE_RANGES: readonly PriceRange[] = [
 
 export const isPriceRange = (value: unknown): value is PriceRange => {
   return isString(value) && PRICE_RANGES.includes(value as PriceRange);
+};
+
+// ==============================
+// 地区のバリデーション
+// ==============================
+
+const SADO_DISTRICTS: readonly SadoDistrict[] = [
+  "両津",
+  "相川",
+  "佐和田",
+  "金井",
+  "新穂",
+  "畑野",
+  "真野",
+  "小木",
+  "羽茂",
+  "赤泊",
+  "その他",
+] as const;
+
+export const isSadoDistrict = (value: unknown): value is SadoDistrict => {
+  return isString(value) && SADO_DISTRICTS.includes(value as SadoDistrict);
 };
 
 // ==============================
@@ -106,6 +133,7 @@ export const isRestaurant = (value: unknown): value is Restaurant => {
     name,
     cuisineType,
     priceRange,
+    district,
     address,
     coordinates,
     features,
@@ -118,6 +146,7 @@ export const isRestaurant = (value: unknown): value is Restaurant => {
   if (!isString(name) || name.length === 0) return false;
   if (!isCuisineType(cuisineType)) return false;
   if (!isPriceRange(priceRange)) return false;
+  if (!isSadoDistrict(district)) return false;
   if (!isString(address) || address.length === 0) return false;
   if (!isLatLngLiteral(coordinates)) return false;
   if (!isArray(features)) return false;
@@ -208,6 +237,7 @@ export const validateRestaurant = (value: unknown): ValidationError[] => {
     name,
     cuisineType,
     priceRange,
+    district,
     address,
     coordinates,
     features,
@@ -267,6 +297,17 @@ export const validateRestaurant = (value: unknown): ValidationError[] => {
         "priceRange",
         "有効な価格帯である必要があります",
         priceRange
+      )
+    );
+  }
+
+  // 地区の検証
+  if (!isSadoDistrict(district)) {
+    errors.push(
+      createValidationError(
+        "district",
+        "有効な佐渡の地区である必要があります",
+        district
       )
     );
   }

@@ -11,6 +11,7 @@ import {
   isValidSearchQuery,
   validateRestaurant,
 } from "./lightValidation";
+import { getDistrictFromAddress } from "./districtUtils";
 import type {
   Restaurant,
   CuisineType,
@@ -182,6 +183,7 @@ export const parseRestaurantFromSheetRow = (
       description: description ? sanitizeInput(description) : undefined,
       cuisineType: cuisineType as CuisineType,
       priceRange: priceRange as PriceRange,
+      district: getDistrictFromAddress(address),
       address: sanitizeInput(address),
       phone: phone ? sanitizeInput(phone) : undefined,
       website: website ? sanitizeInput(website) : undefined,
