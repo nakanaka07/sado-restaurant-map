@@ -1,31 +1,38 @@
 # 🗾 佐渡飲食店マップ
 
 > **佐渡島の美味しい飲食店を発見できるインタラクティブマップアプリケーション**  
-> React 19 + TypeScript 5.9 + Google Maps Advanced Markers v2 + PWA対応
+> React 19 + TypeScript 5.9 + Google Maps Advanced Markers v2 + PWA 対応
 
 ![佐渡飲食店マップ](./docs/assets/sado-restaurant-map-preview.jpg)
 
 ## 🎯 **プロジェクト概要**
 
-佐渡島の飲食店情報をリアルタイムで表示するモダンなWebアプリケーションです。Google Places API (New) v1から取得した正確なデータを元に、Advanced Markers v2を使用した高度なマップ表示を実現しています。
+佐渡島の飲食店情報をリアルタイムで表示するモダンな Web アプリケーションです。Google Places API (New) v1 から取得した正確なデータを元に、Advanced Markers v2 を使用した高度なマップ表示を実現しています。
+
+## 📋 **開発ドキュメント**
+
+- 📈 **[開発ロードマップ](./DEVELOPMENT_ROADMAP.md)** - 段階的開発計画・進捗管理
+- 🚀 **[クイックスタートガイド](./QUICK_START_GUIDE.md)** - 即座の開発開始手順
+- 🤖 **[AI 活用ガイド](./ai-prompts.md)** - 効率的なコード改善指示
+- 🛠️ **[技術仕様書](./copilot-instructions.md)** - 開発ガイドライン・ベストプラクティス
 
 ### ✨ **主要機能**
 
 - 🗺️ **インタラクティブマップ**: Google Maps JavaScript API + Advanced Markers v2
-- 🍽️ **詳細な店舗情報**: Places API (New) v1による包括的データ取得
+- 🍽️ **詳細な店舗情報**: Places API (New) v1 による包括的データ取得
   - 📍 基本情報（営業時間・評価・レビュー・価格帯・電話番号・ウェブサイト）
   - 🍴 飲食店特化情報（朝食・ランチ・ディナー・ベジタリアン対応・アルコール提供）
   - � サービス形態（イートイン・テイクアウト・宅配・カーブサイドピックアップ）
   - ♿ アクセシビリティ情報（車椅子対応入口等）
-  - 🤖 AI生成店舗説明（editorial_summary）
+  - 🤖 AI 生成店舗説明（editorial_summary）
 - �🔍 **高度な検索・フィルタ**: 地区・料理ジャンル・価格帯・営業時間・サービス形態での絞り込み
-- 🏪 **高精度地区分類**: 佐渡市公式住所表記による正確な10地区分類
+- 🏪 **高精度地区分類**: 佐渡市公式住所表記による正確な 10 地区分類
 - 📱 **レスポンシブ対応**: PC・タブレット・スマートフォンで最適表示
 - ⚡ **高速表示**: キャッシュ機能による瞬間的データ読み込み
-- 🛠️ **PWA対応**: オフライン機能・インストール可能・Push Notifications
-- 🔧 **自動データメンテナンス**: Places API (New) v1統合による高品質データ管理
-- 🎯 **スマート検索最適化**: 無駄なAPI呼び出しを削減する改善された検索戦略
-- 💰 **コスト管理機能**: 段階的実行モードによる料金コントロール（最大78%削減）
+- 🛠️ **PWA 対応**: オフライン機能・インストール可能・Push Notifications
+- 🔧 **自動データメンテナンス**: Places API (New) v1 統合による高品質データ管理
+- 🎯 **スマート検索最適化**: 無駄な API 呼び出しを削減する改善された検索戦略
+- 💰 **コスト管理機能**: 段階的実行モードによる料金コントロール（最大 78%削減）
 - 🆕 **新店舗自動発見**: 格子状地域分割による新規店舗の自動検出・信頼度評価
 - 📊 **詳細データ出力**: スプレッドシートへの構造化データ保存・統計レポート生成
 
@@ -33,19 +40,19 @@
 
 ### **フロントエンド**
 
-- **React 19.1** - 最新のConcurrent Features対応
+- **React 19.1** - 最新の Concurrent Features 対応
 - **TypeScript 5.9** - 厳格な型安全性
-- **Vite 8.0** - 高速ビルドツール（Rolldown統合）
-- **@vis.gl/react-google-maps v3** - React Google Maps統合
+- **Vite 8.0** - 高速ビルドツール（Rolldown 統合）
+- **@vis.gl/react-google-maps v3** - React Google Maps 統合
 
 ### **地図・データ**
 
-- **Google Maps JavaScript API** - 地図表示（週次版・2025年8月最新）
+- **Google Maps JavaScript API** - 地図表示（週次版・2025 年 8 月最新）
 - **Advanced Markers v2** - 次世代マーカー表示（HTML マーカー・カスタムマーカー対応）
-- **Places API (New) v1** - 最新の店舗情報API（包括的飲食店データ取得）
+- **Places API (New) v1** - 最新の店舗情報 API（包括的飲食店データ取得）
 - **Google Sheets API v4** - データベース連携・リアルタイム同期
 - **Marker Clustering v2** - 大量マーカーのパフォーマンス最適化
-- **3D Maps & WebGL** - 地図高度設定による3D表示最適化
+- **3D Maps & WebGL** - 地図高度設定による 3D 表示最適化
 
 ### **開発・品質**
 
@@ -102,16 +109,16 @@ pnpm dev
 
 ### **💡 推奨運用パターン**
 
-このプロジェクトは**手動データ更新**によるAPI料金コントロールに対応しています。
+このプロジェクトは**手動データ更新**による API 料金コントロールに対応しています。
 
-#### **🔹 日常開発（API料金なし）**
+#### **🔹 日常開発（API 料金なし）**
 
 ```powershell
 # 既存のスプレッドシートデータを活用
 .\scripts\database-operations.ps1 dev
 ```
 
-### **🔹 データ更新（月1回程度推奨）**
+### **🔹 データ更新（月 1 回程度推奨）**
 
 ```powershell
 # 1. 推奨: 統合実行スクリプトの使用（最新・最適化済み）
@@ -165,11 +172,11 @@ python run_optimized.py --dry-run          # テスト実行（料金なし）
 
 ### **🎯 検索最適化機能**
 
-2025年8月に導入された新機能により、API利用料金を大幅に削減できます。
+2025 年 8 月に導入された新機能により、API 利用料金を大幅に削減できます。
 
 #### **統合実行システム (run_unified.py)**
 
-Places API (New) v1対応の最新統合システム：
+Places API (New) v1 対応の最新統合システム：
 
 ```bash
 # 📍 推奨: 統合スクリプトを使用
@@ -184,18 +191,18 @@ python run_unified.py --dry-run
 
 #### **実行モード比較**
 
-| モード | 説明 | 処理対象 | コスト | 精度 | Places API対応 |
-|--------|------|----------|--------|------|----------------|
-| **quick** | 高速モード | CID URLのみ | 低 | 高 | ✅ New v1 |
-| **standard** | 標準モード | CID URL + 高精度店舗名 | 中 | 高 | ✅ New v1 |
-| **comprehensive** | 包括モード | 全データ | 高 | 最高 | ✅ New v1 |
+| モード            | 説明       | 処理対象               | コスト | 精度 | Places API 対応 |
+| ----------------- | ---------- | ---------------------- | ------ | ---- | --------------- |
+| **quick**         | 高速モード | CID URL のみ           | 低     | 高   | ✅ New v1       |
+| **standard**      | 標準モード | CID URL + 高精度店舗名 | 中     | 高   | ✅ New v1       |
+| **comprehensive** | 包括モード | 全データ               | 高     | 最高 | ✅ New v1       |
 
 #### **新店舗自動発見システム**
 
 格子状地域分割による新規店舗の自動検出：
 
 - ✅ **格子状地域分割**: 佐渡島全域を網羅的に検索
-- ✅ **Places API Nearby Search活用**: 最新のAPI機能を使用
+- ✅ **Places API Nearby Search 活用**: 最新の API 機能を使用
 - ✅ **既存データベースとの重複チェック**: 自動重複排除
 - ✅ **信頼度スコア**: 新店舗候補の評価システム
 - ✅ **自動スプレッドシート保存**: 構造化データ出力
@@ -222,33 +229,35 @@ python run_new_store_discovery.py monthly --validate --save
 **機能詳細:**
 
 - 📍 **佐渡市公式住所表記に基づく正確な地区判定**
-- 🎯 **10地区・約350地名に対応** - 両津・相川・佐和田・金井・新穂・畑野・真野・小木・羽茂・赤泊
-- 💰 **API料金なし** - 既存データの再分類のみ実行
+- 🎯 **10 地区・約 350 地名に対応** - 両津・相川・佐和田・金井・新穂・畑野・真野・小木・羽茂・赤泊
+- 💰 **API 料金なし** - 既存データの再分類のみ実行
 - ⚡ **高速処理** - 数百件のデータを数分で処理
-- 🛡️ **安全設計** - 分析→更新の2段階実行
+- 🛡️ **安全設計** - 分析 → 更新の 2 段階実行
 
 **使用タイミング:**
 
 - 新規データ追加後の地区分類確認
-- 定期的なデータ品質メンテナンス（月1回推奨）
+- 定期的なデータ品質メンテナンス（月 1 回推奨）
 - ユーザーから地区分類の不正確さが報告された場合
 
 **注意事項:**
 
-- Google Sheets API制限（毎分100リクエスト）により、大量データ処理時は中断される場合があります
-- 中断時は5-10分待ってから再実行してください
+- Google Sheets API 制限（毎分 100 リクエスト）により、大量データ処理時は中断される場合があります
+- 中断時は 5-10 分待ってから再実行してください
 
 ### **🚀 新機能: スマート検索最適化システム**
 
-2025年8月3日に導入された検索最適化機能により、API利用料金を大幅に削減できます。
+2025 年 8 月 3 日に導入された検索最適化機能により、API 利用料金を大幅に削減できます。
 
 #### **🎯 主な改善点**
 
 1. **自動スキップ機能**
+
    - 移転・閉店・廃業情報を含むクエリを自動除外
    - 例: `(現：愛之助)海の見えるレストラン【らぶじゃん】` → スキップ
 
 2. **スマートクエリ生成**
+
    - 店名+地域名の組み合わせ: `ふわりと 両津`
    - 店名+業種の組み合わせ: `ふわりと レストラン 佐渡`
    - 括弧・記号の自動除去: `カフェ＆バー` → `カフェ バー`
@@ -285,7 +294,7 @@ python run_optimized.py --mode=standard            # 実行
 
 ## 🔧 **詳細設定ガイド**
 
-### **PWAアイコン更新**
+### **PWA アイコン更新**
 
 アプリのロゴやアイコンを変更する場合：
 
@@ -296,7 +305,7 @@ python run_optimized.py --mode=standard            # 実行
    # SVG形式推奨（高品質でリサイズ可能）
    ```
 
-2. **PWAアイコンの再生成**
+2. **PWA アイコンの再生成**
 
    ```bash
    # 全サイズのアイコンを自動生成
@@ -304,12 +313,13 @@ python run_optimized.py --mode=standard            # 実行
    ```
 
 3. **生成されるアイコン**
+
    - `favicon.ico` (48x48) - ブラウザのファビコン
-   - `pwa-64x64.png` - Windows PWAアイコン
-   - `pwa-192x192.png` - Android PWAアイコン
-   - `pwa-512x512.png` - 高解像度PWAアイコン
-   - `maskable-icon-512x512.png` - Android適応アイコン
-   - `apple-touch-icon-180x180.png` - iOS/macOSアイコン
+   - `pwa-64x64.png` - Windows PWA アイコン
+   - `pwa-192x192.png` - Android PWA アイコン
+   - `pwa-512x512.png` - 高解像度 PWA アイコン
+   - `maskable-icon-512x512.png` - Android 適応アイコン
+   - `apple-touch-icon-180x180.png` - iOS/macOS アイコン
 
 4. **確認・テスト**
 
@@ -318,9 +328,9 @@ python run_optimized.py --mode=standard            # 実行
    pnpm preview  # プレビューでテスト
    ```
 
-> 💡 **Tips**: `public/favicon.svg`を更新するだけで、全てのプラットフォーム向けアイコンが2025年PWA標準に準拠して自動生成されます。
+> 💡 **Tips**: `public/favicon.svg`を更新するだけで、全てのプラットフォーム向けアイコンが 2025 年 PWA 標準に準拠して自動生成されます。
 
-### **Google Sheets API設定**
+### **Google Sheets API 設定**
 
 詳細な設定手順は [`docs/sheets-integration-setup.md`](./docs/sheets-integration-setup.md) を参照してください。
 
@@ -328,13 +338,13 @@ python run_optimized.py --mode=standard            # 実行
 
 プロジェクトには自動データ更新機能が組み込まれています。
 
-#### **GitHub Secrets設定**
+#### **GitHub Secrets 設定**
 
-リポジトリの設定で以下のSecretsを設定してください：
+リポジトリの設定で以下の Secrets を設定してください：
 
 ```text
 PLACES_API_KEY          # Google Places API キー
-SPREADSHEET_ID          # Google Sheets スプレッドシートID  
+SPREADSHEET_ID          # Google Sheets スプレッドシートID
 GOOGLE_SERVICE_ACCOUNT_KEY  # サービスアカウントJSONキー（全体）
 GOOGLE_MAPS_API_KEY     # フロントエンド用Google Maps APIキー
 GOOGLE_MAPS_MAP_ID      # Google Maps マップID（オプション）
@@ -343,14 +353,14 @@ GA_MEASUREMENT_ID       # Google Analytics測定ID（オプション）
 
 #### **自動実行スケジュール**
 
-- **定期実行**: 毎月1日 11:00 JST（API料金管理のため月1回）
+- **定期実行**: 毎月 1 日 11:00 JST（API 料金管理のため月 1 回）
 - **手動実行**: GitHub Actions タブから「Run workflow」で実行可能
 
 #### **実行オプション**
 
 - `all`: 全データ更新（飲食店・駐車場・公衆トイレ）
 - `restaurants`: 飲食店のみ
-- `parkings`: 駐車場のみ  
+- `parkings`: 駐車場のみ
 - `toilets`: 公衆トイレのみ
 
 ### **プロジェクト構造**
@@ -431,14 +441,14 @@ pnpm build
 pnpm preview
 ```
 
-## 📈 **API料金管理**
+## 📈 **API 料金管理**
 
 ### **料金体系**
 
 - **Google Places Text Search (New)**: $0.017 USD/リクエスト
-- **Google Places Nearby Search (New)**: $0.017 USD/リクエスト  
+- **Google Places Nearby Search (New)**: $0.017 USD/リクエスト
 - **推定コスト**:
-  - **Quick モード**: 約$2-3 USD（CID URLのみ・最高効率）
+  - **Quick モード**: 約$2-3 USD（CID URL のみ・最高効率）
   - **Standard モード**: 約$7-10 USD（統合処理・推奨）
   - **Comprehensive モード**: 約$12-15 USD（全フィールド取得・最高精度）
   - **新店舗発見（月次）**: 約$5-8 USD（格子状検索・信頼度評価付き）
@@ -475,9 +485,9 @@ pnpm preview
 2. **段階的更新**: Quick → Standard → Comprehensive
 3. **新店舗発見の活用**: 月次実行による継続的データ品質向上
 4. **事前見積もり**: `--dry-run`オプションでコスト確認
-5. **定期実行を控える**: 月1回程度の手動更新
+5. **定期実行を控える**: 月 1 回程度の手動更新
 6. **カテゴリ別更新**: 必要な部分のみ更新
-7. **Places API (New) v1の活用**: 従来APIより豊富なデータを効率的に取得
+7. **Places API (New) v1 の活用**: 従来 API より豊富なデータを効率的に取得
 
 ## 🤝 **貢献ガイド**
 
@@ -493,16 +503,16 @@ pnpm preview
 
 ## 🔗 **関連リンク**
 
-- **プロジェクトURL**: <https://github.com/nakanaka07/sado-restaurant-map>
+- **プロジェクト URL**: <https://github.com/nakanaka07/sado-restaurant-map>
 - **デモサイト**: [Coming Soon]
 - **Google Maps API ドキュメント**: <https://developers.google.com/maps/documentation/javascript>
 - **React 19 ドキュメント**: <https://react.dev/>
 
 ---
 
-**最終更新**: 2025年8月5日  
+**最終更新**: 2025 年 8 月 5 日  
 **バージョン**: 1.3.0  
-**最新機能**: Places API (New) v1統合による包括的飲食店データ取得・新店舗自動発見システム・構造化スプレッドシート出力  
-**前回機能**: スマート検索最適化システムによるAPI料金削減（最大78%削減）  
+**最新機能**: Places API (New) v1 統合による包括的飲食店データ取得・新店舗自動発見システム・構造化スプレッドシート出力  
+**前回機能**: スマート検索最適化システムによる API 料金削減（最大 78%削減）  
 **データ品質**: 佐渡市公式データに基づく高精度地区分類システム  
 **開発者**: [@nakanaka07](https://github.com/nakanaka07)

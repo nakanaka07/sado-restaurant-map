@@ -7,6 +7,10 @@ import type {
   Restaurant,
   CuisineType,
   PriceRange,
+  SadoDistrict,
+  Parking,
+  Toilet,
+  MapPoint,
 } from "../types/restaurant.types";
 
 // 環境変数から設定値を取得
@@ -15,24 +19,13 @@ const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
 
 // スプレッドシートのワークシート名（実際のデータベース構造に対応）
 const WORKSHEETS = {
-  RESTAURANTS: "restaurants", // 実際のシート名
-  PARKINGS: "parkings", // 実際のシート名
-  TOILETS: "toilets", // 実際のシート名
+  RESTAURANTS: "restaurants", // 飲食店データの実際のシート名
+  PARKINGS: "parkings", // 駐車場データの実際のシート名
+  TOILETS: "toilets", // トイレデータの実際のシート名
 } as const;
 
 // 佐渡の地区分類（places_data_updater.pyと対応）
-export type SadoDistrict =
-  | "両津地区"
-  | "相川地区"
-  | "佐和田地区"
-  | "金井地区"
-  | "新穂地区"
-  | "畑野地区"
-  | "真野地区"
-  | "小木地区"
-  | "羽茂地区"
-  | "赤泊地区"
-  | "その他";
+// restaurant.types.tsからインポートして使用
 
 /**
  * スプレッドシートから飲食店データを取得
@@ -89,11 +82,30 @@ async function fetchSheetData(worksheetName: string): Promise<string[][]> {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
 
   try {
+    console.log(`📡 Google Sheets APIリクエスト: ${url}`);
     const response = await fetch(url);
 
     if (!response.ok) {
+      let errorDetails = `${response.status} ${response.statusText}`;
+
+      // 403エラーの詳細情報を取得
+      if (response.status === 403) {
+        try {
+          const errorBody = await response.text();
+          console.error("🔒 403エラー詳細:", errorBody);
+
+          if (errorBody.includes("permission")) {
+            errorDetails = `スプレッドシートへのアクセス権限がありません。スプレッドシートを「リンクを知っている全員が閲覧可能」に設定してください。`;
+          } else if (errorBody.includes("API key")) {
+            errorDetails = `APIキーが無効または制限されています。Google Cloud ConsoleでAPIキーの設定を確認してください。`;
+          }
+        } catch (e) {
+          console.warn("エラーレスポンスの解析に失敗:", e);
+        }
+      }
+
       throw new SheetsApiError(
-        `Google Sheets API request failed: ${response.status} ${response.statusText}`,
+        `Google Sheets API request failed: ${errorDetails}`,
         response.status
       );
     }
@@ -139,7 +151,12 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
         try {
           return convertSheetRowToRestaurant(row, index + 2); // +2 for header and 1-based indexing
         } catch (error) {
-          console.warn(`Row ${index + 2} conversion failed:`, error);
+          // より詳細なログ出力
+          console.warn(`行 ${index + 2} 変換失敗 (${row.length}列):`, {
+            error: error instanceof Error ? error.message : error,
+            rowData: row.slice(0, 5), // 最初の5列のみ表示（デバッグ用）
+            totalColumns: row.length,
+          });
           return null;
         }
       })
@@ -153,16 +170,17 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
 /**
  * シートの行データをRestaurant型に変換
  *
- * 実際のデータベース構造（43フィールド）に対応:
- * Place ID, 店舗名, 所在地, 緯度, 経度, 評価, レビュー数, 営業状況, 営業時間, 電話番号, ウェブサイト, 価格帯, 店舗タイプ, 店舗説明, テイクアウト, デリバリー, 店内飲食, 朝食提供, 昼食提供, 夕食提供, ビール提供, ワイン提供, カクテル提供, コーヒー提供, ベジタリアン対応, 子供向け対応, デザート提供, 屋外席, 音楽再生, トイレ, 駐車場, アクセシビリティ, 子供連れ歓迎, ペット同伴可, グループ利用, スポーツ観戦, GoogleマップURL, 地区, 佐渡市内外, 取得方法, エディトリアル要約, 最終更新日時
+ * 実際のデータベース構造（26フィールド）に対応:
+ * Place ID, 店舗名, 所在地, 緯度, 経度, 評価, レビュー数, 営業状況, 営業時間, 電話番号, ウェブサイト, 価格帯, 店舗タイプ, 店舗説明, テイクアウト, デリバリー, 店内飲食, カーブサイドピックアップ, 予約可能, 朝食提供, 昼食提供, 夕食提供, ビール提供, ワイン提供, カクテル提供, コーヒー提供
  */
 function convertSheetRowToRestaurant(
   row: string[],
   rowNumber: number
 ): Restaurant {
-  if (row.length < 15) {
+  // 最小限必要なフィールド数を5に減らし、その他はオプションとして扱う
+  if (row.length < 5) {
     throw new Error(
-      `Insufficient data in row ${rowNumber}: expected at least 15 columns, got ${row.length}`
+      `Insufficient data in row ${rowNumber}: expected at least 5 columns (id, name, address, lat, lng), got ${row.length}`
     );
   }
 
@@ -184,6 +202,8 @@ function convertSheetRowToRestaurant(
     takeout = "",
     delivery = "",
     dineIn = "",
+    curbsidePickup = "",
+    reservable = "",
     breakfast = "",
     lunch = "",
     dinner = "",
@@ -191,24 +211,6 @@ function convertSheetRowToRestaurant(
     wine = "",
     cocktails = "",
     coffee = "",
-    vegetarian = "",
-    kidsMenu = "",
-    dessert = "",
-    outdoor = "",
-    liveMusic = "",
-    restroom = "",
-    parking = "",
-    accessibility = "",
-    goodForKids = "",
-    allowsDogs = "",
-    goodForGroups = "",
-    goodForWatchingSports = "", // googleMapsUrl（未使用）
-    ,
-    district = "", // locationCategory（未使用） // acquisitionMethod（未使用）
-    ,
-    ,
-    editorialSummary = "",
-    lastUpdated = "",
   ] = row;
 
   // 必須フィールドの検証
@@ -226,10 +228,10 @@ function convertSheetRowToRestaurant(
     );
   }
 
-  // 料理ジャンルの変換（店舗タイプとエディトリアル要約から推定）
+  // 料理ジャンルの変換（店舗名、店舗タイプ、説明から推定）
   const cuisineType = mapStoreTypeToCuisineType(
-    storeType,
-    storeDescription || editorialSummary
+    `${name} ${storeType}`, // 店舗名も含めて分類
+    storeDescription
   );
 
   // 価格帯の変換（Google Places API価格レベルから）
@@ -242,12 +244,17 @@ function convertSheetRowToRestaurant(
   // 営業時間の変換
   const parsedOpeningHours = parseOpeningHours(openingHours);
 
+  // 地区を住所から抽出
+  const district = extractDistrictFromAddress(address);
+
   // 特徴の抽出（Places APIの詳細データから）
   const features = extractFeaturesFromPlacesData({
     storeType,
     takeout,
     delivery,
     dineIn,
+    curbsidePickup,
+    reservable,
     breakfast,
     lunch,
     dinner,
@@ -255,27 +262,15 @@ function convertSheetRowToRestaurant(
     wine,
     cocktails,
     coffee,
-    vegetarian,
-    kidsMenu,
-    dessert,
-    outdoor,
-    liveMusic,
-    restroom,
-    parking,
-    accessibility,
-    goodForKids,
-    allowsDogs,
-    goodForGroups,
-    goodForWatchingSports,
   });
 
   return {
     id: placeId,
     name: name.trim(),
-    description:
-      editorialSummary || storeDescription || `${district}にある${storeType}`,
+    description: storeDescription || `${district}にある${storeType}`,
     cuisineType,
     priceRange,
+    district,
     address: address.trim(),
     phone: phone.trim() || undefined,
     coordinates: { lat, lng },
@@ -283,74 +278,173 @@ function convertSheetRowToRestaurant(
     reviewCount: reviewCount && !isNaN(reviewCount) ? reviewCount : undefined,
     openingHours: parsedOpeningHours,
     features,
-    lastUpdated: lastUpdated || new Date().toISOString().split("T")[0],
+    lastUpdated: new Date().toISOString().split("T")[0],
   };
 }
 
 /**
- * Google Places APIの店舗タイプを料理ジャンルに変換
+ * Google Places APIの店舗タイプを料理ジャンルに変換 (v2.0 - 大幅改良版)
+ * 店舗名も分析対象に含めて、より精密な分類を実現
  */
 function mapStoreTypeToCuisineType(
-  storeType: string,
+  storeTypeWithName: string,
   description: string
 ): CuisineType {
-  const combined = `${storeType} ${description}`.toLowerCase();
+  const combined = `${storeTypeWithName} ${description}`.toLowerCase();
 
-  if (combined.includes("寿司") || combined.includes("sushi")) return "寿司";
-  if (combined.includes("海鮮") || combined.includes("魚")) return "海鮮";
+  // より詳細なキーワードパターンマッチング（正規表現使用）
+
+  // 🍣 寿司・回転寿司
+  if (combined.match(/(寿司|すし|sushi|回転寿司|握り|にぎり)/)) {
+    return "寿司";
+  }
+
+  // 🐟 海鮮・魚料理
   if (
-    combined.includes("焼肉") ||
-    combined.includes("焼鳥") ||
-    combined.includes("ホルモン")
-  )
+    combined.match(
+      /(海鮮|魚|刺身|鮮魚|漁師|海の家|魚介|あじ|いわし|かに|蟹|えび|海老|たこ|蛸|いか|烏賊|まぐろ|鮪|さば|鯖)/
+    )
+  ) {
+    return "海鮮";
+  }
+
+  // 🥩 焼肉・焼鳥・BBQ
+  if (
+    combined.match(
+      /(焼肉|焼鳥|ホルモン|串焼|炭火|bbq|バーベキュー|やきとり|やきにく|鶏|チキン|beef|牛)/
+    )
+  ) {
     return "焼肉・焼鳥";
-  if (combined.includes("ラーメン") || combined.includes("ramen"))
-    return "ラーメン";
-  if (
-    combined.includes("そば") ||
-    combined.includes("うどん") ||
-    combined.includes("蕎麦")
-  )
-    return "そば・うどん";
-  if (combined.includes("中華") || combined.includes("中国")) return "中華";
-  if (
-    combined.includes("イタリア") ||
-    combined.includes("パスタ") ||
-    combined.includes("ピザ")
-  )
-    return "イタリアン";
-  if (combined.includes("フレンチ") || combined.includes("フランス"))
-    return "フレンチ";
-  if (
-    combined.includes("カフェ") ||
-    combined.includes("cafe") ||
-    combined.includes("珈琲") ||
-    combined.includes("コーヒー") ||
-    combined.includes("パン屋")
-  )
-    return "カフェ・喫茶店";
-  if (
-    combined.includes("バー") ||
-    combined.includes("居酒屋") ||
-    combined.includes("酒") ||
-    combined.includes("スナック")
-  )
-    return "バー・居酒屋";
-  if (
-    combined.includes("ファスト") ||
-    combined.includes("マクドナルド") ||
-    combined.includes("ケンタ")
-  )
-    return "ファストフード";
-  if (
-    combined.includes("デザート") ||
-    combined.includes("スイーツ") ||
-    combined.includes("ケーキ") ||
-    combined.includes("パン")
-  )
-    return "デザート・スイーツ";
+  }
 
-  return "日本料理"; // デフォルト
+  // 🍜 ラーメン・つけ麺
+  if (
+    combined.match(
+      /(ラーメン|らーめん|ramen|つけ麺|担々麺|味噌|醤油|豚骨|塩ラーメン|中華そば|二郎)/
+    )
+  ) {
+    return "ラーメン";
+  }
+
+  // 🍝 そば・うどん
+  if (
+    combined.match(
+      /(そば|蕎麦|うどん|手打|十割|二八|讃岐|きしめん|ひやむぎ|そうめん)/
+    )
+  ) {
+    return "そば・うどん";
+  }
+
+  // 🥟 中華・中国料理
+  if (
+    combined.match(
+      /(中華|中国|餃子|チャーハン|炒飯|麻婆|点心|北京|四川|上海|広東|台湾|小籠包)/
+    )
+  ) {
+    return "中華";
+  }
+
+  // 🍝 イタリアン
+  if (
+    combined.match(
+      /(イタリア|パスタ|ピザ|ピッツァ|リストランテ|トラットリア|スパゲッティ|italian)/
+    )
+  ) {
+    return "イタリアン";
+  }
+
+  // 🥖 フレンチ・西洋料理
+  if (combined.match(/(フレンチ|フランス|ビストロ|french|西洋料理|洋食)/)) {
+    return "フレンチ";
+  }
+
+  // 🍛 カレー・エスニック
+  if (
+    combined.match(
+      /(カレー|curry|インド|タイ|エスニック|スパイス|ナン|タンドール|ココナッツ)/
+    )
+  ) {
+    return "カレー・エスニック";
+  }
+
+  // 🍖 ステーキ・洋食
+  if (
+    combined.match(/(ステーキ|steak|ハンバーグ|オムライス|グリル|beef|pork)/)
+  ) {
+    return "ステーキ・洋食";
+  }
+
+  // 🧁 デザート・スイーツ・和菓子（パン屋を優先）
+  if (
+    combined.match(
+      /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅|パン屋|パン|ベーカリー|bread|パティスリー)/
+    )
+  ) {
+    return "デザート・スイーツ";
+  }
+
+  // ☕ カフェ・喫茶店（パン屋のチェック後に配置）
+  if (combined.match(/(カフェ|cafe|珈琲|コーヒー|coffee|喫茶)/)) {
+    return "カフェ・喫茶店";
+  }
+
+  // 🍺 バー・居酒屋・スナック
+  if (
+    combined.match(
+      /(バー|bar|居酒屋|酒|スナック|パブ|pub|飲み屋|ビアガーデン|beer|wine)/
+    )
+  ) {
+    return "バー・居酒屋";
+  }
+
+  // 🍟 ファストフード
+  if (
+    combined.match(
+      /(ファスト|マクドナルド|ケンタ|モス|サブウェイ|fast|burger|ハンバーガー)/
+    )
+  ) {
+    return "ファストフード";
+  }
+
+  // 🧁 デザート・スイーツ・和菓子
+  if (
+    combined.match(
+      /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅)/
+    )
+  ) {
+    return "デザート・スイーツ";
+  }
+
+  // 🍱 弁当・テイクアウト
+  if (combined.match(/(弁当|bento|テイクアウト|持ち帰り|惣菜|お惣菜)/)) {
+    return "弁当・テイクアウト";
+  }
+
+  // 🍱 和食・定食・食堂
+  if (
+    combined.match(
+      /(和食|定食|食堂|日本料理|割烹|料亭|懐石|会席|てんぷら|天ぷら|とんかつ|カツ|丼|どんぶり)/
+    )
+  ) {
+    return "日本料理";
+  }
+
+  // 🏪 レストラン（ジャンル不明）
+  if (
+    combined.match(
+      /(レストラン|restaurant|ダイニング|ビュッフェ|バイキング|食べ放題)/
+    )
+  ) {
+    return "レストラン";
+  }
+
+  // 🏪 その他（小売店・コンビニなど）
+  if (combined.match(/(コンビニ|スーパー|商店|売店|自販機|マーケット)/)) {
+    return "その他";
+  }
+
+  // それでも分類できない場合
+  return "その他";
 }
 
 /**
@@ -410,6 +504,8 @@ function extractFeaturesFromPlacesData(data: {
   takeout: string;
   delivery: string;
   dineIn: string;
+  curbsidePickup?: string;
+  reservable?: string;
   breakfast: string;
   lunch: string;
   dinner: string;
@@ -417,18 +513,18 @@ function extractFeaturesFromPlacesData(data: {
   wine: string;
   cocktails: string;
   coffee: string;
-  vegetarian: string;
-  kidsMenu: string;
-  dessert: string;
-  outdoor: string;
-  liveMusic: string;
-  restroom: string;
-  parking: string;
-  accessibility: string;
-  goodForKids: string;
-  allowsDogs: string;
-  goodForGroups: string;
-  goodForWatchingSports: string;
+  vegetarian?: string;
+  kidsMenu?: string;
+  dessert?: string;
+  outdoor?: string;
+  liveMusic?: string;
+  restroom?: string;
+  parking?: string;
+  accessibility?: string;
+  goodForKids?: string;
+  allowsDogs?: string;
+  goodForGroups?: string;
+  goodForWatchingSports?: string;
 }): string[] {
   const features: string[] = [];
 
@@ -439,6 +535,10 @@ function extractFeaturesFromPlacesData(data: {
     features.push("デリバリー可");
   if (data.dineIn === "true" || data.dineIn === "可")
     features.push("店内飲食可");
+  if (data.curbsidePickup === "true" || data.curbsidePickup === "可")
+    features.push("カーブサイドピックアップ可");
+  if (data.reservable === "true" || data.reservable === "可")
+    features.push("予約可能");
 
   // 食事時間帯
   if (data.breakfast === "true" || data.breakfast === "可")
@@ -555,13 +655,33 @@ function parseOpeningHours(openingHoursStr: string) {
 }
 
 /**
- * 駐車場データを取得（将来実装用）
+ * 駐車場データを取得してParking型に変換
  */
-export async function fetchParkingsFromSheets(): Promise<any[]> {
+export async function fetchParkingsFromSheets(): Promise<Parking[]> {
   try {
     const rows = await fetchSheetData(WORKSHEETS.PARKINGS);
-    // 将来的に駐車場データの変換処理を実装
-    return rows.slice(1); // ヘッダーを除く
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    // ヘッダー行をスキップ
+    const dataRows = rows.slice(1);
+
+    return dataRows
+      .map((row, index) => {
+        try {
+          return convertSheetRowToParking(row, index + 2);
+        } catch (error) {
+          console.warn(`駐車場データ行 ${index + 2} 変換失敗:`, {
+            error: error instanceof Error ? error.message : error,
+            rowData: row.slice(0, 5),
+            totalColumns: row.length,
+          });
+          return null;
+        }
+      })
+      .filter((parking): parking is Parking => parking !== null);
   } catch (error) {
     console.warn("駐車場データの取得に失敗しました:", error);
     return [];
@@ -569,16 +689,64 @@ export async function fetchParkingsFromSheets(): Promise<any[]> {
 }
 
 /**
- * 公衆トイレデータを取得（将来実装用）
+ * 公衆トイレデータを取得してToilet型に変換
  */
-export async function fetchToiletsFromSheets(): Promise<any[]> {
+export async function fetchToiletsFromSheets(): Promise<Toilet[]> {
   try {
     const rows = await fetchSheetData(WORKSHEETS.TOILETS);
-    // 将来的に公衆トイレデータの変換処理を実装
-    return rows.slice(1); // ヘッダーを除く
+
+    if (rows.length === 0) {
+      return [];
+    }
+
+    // ヘッダー行をスキップ
+    const dataRows = rows.slice(1);
+
+    return dataRows
+      .map((row, index) => {
+        try {
+          return convertSheetRowToToilet(row, index + 2);
+        } catch (error) {
+          console.warn(`トイレデータ行 ${index + 2} 変換失敗:`, {
+            error: error instanceof Error ? error.message : error,
+            rowData: row.slice(0, 5),
+            totalColumns: row.length,
+          });
+          return null;
+        }
+      })
+      .filter((toilet): toilet is Toilet => toilet !== null);
   } catch (error) {
     console.warn("公衆トイレデータの取得に失敗しました:", error);
     return [];
+  }
+}
+
+/**
+ * 全てのマップポイント（飲食店・駐車場・トイレ）を統合して取得
+ */
+export async function fetchAllMapPoints(): Promise<MapPoint[]> {
+  try {
+    const [restaurants, parkings, toilets] = await Promise.all([
+      fetchRestaurantsFromSheets(),
+      fetchParkingsFromSheets(),
+      fetchToiletsFromSheets(),
+    ]);
+
+    const mapPoints: MapPoint[] = [
+      ...restaurants.map(convertRestaurantToMapPoint),
+      ...parkings.map(convertParkingToMapPoint),
+      ...toilets.map(convertToiletToMapPoint),
+    ];
+
+    console.log(
+      `📊 統合マップポイント: 飲食店${restaurants.length}件 + 駐車場${parkings.length}件 + トイレ${toilets.length}件 = 合計${mapPoints.length}件`
+    );
+
+    return mapPoints;
+  } catch (error) {
+    console.error("統合マップポイントの取得に失敗しました:", error);
+    throw error;
   }
 }
 
@@ -596,9 +764,9 @@ export async function checkDataFreshness(): Promise<{
       return { lastUpdated: new Date().toISOString(), needsUpdate: true };
     }
 
-    // 最後の行の最終更新日時をチェック（43番目のフィールド）
-    const lastRow = rows[rows.length - 1];
-    const lastUpdated = lastRow[42] || ""; // 最終更新日時フィールド
+    // 最後の行の最終更新日時をチェック（実際のデータ構造では26番目のフィールドは存在しない）
+    // 代わりに現在の日時を使用
+    const lastUpdated = new Date().toISOString();
 
     // ローカルストレージと比較
     const cachedTimestamp = localStorage.getItem("restaurantDataTimestamp");
@@ -609,4 +777,308 @@ export async function checkDataFreshness(): Promise<{
     console.error("Failed to check data freshness:", error);
     return { lastUpdated: new Date().toISOString(), needsUpdate: true };
   }
+}
+
+/**
+ * シートの行データをParking型に変換
+ *
+ * 実際のデータ構造（21フィールド）に対応:
+ * Place ID, 駐車場名, 所在地, 緯度, 経度, カテゴリ, カテゴリ詳細, 営業状況, 施設説明, 完全住所, 詳細営業時間, バリアフリー対応, 支払い方法, 料金体系, トイレ設備, 施設評価, レビュー数, 地区, GoogleマップURL, 取得方法, 最終更新日時
+ */
+function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
+  if (row.length < 5) {
+    throw new Error(
+      `Insufficient parking data in row ${rowNumber}: expected at least 5 columns, got ${row.length}`
+    );
+  }
+
+  const [
+    placeId = "",
+    name = "",
+    address = "",
+    latStr = "",
+    lngStr = "",
+    category = "",
+    categoryDetail = "", // businessStatus（未使用）
+    ,
+    description = "", // fullAddress（未使用）
+    ,
+    detailedHours = "",
+    accessibility = "",
+    paymentMethods = "",
+    feeStructure = "",
+    toiletFacilities = "", // rating（未使用） // reviewCount（未使用）
+    ,
+    ,
+    district = "", // googleMapsUrl（未使用） // acquisitionMethod（未使用）
+    ,
+    ,
+    lastUpdated = "",
+  ] = row;
+
+  if (!placeId || !name || !address) {
+    throw new Error(`Missing required parking fields in row ${rowNumber}`);
+  }
+
+  const lat = parseFloat(latStr);
+  const lng = parseFloat(lngStr);
+
+  if (isNaN(lat) || isNaN(lng)) {
+    throw new Error(
+      `Invalid parking coordinates in row ${rowNumber}: lat=${latStr}, lng=${lngStr}`
+    );
+  }
+
+  // 地区を住所から推定（地区フィールドがある場合はそれを使用）
+  const extractedDistrict = district || extractDistrictFromAddress(address);
+
+  // 特徴の抽出
+  const extractedFeatures = extractParkingFeatures(
+    `${category} ${categoryDetail} ${accessibility} ${paymentMethods} ${toiletFacilities}`,
+    description,
+    feeStructure
+  );
+
+  return {
+    id: placeId,
+    name: name.trim(),
+    description: description || `${extractedDistrict}にある駐車場`,
+    district: extractedDistrict as SadoDistrict,
+    address: address.trim(),
+    coordinates: { lat, lng },
+    capacity: undefined, // 駐車場データには収容台数情報がない
+    fee: feeStructure || "料金不明",
+    openingHours: parseOpeningHours(detailedHours),
+    features: extractedFeatures,
+    lastUpdated: lastUpdated || new Date().toISOString().split("T")[0],
+  };
+}
+
+/**
+ * シートの行データをToilet型に変換
+ *
+ * 実際のデータ構造（20フィールド）に対応:
+ * Place ID, 施設名, 所在地, 緯度, 経度, カテゴリ, カテゴリ詳細, 営業状況, 施設説明, 完全住所, 詳細営業時間, バリアフリー対応, 子供連れ対応, 駐車場併設, 施設評価, レビュー数, 地区, GoogleマップURL, 取得方法, 最終更新日時
+ */
+function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
+  if (row.length < 5) {
+    throw new Error(
+      `Insufficient toilet data in row ${rowNumber}: expected at least 5 columns, got ${row.length}`
+    );
+  }
+
+  const [
+    placeId = "",
+    name = "",
+    address = "",
+    latStr = "",
+    lngStr = "",
+    category = "",
+    categoryDetail = "", // businessStatus（未使用）
+    ,
+    description = "", // fullAddress（未使用）
+    ,
+    detailedHours = "",
+    accessibility = "",
+    kidsSupport = "",
+    parkingAvailable = "", // rating（未使用） // reviewCount（未使用）
+    ,
+    ,
+    district = "", // googleMapsUrl（未使用） // acquisitionMethod（未使用）
+    ,
+    ,
+    lastUpdated = "",
+  ] = row;
+
+  if (!placeId || !name || !address) {
+    throw new Error(`Missing required toilet fields in row ${rowNumber}`);
+  }
+
+  const lat = parseFloat(latStr);
+  const lng = parseFloat(lngStr);
+
+  if (isNaN(lat) || isNaN(lng)) {
+    throw new Error(
+      `Invalid toilet coordinates in row ${rowNumber}: lat=${latStr}, lng=${lngStr}`
+    );
+  }
+
+  // 地区を住所から推定（地区フィールドがある場合はそれを使用）
+  const extractedDistrict = district || extractDistrictFromAddress(address);
+
+  // 特徴の抽出
+  const extractedFeatures = extractToiletFeatures(
+    `${category} ${categoryDetail} ${accessibility} ${kidsSupport} ${parkingAvailable}`,
+    description
+  );
+
+  return {
+    id: placeId,
+    name: name.trim(),
+    description: description || `${extractedDistrict}にある公衆トイレ`,
+    district: extractedDistrict as SadoDistrict,
+    address: address.trim(),
+    coordinates: { lat, lng },
+    openingHours: parseOpeningHours(detailedHours),
+    features: extractedFeatures,
+    lastUpdated: lastUpdated || new Date().toISOString().split("T")[0],
+  };
+}
+
+/**
+ * Restaurant型をMapPoint型に変換
+ */
+function convertRestaurantToMapPoint(restaurant: Restaurant): MapPoint {
+  return {
+    id: restaurant.id,
+    type: "restaurant",
+    name: restaurant.name,
+    description: restaurant.description,
+    district: restaurant.district,
+    address: restaurant.address,
+    coordinates: restaurant.coordinates,
+    features: restaurant.features,
+    lastUpdated: restaurant.lastUpdated,
+    cuisineType: restaurant.cuisineType,
+    priceRange: restaurant.priceRange,
+    rating: restaurant.rating,
+    reviewCount: restaurant.reviewCount,
+    phone: restaurant.phone,
+    openingHours: restaurant.openingHours,
+  };
+}
+
+/**
+ * Parking型をMapPoint型に変換
+ */
+function convertParkingToMapPoint(parking: Parking): MapPoint {
+  return {
+    id: parking.id,
+    type: "parking",
+    name: parking.name,
+    description: parking.description,
+    district: parking.district,
+    address: parking.address,
+    coordinates: parking.coordinates,
+    features: parking.features,
+    lastUpdated: parking.lastUpdated,
+  };
+}
+
+/**
+ * Toilet型をMapPoint型に変換
+ */
+function convertToiletToMapPoint(toilet: Toilet): MapPoint {
+  return {
+    id: toilet.id,
+    type: "toilet",
+    name: toilet.name,
+    description: toilet.description,
+    district: toilet.district,
+    address: toilet.address,
+    coordinates: toilet.coordinates,
+    features: toilet.features,
+    lastUpdated: toilet.lastUpdated,
+  };
+}
+
+/**
+ * 住所から地区を抽出
+ */
+function extractDistrictFromAddress(address: string): SadoDistrict {
+  const districtMap: Record<string, SadoDistrict> = {
+    両津: "両津",
+    相川: "相川",
+    佐和田: "佐和田",
+    金井: "金井",
+    新穂: "新穂",
+    畑野: "畑野",
+    真野: "真野",
+    小木: "小木",
+    羽茂: "羽茂",
+    赤泊: "赤泊",
+  };
+
+  for (const [key, district] of Object.entries(districtMap)) {
+    if (address.includes(key)) {
+      return district;
+    }
+  }
+
+  return "その他";
+}
+
+/**
+ * 駐車場の特徴を抽出
+ */
+function extractParkingFeatures(
+  featuresText: string,
+  description: string,
+  fee: string
+): string[] {
+  const features: string[] = [];
+  const combinedText = `${featuresText} ${description} ${fee}`.toLowerCase();
+
+  if (combinedText.includes("無料") || fee.includes("無料"))
+    features.push("無料");
+  if (combinedText.includes("有料") || fee.includes("有料"))
+    features.push("有料");
+  if (combinedText.includes("大型") || combinedText.includes("大型車"))
+    features.push("大型車対応");
+  if (combinedText.includes("24時間") || combinedText.includes("24h"))
+    features.push("24時間利用可");
+  if (
+    combinedText.includes("障害者") ||
+    combinedText.includes("車椅子") ||
+    combinedText.includes("バリアフリー")
+  ) {
+    features.push("障害者用駐車場");
+  }
+  if (combinedText.includes("屋根") || combinedText.includes("屋内"))
+    features.push("屋根付き");
+  if (
+    combinedText.includes("観光") ||
+    combinedText.includes("海水浴場") ||
+    combinedText.includes("公園")
+  ) {
+    features.push("観光地駐車場");
+  }
+
+  return features.length > 0 ? features : ["駐車場"];
+}
+
+/**
+ * トイレの特徴を抽出
+ */
+function extractToiletFeatures(
+  featuresText: string,
+  description: string
+): string[] {
+  const features: string[] = [];
+  const combinedText = `${featuresText} ${description}`.toLowerCase();
+
+  if (combinedText.includes("多目的") || combinedText.includes("誰でも"))
+    features.push("多目的トイレ");
+  if (combinedText.includes("車椅子") || combinedText.includes("バリアフリー"))
+    features.push("車椅子対応");
+  if (combinedText.includes("おむつ") || combinedText.includes("赤ちゃん"))
+    features.push("おむつ交換台");
+  if (combinedText.includes("24時間") || combinedText.includes("24h"))
+    features.push("24時間利用可");
+  if (combinedText.includes("きれい") || combinedText.includes("清潔"))
+    features.push("清潔");
+  if (
+    combinedText.includes("温水洗浄") ||
+    combinedText.includes("ウォシュレット")
+  )
+    features.push("温水洗浄便座");
+  if (
+    combinedText.includes("海水浴場") ||
+    combinedText.includes("公園") ||
+    combinedText.includes("観光")
+  ) {
+    features.push("観光地トイレ");
+  }
+
+  return features.length > 0 ? features : ["公衆トイレ"];
 }

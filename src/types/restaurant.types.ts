@@ -14,6 +14,13 @@ export interface LatLngLiteral {
 }
 
 // ==============================
+// マップポイントの種類
+// ==============================
+
+/** マップポイントの種類 */
+export type MapPointType = "restaurant" | "parking" | "toilet";
+
+// ==============================
 // 飲食店関連の型定義
 // ==============================
 
@@ -32,6 +39,10 @@ export type CuisineType =
   | "バー・居酒屋"
   | "ファストフード"
   | "デザート・スイーツ"
+  | "カレー・エスニック"
+  | "ステーキ・洋食"
+  | "弁当・テイクアウト"
+  | "レストラン"
   | "その他";
 
 /** 価格帯 */
@@ -40,6 +51,20 @@ export type PriceRange =
   | "1000-2000円"
   | "2000-3000円"
   | "3000円～";
+
+/** 佐渡の地区分類 */
+export type SadoDistrict =
+  | "両津"
+  | "相川"
+  | "佐和田"
+  | "金井"
+  | "新穂"
+  | "畑野"
+  | "真野"
+  | "小木"
+  | "羽茂"
+  | "赤泊"
+  | "その他";
 
 /** 営業時間 */
 export interface OpeningHours {
@@ -56,6 +81,7 @@ export interface Restaurant {
   readonly description?: string;
   readonly cuisineType: CuisineType;
   readonly priceRange: PriceRange;
+  readonly district: SadoDistrict;
   readonly address: string;
   readonly phone?: string;
   readonly website?: string;
@@ -96,10 +122,13 @@ export interface MapSettings {
 export interface MapFilters {
   readonly cuisineTypes: readonly CuisineType[];
   readonly priceRanges: readonly PriceRange[];
+  readonly districts: readonly SadoDistrict[];
   readonly features: readonly string[];
   readonly searchQuery: string;
   readonly currentLocation?: LatLngLiteral;
   readonly radius?: number; // km
+  readonly minRating?: number;
+  readonly openNow?: boolean;
 }
 
 // ==============================
@@ -171,3 +200,62 @@ export type PromiseState<T> = Promise<T> & {
   readonly value?: T;
   readonly reason?: unknown;
 };
+
+// ==============================
+// 駐車場・トイレ関連の型定義
+// ==============================
+
+/** 駐車場の基本情報 */
+export interface Parking {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly district: SadoDistrict;
+  readonly address: string;
+  readonly coordinates: LatLngLiteral;
+  readonly capacity?: number;
+  readonly fee?: string; // "無料" | "有料" | "100円/時" など
+  readonly openingHours?: readonly OpeningHours[];
+  readonly features: readonly string[]; // "大型車対応", "障害者用", "24時間利用可" など
+  readonly lastUpdated: string;
+}
+
+/** 公衆トイレの基本情報 */
+export interface Toilet {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly district: SadoDistrict;
+  readonly address: string;
+  readonly coordinates: LatLngLiteral;
+  readonly openingHours?: readonly OpeningHours[];
+  readonly features: readonly string[]; // "多目的トイレ", "おむつ交換台", "車椅子対応" など
+  readonly lastUpdated: string;
+}
+
+/** 統合マップポイント（飲食店・駐車場・トイレを統合） */
+export interface MapPoint {
+  readonly id: string;
+  readonly type: MapPointType;
+  readonly name: string;
+  readonly description?: string;
+  readonly district: SadoDistrict;
+  readonly address: string;
+  readonly coordinates: LatLngLiteral;
+  readonly features: readonly string[];
+  readonly lastUpdated: string;
+  // 飲食店固有のプロパティ（オプション）
+  readonly cuisineType?: CuisineType;
+  readonly priceRange?: PriceRange;
+  readonly rating?: number;
+  readonly reviewCount?: number;
+  readonly phone?: string;
+  readonly openingHours?: readonly OpeningHours[];
+}
+
+/** 拡張されたマップフィルター（駐車場・トイレ対応） */
+export interface ExtendedMapFilters extends MapFilters {
+  readonly pointTypes: readonly MapPointType[]; // 表示するポイントの種類
+  readonly parkingFeatures?: readonly string[]; // 駐車場の特徴フィルター
+  readonly toiletFeatures?: readonly string[]; // トイレの特徴フィルター
+}

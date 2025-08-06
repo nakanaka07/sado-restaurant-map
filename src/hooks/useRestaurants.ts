@@ -31,6 +31,7 @@ const MOCK_RESTAURANTS: readonly Restaurant[] = [
     description: "佐渡の新鮮な海の幸を味わえる海鮮料理店",
     cuisineType: "海鮮",
     priceRange: "2000-3000円",
+    district: "両津",
     address: "新潟県佐渡市両津湊119",
     phone: "0259-27-5938",
     coordinates: { lat: 38.018611, lng: 138.367222 }, // 佐渡島中心部
@@ -48,6 +49,7 @@ const MOCK_RESTAURANTS: readonly Restaurant[] = [
     description: "佐渡の水で打つ手打ちそばが自慢",
     cuisineType: "そば・うどん",
     priceRange: "1000-2000円",
+    district: "小木",
     address: "新潟県佐渡市小木町1956",
     coordinates: { lat: 37.9, lng: 138.25 }, // 佐渡島南部
     rating: 4.5,
@@ -65,6 +67,7 @@ const MOCK_RESTAURANTS: readonly Restaurant[] = [
     description: "佐渡の絶景を眺めながらゆったりできるカフェ",
     cuisineType: "カフェ・喫茶店",
     priceRange: "～1000円",
+    district: "両津",
     address: "新潟県佐渡市両津夷269-1",
     phone: "0259-23-4567",
     coordinates: { lat: 38.05, lng: 138.38 }, // 佐渡島北東部
@@ -82,6 +85,7 @@ const MOCK_RESTAURANTS: readonly Restaurant[] = [
     description: "佐渡近海の新鮮なネタが自慢の老舗寿司店",
     cuisineType: "寿司",
     priceRange: "3000円～",
+    district: "相川",
     address: "新潟県佐渡市相川下戸村358",
     phone: "0259-74-2109",
     coordinates: { lat: 38.03, lng: 138.23 }, // 佐渡島西部（相川）
@@ -115,6 +119,7 @@ export function useRestaurants(
   initialFilters: MapFilters = {
     cuisineTypes: [],
     priceRanges: [],
+    districts: [],
     features: [],
     searchQuery: "",
   }
@@ -150,6 +155,13 @@ export function useRestaurants(
       );
     }
 
+    // 地区フィルター
+    if (filters.districts.length > 0) {
+      filtered = filtered.filter((restaurant) =>
+        filters.districts.includes(restaurant.district)
+      );
+    }
+
     // 特徴フィルター
     if (filters.features.length > 0) {
       filtered = filtered.filter((restaurant) =>
@@ -167,8 +179,47 @@ export function useRestaurants(
           restaurant.name.toLowerCase().includes(query) ||
           restaurant.description?.toLowerCase().includes(query) ||
           restaurant.address.toLowerCase().includes(query) ||
-          restaurant.cuisineType.toLowerCase().includes(query)
+          restaurant.cuisineType.toLowerCase().includes(query) ||
+          restaurant.district.toLowerCase().includes(query)
       );
+    }
+
+    // 評価フィルター
+    if (filters.minRating) {
+      filtered = filtered.filter((restaurant) => {
+        return restaurant.rating && restaurant.rating >= filters.minRating!;
+      });
+    }
+
+    // 営業中フィルター
+    if (filters.openNow) {
+      const now = new Date();
+      const currentDay = ["日", "月", "火", "水", "木", "金", "土"][
+        now.getDay()
+      ];
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      filtered = filtered.filter((restaurant) => {
+        return restaurant.openingHours.some((hours) => {
+          if (hours.isHoliday || !hours.day.includes(currentDay)) {
+            return false;
+          }
+
+          const openTime = parseTimeToMinutes(hours.open);
+          const closeTime = parseTimeToMinutes(hours.close);
+
+          if (openTime && closeTime) {
+            // 営業時間が日をまたぐ場合の処理
+            if (closeTime < openTime) {
+              return currentTime >= openTime || currentTime <= closeTime;
+            } else {
+              return currentTime >= openTime && currentTime <= closeTime;
+            }
+          }
+
+          return false;
+        });
+      });
     }
 
     // 距離フィルター（現在地が設定されている場合）
@@ -324,6 +375,29 @@ function calculateDistance(
 
 function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
+}
+
+/**
+ * 時間文字列（HH:MM）を分単位に変換
+ */
+function parseTimeToMinutes(timeStr: string): number | null {
+  if (!timeStr || typeof timeStr !== "string") {
+    return null;
+  }
+
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
 }
 
 /**

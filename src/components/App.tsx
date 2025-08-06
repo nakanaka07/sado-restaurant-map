@@ -1,15 +1,20 @@
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { useEffect, useState, useCallback } from "react";
-import { useRestaurants } from "../hooks/useRestaurants";
-import { RestaurantMap } from "./map/RestaurantMap";
-import { FilterPanel } from "./restaurant/FilterPanel";
+import { useMapPoints } from "../hooks/useMapPoints";
+import MapView from "./map/MapView";
+import { ModernFilterPanel } from "./restaurant/ModernFilterPanel";
 import { SkipLink } from "./common/AccessibilityComponents";
 import { initGA, checkGAStatus } from "../utils/analytics";
 import { sanitizeInput, validateApiKey } from "../utils/securityUtils";
 import PWABadge from "./PWABadge";
-import type { CuisineType, PriceRange } from "../types/restaurant.types";
+import type {
+  CuisineType,
+  PriceRange,
+  SadoDistrict,
+  MapPointType,
+} from "../types/restaurant.types";
 import { SADO_CENTER } from "../config/constants";
-import "../styles/App.css";
+// App.cssは main.tsx で読み込み済み
 
 // 佐渡島の中心座標（設定ファイルから取得）
 
@@ -28,8 +33,10 @@ const ErrorDisplay = ({
 );
 
 function App() {
-  const { filteredRestaurants, asyncState, setFilters, setSortOrder } =
-    useRestaurants();
+  const { mapPoints, loading, error, updateFilters, updateSortOrder, stats } =
+    useMapPoints();
+
+  const filteredMapPoints = mapPoints; // フィルタリング済みのマップポイント
 
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -74,7 +81,7 @@ function App() {
   const handleCuisineFilter = useCallback(
     (cuisine: CuisineType | "") => {
       try {
-        setFilters({
+        updateFilters({
           cuisineTypes: cuisine ? [cuisine] : [],
         });
       } catch (error) {
@@ -82,13 +89,13 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [setFilters]
+    [updateFilters]
   );
 
   const handlePriceFilter = useCallback(
     (price: PriceRange | "") => {
       try {
-        setFilters({
+        updateFilters({
           priceRanges: price ? [price] : [],
         });
       } catch (error) {
@@ -96,7 +103,49 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [setFilters]
+    [updateFilters]
+  );
+
+  const handleDistrictFilter = useCallback(
+    (districts: SadoDistrict[]) => {
+      try {
+        updateFilters({
+          districts,
+        });
+      } catch (error) {
+        console.error("地区フィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [updateFilters]
+  );
+
+  const handleRatingFilter = useCallback(
+    (minRating: number | undefined) => {
+      try {
+        updateFilters({
+          minRating,
+        });
+      } catch (error) {
+        console.error("評価フィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [updateFilters]
+  );
+
+  const handleOpenNowFilter = useCallback(
+    (openNow: boolean) => {
+      try {
+        updateFilters({
+          openNow,
+        });
+      } catch (error) {
+        console.error("営業中フィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [updateFilters]
   );
 
   const handleSearchFilter = useCallback(
@@ -104,7 +153,7 @@ function App() {
       try {
         // セキュリティ: 検索クエリのサニタイズ
         const sanitizedSearch = sanitizeInput(search);
-        setFilters({
+        updateFilters({
           searchQuery: sanitizedSearch,
         });
       } catch (error) {
@@ -112,7 +161,7 @@ function App() {
         setAppError("検索中にエラーが発生しました");
       }
     },
-    [setFilters]
+    [updateFilters]
   );
 
   const handleFeatureFilter = useCallback(
@@ -122,7 +171,7 @@ function App() {
         const sanitizedFeatures = features.map((feature) =>
           sanitizeInput(feature)
         );
-        setFilters({
+        updateFilters({
           features: sanitizedFeatures,
         });
       } catch (error) {
@@ -130,16 +179,34 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [setFilters]
+    [updateFilters]
+  );
+
+  const handlePointTypeFilter = useCallback(
+    (pointTypes: MapPointType[]) => {
+      try {
+        updateFilters({
+          pointTypes,
+        });
+      } catch (error) {
+        console.error("ポイントタイプフィルターエラー:", error);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [updateFilters]
   );
 
   const handleResetFilters = useCallback(() => {
     try {
-      setFilters({
+      updateFilters({
         cuisineTypes: [],
         priceRanges: [],
+        districts: [],
         features: [],
         searchQuery: "",
+        minRating: undefined,
+        openNow: false,
+        pointTypes: ["restaurant", "parking", "toilet"],
       });
       // エラー状態もリセット
       setAppError(null);
@@ -147,7 +214,7 @@ function App() {
       console.error("フィルターリセットエラー:", error);
       setAppError("フィルターのリセット中にエラーが発生しました");
     }
-  }, [setFilters]);
+  }, [updateFilters]);
 
   // アプリケーションエラー表示
   if (appError) {
@@ -179,9 +246,12 @@ function App() {
       <SkipLink href="#main-content">メインコンテンツにスキップ</SkipLink>
 
       <div className="app">
+        {/* Floating Header */}
         <header className="app-header" role="banner">
-          <h1>🗺️ 佐渡飲食店マップ</h1>
-          <p>佐渡島のおいしいお店を見つけよう</p>
+          <div className="app-header-content">
+            <h1>🗺️ 佐渡島マップ</h1>
+            <p>飲食店・駐車場・トイレを探す</p>
+          </div>
         </header>
 
         <main id="main-content" className="app-main">
@@ -190,64 +260,47 @@ function App() {
             libraries={["maps", "marker", "geometry"]}
           >
             <div className="app-content">
-              <FilterPanel
-                loading={asyncState.loading}
-                resultCount={filteredRestaurants.length}
+              {/* Floating Filter Panel */}
+              <ModernFilterPanel
+                loading={loading}
+                resultCount={filteredMapPoints.length}
                 onCuisineFilter={handleCuisineFilter}
                 onPriceFilter={handlePriceFilter}
+                onDistrictFilter={handleDistrictFilter}
+                onRatingFilter={handleRatingFilter}
+                onOpenNowFilter={handleOpenNowFilter}
                 onSearchFilter={handleSearchFilter}
-                onSortChange={setSortOrder}
+                onSortChange={updateSortOrder}
                 onFeatureFilter={handleFeatureFilter}
+                onPointTypeFilter={handlePointTypeFilter}
                 onResetFilters={handleResetFilters}
               />
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1rem",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "1rem",
-                    backgroundColor: "#f0f9ff",
-                    borderRadius: "8px",
-                    border: "1px solid #bae6fd",
-                  }}
-                  role="status"
-                  aria-live="polite"
-                >
-                  <h3 style={{ margin: "0 0 0.5rem 0", color: "#0369a1" }}>
-                    📊 検索結果: {filteredRestaurants.length}件
-                    {filteredRestaurants.length > 0 && (
-                      <span
-                        style={{ fontSize: "0.875rem", fontWeight: "normal" }}
-                      >
-                        （全{asyncState.data?.length || 0}件中）
-                      </span>
-                    )}
-                  </h3>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.875rem",
-                      color: "#0891b2",
-                    }}
-                  >
-                    {filteredRestaurants.length === 0
-                      ? "条件に一致するお店が見つかりませんでした。フィルターを調整してみてください。"
-                      : "フィルターを使って、お探しのお店を見つけてください"}
-                  </p>
-                </div>
-
-                <RestaurantMap
-                  restaurants={filteredRestaurants}
-                  center={SADO_CENTER}
-                  loading={asyncState.loading}
-                  error={asyncState.error}
-                />
+              {/* Floating Results Status */}
+              <div className="results-status" role="status" aria-live="polite">
+                <h3>
+                  📊 検索結果: {filteredMapPoints.length}件
+                  {stats && (
+                    <span style={{ fontSize: "0.75rem", fontWeight: "normal" }}>
+                      （🍽️{stats.restaurants} 🅿️{stats.parkings} 🚽
+                      {stats.toilets}）
+                    </span>
+                  )}
+                </h3>
+                <p>
+                  {filteredMapPoints.length === 0
+                    ? "条件に一致するポイントが見つかりませんでした"
+                    : "フィルターでさらに絞り込み可能です"}
+                </p>
               </div>
+
+              {/* Fullscreen Map */}
+              <MapView
+                mapPoints={filteredMapPoints}
+                center={SADO_CENTER}
+                loading={loading}
+                error={error}
+              />
             </div>
           </APIProvider>
         </main>

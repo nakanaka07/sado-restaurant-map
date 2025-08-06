@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "./styles/App.css"; // App.cssを最優先で読み込み
 import "./styles/index.css";
 import App from "./components/App";
 
