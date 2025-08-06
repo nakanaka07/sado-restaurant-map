@@ -55,51 +55,68 @@ class DataValidator:
     
     def _load_district_mapping(self) -> Dict[str, List[str]]:
         """佐渡市公式地区分類マッピングを読み込み"""
+        # 佐渡市公式サイト基準: https://www.city.sado.niigata.jp/soshiki/2002/2359.html
         return {
             '両津地区': [
-                '両津', '河崎', '湊', '秋津', '和木', '原黒', '水津', '小川', '梅津',
-                '東強清水', '小田', '両津福浦', '玉川', '立野', '両津夷', '両津夷新',
-                '上横山', '中津', '下戸', '真木', '旭', '城腰', '中興乙', '青野', '蚫',
-                '東立島', '浦川', '月布施', '北片辺', '南片辺', '北立島', '羽二生', '大川',
-                '黒山', '湖畔', '野浦', '住吉', '下戸炭屋', '両津福浦一丁目', '両津福浦二丁目',
-                '夷', '川茂', '山田', '久知河内', '両津湊', '古津'
+                '両津', '河崎', '秋津', '梅津', '湊', '原黒', '北田野浦', '春日', '浜田', '加茂歌代',
+                '羽吉', '椿', '北五十里', '白瀬', '玉崎', '和木', '馬首', '北松ケ崎', '平松',
+                '浦川', '歌見', '黒姫', '虫崎', '両津大川', '羽二生', '両尾', '椎泊', '真木',
+                '下久知', '久知河内', '城腰', '住吉', '吾潟', '立野', '上横山', '長江',
+                '潟端', '下横山', '旭', '水津', '片野尾', '月布施', '野浦', '東強清水',
+                '東立島', '岩首', '東鵜島', '柿野浦', '豊岡', '立間', '赤玉', '蚫',
+                '北小浦', '見立', '鷲崎', '願', '北鵜島', '真更川', '両津福浦', '藻浦'
             ],
             '相川地区': [
-                '相川', '下相川', '相川一町目', '相川二町目', '相川三町目', '相川四町目',
-                '相川五町目', '相川六町目', '相川栄町', '相川濁川町', '相川塩屋町',
-                '相川上町', '高山', '北鵜島', '鷲崎', '関', '五十里', '下戸村',
-                '大立', '小川', '北狄', '海士町', '姫津', '戸中', '石花', '稲鯨',
-                '橘', '岩首', '戸地', '和田', '沢根', '沢根五十里', '入川', '相川下戸',
-                '相川米屋町', '相川羽田町', '相川下戸炭屋二町目', '相川大浦', '小野見',
-                '達者', '銀山町', '左沢', '相川材木町', '窪田', '相川諏訪町'
+                '相川', '戸中', '北立島', '達者', '入川', '北片辺', '関', '高瀬', '橘', '稲鯨',
+                '米郷', '二見', '下相川', '小川', '姫津', '北狄', '戸地', '南片辺', '石花',
+                '後尾', '北川内', '高千', '小野見', '石名', '小田', '大倉', '矢柄',
+                '五十浦', '岩谷口', '相川大浦',
+                # 相川町内の詳細地名
+                '相川水金町', '相川柴町', '相川大間町', '相川紙屋町', '相川炭屋町', '相川濁川町',
+                '相川坂下町', '相川北沢町', '相川下山之神町', '相川柄杓町', '相川奈良町', '奈良町',
+                '相川嘉左衛門町', '相川清右衛門町', '相川銀山町', '相川小右衛門町', '相川勘四郎町',
+                '上相川町', '相川五郎右衛門町', '相川宗徳町', '相川庄右衛門町', '相川次助町',
+                '相川諏訪町', '相川大工町', '相川新五郎町', '相川六右衛門町', '相川上京町',
+                '相川左門町', '相川大床屋町', '相川中京町', '相川下京町', '相川八百屋町',
+                '相川会津町', '相川味噌屋町', '相川米屋町', '相川夕白町', '相川弥十郎町',
+                '相川四十物町', '相川広間町', '相川西坂町', '相川長坂町', '相川上寺町',
+                '相川中寺町', '相川下寺町', '相川南沢町', '相川小六町', '相川新西坂町',
+                '相川石扣町', '相川塩屋町', '相川板町', '相川材木町', '相川新材木町',
+                '相川羽田町', '相川江戸沢町', '相川一町目', '相川一町目裏町', '相川一町目浜町',
+                '相川二町目', '相川五郎左衛門町', '相川二町目浜町', '相川二町目新浜町',
+                '相川三町目', '相川三町目浜町', '相川三町目新浜町', '相川四町目',
+                '相川四町目浜町', '相川市町', '相川新浜町', '相川馬町', '相川羽田村',
+                '相川下戸町', '相川下戸浜町', '相川下戸炭屋町', '相川下戸炭屋裏町',
+                '相川下戸炭屋浜町', '相川海士町', '相川下戸村', '相川鹿伏', '相川栄町'
             ],
             '佐和田地区': [
-                '佐和田', '市野沢', '真光寺', '西山', '中原', '沢根篭町', '八幡町',
-                '八幡', '河原田', '河原田本町', '河原田諏訪町', '石田', '真野湾',
-                '市野沢', '大和田', '二宮', '沢根', '沢根炭屋町', '窪田', '市野沢'
+                '佐和田', '沢根', '窪田', '中原', '河原田', '八幡', '八幡新町', '八幡町',
+                '河原田本町', '河原田諏訪町', '鍛冶町', '石田', '上長木', '下長木', '長木',
+                '上矢馳', '二宮', '市野沢', '真光寺', '山田', '青野', '東大通', 
+                '沢根五十里', '沢根篭町', '沢根炭屋町', '沢根町'
             ],
             '金井地区': [
                 '金井', '千種', '吉井', '泉', '中興', '平清水', '金井新保', '貝塚',
                 '大和', '吉井本郷', '安養寺', '三瀬川', '水渡田'
             ],
             '新穂地区': [
-                '新穂', '新穗', '大野', '下新穂', '舟下', '皆川', '新穂皆川', '新穂舟下', 
-                '新穂武井', '新穂大野', '新穂井内', '上新穂', '新穂瓜生屋', '新穂正明寺', 
-                '新穂田野沢', '新穂潟上', '新穂青木', '新穂長畝', '新穂北方'
+                '新穂', '新穗', '大野', '下新穂', '舟下', '皆川', '新穂皆川', '新穂舟下', '新穂武井',
+                '新穂大野', '新穂井内', '上新穂', '新穂瓜生屋', '新穂正明寺', '新穂田野沢',
+                '新穂潟上', '新穂青木', '新穂長畝', '新穂北方'
             ],
             '畑野地区': [
-                '畑野', '宮川', '栗野江', '目黒町', '三宮', '松ケ崎', '多田', '寺田', 
-                '飯持', '畉田', '大久保', '猿八', '小倉', '長谷', '坊ケ浦', '浜河内', '丸山'
+                '畑野', '宮川', '栗野江', '目黒町', '三宮', '松ケ崎', '多田', '寺田', '飯持',
+                '畉田', '大久保', '猿八', '小倉', '長谷', '坊ケ浦', '浜河内', '丸山'
             ],
             '真野地区': [
-                '真野', '豊田', '四日町', '吉岡', '大小', '金丸', '長石', '真野新町', 
-                '滝脇', '背合', '大須', '静平', '下黒山', '真野大川', '名古屋', '国分寺', 
-                '竹田', '阿仏坊', '阿佛坊', '大倉谷', '田切須', '西三川', '椿尾'
+                '真野', '豊田', '四日町', '吉岡', '大小', '金丸', '長石', '真野新町', '滝脇',
+                '背合', '大須', '静平', '下黒山', '真野大川', '名古屋', '国分寺', '竹田',
+                '阿仏坊', '阿佛坊', '大倉谷', '田切須', '西三川', '椿尾'
             ],
             '小木地区': [
-                '小木', '宿根木', '深浦', '田野浦', '強清水', '小木町', '小木木野浦', 
-                '小比叡', '小木堂釜', '井坪', '小木大浦', '木流', '江積', '沢崎', 
-                '犬神平', '小木強清水', '琴浦', '小木金田新田'
+                '小木', '宿根木', '深浦', '田野浦', '強清水', '小木町', '小木木野浦', '小比叡',
+                '小木堂釜', '井坪', '小木大浦', '木流', '江積', '沢崎', '犬神平',
+                '小木強清水', '琴浦', '小木金田新田'
             ],
             '羽茂地区': [
                 '羽茂', '大石', '羽茂本郷', '羽茂三瀬', '亀脇', '羽茂滝平', '羽茂大崎',
@@ -200,24 +217,41 @@ class DataValidator:
     
     def format_opening_hours(self, opening_hours_data: Optional[Dict]) -> str:
         """営業時間データをフォーマット"""
-        if not opening_hours_data or 'weekdayDescriptions' not in opening_hours_data:
+        if not opening_hours_data:
             return ""
         
-        descriptions = opening_hours_data['weekdayDescriptions']
-        if not descriptions:
-            return ""
+        # weekdayDescriptions または periods のいずれかが存在する場合
+        descriptions = opening_hours_data.get('weekdayDescriptions', [])
+        if descriptions:
+            # 曜日順に並び替え（月火水木金土日）
+            weekday_order = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日']
+            sorted_descriptions = []
+            
+            for day in weekday_order:
+                for desc in descriptions:
+                    if desc.startswith(day):
+                        sorted_descriptions.append(desc)
+                        break
+            
+            return '\n'.join(sorted_descriptions)
         
-        # 曜日順に並び替え（月火水木金土日）
-        weekday_order = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日']
-        sorted_descriptions = []
+        # periods データがある場合
+        periods = opening_hours_data.get('periods', [])
+        if periods:
+            # periods を weekdayDescriptions 形式に変換
+            weekday_names = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日']
+            formatted_periods = []
+            
+            for period in periods:
+                if 'open' in period:
+                    day = period['open'].get('day', 0)
+                    time = period['open'].get('time', '0000')
+                    if day < len(weekday_names):
+                        formatted_periods.append(f"{weekday_names[day]}: {time[:2]}:{time[2:]}～")
+            
+            return '\n'.join(formatted_periods)
         
-        for day in weekday_order:
-            for desc in descriptions:
-                if desc.startswith(day):
-                    sorted_descriptions.append(desc)
-                    break
-        
-        return '\n'.join(sorted_descriptions)
+        return ""
     
     def validate_place_data(self, place: Dict[str, Any], category: str) -> ValidationResult:
         """Places APIレスポンスを検証・変換"""
@@ -235,7 +269,13 @@ class DataValidator:
         
         # 住所の取得・正規化
         raw_address = place.get('shortFormattedAddress', '')
+        if not raw_address:
+            raw_address = place.get('formattedAddress', '')
         normalized_address = self.normalize_address(raw_address)
+        
+        # 名前の取得
+        if isinstance(name, dict) and 'text' in name:
+            name = name['text']
         
         # 座標の取得
         location = place.get('location', {})
@@ -266,12 +306,10 @@ class DataValidator:
         
         # Google Maps URL の生成
         google_maps_url = ""
-        if 'googleMapsLinks' in place and place['googleMapsLinks']:
-            google_maps_url = place['googleMapsLinks'].get('directionsLink', 
-                             place['googleMapsLinks'].get('searchLink', ''))
-        
-        if not google_maps_url and place_id:
-            google_maps_url = f"https://www.google.com/maps/search/?api=1&query=Google&query_place_id={place_id}"
+        if 'googleMapsUri' in place:
+            google_maps_url = place['googleMapsUri']
+        elif place_id:
+            google_maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
         
         # タイムスタンプ
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
@@ -285,11 +323,17 @@ class DataValidator:
                 'latitude': lat,
                 'longitude': lng,
                 'primary_type': place.get('primaryType', ''),
-                'primary_type_display': place.get('primaryTypeDisplayName', {}).get('text', ''),
+                'primary_type_display': place.get('primaryTypeDisplayName', {}).get('text', '') if isinstance(place.get('primaryTypeDisplayName'), dict) else place.get('primaryTypeDisplayName', ''),
                 'phone': place.get('nationalPhoneNumber', ''),
                 'opening_hours': self.format_opening_hours(place.get('regularOpeningHours')),
                 'rating': place.get('rating', ''),
                 'review_count': place.get('userRatingCount', ''),
+                'business_status': place.get('businessStatus', ''),
+                'types': place.get('types', []),
+                'website': place.get('websiteUri', ''),
+                'price_level': place.get('priceLevel', ''),
+                'editorial_summary': place.get('editorialSummary', {}).get('text', '') if isinstance(place.get('editorialSummary'), dict) else place.get('editorialSummary', ''),
+                'formatted_address': place.get('formattedAddress', ''),
                 'district': district,
                 'google_maps_url': google_maps_url,
                 'timestamp': timestamp,
@@ -304,7 +348,19 @@ class DataValidator:
                 'latitude': lat,
                 'longitude': lng,
                 'primary_type': place.get('primaryType', ''),
-                'primary_type_display': place.get('primaryTypeDisplayName', {}).get('text', ''),
+                'primary_type_display': place.get('primaryTypeDisplayName', {}).get('text', '') if isinstance(place.get('primaryTypeDisplayName'), dict) else place.get('primaryTypeDisplayName', ''),
+                'business_status': place.get('businessStatus', ''),
+                'types': place.get('types', []),
+                'rating': place.get('rating', ''),
+                'review_count': place.get('userRatingCount', ''),
+                'opening_hours': self.format_opening_hours(place.get('regularOpeningHours')),
+                'editorial_summary': place.get('editorialSummary', {}).get('text', '') if isinstance(place.get('editorialSummary'), dict) else place.get('editorialSummary', ''),
+                'formatted_address': place.get('formattedAddress', ''),
+                'payment_options': place.get('paymentOptions', {}),
+                'accessibility_options': place.get('accessibilityOptions', {}),
+                'restroom': place.get('restroom', ''),
+                'good_for_children': place.get('goodForChildren', ''),
+                'parking_options': place.get('parkingOptions', {}),
                 'district': district,
                 'google_maps_url': google_maps_url,
                 'timestamp': timestamp,

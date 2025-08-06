@@ -9,7 +9,6 @@
 # これらのURLは直接Place詳細を取得可能（API効率◎）
 
 https://maps.google.com/place?cid=6366317099313563773  # 平根崎駐車場
-https://maps.google.com/place?cid=6738635503330442307  # 鎮目サンセット・パーク
 https://maps.google.com/place?cid=2445924530673934432  # 平松駐車場
 https://maps.google.com/place?cid=11026485518381875542  # 北田野浦駐車場
 https://maps.google.com/place?cid=10272798561657426385  # みなと中央公園駐車場・おんでこドーム駐車場
@@ -93,7 +92,6 @@ https://maps.google.com/place?cid=8771310345932489773  # あいぽーと佐渡+�
 https://maps.google.com/place?cid=6639224502650128870  # 達者海岸展望駐車場
 https://maps.google.com/place?cid=1462875257241608016  # 市営駐車場
 https://maps.google.com/place?cid=6397693045501503705  # 二ツ亀第１駐車場
-https://maps.google.com/place?cid=11927807652993295310  # 佐渡歴史伝説館+駐車場
 https://maps.google.com/place?cid=1129946872099294418  # サン・スポーツランド畑野駐車場
 https://maps.google.com/place?cid=13178689977863705568  # 杉池県民休養地駐車場
 https://maps.google.com/place?cid=9531719268699203830  # 南片辺駐車場

@@ -68,108 +68,118 @@ class PlacesAPIClient:
             time.sleep(self.config.request_delay - elapsed)
         self.last_request_time = time.time()
     
-    def _build_field_mask(self, category: str) -> str:
-        """カテゴリに応じたフィールドマスクを構築"""
+    def _build_field_mask(self, category: str, api_type: str = 'details') -> str:
+        """カテゴリに応じたフィールドマスクを構築
+        
+        Args:
+            category: カテゴリ（restaurants, parkings, toilets）
+            api_type: APIの種類（'details' または 'search'）
+        """
         base_fields = [
-            "places.id",
-            "places.shortFormattedAddress", 
-            "places.location",
-            "places.displayName",
-            "places.primaryType",
-            "places.primaryTypeDisplayName",
-            "places.googleMapsLinks"
+            "id",
+            "shortFormattedAddress", 
+            "location",
+            "displayName",
+            "primaryType",
+            "primaryTypeDisplayName",
+            "googleMapsUri"
         ]
         
         if category in ['restaurant', 'restaurants']:
             # Places API (New) v1 拡張フィールド（飲食店用包括的データ）
             additional_fields = [
                 # 基本営業データ
-                "places.regularOpeningHours",
-                "places.nationalPhoneNumber",
-                "places.rating",
-                "places.userRatingCount",
-                "places.priceLevel",
-                "places.businessStatus",
-                "places.types",
-                "places.websiteUri",
-                "places.reviews",
-                "places.photos",
+                "regularOpeningHours",
+                "nationalPhoneNumber",
+                "rating",
+                "userRatingCount",
+                "priceLevel",
+                "businessStatus",
+                "types",
+                "websiteUri",
+                "reviews",
+                "photos",
                 
                 # 拡張営業データ (Places API New v1)
-                "places.editorialSummary",        # 店舗説明
-                "places.formattedAddress",        # 完全住所
-                "places.currentOpeningHours",     # 現在の営業時間
-                "places.utcOffsetMinutes",        # UTCオフセット
+                "editorialSummary",        # 店舗説明
+                "formattedAddress",        # 完全住所
+                "currentOpeningHours",     # 現在の営業時間
+                "utcOffsetMinutes",        # UTCオフセット
                 
                 # サービス・設備情報
-                "places.takeout",                 # テイクアウト対応
-                "places.delivery",                # デリバリー対応
-                "places.dineIn",                  # 店内飲食対応
-                "places.curbsidePickup",          # カーブサイドピックアップ
-                "places.reservable",              # 予約可能
+                "takeout",                 # テイクアウト対応
+                "delivery",                # デリバリー対応
+                "dineIn",                  # 店内飲食対応
+                "curbsidePickup",          # カーブサイドピックアップ
+                "reservable",              # 予約可能
                 
                 # 食事・時間帯対応
-                "places.servesBreakfast",         # 朝食提供
-                "places.servesLunch",             # 昼食提供
-                "places.servesDinner",            # 夕食提供
+                "servesBreakfast",         # 朝食提供
+                "servesLunch",             # 昼食提供
+                "servesDinner",            # 夕食提供
                 
                 # アルコール・飲み物
-                "places.servesBeer",              # ビール提供
-                "places.servesWine",              # ワイン提供
-                "places.servesCocktails",         # カクテル提供
-                "places.servesCoffee",            # コーヒー提供
+                "servesBeer",              # ビール提供
+                "servesWine",              # ワイン提供
+                "servesCocktails",         # カクテル提供
+                "servesCoffee",            # コーヒー提供
                 
                 # 特別メニュー・食事制限対応
-                "places.servesVegetarianFood",    # ベジタリアン料理
-                "places.servesDessert",           # デザート提供
-                "places.menuForChildren",         # 子供向けメニュー
+                "servesVegetarianFood",    # ベジタリアン料理
+                "servesDessert",           # デザート提供
+                "menuForChildren",         # 子供向けメニュー
                 
                 # 設備・環境
-                "places.outdoorSeating",          # 屋外席
-                "places.liveMusic",               # ライブ音楽
-                "places.restroom",                # トイレ完備
+                "outdoorSeating",          # 屋外席
+                "liveMusic",               # ライブ音楽
+                "restroom",                # トイレ完備
                 
                 # 顧客対応
-                "places.goodForChildren",         # 子供連れ歓迎
-                "places.allowsDogs",              # ペット同伴可
-                "places.goodForGroups",           # グループ向け
-                "places.goodForWatchingSports",   # スポーツ観戦向け
+                "goodForChildren",         # 子供連れ歓迎
+                "allowsDogs",              # ペット同伴可
+                "goodForGroups",           # グループ向け
+                "goodForWatchingSports",   # スポーツ観戦向け
                 
                 # 支払い・駐車場
-                "places.paymentOptions",          # 支払い方法
-                "places.parkingOptions",          # 駐車場オプション
-                "places.accessibilityOptions"     # アクセシビリティオプション
+                "paymentOptions",          # 支払い方法
+                "parkingOptions",          # 駐車場オプション
+                "accessibilityOptions"     # アクセシビリティオプション
             ]
-            return ','.join(base_fields + additional_fields)
+            all_fields = base_fields + additional_fields
         elif category in ['parking', 'parkings', 'toilet', 'toilets']:
-            # 駐車場・公衆トイレ用設定（Phase 1実装 - 2025年8月5日）
-            # Phase 1: 基本拡張項目を追加
+            # 駐車場・公衆トイレ用設定（修正版 - 2025年8月6日）
+            # 有効なフィールドのみを使用
             
             additional_fields = [
-                # 既存の基本設定
-                "places.businessStatus",          # 営業状況
-                "places.types",                   # 施設タイプ
-                "places.photos",                  # 写真データ
+                # 基本営業データ
+                "businessStatus",          # 営業状況
+                "types",                   # 施設タイプ
+                "photos",                  # 写真データ
+                "rating",                  # 評価
+                "userRatingCount",         # レビュー数
                 
-                # Phase 1 追加項目（parking_toilet_fields_consideration.md より）
-                "places.regularOpeningHours",     # 営業/開放時間
-                "places.accessibilityOptions",    # アクセシビリティ全般
-                "places.rating",                  # 評価
-                "places.userRatingCount",         # レビュー数
-                
-                # Phase 2 候補項目（必要に応じて今後追加）
-                "places.paymentOptions",          # 料金体系（駐車場重要）
-                "places.restroom",                # トイレ設備（駐車場）
-                "places.goodForChildren",         # 子供連れ対応（公衆トイレ）
-                "places.parkingOptions",          # 駐車場併設（公衆トイレ）
-                "places.editorialSummary",        # 施設説明
-                "places.formattedAddress"         # 完全住所
+                # 営業・設備情報
+                "regularOpeningHours",     # 営業/開放時間
+                "accessibilityOptions",    # アクセシビリティ全般
+                "paymentOptions",          # 料金体系（駐車場重要）
+                "restroom",                # トイレ設備（駐車場）
+                "goodForChildren",         # 子供連れ対応（公衆トイレ）
+                "parkingOptions",          # 駐車場併設（公衆トイレ）
+                "editorialSummary",        # 施設説明
+                "formattedAddress"         # 完全住所
             ]
-            
-            return ','.join(base_fields + additional_fields)
+            all_fields = base_fields + additional_fields
         else:
             # 未知のカテゴリの場合は基本フィールドのみ
-            return ','.join(base_fields)
+            all_fields = base_fields
+        
+        # APIの種類に応じてプレフィックスを付与
+        if api_type == 'search':
+            # Text Search API用: places. プレフィックスが必要
+            return ','.join(f'places.{field}' for field in all_fields)
+        else:
+            # Place Details API用: プレフィックス不要
+            return ','.join(all_fields)
     
     def _build_location_bias(self) -> Dict[str, Any]:
         """佐渡島の境界ボックスを構築"""
@@ -217,7 +227,7 @@ class PlacesAPIClient:
         headers = {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': self.config.api_key,
-            'X-Goog-FieldMask': self._build_field_mask(category)
+            'X-Goog-FieldMask': self._build_field_mask(category, 'search')
         }
         
         try:
@@ -246,6 +256,52 @@ class PlacesAPIClient:
             print(f"❌ Unexpected error: {e}")
             return 'ERROR', []
     
+    def get_place_details(self, place_id: str, category: str = 'restaurants') -> Optional[Dict]:
+        """
+        Place IDから詳細情報を取得
+        
+        Args:
+            place_id: Google Place ID
+            category: カテゴリ（restaurants, parkings, toilets）
+            
+        Returns:
+            Place詳細情報またはNone
+        """
+        self._wait_for_rate_limit()
+        
+        # ヘッダー構築
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': self.config.api_key,
+            'X-Goog-FieldMask': self._build_field_mask(category, 'details')
+        }
+        
+        try:
+            print(f"🔍 Place Details検索: {place_id}")
+            
+            response = requests.get(
+                f'https://places.googleapis.com/v1/places/{place_id}',
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code == 404:
+                print(f"⚠️ Place not found: {place_id}")
+                return None
+            
+            response.raise_for_status()
+            place_data = response.json()
+            
+            print(f"✅ Place Details取得成功")
+            return place_data
+            
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Place Details API request failed: {e}")
+            return None
+        except Exception as e:
+            print(f"❌ Place Details Unexpected error: {e}")
+            return None
+
     def get_place_details_from_cid(self, cid_url: str, category: str) -> Tuple[str, Optional[Dict]]:
         """
         CID URLからPlace詳細を取得
@@ -273,7 +329,7 @@ class PlacesAPIClient:
         headers = {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': self.config.api_key,
-            'X-Goog-FieldMask': self._build_field_mask(category)
+            'X-Goog-FieldMask': self._build_field_mask(category, 'details')
         }
         
         try:

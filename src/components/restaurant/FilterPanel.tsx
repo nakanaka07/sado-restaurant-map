@@ -365,7 +365,7 @@ export function FilterPanel({
           </div>
         </div>
 
-        {/* クイックフィルター */}
+        {/* クイックフィルター - 実際のデータベースに基づく特徴 */}
         <div>
           <p
             style={{
@@ -378,32 +378,89 @@ export function FilterPanel({
             こだわり条件
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-            {["駐車場あり", "禁煙", "テイクアウト可", "予約可能"].map(
-              (feature) => (
-                <label
-                  key={feature}
+            {[
+              "テイクアウト可",
+              "デリバリー可",
+              "店内飲食可",
+              "朝食提供",
+              "昼食提供",
+              "夕食提供",
+              "ビール提供",
+              "ワイン提供",
+              "カクテル提供",
+              "コーヒー提供",
+              "ベジタリアン対応",
+              "子供向けメニュー",
+              "デザート提供",
+              "屋外席",
+              "音楽あり",
+              "トイレあり",
+              "駐車場あり",
+              "バリアフリー",
+              "子供連れ歓迎",
+              "ペット同伴可",
+              "グループ利用可",
+              "スポーツ観戦可",
+              "禁煙",
+              "個室あり",
+              "テラス席",
+              "Wi-Fiあり",
+              "クレジットカード可",
+              "予約可能",
+            ].map((feature) => (
+              <label
+                key={feature}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  padding: "0.25rem 0.5rem",
+                  backgroundColor: selectedFeatures.includes(feature)
+                    ? "#dbeafe"
+                    : "#f8fafc",
+                  borderRadius: "6px",
+                  border: "1px solid",
+                  borderColor: selectedFeatures.includes(feature)
+                    ? "#3b82f6"
+                    : "#e2e8f0",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  if (!selectedFeatures.includes(feature)) {
+                    e.currentTarget.style.backgroundColor = "#f1f5f9";
+                    e.currentTarget.style.borderColor = "#cbd5e1";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!selectedFeatures.includes(feature)) {
+                    e.currentTarget.style.backgroundColor = "#f8fafc";
+                    e.currentTarget.style.borderColor = "#e2e8f0";
+                  }
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedFeatures.includes(feature)}
+                  onChange={() => handleFeatureToggle(feature)}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
+                    width: "16px",
+                    height: "16px",
+                    accentColor: "#3b82f6",
+                  }}
+                />
+                <span
+                  style={{
+                    color: selectedFeatures.includes(feature)
+                      ? "#1e40af"
+                      : "#374151",
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedFeatures.includes(feature)}
-                    onChange={() => handleFeatureToggle(feature)}
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                      accentColor: "#3b82f6",
-                    }}
-                  />
-                  <span style={{ color: "#374151" }}>{feature}</span>
-                </label>
-              )
-            )}
+                  {feature}
+                </span>
+              </label>
+            ))}
           </div>
         </div>
       </div>

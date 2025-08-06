@@ -410,7 +410,8 @@ class SpreadsheetManager:
     def worksheet_exists(self, worksheet_name: str) -> bool:
         """ワークシートの存在確認"""
         try:
-            self.spreadsheet.worksheet(worksheet_name)
+            spreadsheet = self._get_spreadsheet()
+            spreadsheet.worksheet(worksheet_name)
             return True
         except gspread.exceptions.WorksheetNotFound:
             return False
@@ -418,7 +419,8 @@ class SpreadsheetManager:
     def get_all_records(self, worksheet_name: str) -> List[Dict[str, Any]]:
         """ワークシートの全レコードを取得"""
         try:
-            worksheet = self.spreadsheet.worksheet(worksheet_name)
+            spreadsheet = self._get_spreadsheet()
+            worksheet = spreadsheet.worksheet(worksheet_name)
             records = worksheet.get_all_records()
             return records
         except Exception as e:
@@ -428,9 +430,10 @@ class SpreadsheetManager:
     def duplicate_worksheet(self, source_name: str, target_name: str) -> bool:
         """ワークシートを複製"""
         try:
-            source_worksheet = self.spreadsheet.worksheet(source_name)
+            spreadsheet = self._get_spreadsheet()
+            source_worksheet = spreadsheet.worksheet(source_name)
             # 新しいワークシートを作成
-            target_worksheet = self.spreadsheet.add_worksheet(
+            target_worksheet = spreadsheet.add_worksheet(
                 title=target_name,
                 rows=source_worksheet.row_count,
                 cols=source_worksheet.col_count
@@ -451,6 +454,15 @@ class SpreadsheetManager:
             print(f"❌ ワークシート複製エラー: {e}")
             return False
     
+    def _get_headers_for_category(self, category: str) -> List[str]:
+        """カテゴリに対応するヘッダーを取得"""
+        if category in self.worksheet_configs:
+            return self.worksheet_configs[category].headers
+        else:
+            # デフォルトヘッダー
+            return ['Place ID', '名称', '住所', '緯度', '経度', '評価', 'レビュー数', 
+                   '営業状況', '営業時間', '電話番号', 'ウェブサイト', '最終更新日時']
+    
     def create_or_update_worksheet(self, worksheet_name: str, data: List[Dict[str, Any]], 
                                   category: str) -> bool:
         """ワークシートを作成または更新"""
@@ -462,11 +474,13 @@ class SpreadsheetManager:
             # ワークシートの存在確認
             if self.worksheet_exists(worksheet_name):
                 # 既存ワークシートを更新
-                worksheet = self.spreadsheet.worksheet(worksheet_name)
+                spreadsheet = self._get_spreadsheet()
+                worksheet = spreadsheet.worksheet(worksheet_name)
                 worksheet.clear()
             else:
                 # 新規ワークシートを作成
-                worksheet = self.spreadsheet.add_worksheet(
+                spreadsheet = self._get_spreadsheet()
+                worksheet = spreadsheet.add_worksheet(
                     title=worksheet_name,
                     rows=len(data) + 10,  # 余裕を持たせる
                     cols=20

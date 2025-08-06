@@ -54,7 +54,6 @@ https://maps.google.com/place?cid=10218144829014330171  # 泉公衆トイレ
 https://maps.google.com/place?cid=15896455896906887329  # 城ヶ鼻公園公衆トイレ
 https://maps.google.com/place?cid=13955750320922743827  # 新穂大野根本寺公衆トイレ
 https://maps.google.com/place?cid=22549085921216690  # 松ヶ崎トイレ
-https://maps.google.com/place?cid=13185082515097076019  # ムサシ佐和田店トイレ
 https://maps.google.com/place?cid=11007530938296100964  # 佐和田海水浴場公衆トイレ
 https://maps.google.com/place?cid=15505258155460342736  # 中原公衆トイレ
 https://maps.google.com/place?cid=15677501286954264582  # 公衆トイレ

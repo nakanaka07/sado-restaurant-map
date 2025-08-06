@@ -119,8 +119,7 @@ export function useRestaurants(
     searchQuery: "",
   }
 ): UseRestaurantsResult {
-  const [restaurants, setRestaurants] =
-    useState<readonly Restaurant[]>(MOCK_RESTAURANTS);
+  const [restaurants, setRestaurants] = useState<readonly Restaurant[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
   const [filters, setInternalFilters] = useState<MapFilters>(initialFilters);
@@ -128,8 +127,8 @@ export function useRestaurants(
   const [asyncState, setAsyncState] = useState<
     AsyncState<readonly Restaurant[]>
   >({
-    data: MOCK_RESTAURANTS,
-    loading: false,
+    data: [],
+    loading: true, // 初期状態は読み込み中
     error: null,
   });
 
@@ -210,18 +209,26 @@ export function useRestaurants(
       // キャッシュされたデータがある場合はそれを使用
       const cachedData = localStorage.getItem("restaurantData");
       if (!needsUpdate && cachedData) {
-        const parsedData = JSON.parse(cachedData) as Restaurant[];
-        setRestaurants(parsedData);
-        setAsyncState({
-          data: parsedData,
-          loading: false,
-          error: null,
-        });
-        return;
+        try {
+          const parsedData = JSON.parse(cachedData) as Restaurant[];
+          setRestaurants(parsedData);
+          setAsyncState({
+            data: parsedData,
+            loading: false,
+            error: null,
+          });
+          return;
+        } catch (parseError) {
+          console.warn("キャッシュデータの解析に失敗:", parseError);
+          // キャッシュが無効な場合は新しいデータを取得
+        }
       }
 
       // Google Sheets APIからデータ取得
+      console.log("📡 Google Sheetsからデータを取得中...");
       const data = await fetchRestaurantsFromSheets();
+
+      console.log(`✅ ${data.length}件の飲食店データを取得しました`);
 
       // データをキャッシュ
       localStorage.setItem("restaurantData", JSON.stringify(data));
@@ -242,6 +249,8 @@ export function useRestaurants(
         errorMessage = error.message;
       }
 
+      console.error("データ取得エラー:", error);
+
       // フォールバック: キャッシュされたデータを使用
       const cachedData = localStorage.getItem("restaurantData");
       if (cachedData) {
@@ -260,6 +269,7 @@ export function useRestaurants(
       }
 
       // 最終フォールバック: モックデータ
+      console.warn("モックデータにフォールバック");
       setRestaurants(MOCK_RESTAURANTS);
       setAsyncState({
         data: MOCK_RESTAURANTS,
