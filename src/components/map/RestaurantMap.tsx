@@ -343,3 +343,5 @@ export default function RestaurantMap({
     </div>
   );
 }
+
+export { RestaurantMap };

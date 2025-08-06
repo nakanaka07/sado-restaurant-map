@@ -110,6 +110,7 @@ describe("RestaurantMap", () => {
       address: "佐渡市両津湊353",
       cuisineType: "寿司",
       priceRange: "2000-3000円",
+      district: "両津",
       coordinates: { lat: 38.0751, lng: 138.4094 },
       phone: "0259-27-5473",
       rating: 4.2,
@@ -130,6 +131,7 @@ describe("RestaurantMap", () => {
       address: "佐渡市金井新保甲1228",
       cuisineType: "そば・うどん",
       priceRange: "1000-2000円",
+      district: "金井",
       coordinates: { lat: 38.0621, lng: 138.3667 },
       phone: "0259-67-7408",
       rating: 4.0,
@@ -254,9 +256,9 @@ describe("RestaurantMap", () => {
 
       expect(screen.getByTestId("info-window")).toBeInTheDocument();
       expect(screen.getByText("寿司処金峰")).toBeInTheDocument();
-      expect(screen.getByText("📍 佐渡市両津湊353")).toBeInTheDocument();
-      expect(screen.getByText("🍽️ 寿司")).toBeInTheDocument();
-      expect(screen.getByText("📞 0259-27-5473")).toBeInTheDocument();
+      expect(screen.getByText("佐渡市両津湊353")).toBeInTheDocument();
+      expect(screen.getByText("寿司")).toBeInTheDocument();
+      expect(screen.getByText("0259-27-5473")).toBeInTheDocument();
     });
 
     it("InfoWindow閉じるボタンでInfoWindowが非表示になること", () => {
