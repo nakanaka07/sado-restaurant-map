@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FilterPanel } from "./FilterPanel";
 
@@ -25,15 +25,17 @@ describe("FilterPanel", () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    cleanup();
+  });
+
   describe("基本レンダリング", () => {
     it("正常にレンダリングされること", () => {
       render(<FilterPanel {...mockProps} />);
 
       expect(screen.getByText("🔍 飲食店を探す")).toBeInTheDocument();
       expect(screen.getByText("10件")).toBeInTheDocument();
-      expect(
-        screen.getByPlaceholderText("店舗名を入力...")
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText("店舗名で検索")).toBeInTheDocument();
     });
 
     it("すべてのフィルター要素が表示されること", () => {
@@ -95,7 +97,7 @@ describe("FilterPanel", () => {
       const user = userEvent.setup();
       render(<FilterPanel {...mockProps} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.type(searchInput, "寿司");
 
       expect(mockProps.onSearchFilter).toHaveBeenCalledWith("寿司");
@@ -107,7 +109,7 @@ describe("FilterPanel", () => {
 
       render(<FilterPanel {...mockProps} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.type(searchInput, "寿司");
 
       expect(trackSearch).toHaveBeenCalledWith("寿司", 10);
@@ -119,7 +121,7 @@ describe("FilterPanel", () => {
 
       render(<FilterPanel {...mockProps} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.type(searchInput, "   "); // 空白文字
 
       expect(trackSearch).not.toHaveBeenCalled();
@@ -129,7 +131,7 @@ describe("FilterPanel", () => {
       const user = userEvent.setup();
       render(<FilterPanel {...mockProps} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.type(searchInput, "テスト");
 
       expect(searchInput).toHaveValue("テスト");
@@ -334,7 +336,7 @@ describe("FilterPanel", () => {
       render(<FilterPanel {...mockProps} />);
 
       // 各フィルターに値を設定
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       const cuisineSelect = screen.getByLabelText("ジャンル");
       const priceSelect = screen.getByLabelText("価格帯");
       const sortSelect = screen.getByLabelText("並び順");
@@ -392,7 +394,7 @@ describe("FilterPanel", () => {
       const user = userEvent.setup();
       render(<FilterPanel resultCount={5} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.type(searchInput, "テスト");
 
       // エラーが発生しないことを確認
@@ -424,7 +426,7 @@ describe("FilterPanel", () => {
       const user = userEvent.setup();
       render(<FilterPanel {...mockProps} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.click(searchInput);
 
       expect(searchInput).toHaveFocus();
@@ -435,7 +437,7 @@ describe("FilterPanel", () => {
       render(<FilterPanel {...mockProps} />);
 
       // 検索欄に直接フォーカス
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.click(searchInput);
       expect(searchInput).toHaveFocus();
 
@@ -455,7 +457,7 @@ describe("FilterPanel", () => {
       const longText =
         "非常に長いレストラン名前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前前";
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
       await user.type(searchInput, longText);
 
       expect(mockProps.onSearchFilter).toHaveBeenCalledWith(longText);
@@ -465,7 +467,7 @@ describe("FilterPanel", () => {
       const user = userEvent.setup();
       render(<FilterPanel {...mockProps} />);
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
 
       await user.type(searchInput, "寿司");
       await user.clear(searchInput);
@@ -480,7 +482,7 @@ describe("FilterPanel", () => {
 
       const specialChars = "!@#$%^&*()_+-=";
 
-      const searchInput = screen.getByPlaceholderText("店舗名を入力...");
+      const searchInput = screen.getByLabelText("店舗名で検索");
 
       // 文字を一つずつ入力する方法
       await user.click(searchInput);

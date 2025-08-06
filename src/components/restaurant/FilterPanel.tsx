@@ -256,7 +256,7 @@ export function FilterPanel({
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          �️ マップポイントを探す
+          🔍 飲食店を探す
           <span
             style={{
               fontSize: "0.875rem",
