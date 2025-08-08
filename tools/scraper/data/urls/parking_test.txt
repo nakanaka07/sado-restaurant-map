@@ -1,2 +1,0 @@
-# テスト用駐車場データ
-https://maps.google.com/place?cid=6366317099313563773  # 平根崎駐車場
