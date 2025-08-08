@@ -11,10 +11,10 @@
 
 ## 📋 **開発ドキュメント**
 
-- 📈 **[開発ロードマップ](./DEVELOPMENT_ROADMAP.md)** - 段階的開発計画・進捗管理
+- 📈 **[開発ロードマップ](./docs/planning/DEVELOPMENT_ROADMAP.md)** - 段階的開発計画・進捗管理
 - 🚀 **[クイックスタートガイド](./QUICK_START_GUIDE.md)** - 即座の開発開始手順
-- 🤖 **[AI 活用ガイド](./ai-prompts.md)** - 効率的なコード改善指示
-- 🛠️ **[技術仕様書](./copilot-instructions.md)** - 開発ガイドライン・ベストプラクティス
+- 🤖 **[AI 活用ガイド](./docs/development/ai-prompts.md)** - 効率的なコード改善指示
+- 🛠️ **[技術仕様書](./docs/development/copilot-instructions.md)** - 開発ガイドライン・ベストプラクティス
 
 ### ✨ **主要機能**
 
