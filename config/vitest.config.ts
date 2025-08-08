@@ -41,6 +41,11 @@ export default defineConfig({
       "@types": path.resolve(__dirname, "../src/types"),
       "@utils": path.resolve(__dirname, "../src/utils"),
       "@config": path.resolve(__dirname, "../src/config"),
+      // PWA virtual module mock
+      "virtual:pwa-register/react": path.resolve(
+        __dirname,
+        "../src/test/mocks/pwa-register.ts"
+      ),
     },
   },
 });

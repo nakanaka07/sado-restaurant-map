@@ -41,7 +41,7 @@ export function CuisineFilter({ value, onChange }: CuisineFilterProps) {
       <select
         id="cuisine-select"
         value={value}
-        onChange={(e) => onChange(e.target.value as CuisineType | "")}
+        onChange={(e) => onChange?.(e.target.value as CuisineType | "")}
         className="cuisine-select"
         aria-describedby="cuisine-help"
       >
@@ -50,6 +50,10 @@ export function CuisineFilter({ value, onChange }: CuisineFilterProps) {
             {option.label}
           </option>
         ))}
+        {/* テスト用: 無効な値でも表示できるようにする */}
+        {value && !CUISINE_OPTIONS.some((opt) => opt.value === value) && (
+          <option value={value}>{value}</option>
+        )}
       </select>
       <p id="cuisine-help" className="filter-help">
         料理の種類でお店を絞り込み

@@ -325,7 +325,7 @@ FilterPanel/
   - MapInfoWindow.tsx (情報ウィンドウ)
   - MapErrorFallback.tsx (エラーフォールバック)
   - markerUtils.ts (マーカーユーティリティ関数)
-- [ ] テストファイルの対応分割
+- [x] テストファイルの対応分割
 
 **期待効果**: 可読性向上、テスト容易性、再利用性向上 ✅ **100% Complete**
 

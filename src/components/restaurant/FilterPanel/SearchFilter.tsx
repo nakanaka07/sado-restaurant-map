@@ -28,7 +28,7 @@ export function SearchFilter({
     }
 
     timeoutRef.current = setTimeout(() => {
-      onChange(inputValue);
+      onChange?.(inputValue);
     }, 300);
 
     return () => {

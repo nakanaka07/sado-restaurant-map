@@ -41,7 +41,7 @@ export function DistrictFilter({
               <input
                 type="checkbox"
                 checked={selectedDistricts.includes(option.value)}
-                onChange={() => onToggle(option.value)}
+                onChange={() => onToggle?.(option.value)}
                 className="district-checkbox"
                 aria-describedby="district-help"
               />

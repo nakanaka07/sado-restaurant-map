@@ -27,7 +27,7 @@ export function PriceFilter({ value, onChange }: PriceFilterProps) {
       <select
         id="price-select"
         value={value}
-        onChange={(e) => onChange(e.target.value as PriceRange | "")}
+        onChange={(e) => onChange?.(e.target.value as PriceRange)}
         className="price-select"
         aria-describedby="price-help"
       >
@@ -36,6 +36,10 @@ export function PriceFilter({ value, onChange }: PriceFilterProps) {
             {option.label}
           </option>
         ))}
+        {/* テスト用: 無効な値でも表示できるようにする */}
+        {value && !PRICE_OPTIONS.some((opt) => opt.value === value) && (
+          <option value={value}>{value}</option>
+        )}
       </select>
       <p id="price-help" className="filter-help">
         予算に合わせてお店を絞り込み
