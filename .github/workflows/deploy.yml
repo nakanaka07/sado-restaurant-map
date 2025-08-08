@@ -41,8 +41,8 @@ jobs:
         env:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'test-placeholder' }}
           VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID || 'test-placeholder' }}
-          VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+          VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID || 'test-spreadsheet-id' }}
+          VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY || 'test-sheets-api-key' }}
 
       - name: Debug environment variables
         run: |

@@ -1,3 +1,9 @@
+// Environment variables for testing - 最優先で設定
+process.env.VITE_GA_MEASUREMENT_ID = "G-TEST123456";
+process.env.VITE_GOOGLE_MAPS_API_KEY = "TEST_API_KEY";
+process.env.VITE_GOOGLE_SHEETS_API_KEY = "test-sheets-api-key";
+process.env.VITE_SPREADSHEET_ID = "test-spreadsheet-id";
+
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 import { configure } from "@testing-library/react";
@@ -132,10 +138,6 @@ Object.defineProperty(global, "localStorage", {
   value: localStorageMock,
   configurable: true,
 });
-
-// Environment variables for testing
-process.env.VITE_GA_MEASUREMENT_ID = "G-TEST123456";
-process.env.VITE_GOOGLE_MAPS_API_KEY = "TEST_API_KEY";
 
 // Mock analytics for testing
 vi.mock("../utils/analytics", () => ({

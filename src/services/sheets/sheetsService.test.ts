@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// 環境変数を事前にセット（モジュール読み込み前）
+vi.stubEnv("VITE_GOOGLE_SHEETS_API_KEY", "test-api-key");
+vi.stubEnv("VITE_SPREADSHEET_ID", "test-sheet-id");
+
 // vi.mockを無効化して実際の関数をテストする
 vi.unmock("./sheetsService");
 
@@ -18,14 +22,14 @@ vi.stubGlobal("fetch", mockFetch);
 describe("Google Sheets API連携テスト", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // 環境変数をセット
+    // 環境変数を再セット（念のため）
     vi.stubEnv("VITE_GOOGLE_SHEETS_API_KEY", "test-api-key");
     vi.stubEnv("VITE_SPREADSHEET_ID", "test-sheet-id");
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    vi.unstubAllEnvs();
+    // 環境変数はグローバルに設定しているので、個別にunstubしない
   });
 
   describe("fetchRestaurantsFromSheets", () => {
