@@ -7,6 +7,7 @@ import {
 import { useState, useCallback } from "react";
 import type { Restaurant } from "@/types";
 import { trackRestaurantClick, trackMapInteraction } from "@/utils/analytics";
+import { getMarkerColorByCuisine, getMarkerSizeByPrice } from "./utils";
 
 interface RestaurantMapProps {
   restaurants: readonly Restaurant[];
@@ -14,44 +15,6 @@ interface RestaurantMapProps {
   loading: boolean;
   error?: string | null;
 }
-
-/**
- * 料理ジャンルに基づいてマーカーの色を決定
- */
-const getMarkerColorByCuisine = (cuisineType: string): string => {
-  const colorMap: Record<string, string> = {
-    日本料理: "#ff9800", // オレンジ
-    寿司: "#e91e63", // ピンク
-    海鮮: "#2196f3", // 青
-    "焼肉・焼鳥": "#d32f2f", // 赤
-    ラーメン: "#ff5722", // ディープオレンジ
-    "そば・うどん": "#795548", // ブラウン
-    中華: "#f44336", // レッド
-    イタリアン: "#4caf50", // グリーン
-    フレンチ: "#9c27b0", // パープル
-    "カフェ・喫茶店": "#607d8b", // グレー
-    "バー・居酒屋": "#ff9800", // アンバー
-    ファストフード: "#ffeb3b", // イエロー
-    "デザート・スイーツ": "#e91e63", // ピンク
-    その他: "#9e9e9e", // グレー
-  };
-
-  return colorMap[cuisineType] || "#ff6b6b"; // デフォルト色
-};
-
-/**
- * 価格帯に基づいてマーカーのサイズを決定
- */
-const getMarkerSizeByPrice = (priceRange: string): number => {
-  const sizeMap: Record<string, number> = {
-    "～1000円": 1.0,
-    "1000-2000円": 1.2,
-    "2000-3000円": 1.4,
-    "3000円～": 1.6,
-  };
-
-  return sizeMap[priceRange] || 1.2; // デフォルトサイズ
-};
 
 export default function RestaurantMap({
   restaurants,

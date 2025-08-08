@@ -1,16 +1,18 @@
 /**
- * @fileoverview Modern feature filter component
- * モダンな特徴フィルターコンポーネント
+ * @fileoverview Feature filter component
+ * 特徴フィルターコンポーネント
  */
 
-interface ModernFeatureFilterProps {
-  selectedFeatures: string[];
+import { memo, useMemo, useCallback } from "react";
+
+interface FeatureFilterProps {
+  readonly selectedFeatures: string[];
   onToggle: (feature: string) => void;
-  isExpanded: boolean;
+  readonly isExpanded: boolean;
   onToggleExpanded: () => void;
 }
 
-const AVAILABLE_FEATURES = [
+const AVAILABLE_FEATURES: readonly string[] = [
   "駐車場あり",
   "テラス席",
   "海が見える",
@@ -43,12 +45,49 @@ const AVAILABLE_FEATURES = [
   "BBQ可能",
 ];
 
-export function ModernFeatureFilter({
+export const FeatureFilter = memo<FeatureFilterProps>(function FeatureFilter({
   selectedFeatures,
   onToggle,
   isExpanded,
   onToggleExpanded,
-}: ModernFeatureFilterProps) {
+}) {
+  const handleFeatureToggle = useCallback(
+    (feature: string) => () => {
+      onToggle(feature);
+    },
+    [onToggle]
+  );
+
+  const featureCheckboxes = useMemo(
+    () =>
+      AVAILABLE_FEATURES.map((feature) => (
+        <label
+          key={feature}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            fontSize: "13px",
+            color: "var(--color-text-primary)",
+            cursor: "pointer",
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={selectedFeatures.includes(feature)}
+            onChange={handleFeatureToggle(feature)}
+            style={{
+              width: "16px",
+              height: "16px",
+              accentColor: "#3b82f6",
+            }}
+          />
+          {feature}
+        </label>
+      )),
+    [selectedFeatures, handleFeatureToggle]
+  );
+
   return (
     <div className="filter-section">
       <button
@@ -108,34 +147,9 @@ export function ModernFeatureFilter({
             gap: "6px",
           }}
         >
-          {AVAILABLE_FEATURES.map((feature) => (
-            <label
-              key={feature}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                cursor: "pointer",
-                fontSize: "12px",
-                color: "var(--color-text-primary)",
-                padding: "2px 0",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={selectedFeatures.includes(feature)}
-                onChange={() => onToggle(feature)}
-                style={{
-                  width: "14px",
-                  height: "14px",
-                  accentColor: "#3b82f6",
-                }}
-              />
-              <span>{feature}</span>
-            </label>
-          ))}
+          {featureCheckboxes}
         </div>
       )}
     </div>
   );
-}
+});

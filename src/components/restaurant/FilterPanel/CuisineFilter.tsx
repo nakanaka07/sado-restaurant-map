@@ -1,63 +1,93 @@
 /**
  * @fileoverview Cuisine filter component
- * 料理分野フィルターコンポーネント
+ * 料理タイプフィルターコンポーネント
  */
 
+import { memo, useMemo } from "react";
 import type { CuisineType } from "@/types";
 
 interface CuisineFilterProps {
-  value: CuisineType | "";
-  onChange: (cuisine: CuisineType | "") => void;
+  readonly value: CuisineType | "";
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-const CUISINE_OPTIONS: { value: CuisineType | ""; label: string }[] = [
-  { value: "", label: "すべての料理" },
-  { value: "日本料理", label: "日本料理" },
-  { value: "寿司", label: "寿司" },
-  { value: "海鮮", label: "海鮮" },
-  { value: "焼肉・焼鳥", label: "焼肉・焼鳥" },
-  { value: "ラーメン", label: "ラーメン" },
-  { value: "そば・うどん", label: "そば・うどん" },
-  { value: "中華", label: "中華" },
-  { value: "イタリアン", label: "イタリアン" },
-  { value: "フレンチ", label: "フレンチ" },
-  { value: "カフェ・喫茶店", label: "カフェ・喫茶店" },
-  { value: "バー・居酒屋", label: "バー・居酒屋" },
-  { value: "ファストフード", label: "ファストフード" },
-  { value: "デザート・スイーツ", label: "デザート・スイーツ" },
-  { value: "カレー・エスニック", label: "カレー・エスニック" },
-  { value: "ステーキ・洋食", label: "ステーキ・洋食" },
-  { value: "弁当・テイクアウト", label: "弁当・テイクアウト" },
-  { value: "レストラン", label: "レストラン" },
-  { value: "その他", label: "その他" },
+const CUISINE_OPTIONS: readonly CuisineType[] = [
+  "日本料理",
+  "寿司",
+  "海鮮",
+  "焼肉・焼鳥",
+  "ラーメン",
+  "そば・うどん",
+  "中華",
+  "イタリアン",
+  "フレンチ",
+  "カフェ・喫茶店",
+  "バー・居酒屋",
+  "ファストフード",
+  "デザート・スイーツ",
+  "カレー・エスニック",
+  "ステーキ・洋食",
+  "弁当・テイクアウト",
+  "レストラン",
+  "その他",
 ];
 
-export function CuisineFilter({ value, onChange }: CuisineFilterProps) {
+export const CuisineFilter = memo<CuisineFilterProps>(function CuisineFilter({
+  value,
+  onChange,
+}) {
+  const cuisineOptions = useMemo(
+    () =>
+      CUISINE_OPTIONS.map((cuisine) => (
+        <option key={cuisine} value={cuisine}>
+          {cuisine}
+        </option>
+      )),
+    []
+  );
+
   return (
-    <div className="filter-cuisine">
-      <label htmlFor="cuisine-select" className="filter-label">
-        料理分野
+    <div className="filter-section">
+      <label htmlFor="modern-cuisine" className="filter-label">
+        <span
+          style={{
+            fontSize: "14px",
+            fontWeight: "600",
+            color: "var(--color-text-primary)",
+          }}
+        >
+          🍽️ 料理ジャンル
+        </span>
       </label>
       <select
-        id="cuisine-select"
+        id="modern-cuisine"
         value={value}
-        onChange={(e) => onChange?.(e.target.value as CuisineType | "")}
-        className="cuisine-select"
+        onChange={onChange}
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          border: "2px solid #e5e7eb",
+          borderRadius: "8px",
+          fontSize: "14px",
+          backgroundColor: "#fff",
+          transition: "all 0.2s ease",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = "#3b82f6";
+          e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = "#e5e7eb";
+          e.target.style.boxShadow = "none";
+        }}
         aria-describedby="cuisine-help"
       >
-        {CUISINE_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-        {/* テスト用: 無効な値でも表示できるようにする */}
-        {value && !CUISINE_OPTIONS.some((opt) => opt.value === value) && (
-          <option value={value}>{value}</option>
-        )}
+        <option value="">すべての料理</option>
+        {cuisineOptions}
       </select>
-      <p id="cuisine-help" className="filter-help">
-        料理の種類でお店を絞り込み
-      </p>
+      <div id="cuisine-help" className="sr-only">
+        料理ジャンルでフィルタリングします
+      </div>
     </div>
   );
-}
+});

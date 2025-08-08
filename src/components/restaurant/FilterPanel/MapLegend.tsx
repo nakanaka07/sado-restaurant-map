@@ -1,6 +1,6 @@
 /**
- * @fileoverview Modern map legend component
- * モダンなマップ凡例コンポーネント
+ * @fileoverview Map legend component
+ * マップ凡例コンポーネント
  */
 
 import type { CuisineType } from "@/types";
@@ -31,7 +31,7 @@ const CUISINE_COLORS: CuisineColor[] = [
   { cuisine: "その他", color: "#6b7280" },
 ];
 
-export function ModernMapLegend() {
+export function MapLegend() {
   return (
     <div className="filter-section">
       <details style={{ fontSize: "13px" }}>

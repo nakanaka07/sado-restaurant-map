@@ -3,83 +3,61 @@
  * 検索フィルターコンポーネント
  */
 
-import { useState, useRef, useEffect } from "react";
+import { memo } from "react";
 
 interface SearchFilterProps {
-  value: string;
-  onChange: (value: string) => void;
-  loading?: boolean;
-  placeholder?: string;
+  readonly value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  readonly loading?: boolean;
 }
 
-export function SearchFilter({
+export const SearchFilter = memo<SearchFilterProps>(function SearchFilter({
   value,
   onChange,
   loading = false,
-  placeholder = "店名・料理名で検索",
-}: SearchFilterProps) {
-  const [inputValue, setInputValue] = useState(value);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // デバウンス処理
-  useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      onChange?.(inputValue);
-    }, 300);
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [inputValue, onChange]);
-
-  // 外部からの値変更に対応
-  useEffect(() => {
-    if (value !== inputValue) {
-      setInputValue(value);
-    }
-  }, [value]);
-
+}) {
   return (
-    <div className="filter-search">
-      <label htmlFor="search-input" className="filter-label">
-        検索
+    <div className="filter-section">
+      <label htmlFor="modern-search" className="filter-label">
+        <span
+          style={{
+            fontSize: "14px",
+            fontWeight: "600",
+            color: "var(--color-text-primary)",
+          }}
+        >
+          🔍 検索
+        </span>
       </label>
-      <div className="search-input-container">
-        <input
-          id="search-input"
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder={placeholder}
-          className="search-input"
-          disabled={loading}
-          aria-describedby="search-help"
-        />
-        {loading && (
-          <div className="search-loading" aria-label="検索中">
-            <span className="spinner" />
-          </div>
-        )}
-        {inputValue && (
-          <button
-            type="button"
-            onClick={() => setInputValue("")}
-            className="search-clear"
-            aria-label="検索をクリア"
-          >
-            ×
-          </button>
-        )}
+      <input
+        id="modern-search"
+        type="text"
+        value={value}
+        onChange={onChange}
+        placeholder="店名、料理、地域で検索..."
+        disabled={loading}
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          border: "2px solid #e5e7eb",
+          borderRadius: "8px",
+          fontSize: "14px",
+          transition: "all 0.2s ease",
+          backgroundColor: "#fff",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = "#3b82f6";
+          e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = "#e5e7eb";
+          e.target.style.boxShadow = "none";
+        }}
+        aria-describedby="search-help"
+      />
+      <div id="search-help" className="sr-only">
+        店名、料理ジャンル、地域名で検索できます
       </div>
-      <p id="search-help" className="filter-help">
-        店名、料理名、エリア名で検索できます
-      </p>
     </div>
   );
-}
+});

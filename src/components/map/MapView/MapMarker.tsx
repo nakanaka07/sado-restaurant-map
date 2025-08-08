@@ -5,7 +5,7 @@
 
 import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import type { MapPoint } from "@/types";
-import { getMarkerIcon, getMarkerSize } from "./markerUtils";
+import { getMarkerIcon, getMarkerSize } from "../utils";
 
 interface MapMarkerProps {
   point: MapPoint;

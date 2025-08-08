@@ -1,6 +1,6 @@
 /**
  * @fileoverview FilterPanel state management hook
- * フィルターパネルの状態管理ロジック
+ * FilterPanelの状態管理カスタムフック
  */
 
 import { useState, useCallback } from "react";
@@ -11,9 +11,31 @@ import type {
   SortOrder,
   MapPointType,
 } from "@/types";
-import { trackSearch, trackFilter } from "@/utils/analytics";
+import { trackFilter } from "@/utils/analytics";
 
+/**
+ * フィルターイベントハンドラーの型定義
+ * 各フィルター操作の型安全性を保証
+ */
+export interface FilterHandlers {
+  readonly onCuisineFilter?: (cuisine: CuisineType | "") => void;
+  readonly onPriceFilter?: (price: PriceRange | "") => void;
+  readonly onDistrictFilter?: (districts: SadoDistrict[]) => void;
+  readonly onRatingFilter?: (minRating: number | undefined) => void;
+  readonly onOpenNowFilter?: (openNow: boolean) => void;
+  readonly onSearchFilter?: (search: string) => void;
+  readonly onSortChange?: (sort: SortOrder) => void;
+  readonly onFeatureFilter?: (features: string[]) => void;
+  readonly onPointTypeFilter?: (pointTypes: MapPointType[]) => void;
+  readonly onResetFilters?: () => void;
+}
+
+/**
+ * フィルター状態の型定義
+ * immutableな配列とオプショナルチェーンを活用
+ */
 export interface FilterState {
+  // Filter states
   searchQuery: string;
   selectedCuisine: CuisineType | "";
   selectedPrice: PriceRange | "";
@@ -23,38 +45,24 @@ export interface FilterState {
   selectedSort: SortOrder;
   selectedFeatures: string[];
   selectedPointTypes: MapPointType[];
-}
+  isExpanded: boolean;
 
-export interface FilterActions {
-  handleSearchChange: (value: string) => void;
-  handleCuisineChange: (value: CuisineType | "") => void;
-  handlePriceChange: (value: PriceRange | "") => void;
+  // Action handlers
+  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleCuisineChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handlePriceChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleDistrictToggle: (district: SadoDistrict) => void;
-  handleRatingChange: (value: number | undefined) => void;
-  handleOpenNowChange: (value: boolean) => void;
-  handleSortChange: (value: SortOrder) => void;
+  handleRatingChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleOpenNowChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSortChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleFeatureToggle: (feature: string) => void;
-  handlePointTypeChange: (pointType: MapPointType) => void;
+  handlePointTypeToggle: (pointType: MapPointType) => void;
   handleResetFilters: () => void;
+  toggleExpanded: () => void;
 }
 
-export interface FilterHandlers {
-  onCuisineFilter?: (cuisine: CuisineType | "") => void;
-  onPriceFilter?: (price: PriceRange | "") => void;
-  onDistrictFilter?: (districts: SadoDistrict[]) => void;
-  onRatingFilter?: (minRating: number | undefined) => void;
-  onOpenNowFilter?: (openNow: boolean) => void;
-  onSearchFilter?: (search: string) => void;
-  onSortChange?: (sort: SortOrder) => void;
-  onFeatureFilter?: (features: string[]) => void;
-  onPointTypeFilter?: (pointTypes: MapPointType[]) => void;
-  onResetFilters?: () => void;
-}
-
-export function useFilterState(
-  handlers: FilterHandlers
-): FilterState & FilterActions {
-  // State
+export function useFilterState(handlers: FilterHandlers): FilterState {
+  // State management
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCuisine, setSelectedCuisine] = useState<CuisineType | "">("");
   const [selectedPrice, setSelectedPrice] = useState<PriceRange | "">("");
@@ -69,104 +77,109 @@ export function useFilterState(
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [selectedPointTypes, setSelectedPointTypes] = useState<MapPointType[]>([
     "restaurant",
-    "parking",
-    "toilet",
   ]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Actions
+  // Event handlers
   const handleSearchChange = useCallback(
-    (value: string) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
       setSearchQuery(value);
-      if (value.trim()) {
-        trackSearch(value, 0); // 結果数は後で更新される
-      }
       handlers.onSearchFilter?.(value);
     },
     [handlers]
   );
 
   const handleCuisineChange = useCallback(
-    (value: CuisineType | "") => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value as CuisineType | "";
       setSelectedCuisine(value);
-      trackFilter("cuisine", value);
       handlers.onCuisineFilter?.(value);
+      trackFilter("cuisine", value);
     },
     [handlers]
   );
 
   const handlePriceChange = useCallback(
-    (value: PriceRange | "") => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value as PriceRange | "";
       setSelectedPrice(value);
-      trackFilter("price", value);
       handlers.onPriceFilter?.(value);
+      trackFilter("price", value);
     },
     [handlers]
   );
 
   const handleDistrictToggle = useCallback(
     (district: SadoDistrict) => {
-      const newDistricts = selectedDistricts.includes(district)
-        ? selectedDistricts.filter((d) => d !== district)
-        : [...selectedDistricts, district];
-
-      setSelectedDistricts(newDistricts);
-      trackFilter("district", district);
-      handlers.onDistrictFilter?.(newDistricts);
+      setSelectedDistricts((prev) => {
+        const newDistricts = prev.includes(district)
+          ? prev.filter((d) => d !== district)
+          : [...prev, district];
+        handlers.onDistrictFilter?.(newDistricts);
+        trackFilter("district", district);
+        return newDistricts;
+      });
     },
-    [selectedDistricts, handlers]
+    [handlers]
   );
 
   const handleRatingChange = useCallback(
-    (value: number | undefined) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value ? Number(e.target.value) : undefined;
       setSelectedRating(value);
-      trackFilter("rating", value?.toString() || "");
       handlers.onRatingFilter?.(value);
+      trackFilter("rating", value?.toString() || "all");
     },
     [handlers]
   );
 
   const handleOpenNowChange = useCallback(
-    (value: boolean) => {
-      setOpenNow(value);
-      trackFilter("openNow", value.toString());
-      handlers.onOpenNowFilter?.(value);
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const checked = e.target.checked;
+      setOpenNow(checked);
+      handlers.onOpenNowFilter?.(checked);
+      trackFilter("openNow", checked.toString());
     },
     [handlers]
   );
 
   const handleSortChange = useCallback(
-    (value: SortOrder) => {
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const value = e.target.value as SortOrder;
       setSelectedSort(value);
-      trackFilter("sort", value);
       handlers.onSortChange?.(value);
+      trackFilter("sort", value);
     },
     [handlers]
   );
 
   const handleFeatureToggle = useCallback(
     (feature: string) => {
-      const newFeatures = selectedFeatures.includes(feature)
-        ? selectedFeatures.filter((f) => f !== feature)
-        : [...selectedFeatures, feature];
-
-      setSelectedFeatures(newFeatures);
-      trackFilter("feature", feature);
-      handlers.onFeatureFilter?.(newFeatures);
+      setSelectedFeatures((prev) => {
+        const newFeatures = prev.includes(feature)
+          ? prev.filter((f) => f !== feature)
+          : [...prev, feature];
+        handlers.onFeatureFilter?.(newFeatures);
+        trackFilter("feature", feature);
+        return newFeatures;
+      });
     },
-    [selectedFeatures, handlers]
+    [handlers]
   );
 
-  const handlePointTypeChange = useCallback(
+  const handlePointTypeToggle = useCallback(
     (pointType: MapPointType) => {
-      const newPointTypes = selectedPointTypes.includes(pointType)
-        ? selectedPointTypes.filter((type) => type !== pointType)
-        : [...selectedPointTypes, pointType];
-
-      setSelectedPointTypes(newPointTypes);
-      trackFilter("pointType", pointType);
-      handlers.onPointTypeFilter?.(newPointTypes);
+      setSelectedPointTypes((prev) => {
+        const newPointTypes = prev.includes(pointType)
+          ? prev.filter((pt) => pt !== pointType)
+          : [...prev, pointType];
+        handlers.onPointTypeFilter?.(newPointTypes);
+        trackFilter("pointType", pointType);
+        return newPointTypes;
+      });
     },
-    [selectedPointTypes, handlers]
+    [handlers]
   );
 
   const handleResetFilters = useCallback(() => {
@@ -178,14 +191,17 @@ export function useFilterState(
     setOpenNow(false);
     setSelectedSort("name");
     setSelectedFeatures([]);
-    setSelectedPointTypes(["restaurant", "parking", "toilet"]);
-
-    trackFilter("reset", "all");
+    setSelectedPointTypes(["restaurant"]);
     handlers.onResetFilters?.();
+    trackFilter("reset", "all");
   }, [handlers]);
 
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => !prev);
+  }, []);
+
   return {
-    // State
+    // States
     searchQuery,
     selectedCuisine,
     selectedPrice,
@@ -195,8 +211,9 @@ export function useFilterState(
     selectedSort,
     selectedFeatures,
     selectedPointTypes,
+    isExpanded,
 
-    // Actions
+    // Handlers
     handleSearchChange,
     handleCuisineChange,
     handlePriceChange,
@@ -205,7 +222,8 @@ export function useFilterState(
     handleOpenNowChange,
     handleSortChange,
     handleFeatureToggle,
-    handlePointTypeChange,
+    handlePointTypeToggle,
     handleResetFilters,
+    toggleExpanded,
   };
 }

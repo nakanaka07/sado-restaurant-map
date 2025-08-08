@@ -26,4 +26,3 @@ export { RestaurantMap } from "./map";
 
 // Restaurant Components
 export { FilterPanel } from "./restaurant";
-export { ModernFilterPanel } from "./restaurant";

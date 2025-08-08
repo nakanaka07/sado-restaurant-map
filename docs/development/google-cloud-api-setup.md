@@ -12,21 +12,21 @@ Google Cloud Console → APIs & Services → Credentials → API キー設定で
 
 #### **ローカル開発環境**
 
-```
+```text
 http://localhost:*/*
 http://127.0.0.1:*/*
 ```
 
 #### **GitHub Pages**
 
-```
+```text
 https://nakanaka07.github.io/sado-restaurant-map/*
 https://*.github.io/sado-restaurant-map/*
 ```
 
 #### **その他の本番環境（将来用）**
 
-```
+```text
 https://sado-restaurant-map.vercel.app/*
 https://your-custom-domain.com/*
 ```
@@ -42,7 +42,8 @@ https://your-custom-domain.com/*
    - Geocoding API: ✅ 有効（住所 → 座標変換用）
 
 2. **HTTP リファラー**
-   ```
+
+   ```text
    http://localhost:*/*
    http://127.0.0.1:*/*
    https://nakanaka07.github.io/sado-restaurant-map/*
@@ -56,7 +57,8 @@ https://your-custom-domain.com/*
    - Google Sheets API: ✅ 有効
 
 2. **HTTP リファラー**
-   ```
+
+   ```text
    http://localhost:*/*
    http://127.0.0.1:*/*
    https://nakanaka07.github.io/sado-restaurant-map/*
@@ -69,21 +71,21 @@ https://your-custom-domain.com/*
 
 #### **`RefererNotAllowedMapError`**
 
-```
+```text
 原因: HTTPリファラー制限でGitHub Pagesのドメインがブロックされている
 解決: 上記のGitHub Pagesドメインを追加
 ```
 
 #### **`ApiNotActivatedMapError`**
 
-```
+```text
 原因: 必要なAPIが有効化されていない
 解決: Maps JavaScript API、Places API、Sheets APIを有効化
 ```
 
 #### **`RequestDenied`**
 
-```
+```text
 原因: APIキー制限またはクォータ制限
 解決: API制限設定を確認し、必要に応じて制限を緩和
 ```

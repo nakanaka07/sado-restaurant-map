@@ -2,7 +2,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { useEffect, useState, useCallback } from "react";
 import { useMapPoints } from "@/hooks";
 import { MapView } from "../components/map";
-import { ModernFilterPanel } from "../components/restaurant";
+import { FilterPanel } from "../components/restaurant";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import { initGA, checkGAStatus } from "@/utils";
 import { sanitizeInput } from "@/utils";
@@ -262,7 +262,7 @@ function App() {
           >
             <div className="app-content">
               {/* Floating Filter Panel */}
-              <ModernFilterPanel
+              <FilterPanel
                 loading={loading}
                 resultCount={filteredMapPoints.length}
                 onCuisineFilter={handleCuisineFilter}

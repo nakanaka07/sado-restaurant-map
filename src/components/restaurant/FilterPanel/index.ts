@@ -9,6 +9,7 @@ export { SearchFilter } from "./SearchFilter";
 export { CuisineFilter } from "./CuisineFilter";
 export { PriceFilter } from "./PriceFilter";
 export { DistrictFilter } from "./DistrictFilter";
-export { FilterChips } from "./FilterChips";
+export { FeatureFilter } from "./FeatureFilter";
+export { MapLegend } from "./MapLegend";
 
 export type { FilterHandlers } from "./useFilterState";

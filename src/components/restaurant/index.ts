@@ -3,4 +3,3 @@
  */
 
 export { FilterPanel } from "./FilterPanel/FilterPanel";
-export { ModernFilterPanel } from "./ModernFilterPanel/ModernFilterPanel";

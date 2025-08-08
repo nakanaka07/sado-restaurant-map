@@ -4,7 +4,7 @@
  */
 
 import type { MapPoint, Restaurant, Parking, Toilet } from "@/types";
-import { getMarkerIcon } from "./markerUtils";
+import { getMarkerIcon } from "../utils";
 
 interface MapInfoWindowProps {
   point: MapPoint;

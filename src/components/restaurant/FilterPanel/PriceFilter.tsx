@@ -1,49 +1,79 @@
 /**
  * @fileoverview Price filter component
- * 価格帯フィルターコンポーネント
+ * 価格フィルターコンポーネント
  */
 
+import { memo, useMemo } from "react";
 import type { PriceRange } from "@/types";
 
 interface PriceFilterProps {
-  value: PriceRange | "";
-  onChange: (price: PriceRange | "") => void;
+  readonly value: PriceRange | "";
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-const PRICE_OPTIONS: { value: PriceRange | ""; label: string }[] = [
-  { value: "", label: "すべての価格帯" },
-  { value: "～1000円", label: "～1000円" },
-  { value: "1000-2000円", label: "1000-2000円" },
-  { value: "2000-3000円", label: "2000-3000円" },
-  { value: "3000円～", label: "3000円～" },
+const PRICE_OPTIONS: readonly PriceRange[] = [
+  "～1000円",
+  "1000-2000円",
+  "2000-3000円",
+  "3000円～",
 ];
 
-export function PriceFilter({ value, onChange }: PriceFilterProps) {
+export const PriceFilter = memo<PriceFilterProps>(function PriceFilter({
+  value,
+  onChange,
+}) {
+  const priceOptions = useMemo(
+    () =>
+      PRICE_OPTIONS.map((price) => (
+        <option key={price} value={price}>
+          {price}
+        </option>
+      )),
+    []
+  );
+
   return (
-    <div className="filter-price">
-      <label htmlFor="price-select" className="filter-label">
-        価格帯
+    <div className="filter-section">
+      <label htmlFor="modern-price" className="filter-label">
+        <span
+          style={{
+            fontSize: "14px",
+            fontWeight: "600",
+            color: "var(--color-text-primary)",
+          }}
+        >
+          💰 価格帯
+        </span>
       </label>
       <select
-        id="price-select"
+        id="modern-price"
         value={value}
-        onChange={(e) => onChange?.(e.target.value as PriceRange)}
-        className="price-select"
+        onChange={onChange}
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          border: "2px solid #e5e7eb",
+          borderRadius: "8px",
+          fontSize: "14px",
+          backgroundColor: "#fff",
+          transition: "all 0.2s ease",
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = "#3b82f6";
+          e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = "#e5e7eb";
+          e.target.style.boxShadow = "none";
+        }}
         aria-describedby="price-help"
       >
-        {PRICE_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-        {/* テスト用: 無効な値でも表示できるようにする */}
-        {value && !PRICE_OPTIONS.some((opt) => opt.value === value) && (
-          <option value={value}>{value}</option>
-        )}
+        <option value="">すべての価格帯</option>
+        {priceOptions}
       </select>
-      <p id="price-help" className="filter-help">
-        予算に合わせてお店を絞り込み
-      </p>
+      <div id="price-help" className="sr-only">
+        価格帯でフィルタリングします
+      </div>
     </div>
   );
-}
+});
