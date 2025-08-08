@@ -1,0 +1,91 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+dev-dist
+coverage
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python tools specific
+# Python Virtual Environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Python cache in scraper tools
+tools/scraper/__pycache__/
+tools/scraper/*/__pycache__/
+tools/scraper/*/*/__pycache__/
+tools/scraper/*.pyc
+tools/scraper/.env
+
+# Google Cloud Service Account and API Keys
+*service-account*.json
+*service_account*.json
+*-key.json
+*_key.json
+google-credentials.json
+gcp-credentials.json
+tools/scraper/config/*.json
+tools/scraper/config/*-key.json
+tools/scraper/config/*_key.json
+
+# API Keys and Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+*secret*
+*credential*
+*token*
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+.cache
+
+# PWA generated files
+sw.js
+sw.js.map
+workbox-*.js
+workbox-*.js.map
+
+# Testing
+coverage/
+.nyc_output
