@@ -1,12 +1,59 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { useRestaurants } from "@/hooks";
+
+// localStorage モックをグローバルスコープで設定
+const createLocalStorageMock = () => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: vi.fn((index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    }),
+  };
+};
+
+// グローバルlocalStorageモック
+const localStorageMock = createLocalStorageMock();
+
+// Vitestのグローバル設定として localStorage を定義
+Object.defineProperty(globalThis, "localStorage", {
+  value: localStorageMock,
+  writable: true,
+  configurable: true,
+});
+
+// windowオブジェクトにも設定
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "localStorage", {
+    value: localStorageMock,
+    writable: true,
+    configurable: true,
+  });
+}
 
 // sheetsService をモック
-vi.mock("../services/sheetsService", () => ({
+vi.mock("@/services", () => ({
   fetchRestaurantsFromSheets: vi.fn().mockResolvedValue([
     {
       id: "1",
+      type: "restaurant",
       name: "海鮮市場 金太",
       description: "佐渡の新鮮な海の幸を味わえる海鮮料理店",
       cuisineType: "海鮮",
@@ -25,6 +72,7 @@ vi.mock("../services/sheetsService", () => ({
     },
     {
       id: "2",
+      type: "restaurant",
       name: "そば処 竹の子",
       description: "佐渡の水で打つ手打ちそばが自慢",
       cuisineType: "そば・うどん",
@@ -43,6 +91,7 @@ vi.mock("../services/sheetsService", () => ({
     },
     {
       id: "3",
+      type: "restaurant",
       name: "佐渡カフェ",
       description: "佐渡の絶景を眺めながらゆったりできるカフェ",
       cuisineType: "カフェ・喫茶店",
@@ -67,6 +116,7 @@ vi.mock("../services/sheetsService", () => ({
     },
     {
       id: "4",
+      type: "restaurant",
       name: "寿司処 金峰",
       description: "佐渡近海の新鮮なネタが自慢の老舗寿司店",
       cuisineType: "寿司",
@@ -86,14 +136,24 @@ vi.mock("../services/sheetsService", () => ({
     },
   ]),
   checkDataFreshness: vi.fn().mockResolvedValue({ needsUpdate: false }),
-  SheetsApiError: class extends Error {},
+  SheetsApiError: class extends Error {
+    status: number;
+    constructor(message: string, status: number = 500) {
+      super(message);
+      this.status = status;
+    }
+  },
 }));
+
+// useRestaurants をインポート（モック設定後）
+import { useRestaurants } from "./useRestaurants";
 
 describe("useRestaurants Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // localStorage をクリア
-    localStorage.clear();
+    // localStorage をクリア（モック関数もリセット）
+    localStorageMock.clear();
+    vi.clearAllMocks(); // vi.fn() のモックもクリア
   });
   it("should initialize with mock data", async () => {
     const { result } = renderHook(() => useRestaurants());

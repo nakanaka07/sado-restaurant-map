@@ -148,7 +148,9 @@ describe("useErrorHandler", () => {
 
     expect(result.current.errorHistory).toHaveLength(2);
 
-    result.current.clearErrorHistory();
+    act(() => {
+      result.current.clearErrorHistory();
+    });
 
     expect(result.current.errorHistory).toEqual([]);
   });
@@ -156,11 +158,13 @@ describe("useErrorHandler", () => {
   it("エラーの重要度が正しく設定されるべき", () => {
     const { result } = renderHook(() => useErrorHandler());
 
-    const testError = new Error("テストエラー");
-    result.current.handleError({
-      error: testError,
-      context: "TestComponent",
-      severity: "low",
+    act(() => {
+      const testError = new Error("テストエラー");
+      result.current.handleError({
+        error: testError,
+        context: "TestComponent",
+        severity: "low",
+      });
     });
 
     expect(result.current.error?.severity).toBe("low");
@@ -169,10 +173,12 @@ describe("useErrorHandler", () => {
   it("デフォルトの重要度が medium であるべき", () => {
     const { result } = renderHook(() => useErrorHandler());
 
-    const testError = new Error("テストエラー");
-    result.current.handleError({
-      error: testError,
-      context: "TestComponent",
+    act(() => {
+      const testError = new Error("テストエラー");
+      result.current.handleError({
+        error: testError,
+        context: "TestComponent",
+      });
     });
 
     expect(result.current.error?.severity).toBe("medium");
@@ -182,12 +188,14 @@ describe("useErrorHandler", () => {
     const { result } = renderHook(() => useErrorHandler());
 
     // 12個のエラーを追加
-    for (let i = 1; i <= 12; i++) {
-      result.current.handleError({
-        error: new Error(`エラー${i}`),
-        context: "Component",
-      });
-    }
+    act(() => {
+      for (let i = 1; i <= 12; i++) {
+        result.current.handleError({
+          error: new Error(`エラー${i}`),
+          context: "Component",
+        });
+      }
+    });
 
     // 最大10件まで保持
     expect(result.current.errorHistory).toHaveLength(10);

@@ -171,15 +171,15 @@ export function useRestaurants(
     }
 
     // 検索クエリフィルター
-    if (filters.searchQuery.trim()) {
+    if (filters.searchQuery?.trim()) {
       const query = filters.searchQuery.toLowerCase().trim();
       filtered = filtered.filter(
         (restaurant) =>
-          restaurant.name.toLowerCase().includes(query) ||
+          restaurant.name?.toLowerCase().includes(query) ||
           restaurant.description?.toLowerCase().includes(query) ||
-          restaurant.address.toLowerCase().includes(query) ||
-          restaurant.cuisineType.toLowerCase().includes(query) ||
-          restaurant.district.toLowerCase().includes(query)
+          restaurant.address?.toLowerCase().includes(query) ||
+          restaurant.cuisineType?.toLowerCase().includes(query) ||
+          restaurant.district?.toLowerCase().includes(query)
       );
     }
 
@@ -199,8 +199,16 @@ export function useRestaurants(
       const currentTime = now.getHours() * 60 + now.getMinutes();
 
       filtered = filtered.filter((restaurant) => {
+        // openingHours が存在するかチェック
+        if (
+          !restaurant.openingHours ||
+          !Array.isArray(restaurant.openingHours)
+        ) {
+          return false;
+        }
+
         return restaurant.openingHours.some((hours) => {
-          if (hours.isHoliday || !hours.day.includes(currentDay)) {
+          if (hours.isHoliday || !hours.day?.includes(currentDay)) {
             return false;
           }
 
@@ -261,6 +269,12 @@ export function useRestaurants(
       if (!needsUpdate && cachedData) {
         try {
           const parsedData = JSON.parse(cachedData) as Restaurant[];
+
+          // キャッシュデータの基本検証
+          if (!Array.isArray(parsedData)) {
+            throw new Error("Cached data is not an array");
+          }
+
           setRestaurants(parsedData);
           setAsyncState({
             data: parsedData,
@@ -277,6 +291,11 @@ export function useRestaurants(
       // Google Sheets APIからデータ取得
       console.log("📡 Google Sheetsからデータを取得中...");
       const data = await fetchRestaurantsFromSheets();
+
+      // データの基本検証
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid data format: expected array");
+      }
 
       console.log(`✅ ${data.length}件の飲食店データを取得しました`);
 
@@ -306,14 +325,19 @@ export function useRestaurants(
       if (cachedData) {
         try {
           const parsedData = JSON.parse(cachedData) as Restaurant[];
-          setRestaurants(parsedData);
-          setAsyncState({
-            data: parsedData,
-            loading: false,
-            error: `${errorMessage}（キャッシュデータを使用中）`,
-          });
-          return;
-        } catch {
+
+          // キャッシュデータの検証
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setRestaurants(parsedData);
+            setAsyncState({
+              data: parsedData,
+              loading: false,
+              error: `${errorMessage}（キャッシュデータを使用中）`,
+            });
+            return;
+          }
+        } catch (cacheError) {
+          console.warn("キャッシュデータの解析も失敗:", cacheError);
           // キャッシュデータも無効な場合はモックデータを使用
         }
       }

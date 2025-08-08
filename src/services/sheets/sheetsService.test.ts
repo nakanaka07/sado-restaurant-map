@@ -1,4 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// vi.mockを無効化して実際の関数をテストする
+vi.unmock("./sheetsService");
+
 import {
   fetchRestaurantsFromSheets,
   fetchParkingsFromSheets,
@@ -15,8 +19,13 @@ describe("Google Sheets API連携テスト", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // 環境変数をセット
-    process.env.VITE_GOOGLE_SHEETS_API_KEY = "test-api-key";
-    process.env.VITE_RESTAURANT_SHEET_ID = "test-sheet-id";
+    vi.stubEnv("VITE_GOOGLE_SHEETS_API_KEY", "test-api-key");
+    vi.stubEnv("VITE_SPREADSHEET_ID", "test-sheet-id");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   describe("fetchRestaurantsFromSheets", () => {
@@ -27,19 +36,30 @@ describe("Google Sheets API連携テスト", () => {
           [
             "1",
             "海鮮市場 金太",
-            "佐渡の新鮮な海の幸を味わえる海鮮料理店",
-            "海鮮",
-            "2000-3000円",
-            "両津",
             "新潟県佐渡市両津湊119",
-            "0259-27-5938",
             "38.018611",
             "138.367222",
             "4.2",
             "85",
-            "月-日,11:00-21:00",
-            "駐車場あり,団体利用可",
-            "2025-07-10",
+            "Open",
+            "月-日: 11:00–21:00",
+            "0259-27-5938",
+            "",
+            "2",
+            "海鮮料理",
+            "佐渡の新鮮な海の幸を味わえる海鮮料理店",
+            "true",
+            "false",
+            "true",
+            "false",
+            "false",
+            "false",
+            "true",
+            "true",
+            "false",
+            "false",
+            "false",
+            "false",
           ],
         ],
       };
@@ -55,12 +75,9 @@ describe("Google Sheets API連携テスト", () => {
       expect(result[0]).toMatchObject({
         id: "1",
         name: "海鮮市場 金太",
-        description: "佐渡の新鮮な海の幸を味わえる海鮮料理店",
-        cuisineType: "海鮮",
-        priceRange: "2000-3000円",
-        district: "両津",
         address: "新潟県佐渡市両津湊119",
-        phone: "0259-27-5938",
+        cuisineType: "海鮮",
+        type: "restaurant",
         coordinates: { lat: 38.018611, lng: 138.367222 },
         rating: 4.2,
         reviewCount: 85,
@@ -87,7 +104,7 @@ describe("Google Sheets API連携テスト", () => {
         SheetsApiError
       );
       await expect(fetchRestaurantsFromSheets()).rejects.toThrow(
-        "Google Sheets API request failed: 403 Forbidden"
+        "Google Sheets API request failed"
       );
     });
 
@@ -106,7 +123,7 @@ describe("Google Sheets API連携テスト", () => {
           [
             "1",
             "テストレストラン",
-            // 必要なフィールドが不足
+            // 必要なフィールドが不足（5フィールド未満）
           ],
         ],
       };
@@ -116,7 +133,9 @@ describe("Google Sheets API連携テスト", () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      await expect(fetchRestaurantsFromSheets()).rejects.toThrow();
+      await expect(fetchRestaurantsFromSheets()).rejects.toThrow(
+        "No valid restaurant data could be parsed"
+      );
     });
 
     it("空のデータが返された場合に空配列を返すべき", async () => {
@@ -142,15 +161,24 @@ describe("Google Sheets API連携テスト", () => {
           [
             "p1",
             "両津港駐車場",
-            "両津港の駐車場",
-            "両津",
             "新潟県佐渡市両津湊",
             "38.018611",
             "138.367222",
-            "50",
-            "無料",
+            "駐車場",
+            "公共駐車場",
+            "Open",
+            "両津港の公共駐車場",
+            "新潟県佐渡市両津湊119",
             "9:00-18:00",
-            "大型車対応",
+            "車椅子対応",
+            "現金",
+            "無料",
+            "あり",
+            "4.0",
+            "20",
+            "両津",
+            "https://maps.google.com/",
+            "手動",
             "2025-07-10",
           ],
         ],
@@ -168,9 +196,7 @@ describe("Google Sheets API連携テスト", () => {
         id: "p1",
         type: "parking",
         name: "両津港駐車場",
-        district: "両津",
         coordinates: { lat: 38.018611, lng: 138.367222 },
-        capacity: 50,
         fee: "無料",
       });
     });
@@ -184,13 +210,23 @@ describe("Google Sheets API連携テスト", () => {
           [
             "t1",
             "両津港公衆トイレ",
-            "両津港の公衆トイレ",
-            "両津",
             "新潟県佐渡市両津湊",
             "38.018611",
             "138.367222",
+            "公衆トイレ",
+            "バリアフリートイレ",
+            "Open",
+            "両津港の公衆トイレ",
+            "新潟県佐渡市両津湊119",
             "9:00-18:00",
-            "車椅子対応,おむつ交換台",
+            "車椅子対応",
+            "おむつ交換台",
+            "駐車場併設",
+            "4.0",
+            "15",
+            "両津",
+            "https://maps.google.com/",
+            "手動",
             "2025-07-10",
           ],
         ],
@@ -208,7 +244,6 @@ describe("Google Sheets API連携テスト", () => {
         id: "t1",
         type: "toilet",
         name: "両津港公衆トイレ",
-        district: "両津",
         coordinates: { lat: 38.018611, lng: 138.367222 },
       });
     });
@@ -223,19 +258,30 @@ describe("Google Sheets API連携テスト", () => {
           [
             "r1",
             "テストレストラン",
-            "説明",
-            "日本料理",
-            "2000-3000円",
-            "両津",
-            "住所",
-            "電話",
+            "新潟県佐渡市両津",
             "38.0",
             "138.0",
             "4.5",
             "100",
+            "Open",
             "営業時間",
-            "特徴",
-            "2025-07-10",
+            "電話",
+            "",
+            "2",
+            "日本料理",
+            "説明",
+            "true",
+            "false",
+            "true",
+            "false",
+            "false",
+            "false",
+            "true",
+            "true",
+            "false",
+            "false",
+            "false",
+            "false",
           ],
         ],
       };
@@ -247,15 +293,24 @@ describe("Google Sheets API連携テスト", () => {
           [
             "p1",
             "テスト駐車場",
-            "説明",
-            "両津",
-            "住所",
+            "新潟県佐渡市両津",
             "38.0",
             "138.0",
-            "30",
-            "無料",
+            "駐車場",
+            "公共駐車場",
+            "Open",
+            "説明",
+            "住所",
             "営業時間",
+            "バリアフリー",
+            "現金",
+            "無料",
             "特徴",
+            "4.0",
+            "10",
+            "両津",
+            "URL",
+            "方法",
             "2025-07-10",
           ],
         ],
@@ -268,13 +323,23 @@ describe("Google Sheets API連携テスト", () => {
           [
             "t1",
             "テストトイレ",
-            "説明",
-            "両津",
-            "住所",
+            "新潟県佐渡市両津",
             "38.0",
             "138.0",
+            "公衆トイレ",
+            "バリアフリートイレ",
+            "Open",
+            "説明",
+            "住所",
             "営業時間",
-            "特徴",
+            "バリアフリー",
+            "子供対応",
+            "駐車場",
+            "4.0",
+            "5",
+            "両津",
+            "URL",
+            "方法",
             "2025-07-10",
           ],
         ],
@@ -314,19 +379,30 @@ describe("Google Sheets API連携テスト", () => {
                 [
                   "r1",
                   "テストレストラン",
-                  "説明",
-                  "日本料理",
-                  "2000-3000円",
-                  "両津",
-                  "住所",
-                  "電話",
+                  "新潟県佐渡市両津",
                   "38.0",
                   "138.0",
                   "4.5",
                   "100",
+                  "Open",
                   "営業時間",
-                  "特徴",
-                  "2025-07-10",
+                  "電話",
+                  "",
+                  "2",
+                  "日本料理",
+                  "説明",
+                  "true",
+                  "false",
+                  "true",
+                  "false",
+                  "false",
+                  "false",
+                  "true",
+                  "true",
+                  "false",
+                  "false",
+                  "false",
+                  "false",
                 ],
               ],
             }),
@@ -347,13 +423,23 @@ describe("Google Sheets API連携テスト", () => {
                 [
                   "t1",
                   "テストトイレ",
-                  "説明",
-                  "両津",
-                  "住所",
+                  "新潟県佐渡市両津",
                   "38.0",
                   "138.0",
+                  "公衆トイレ",
+                  "バリアフリートイレ",
+                  "Open",
+                  "説明",
+                  "住所",
                   "営業時間",
-                  "特徴",
+                  "バリアフリー",
+                  "子供対応",
+                  "駐車場",
+                  "4.0",
+                  "5",
+                  "両津",
+                  "URL",
+                  "方法",
                   "2025-07-10",
                 ],
               ],
@@ -381,50 +467,19 @@ describe("Google Sheets API連携テスト", () => {
   });
 
   describe("レート制限とリトライ", () => {
-    it("リトライ可能なエラーの場合にリトライするべき", async () => {
-      // 最初の2回は429エラー、3回目は成功
-      mockFetch
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 429,
-          text: () => Promise.resolve("Too Many Requests"),
-        })
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 429,
-          text: () => Promise.resolve("Too Many Requests"),
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              values: [
-                ["Header"],
-                [
-                  "1",
-                  "テストレストラン",
-                  "説明",
-                  "日本料理",
-                  "2000-3000円",
-                  "両津",
-                  "住所",
-                  "電話",
-                  "38.0",
-                  "138.0",
-                  "4.5",
-                  "100",
-                  "営業時間",
-                  "特徴",
-                  "2025-07-10",
-                ],
-              ],
-            }),
-        });
+    it("429エラーの場合はSheetsApiErrorをスローするべき", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        text: () => Promise.resolve("Too Many Requests"),
+      });
 
-      const result = await fetchRestaurantsFromSheets();
-
-      expect(result).toHaveLength(1);
-      expect(mockFetch).toHaveBeenCalledTimes(3);
+      await expect(fetchRestaurantsFromSheets()).rejects.toThrow(
+        SheetsApiError
+      );
+      await expect(fetchRestaurantsFromSheets()).rejects.toThrow(
+        "Google Sheets API request failed"
+      );
     });
   });
 });

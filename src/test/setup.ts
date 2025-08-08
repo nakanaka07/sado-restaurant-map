@@ -99,16 +99,36 @@ Object.defineProperty(window, "google", {
 });
 
 // Mock localStorage for testing
-const localStorageMock = {
-  getItem: vi.fn(() => null),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-  length: 0,
-  key: vi.fn(() => null),
-};
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+
+  return {
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      store = {};
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: vi.fn((index: number) => {
+      const keys = Object.keys(store);
+      return keys[index] || null;
+    }),
+  };
+})();
 
 Object.defineProperty(window, "localStorage", {
+  value: localStorageMock,
+  configurable: true,
+});
+
+Object.defineProperty(global, "localStorage", {
   value: localStorageMock,
   configurable: true,
 });
@@ -134,110 +154,15 @@ vi.mock("../utils/analytics", () => ({
   autoFixGA: vi.fn().mockReturnValue({}),
 }));
 
-// Mock all services for testing
+// Mock services for general testing (excluding sheetsService which has its own tests)
 vi.mock("../services/sheets/sheetsService", () => ({
-  fetchRestaurantsFromSheets: vi.fn().mockResolvedValue([
-    {
-      id: "1",
-      name: "海鮮市場 金太",
-      description: "佐渡の新鮮な海の幸を味わえる海鮮料理店",
-      cuisineType: "海鮮",
-      priceRange: "2000-3000円",
-      address: "新潟県佐渡市両津湊119",
-      phone: "0259-27-5938",
-      coordinates: { lat: 38.018611, lng: 138.367222 },
-      rating: 4.2,
-      reviewCount: 85,
-      openingHours: [
-        { day: "月-日", open: "11:00", close: "21:00", isHoliday: false },
-      ],
-      features: ["駐車場あり", "団体利用可", "個室あり"],
-      lastUpdated: "2025-07-10",
-    },
-    {
-      id: "2",
-      name: "そば処 竹の子",
-      description: "佐渡の水で打つ手打ちそばが自慢",
-      cuisineType: "そば・うどん",
-      priceRange: "1000-2000円",
-      address: "新潟県佐渡市小木町1956",
-      coordinates: { lat: 37.9, lng: 138.25 },
-      rating: 4.5,
-      reviewCount: 123,
-      openingHours: [
-        { day: "火-日", open: "11:30", close: "20:00", isHoliday: false },
-        { day: "月", open: "", close: "", isHoliday: true },
-      ],
-      features: ["テラス席", "禁煙", "手打ちそば", "テイクアウト可"],
-      lastUpdated: "2025-07-10",
-    },
-    {
-      id: "3",
-      name: "佐渡カフェ",
-      description: "佐渡の絶景を眺めながらゆったりできるカフェ",
-      cuisineType: "カフェ・喫茶店",
-      priceRange: "～1000円",
-      address: "新潟県佐渡市両津夷269-1",
-      phone: "0259-23-4567",
-      coordinates: { lat: 38.05, lng: 138.38 },
-      rating: 4.3,
-      reviewCount: 67,
-      openingHours: [
-        { day: "月-日", open: "9:00", close: "18:00", isHoliday: false },
-      ],
-      features: [
-        "Wi-Fiあり",
-        "テラス席",
-        "駐車場あり",
-        "禁煙",
-        "テイクアウト可",
-      ],
-      lastUpdated: "2025-07-10",
-    },
-    {
-      id: "4",
-      name: "寿司処 金峰",
-      description: "佐渡近海の新鮮なネタが自慢の老舗寿司店",
-      cuisineType: "寿司",
-      priceRange: "3000円～",
-      address: "新潟県佐渡市相川下戸村358",
-      phone: "0259-74-2109",
-      coordinates: { lat: 38.03, lng: 138.23 },
-      rating: 4.6,
-      reviewCount: 142,
-      openingHours: [
-        { day: "火-日", open: "17:00", close: "22:00", isHoliday: false },
-        { day: "月", open: "", close: "", isHoliday: true },
-      ],
-      features: ["カウンター席", "個室あり", "予約可能"],
-      lastUpdated: "2025-07-10",
-    },
-  ]),
-  fetchParkingsFromSheets: vi.fn().mockResolvedValue([
-    {
-      id: "p1",
-      name: "両津港駐車場",
-      coordinates: { lat: 38.018611, lng: 138.367222 },
-      capacity: 50,
-      type: "public",
-    },
-  ]),
-  fetchToiletsFromSheets: vi.fn().mockResolvedValue([
-    {
-      id: "t1",
-      name: "両津港公衆トイレ",
-      coordinates: { lat: 38.018611, lng: 138.367222 },
-      accessible: true,
-    },
-  ]),
-  fetchAllMapPoints: vi.fn().mockResolvedValue({
-    restaurants: [],
-    parkings: [],
-    toilets: [],
-  }),
+  fetchRestaurantsFromSheets: vi.fn().mockResolvedValue([]),
+  fetchParkingsFromSheets: vi.fn().mockResolvedValue([]),
+  fetchToiletsFromSheets: vi.fn().mockResolvedValue([]),
+  fetchAllMapPoints: vi.fn().mockResolvedValue([]),
   checkDataFreshness: vi.fn().mockResolvedValue({ needsUpdate: false }),
   SheetsApiError: class SheetsApiError extends Error {
-    constructor(message: string) {
+    constructor(message: string, public status: number = 500) {
       super(message);
       this.name = "SheetsApiError";
     }

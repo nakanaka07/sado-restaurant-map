@@ -52,13 +52,16 @@ export interface SheetRestaurantData {
  * Google Sheets APIエラー
  */
 export class SheetsApiError extends Error {
+  public readonly status: number;
+
   constructor(
     message: string,
-    public readonly status?: number,
+    status: number = 500,
     public readonly response?: unknown
   ) {
     super(message);
     this.name = "SheetsApiError";
+    this.status = status;
   }
 }
 
@@ -75,7 +78,8 @@ interface SheetsApiResponse {
 async function fetchSheetData(worksheetName: string): Promise<string[][]> {
   if (!SPREADSHEET_ID || !API_KEY) {
     throw new SheetsApiError(
-      "Google Sheets API設定が不完全です。VITE_SPREADSHEET_IDとVITE_GOOGLE_SHEETS_API_KEYを設定してください。"
+      "Google Sheets API設定が不完全です。VITE_SPREADSHEET_IDとVITE_GOOGLE_SHEETS_API_KEYを設定してください。",
+      400
     );
   }
 
@@ -113,9 +117,32 @@ async function fetchSheetData(worksheetName: string): Promise<string[][]> {
 
     const data = (await response.json()) as SheetsApiResponse;
 
-    if (!data.values || !Array.isArray(data.values)) {
+    // レスポンスデータの厳格な検証
+    if (!data || typeof data !== "object") {
       throw new SheetsApiError(
-        "Invalid response format from Google Sheets API"
+        "Invalid response format from Google Sheets API: response is not an object",
+        422
+      );
+    }
+
+    if (!data.values) {
+      // valuesがない場合は空配列として扱う（正常なケース）
+      console.warn(`Worksheet '${worksheetName}' has no data`);
+      return [];
+    }
+
+    if (!Array.isArray(data.values)) {
+      throw new SheetsApiError(
+        "Invalid response format from Google Sheets API: values is not an array",
+        422
+      );
+    }
+
+    // 各行が配列であることを確認
+    if (!data.values.every((row) => Array.isArray(row))) {
+      throw new SheetsApiError(
+        "Invalid response format from Google Sheets API: some rows are not arrays",
+        422
       );
     }
 
@@ -128,9 +155,76 @@ async function fetchSheetData(worksheetName: string): Promise<string[][]> {
     throw new SheetsApiError(
       `Google Sheets API request failed: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`
+      }`,
+      500
     );
   }
+}
+
+/**
+ * Restaurant データの型安全性を検証
+ */
+function validateRestaurantData(data: any): data is Restaurant {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  // 必須プロパティの検証
+  const requiredStringFields = [
+    "id",
+    "name",
+    "address",
+    "district",
+    "cuisineType",
+    "priceRange",
+  ];
+  for (const field of requiredStringFields) {
+    if (!data[field] || typeof data[field] !== "string") {
+      console.warn(`Missing or invalid required field: ${field}`);
+      return false;
+    }
+  }
+
+  // type プロパティの検証
+  if (data.type !== "restaurant") {
+    console.warn(
+      `Invalid type property: expected 'restaurant', got '${data.type}'`
+    );
+    return false;
+  }
+
+  // coordinates の検証
+  if (!data.coordinates || typeof data.coordinates !== "object") {
+    console.warn("Missing or invalid coordinates");
+    return false;
+  }
+
+  if (
+    typeof data.coordinates.lat !== "number" ||
+    typeof data.coordinates.lng !== "number"
+  ) {
+    console.warn("Invalid coordinate values");
+    return false;
+  }
+
+  if (isNaN(data.coordinates.lat) || isNaN(data.coordinates.lng)) {
+    console.warn("NaN coordinate values");
+    return false;
+  }
+
+  // features の検証
+  if (!Array.isArray(data.features)) {
+    console.warn("Features must be an array");
+    return false;
+  }
+
+  // openingHours の検証
+  if (!Array.isArray(data.openingHours)) {
+    console.warn("OpeningHours must be an array");
+    return false;
+  }
+
+  return true;
 }
 
 /**
@@ -140,17 +234,44 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
   try {
     const rows = await fetchSheetData(WORKSHEETS.RESTAURANTS);
 
+    // 厳格なデータ型検証
+    if (!Array.isArray(rows)) {
+      throw new SheetsApiError("Invalid data format: expected array", 400);
+    }
+
     if (rows.length === 0) {
+      console.warn("Google Sheets returned empty data");
       return [];
     }
 
     // ヘッダー行をスキップ
     const dataRows = rows.slice(1);
 
-    return dataRows
+    // 空データの場合は空配列を返す
+    if (dataRows.length === 0) {
+      console.warn("No restaurant data rows found after header");
+      return [];
+    }
+
+    // データ行の形式検証
+    if (!dataRows.every((row) => Array.isArray(row))) {
+      throw new SheetsApiError(
+        "Invalid data format: each row must be an array",
+        400
+      );
+    }
+
+    const validRestaurants = dataRows
       .map((row, index) => {
         try {
-          return convertSheetRowToRestaurant(row, index + 2); // +2 for header and 1-based indexing
+          const restaurant = convertSheetRowToRestaurant(row, index + 2);
+
+          // 厳格な型検証
+          if (!validateRestaurantData(restaurant)) {
+            throw new Error("Restaurant data validation failed");
+          }
+
+          return restaurant;
         } catch (error) {
           // より詳細なログ出力
           console.warn(`行 ${index + 2} 変換失敗 (${row.length}列):`, {
@@ -162,9 +283,30 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
         }
       })
       .filter((restaurant): restaurant is Restaurant => restaurant !== null);
+
+    // 最終的なデータ検証
+    if (validRestaurants.length === 0 && dataRows.length > 0) {
+      throw new SheetsApiError("No valid restaurant data could be parsed", 422);
+    }
+
+    console.log(
+      `✅ ${validRestaurants.length}/${dataRows.length} 件の有効な飲食店データを変換しました`
+    );
+    return validRestaurants;
   } catch (error) {
     console.error("Failed to fetch restaurants from sheets:", error);
-    throw error;
+
+    // エラーを適切にrejectする
+    if (error instanceof SheetsApiError) {
+      throw error;
+    }
+
+    throw new SheetsApiError(
+      `Restaurant data fetch failed: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+      500
+    );
   }
 }
 
@@ -663,17 +805,39 @@ export async function fetchParkingsFromSheets(): Promise<Parking[]> {
   try {
     const rows = await fetchSheetData(WORKSHEETS.PARKINGS);
 
+    // 厳格なデータ型検証
+    if (!Array.isArray(rows)) {
+      throw new SheetsApiError(
+        "Invalid parking data format: expected array",
+        400
+      );
+    }
+
     if (rows.length === 0) {
+      console.warn("Google Sheets returned empty parking data");
       return [];
     }
 
     // ヘッダー行をスキップ
     const dataRows = rows.slice(1);
 
-    return dataRows
+    // 空データの場合は空配列を返す
+    if (dataRows.length === 0) {
+      console.warn("No parking data rows found after header");
+      return [];
+    }
+
+    const validParkings = dataRows
       .map((row, index) => {
         try {
-          return convertSheetRowToParking(row, index + 2);
+          const parking = convertSheetRowToParking(row, index + 2);
+
+          // type プロパティが正しく設定されているか確認
+          if (parking.type !== "parking") {
+            throw new Error('Parking type property must be "parking"');
+          }
+
+          return parking;
         } catch (error) {
           console.warn(`駐車場データ行 ${index + 2} 変換失敗:`, {
             error: error instanceof Error ? error.message : error,
@@ -684,8 +848,19 @@ export async function fetchParkingsFromSheets(): Promise<Parking[]> {
         }
       })
       .filter((parking): parking is Parking => parking !== null);
+
+    console.log(
+      `✅ ${validParkings.length}/${dataRows.length} 件の有効な駐車場データを変換しました`
+    );
+    return validParkings;
   } catch (error) {
     console.warn("駐車場データの取得に失敗しました:", error);
+
+    if (error instanceof SheetsApiError) {
+      throw error;
+    }
+
+    // エラー時は空配列を返す（データ不足による完全な失敗を防ぐ）
     return [];
   }
 }
@@ -697,17 +872,39 @@ export async function fetchToiletsFromSheets(): Promise<Toilet[]> {
   try {
     const rows = await fetchSheetData(WORKSHEETS.TOILETS);
 
+    // 厳格なデータ型検証
+    if (!Array.isArray(rows)) {
+      throw new SheetsApiError(
+        "Invalid toilet data format: expected array",
+        400
+      );
+    }
+
     if (rows.length === 0) {
+      console.warn("Google Sheets returned empty toilet data");
       return [];
     }
 
     // ヘッダー行をスキップ
     const dataRows = rows.slice(1);
 
-    return dataRows
+    // 空データの場合は空配列を返す
+    if (dataRows.length === 0) {
+      console.warn("No toilet data rows found after header");
+      return [];
+    }
+
+    const validToilets = dataRows
       .map((row, index) => {
         try {
-          return convertSheetRowToToilet(row, index + 2);
+          const toilet = convertSheetRowToToilet(row, index + 2);
+
+          // type プロパティが正しく設定されているか確認
+          if (toilet.type !== "toilet") {
+            throw new Error('Toilet type property must be "toilet"');
+          }
+
+          return toilet;
         } catch (error) {
           console.warn(`トイレデータ行 ${index + 2} 変換失敗:`, {
             error: error instanceof Error ? error.message : error,
@@ -718,8 +915,19 @@ export async function fetchToiletsFromSheets(): Promise<Toilet[]> {
         }
       })
       .filter((toilet): toilet is Toilet => toilet !== null);
+
+    console.log(
+      `✅ ${validToilets.length}/${dataRows.length} 件の有効なトイレデータを変換しました`
+    );
+    return validToilets;
   } catch (error) {
     console.warn("公衆トイレデータの取得に失敗しました:", error);
+
+    if (error instanceof SheetsApiError) {
+      throw error;
+    }
+
+    // エラー時は空配列を返す（データ不足による完全な失敗を防ぐ）
     return [];
   }
 }
@@ -729,17 +937,90 @@ export async function fetchToiletsFromSheets(): Promise<Toilet[]> {
  */
 export async function fetchAllMapPoints(): Promise<MapPoint[]> {
   try {
-    const [restaurants, parkings, toilets] = await Promise.all([
-      fetchRestaurantsFromSheets(),
-      fetchParkingsFromSheets(),
-      fetchToiletsFromSheets(),
-    ]);
+    // Promise.allSettledを使用して、一部のAPIが失敗しても他の結果を取得
+    const [restaurantResult, parkingResult, toiletResult] =
+      await Promise.allSettled([
+        fetchRestaurantsFromSheets(),
+        fetchParkingsFromSheets(),
+        fetchToiletsFromSheets(),
+      ]);
+
+    // 成功した結果のみを取得
+    const restaurants =
+      restaurantResult.status === "fulfilled" ? restaurantResult.value : [];
+    const parkings =
+      parkingResult.status === "fulfilled" ? parkingResult.value : [];
+    const toilets =
+      toiletResult.status === "fulfilled" ? toiletResult.value : [];
+
+    // エラーログを出力（デバッグ用）
+    if (restaurantResult.status === "rejected") {
+      console.warn(
+        "レストランデータの取得に失敗しました:",
+        restaurantResult.reason
+      );
+    }
+    if (parkingResult.status === "rejected") {
+      console.warn("駐車場データの取得に失敗しました:", parkingResult.reason);
+    }
+    if (toiletResult.status === "rejected") {
+      console.warn(
+        "公衆トイレデータの取得に失敗しました:",
+        toiletResult.reason
+      );
+    }
+
+    // 各データに type プロパティが正しく設定されているか再確認
+    const restaurantPoints = restaurants.map((restaurant) => {
+      const point = convertRestaurantToMapPoint(restaurant);
+      if (point.type !== "restaurant") {
+        throw new Error(
+          `Invalid restaurant type: expected 'restaurant', got '${point.type}'`
+        );
+      }
+      return point;
+    });
+
+    const parkingPoints = parkings.map((parking) => {
+      const point = convertParkingToMapPoint(parking);
+      if (point.type !== "parking") {
+        throw new Error(
+          `Invalid parking type: expected 'parking', got '${point.type}'`
+        );
+      }
+      return point;
+    });
+
+    const toiletPoints = toilets.map((toilet) => {
+      const point = convertToiletToMapPoint(toilet);
+      if (point.type !== "toilet") {
+        throw new Error(
+          `Invalid toilet type: expected 'toilet', got '${point.type}'`
+        );
+      }
+      return point;
+    });
 
     const mapPoints: MapPoint[] = [
-      ...restaurants.map(convertRestaurantToMapPoint),
-      ...parkings.map(convertParkingToMapPoint),
-      ...toilets.map(convertToiletToMapPoint),
+      ...restaurantPoints,
+      ...parkingPoints,
+      ...toiletPoints,
     ];
+
+    // 最終的な統合データの検証
+    if (!Array.isArray(mapPoints)) {
+      throw new SheetsApiError("Failed to create map points array", 500);
+    }
+
+    // 各ポイントの type プロパティ検証
+    for (const point of mapPoints) {
+      if (
+        !point.type ||
+        !["restaurant", "parking", "toilet"].includes(point.type)
+      ) {
+        throw new SheetsApiError(`Invalid map point type: ${point.type}`, 422);
+      }
+    }
 
     console.log(
       `📊 統合マップポイント: 飲食店${restaurants.length}件 + 駐車場${parkings.length}件 + トイレ${toilets.length}件 = 合計${mapPoints.length}件`
@@ -748,7 +1029,17 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
     return mapPoints;
   } catch (error) {
     console.error("統合マップポイントの取得に失敗しました:", error);
-    throw error;
+
+    if (error instanceof SheetsApiError) {
+      throw error;
+    }
+
+    throw new SheetsApiError(
+      `Map points integration failed: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
+      500
+    );
   }
 }
 
