@@ -169,6 +169,7 @@ export default defineConfig({
     minify: "terser",
     cssMinify: true,
     rollupOptions: {
+      input: "src/app/main.tsx", // カスタムエントリーポイント
       output: {
         manualChunks: {
           "google-maps": ["@vis.gl/react-google-maps"],

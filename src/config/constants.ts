@@ -3,7 +3,7 @@
  * 定数・設定値の一元管理
  */
 
-import type { LatLngLiteral } from "../types/restaurant.types";
+import type { LatLngLiteral } from "@/types";
 
 // ==============================
 // 地図関連の定数

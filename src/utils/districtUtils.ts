@@ -1,13 +1,32 @@
 /**
- * 佐渡島の地区判定ユーティリティ
- * 住所文字列から佐渡の地区を判定
+ * 佐渡島地区分類ユーティリティ
+ *
+ * @fileoverview 住所文字列から佐渡市の地区を判定するためのユーティリティ関数群
+ * @version 1.2.0
+ * @since 1.0.0
+ * @author GitHub Copilot AI Assistant
+ *
+ * @description
+ * 佐渡市の11地区（両津、相川、佐和田、金井、新穂、畑野、真野、小木、羽茂、赤泊、その他）への
+ * 住所文字列からの自動分類機能を提供します。
+ *
+ * 主な機能:
+ * - 住所文字列からの地区自動判定
+ * - 地区名の正規化
+ * - 佐渡市公式の地区分類に準拠
  */
 
-import type { SadoDistrict } from "../types/restaurant.types";
+import type { SadoDistrict } from "@/types";
 
 /**
  * 佐渡の地区キーワードマッピング
  * より具体的な地名から地区を判定
+ *
+ * @description
+ * 住所に含まれるキーワードから対応する地区を特定するためのマッピング。
+ * 長いキーワードから順にチェックすることで、より具体的な判定を実現。
+ *
+ * @internal
  */
 const DISTRICT_KEYWORDS: Record<string, SadoDistrict> = {
   // 両津地区

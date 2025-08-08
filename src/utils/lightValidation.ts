@@ -1,6 +1,12 @@
 /**
  * 軽量バリデーションユーティリティ
  * Zodの代替として、TypeScriptネイティブな型ガードを提供
+ *
+ * @fileoverview 佐渡飲食店マップアプリケーション用の軽量バリデーション
+ * @version 2.1.0
+ * @since 1.0.0
+ * @author GitHub Copilot AI Assistant
+ * @see {@link https://www.typescriptlang.org/docs/handbook/2/narrowing.html#using-type-predicates TypeScript Type Guards}
  */
 
 import type {
@@ -9,23 +15,47 @@ import type {
   PriceRange,
   SadoDistrict,
   LatLngLiteral,
-} from "../types/restaurant.types";
+} from "@/types";
 
 // ==============================
 // 基本的な型ガード関数
 // ==============================
 
-/** 文字列かどうかをチェック */
+/**
+ * 値が文字列かどうかをチェックする型ガード関数
+ *
+ * @param value - チェック対象の値
+ * @returns 値が文字列の場合true
+ *
+ * @example
+ * ```typescript
+ * if (isString(userInput)) {
+ *   // userInput は string 型として扱える
+ *   console.log(userInput.toLowerCase());
+ * }
+ * ```
+ */
 export const isString = (value: unknown): value is string => {
   return typeof value === "string";
 };
 
-/** 数値かどうかをチェック */
+/**
+ * 値が数値かどうかをチェックする型ガード関数
+ * NaN は false を返す
+ *
+ * @param value - チェック対象の値
+ * @returns 値が有効な数値の場合true
+ */
 export const isNumber = (value: unknown): value is number => {
   return typeof value === "number" && !isNaN(value);
 };
 
-/** 配列かどうかをチェック */
+/**
+ * 値が配列かどうかをチェックする型ガード関数
+ *
+ * @param value - チェック対象の値
+ * @returns 値が配列の場合true
+ */
 export const isArray = (value: unknown): value is unknown[] => {
   return Array.isArray(value);
 };

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { RestaurantMap } from "./RestaurantMap";
-import type { Restaurant } from "../../types/restaurant.types";
+import type { Restaurant } from "@/types";
 import type { ReactNode } from "react";
 
 // 型定義
@@ -106,6 +106,7 @@ describe("RestaurantMap", () => {
   const mockRestaurants: Restaurant[] = [
     {
       id: "1",
+      type: "restaurant",
       name: "寿司処金峰",
       address: "佐渡市両津湊353",
       cuisineType: "寿司",
@@ -127,6 +128,7 @@ describe("RestaurantMap", () => {
     },
     {
       id: "2",
+      type: "restaurant",
       name: "そば処竹の子",
       address: "佐渡市金井新保甲1228",
       cuisineType: "そば・うどん",
