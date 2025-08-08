@@ -38,6 +38,25 @@ jobs:
 
       - name: Run tests
         run: pnpm run test
+        env:
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'test-placeholder' }}
+          VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID || 'test-placeholder' }}
+          VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+
+      - name: Debug environment variables
+        run: |
+          echo "🔍 Environment Variables Debug:"
+          echo "VITE_BASE_URL=$VITE_BASE_URL"
+          echo "Repository name: ${{ github.event.repository.name }}"
+          echo "Node environment: $NODE_ENV"
+          echo "Environment variables presence check:"
+          echo "VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY != '' }}"
+          echo "VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID != '' }}"
+          echo "VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY != '' }}"
+          echo "VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID != '' }}"
+        env:
+          VITE_BASE_URL: /${{ github.event.repository.name }}/
 
       - name: Build application
         run: pnpm run build

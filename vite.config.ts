@@ -5,7 +5,9 @@ import { fileURLToPath, URL } from "node:url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
+  base:
+    process.env.VITE_BASE_URL ||
+    (process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/"),
   plugins: [
     react({
       // React Compiler対応（React 19.1 Stable）
