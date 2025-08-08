@@ -117,8 +117,25 @@ Object.defineProperty(window, "localStorage", {
 process.env.VITE_GA_MEASUREMENT_ID = "G-TEST123456";
 process.env.VITE_GOOGLE_MAPS_API_KEY = "TEST_API_KEY";
 
-// Mock sheetsService for testing
-vi.mock("../services/sheetsService", () => ({
+// Mock analytics for testing
+vi.mock("../utils/analytics", () => ({
+  trackSearch: vi.fn(),
+  trackFilter: vi.fn(),
+  initGA: vi.fn().mockResolvedValue(undefined),
+  trackEvent: vi.fn(),
+  trackRestaurantClick: vi.fn(),
+  trackMapInteraction: vi.fn(),
+  trackPWAUsage: vi.fn(),
+  trackPageView: vi.fn(),
+  checkGAStatus: vi.fn().mockResolvedValue({}),
+  debugGA: vi.fn().mockResolvedValue({}),
+  runGADiagnostics: vi.fn().mockReturnValue({}),
+  sendTestEvents: vi.fn(),
+  autoFixGA: vi.fn().mockReturnValue({}),
+}));
+
+// Mock all services for testing
+vi.mock("../services/sheets/sheetsService", () => ({
   fetchRestaurantsFromSheets: vi.fn().mockResolvedValue([
     {
       id: "1",
@@ -196,6 +213,28 @@ vi.mock("../services/sheetsService", () => ({
       lastUpdated: "2025-07-10",
     },
   ]),
+  fetchParkingsFromSheets: vi.fn().mockResolvedValue([
+    {
+      id: "p1",
+      name: "両津港駐車場",
+      coordinates: { lat: 38.018611, lng: 138.367222 },
+      capacity: 50,
+      type: "public",
+    },
+  ]),
+  fetchToiletsFromSheets: vi.fn().mockResolvedValue([
+    {
+      id: "t1",
+      name: "両津港公衆トイレ",
+      coordinates: { lat: 38.018611, lng: 138.367222 },
+      accessible: true,
+    },
+  ]),
+  fetchAllMapPoints: vi.fn().mockResolvedValue({
+    restaurants: [],
+    parkings: [],
+    toilets: [],
+  }),
   checkDataFreshness: vi.fn().mockResolvedValue({ needsUpdate: false }),
   SheetsApiError: class SheetsApiError extends Error {
     constructor(message: string) {
