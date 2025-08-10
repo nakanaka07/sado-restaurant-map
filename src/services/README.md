@@ -1,433 +1,332 @@
-# 🔌 Services Architecture
+# Services Layer
 
-> **目的**: 佐渡飲食店マップアプリケーションの外部サービス・API 連携アーキテクチャ  
-> **更新日**: 2025 年 8 月 8 日
+## 概要
 
-## 📁 ディレクトリ構造
+このディレクトリは、佐渡島レストランマップアプリケーションの**サービス層**を構成します。外部API通信、データ変換、ビジネスロジックの抽象化を担当し、クリーンアーキテクチャの原則に基づいて設計されています。
 
-```text
-services/
-├── sheets/
-│   ├── sheetsService.ts    # Google Sheets API実装
-│   └── index.ts           # sheets export
-├── api/                   # 汎用API層 (将来実装)
-├── maps/                  # Google Maps API (将来実装)
-└── index.ts              # 全サービスのbarrel export
+## アーキテクチャ概要
+
+```
+src/services/
+├── abstractions/          # 依存関係逆転原則の実装
+├── sheets/               # Google Sheets API連携
+├── index.ts              # バレルエクスポート
+└── sheetsService.ts      # レガシーサービス（互換性維持）
 ```
 
-## 🎯 アーキテクチャ原則
+## ディレクトリ構成
 
-### 1. **責任分離**
+### `abstractions/`
+**依存関係逆転原則（Dependency Inversion Principle）の実装**
 
-各サービスは特定の外部 API との通信のみを担当
+- **目的**: 具象実装への依存を排除し、テスタブルなアーキテクチャを実現
+- **主要コンポーネント**:
+  - `AbstractDataService<T>` - 抽象データサービス基底クラス
+  - `RestaurantService` - 飲食店データサービス
+  - `ParkingService` - 駐車場データサービス
+  - `ToiletService` - トイレデータサービス
+  - `ServiceFactory` - 依存関係注入ファクトリー
+  - `MapDataService` - 統合マップデータサービス
 
+### `sheets/`
+**Google Sheets API連携サービス**
+
+- **目的**: スプレッドシートからのデータ取得と型安全な変換
+- **主要機能**:
+  - データ取得（レストラン、駐車場、トイレ）
+  - 型変換とバリデーション
+  - エラーハンドリング
+  - データ品質管理
+
+### `index.ts`
+**バレルエクスポートファイル**
+
+- **目的**: サービス層の統一的なインターフェース提供
+- **エクスポート内容**:
+  - Sheets Service関数群
+  - Abstract Services クラス群
+  - 型定義の再エクスポート
+
+## 設計原則
+
+### 1. 依存関係逆転原則（DIP）
 ```typescript
-// ✅ 良い例: 特定API専用
-class GoogleSheetsService {
-  // Google Sheets APIのみを扱う
-}
-
-// ❌ 悪い例: 複数API混在
-class DataService {
-  // Google Sheets + Maps + Analytics混在
-}
-```
-
-### 2. **抽象化**
-
-具体的な実装詳細を隠蔽し、統一インターフェースを提供
-
-```typescript
-// 抽象インターフェース
-interface DataService {
-  fetchRestaurants(): Promise<Restaurant[]>;
-  fetchMapPoints(): Promise<MapPoint[]>;
-}
-
-// 具体実装
-class GoogleSheetsDataService implements DataService {
-  // Google Sheets固有の実装
-}
-```
-
-### 3. **エラーハンドリング**
-
-統一的なエラー処理とログ出力
-
-```typescript
-class ServiceError extends Error {
+// 高レベルモジュールは抽象化に依存
+class MapDataService {
   constructor(
-    message: string,
-    public service: string,
-    public originalError?: unknown
-  ) {
-    super(message);
-    this.name = "ServiceError";
+    private restaurantService: RestaurantService,
+    private parkingService: ParkingService,
+    private toiletService: ToiletService
+  ) {}
+}
+```
+
+### 2. 単一責任原則（SRP）
+- 各サービスは特定のデータタイプまたは機能領域を担当
+- 関心事の分離により保守性を向上
+
+### 3. 開放閉鎖原則（OCP）
+- 新機能の追加は拡張で対応
+- 既存コードの修正を最小限に抑制
+
+## データフロー
+
+```
+External Data Sources
+        ↓
+Google Sheets API
+        ↓
+Sheets Service Layer
+        ↓
+Abstract Service Layer
+        ↓
+Application Components
+```
+
+### フロー詳細
+
+1. **データソース** - Google Sheets、外部API
+2. **取得層** - `sheets/` サービスによるデータ取得
+3. **変換層** - 型安全なオブジェクトへの変換
+4. **抽象化層** - `abstractions/` による統一インターフェース
+5. **アプリケーション層** - コンポーネントでの利用
+
+## 使用例
+
+### 基本的な使用方法
+
+```typescript
+import {
+  fetchAllMapPoints,
+  ServiceFactory,
+  MapDataService
+} from '@/services';
+
+// 直接的なデータ取得
+const allPoints = await fetchAllMapPoints();
+
+// 抽象化されたサービスの使用
+const factory = new ServiceFactory(
+  mapPointProvider,
+  cacheProvider,
+  errorHandler,
+  validators
+);
+
+const mapService = new MapDataService(
+  factory.createRestaurantService(),
+  factory.createParkingService(),
+  factory.createToiletService()
+);
+
+const nearbyPoints = await mapService.getMapPointsInArea(
+  { lat: 38.0186, lng: 138.3672 },
+  5000
+);
+```
+
+### エラーハンドリング
+
+```typescript
+import { SheetsApiError } from '@/services';
+
+try {
+  const restaurants = await fetchRestaurantsFromSheets();
+} catch (error) {
+  if (error instanceof SheetsApiError) {
+    console.error(`API Error ${error.status}:`, error.message);
+    // 適切なフォールバック処理
   }
 }
 ```
 
-## 📊 既存サービス詳細
+## パフォーマンス最適化
 
-### **GoogleSheetsService**
+### キャッシュ戦略
+- **L1キャッシュ**: メモリ内キャッシュ
+- **データ更新チェック**: 不要なAPI呼び出しの回避
+- **バッチ処理**: 複数データタイプの並列取得
 
-Google Sheets API との通信を担当
+### メモリ管理
+- **オブジェクトプーリング**: 頻繁に作成されるオブジェクトの再利用
+- **遅延読み込み**: 必要時のみデータを取得
+- **適切な解放**: 不要なオブジェクトの早期解放
 
-#### **主要機能**
+## テスト戦略
 
+### 単体テスト
 ```typescript
-class GoogleSheetsService {
-  // 基本データ取得
-  async fetchSheetData(range: string): Promise<string[][]>;
-
-  // 飲食店データ変換
-  async fetchRestaurants(): Promise<Restaurant[]>;
-
-  // 追加ポイント取得
-  async fetchAdditionalPoints(): Promise<MapPoint[]>;
-}
+// モック注入による抽象サービステスト
+const mockDataSource = createMock<IMapPointProvider>();
+const service = new RestaurantService(
+  mockDataSource,
+  mockCache,
+  mockErrorHandler,
+  mockValidator
+);
 ```
 
-#### **設定**
-
+### 統合テスト
 ```typescript
-const SHEETS_CONFIG = {
-  SPREADSHEET_ID: import.meta.env.VITE_SPREADSHEET_ID,
-  API_KEY: import.meta.env.VITE_GOOGLE_SHEETS_API_KEY,
-  SHEET_NAME: "まとめータベース",
-  RANGE: "A:Z",
-} as const;
+// 実際のAPIを使用した統合テスト
+describe('Services Integration', () => {
+  it('should fetch and transform data correctly', async () => {
+    const result = await fetchAllMapPoints();
+    expect(result).toBeDefined();
+    expect(result.length).toBeGreaterThan(0);
+  });
+});
 ```
 
-#### **エラーハンドリング**
+## 環境設定
 
-```typescript
-// レート制限対応
-private async handleRateLimit(error: unknown): Promise<void> {
-  if (this.isRateLimitError(error)) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    throw new ServiceError(
-      'Rate limit exceeded. Please try again.',
-      'GoogleSheets',
-      error
-    );
-  }
-}
+### 必要な環境変数
 
-// ネットワークエラー対応
-private handleNetworkError(error: unknown): never {
-  throw new ServiceError(
-    'Network error occurred while fetching data.',
-    'GoogleSheets',
-    error
-  );
-}
+```env
+# Google Sheets API
+VITE_GOOGLE_SHEETS_API_KEY=your_api_key_here
+VITE_SPREADSHEET_ID=your_spreadsheet_id_here
+
+# その他のAPI設定（将来の拡張用）
+# VITE_EXTERNAL_API_KEY=your_external_api_key
 ```
 
-#### **データ変換**
+### 設定ファイル
 
 ```typescript
-// 生データから型安全なオブジェクトに変換
-private convertRowToRestaurant(row: string[]): Restaurant {
-  return {
-    id: sanitizeInput(row[0] || ''),
-    name: sanitizeInput(row[1] || ''),
-    cuisineType: this.parseCuisineType(row[2]),
-    priceRange: this.parsePriceRange(row[3]),
-    district: getDistrictFromAddress(row[4] || ''),
-    address: sanitizeInput(row[4] || ''),
-    coordinates: this.parseCoordinates(row[5], row[6]),
-    phone: this.parsePhone(row[7]),
-    website: this.parseWebsite(row[8]),
-    features: this.parseFeatures(row[9])
-  };
-}
-```
-
-## 🛠️ サービス作成ガイド
-
-### **1. 基本テンプレート**
-
-```typescript
-import { ServiceError } from "./ServiceError";
-
-interface ServiceConfig {
-  apiKey: string;
-  baseUrl: string;
-  timeout?: number;
-}
-
-export class CustomService {
-  private config: ServiceConfig;
-
-  constructor(config: ServiceConfig) {
-    this.config = config;
-  }
-
-  async fetchData<T>(endpoint: string): Promise<T> {
-    try {
-      const response = await fetch(
-        `${this.config.baseUrl}/${endpoint}?key=${this.config.apiKey}`,
-        {
-          timeout: this.config.timeout || 10000,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw new ServiceError(
-        `Failed to fetch data from ${endpoint}`,
-        "CustomService",
-        error
-      );
-    }
-  }
-}
-```
-
-### **2. 型安全性**
-
-```typescript
-// APIレスポンス型定義
-interface ApiResponse<T> {
-  data: T;
-  status: "success" | "error";
-  message?: string;
-}
-
-// サービスメソッドの型定義
-interface RestaurantService {
-  fetchRestaurants(): Promise<Restaurant[]>;
-  searchRestaurants(query: string): Promise<Restaurant[]>;
-  getRestaurantById(id: string): Promise<Restaurant | null>;
-}
-```
-
-### **3. 設定管理**
-
-```typescript
-// 環境変数からの設定読み込み
-const createServiceConfig = () => ({
-  googleSheets: {
+// services/config.ts (将来の拡張例)
+export const serviceConfig = {
+  sheets: {
     apiKey: import.meta.env.VITE_GOOGLE_SHEETS_API_KEY,
     spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID,
   },
-  googleMaps: {
-    apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  cache: {
+    ttl: 300000, // 5分
+    maxSize: 100,
   },
-  analytics: {
-    measurementId: import.meta.env.VITE_GA_MEASUREMENT_ID,
-  },
-});
-
-// 設定バリデーション
-const validateConfig = (config: ServiceConfig): void => {
-  if (!config.googleSheets.apiKey) {
-    throw new Error("Google Sheets API key is required");
-  }
-  // その他のバリデーション
 };
 ```
 
-## 🧪 テスト戦略
+## エラーハンドリング
 
-### **1. サービス単体テスト**
-
-```typescript
-import { GoogleSheetsService } from "./sheetsService";
-
-describe("GoogleSheetsService", () => {
-  let service: GoogleSheetsService;
-
-  beforeEach(() => {
-    service = new GoogleSheetsService({
-      apiKey: "test-api-key",
-      spreadsheetId: "test-spreadsheet-id",
-    });
-  });
-
-  test("飲食店データ取得が正常に動作", async () => {
-    // モックレスポンス設定
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () =>
-        Promise.resolve({
-          values: [
-            ["ID", "Name", "Type", "Price", "Address", "Lat", "Lng"],
-            [
-              "1",
-              "テストレストラン",
-              "日本料理",
-              "1000-2000円",
-              "佐渡市両津",
-              "38.0",
-              "138.0",
-            ],
-          ],
-        }),
-    });
-
-    const restaurants = await service.fetchRestaurants();
-
-    expect(restaurants).toHaveLength(1);
-    expect(restaurants[0].name).toBe("テストレストラン");
-    expect(restaurants[0].cuisineType).toBe("日本料理");
-  });
-
-  test("APIエラー時の適切なエラーハンドリング", async () => {
-    global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
-
-    await expect(service.fetchRestaurants()).rejects.toThrow(ServiceError);
-  });
-});
-```
-
-### **2. 統合テスト**
+### カスタムエラー型
 
 ```typescript
-// 実際のAPIとの統合テスト（E2E）
-test("実際のGoogle Sheets APIとの通信", async () => {
-  const service = new GoogleSheetsService({
-    apiKey: process.env.VITE_GOOGLE_SHEETS_API_KEY,
-    spreadsheetId: process.env.VITE_SPREADSHEET_ID,
-  });
-
-  const restaurants = await service.fetchRestaurants();
-
-  expect(restaurants.length).toBeGreaterThan(400); // 実際のデータ数
-  expect(restaurants.every((r) => r.id && r.name)).toBe(true);
-}, 30000); // 長いタイムアウト
-```
-
-## 🔒 セキュリティ
-
-### **1. API キー管理**
-
-```typescript
-// 環境変数での管理
-const config = {
-  apiKey: import.meta.env.VITE_GOOGLE_SHEETS_API_KEY,
-  // 本番環境では暗号化やvaultサービス使用を検討
-};
-
-// APIキー形式バリデーション
-const validateApiKey = (key: string): boolean => {
-  return /^AIza[0-9A-Za-z-_]{35}$/.test(key);
-};
-```
-
-### **2. 入力サニタイゼーション**
-
-```typescript
-import { sanitizeInput } from "@/utils/security";
-
-const sanitizeRestaurantData = (raw: string[]): Restaurant => ({
-  id: sanitizeInput(raw[0]),
-  name: sanitizeInput(raw[1]),
-  address: sanitizeInput(raw[4]),
-  // すべての文字列入力をサニタイズ
-});
-```
-
-### **3. レート制限対応**
-
-```typescript
-class RateLimitManager {
-  private requestTimes: number[] = [];
-  private readonly maxRequests = 100; // per minute
-  private readonly timeWindow = 60000; // 1 minute
-
-  canMakeRequest(): boolean {
-    const now = Date.now();
-    // 時間窓から古いリクエストを削除
-    this.requestTimes = this.requestTimes.filter(
-      (time) => now - time < this.timeWindow
-    );
-
-    return this.requestTimes.length < this.maxRequests;
-  }
-
-  recordRequest(): void {
-    this.requestTimes.push(Date.now());
+// SheetsApiError - Google Sheets API固有のエラー
+export class SheetsApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly response?: unknown
+  ) {
+    super(message);
+    this.name = 'SheetsApiError';
   }
 }
 ```
 
-## 🚀 将来の拡張予定
+### エラー分類
+- **認証エラー** (403) - API キー関連
+- **レート制限エラー** (429) - API使用量超過
+- **データ形式エラー** - スプレッドシート構造不整合
+- **ネットワークエラー** - 通信障害
 
-### **Google Maps Service**
+## 拡張ポイント
+
+### 新しいデータソースの追加
+
+1. **新しいサービスディレクトリの作成**
+   ```
+   src/services/newapi/
+   ├── index.ts
+   ├── newApiService.ts
+   └── newApiService.test.ts
+   ```
+
+2. **抽象サービスの実装**
+   ```typescript
+   class NewDataService extends AbstractDataService<NewDataType> {
+     // 具象実装
+   }
+   ```
+
+3. **ファクトリーへの統合**
+   ```typescript
+   class ServiceFactory {
+     createNewDataService(): NewDataService {
+       // ファクトリーメソッドの実装
+     }
+   }
+   ```
+
+### カスタムキャッシュプロバイダー
 
 ```typescript
-// services/maps/mapsService.ts
-export class GoogleMapsService {
-  async geocode(address: string): Promise<LatLngLiteral>;
-  async reverseGeocode(coordinates: LatLngLiteral): Promise<string>;
-  async getPlaceDetails(placeId: string): Promise<PlaceDetails>;
+class RedisCache implements ICacheProvider<T> {
+  async get(key: string): Promise<T | null> {
+    // Redis実装
+  }
+  
+  async set(key: string, value: T, ttl?: number): Promise<void> {
+    // Redis実装
+  }
 }
 ```
 
-### **Analytics Service**
+## モニタリング・ログ
+
+### パフォーマンス監視
 
 ```typescript
-// services/analytics/analyticsService.ts
-export class AnalyticsService {
-  trackEvent(action: string, category: string, label?: string): void;
-  trackPageView(path: string): void;
-  setUserProperties(properties: Record<string, string>): void;
-}
+// サービス呼び出しの監視
+const startTime = performance.now();
+const result = await fetchRestaurantsFromSheets();
+const duration = performance.now() - startTime;
+
+console.log(`Data fetch completed in ${duration}ms`);
 ```
 
-### **Cache Service**
+### エラー追跡
 
 ```typescript
-// services/cache/cacheService.ts
-export class CacheService {
-  async get<T>(key: string): Promise<T | null>;
-  async set<T>(key: string, value: T, ttl?: number): Promise<void>;
-  async invalidate(pattern: string): Promise<void>;
-}
+// エラーログの構造化
+const errorLog = {
+  timestamp: new Date().toISOString(),
+  service: 'SheetsService',
+  operation: 'fetchRestaurants',
+  error: error.message,
+  status: error.status,
+};
 ```
 
-## 📦 エクスポート規則
+## 関連ドキュメント
 
-### **Barrel Exports**
+- [`abstractions/README.md`](./abstractions/README.md) - 依存関係逆転実装の詳細
+- [`sheets/README.md`](./sheets/README.md) - Google Sheets API連携の詳細
+- `src/types/` - 型定義
+- `src/utils/` - ユーティリティ関数
+- `docs/development/` - 開発ガイドライン
 
-```typescript
-// services/index.ts
-export { GoogleSheetsService } from "./sheets";
-export { GoogleMapsService } from "./maps";
-export { AnalyticsService } from "./analytics";
+## ベストプラクティス
 
-// 型定義
-export type { DataService, ServiceConfig, ServiceError } from "./types";
-```
+### コード品質
+- **型安全性** - TypeScriptの型システムを最大限活用
+- **エラーハンドリング** - 適切な例外処理とログ出力
+- **テスト可能性** - 依存関係注入によるモック化
 
-### **使用時**
+### パフォーマンス
+- **キャッシュ活用** - 不要なAPI呼び出しの削減
+- **並列処理** - 独立したデータ取得の並列化
+- **メモリ効率** - 適切なオブジェクト管理
 
-```typescript
-// ✅ 推奨
-import { GoogleSheetsService } from "@/services";
+### 保守性
+- **関心事の分離** - 各サービスの責任範囲を明確化
+- **依存関係管理** - 抽象化による疎結合
+- **ドキュメント** - 包括的なドキュメンテーション
 
-// ❌ 非推奨
-import { GoogleSheetsService } from "@/services/sheets/sheetsService";
-```
+## 注意事項
 
-## 📚 参考資料
-
-- [Google Sheets API v4](https://developers.google.com/sheets/api)
-- [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
-- [Fetch API Best Practices](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
-- [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
-
----
-
-**📝 最終更新**: 2025 年 8 月 8 日  
-**🔄 次回更新**: 新サービス追加時  
-**👥 レビュー**: 開発チーム全体
+- **API制限** - 外部APIの使用量制限に注意
+- **データ整合性** - 外部データソースの変更への対応
+- **セキュリティ** - API キーの適切な管理
+- **互換性** - 既存コードとの後方互換性維持

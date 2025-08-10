@@ -36,7 +36,8 @@ def translate_types(types):
         'meal_takeaway': 'テイクアウト',
         'cafe': 'カフェ',
         'bar': 'バー',
-        'bakery': 'パン屋',
+        'bakery': 'パン・洋菓子店',  # 🆕 より正確な表現に変更
+        'meal_delivery': 'デリバリー',
         'store': '店舗',
         'establishment': '施設',
         'lodging': '宿泊施設',
@@ -76,7 +77,21 @@ def translate_types(types):
         'police': '警察署',
         'city_hall': '市役所',
         'courthouse': '裁判所',
-        'embassy': '大使館'
+        'embassy': '大使館',
+        # 🆕 Places API (New) v1 対応の追加業種
+        'japanese_restaurant': '和食レストラン',
+        'chinese_restaurant': '中華料理店',
+        'italian_restaurant': 'イタリアンレストラン',
+        'fast_food_restaurant': 'ファーストフード',
+        'pizza_restaurant': 'ピザ店',
+        'seafood_restaurant': 'シーフードレストラン',
+        'steak_house': 'ステーキハウス',
+        'sushi_restaurant': '寿司店',
+        'ramen_restaurant': 'ラーメン店',
+        'ice_cream_shop': 'アイスクリーム店',
+        'sandwich_shop': 'サンドイッチ店',
+        'public_bathroom': '公衆トイレ',
+        'point_of_interest': '観光スポット'
     }
     
     translated = []

@@ -1,488 +1,320 @@
-# 🛠️ Utilities Reference
+# Utils Layer - ユーティリティ関数群
 
-> **目的**: 佐渡飲食店マップアプリケーションのユーティリティ関数リファレンス  
-> **更新日**: 2025 年 8 月 8 日
+佐渡飲食店マップアプリケーションのユーティリティ関数層です。アプリケーション全体で使用される汎用的な機能を提供します。
 
-## 📁 ディレクトリ構造
+## 📁 ディレクトリ構成
 
-```text
-utils/
-├── analytics.ts           # Google Analytics関連
-├── districtUtils.ts       # 佐渡島地区分類
-├── lightValidation.ts     # 軽量バリデーション
-├── district/              # 地区関連詳細
-├── security/              # セキュリティ関連
-├── validation/            # バリデーション詳細
-└── index.ts              # barrel export
+```
+src/utils/
+├── analytics.ts        # Google Analytics 4 統合
+├── districtUtils.ts    # 佐渡島地区分類システム
+├── lightValidation.ts  # 軽量バリデーション（Zod代替）
+├── securityUtils.ts    # セキュリティユーティリティ
+└── README.md          # このファイル
 ```
 
-## 🎯 設計方針
+## 🛠️ ユーティリティファイル概要
 
-### 1. **純粋関数優先**
+### 📊 Analytics (`analytics.ts`)
+Google Analytics 4との統合を提供し、ユーザー行動の追跡と分析を行います。
 
-副作用のない、テスト可能な関数を基本とする
+**主な機能:**
+- **GA4初期化**: 環境変数からの自動設定
+- **イベント追跡**: カスタムイベントの送信
+- **専用イベント**: 飲食店クリック、検索、フィルタリング、地図操作
+- **PWA追跡**: インストールとスタンドアロンモード
+- **デバッグツール**: 開発環境での診断機能
 
+**主要な関数:**
 ```typescript
-// ✅ 純粋関数
-const formatPrice = (price: number): string => {
-  return `¥${price.toLocaleString()}`;
-};
+// 初期化
+initGA(): Promise<void>
 
-// ❌ 副作用あり
-const logAndFormatPrice = (price: number): string => {
-  console.log(price); // 副作用
-  return `¥${price.toLocaleString()}`;
-};
+// 基本イベント追跡
+trackEvent(eventName: string, parameters: Record<string, unknown>): void
+
+// 専用イベント
+trackRestaurantClick(restaurant: RestaurantData): void
+trackSearch(query: string, resultCount: number): void
+trackFilter(filterType: string, filterValue: string): void
+trackMapInteraction(action: "zoom" | "pan" | "marker_click"): void
+trackPWAUsage(action: "install" | "standalone_mode"): void
+
+// デバッグ機能（開発環境限定）
+runGADiagnostics(): void
+checkGAStatus(): void
 ```
 
-### 2. **型安全性**
+### 🗺️ District Utils (`districtUtils.ts`)
+佐渡島の11地区への住所分類システムを提供します。
 
-厳格な型定義とガード関数
+**対応地区:**
+- 両津、相川、佐和田、金井、新穂、畑野、真野、小木、羽茂、赤泊、その他
 
-```typescript
-// 型ガード関数
-export const isString = (value: unknown): value is string => {
-  return typeof value === "string";
-};
+**主な機能:**
+- **住所解析**: 住所文字列からの地区自動判定
+- **地区正規化**: 入力された地区名の標準化
+- **バリデーション**: 地区名の有効性チェック
 
-// 型安全な変換
-export const parseNumber = (value: unknown): number | null => {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return isNaN(parsed) ? null : parsed;
-  }
-  return null;
-};
-```
-
-### 3. **パフォーマンス**
-
-計算量とメモリ使用量を意識した実装
-
-```typescript
-// 効率的な検索
-const DISTRICT_KEYWORDS = new Map([
-  ["両津", "両津"],
-  ["相川", "相川"],
-  // ... マップによる高速検索
-]);
-
-export const getDistrictFromAddress = memoize(
-  (address: string): SadoDistrict => {
-    // メモ化による性能向上
-  }
-);
-```
-
-## 📚 ユーティリティ詳細
-
-### **analytics.ts**
-
-Google Analytics 関連の機能
-
-#### **主要関数**
-
-```typescript
-// Google Analytics初期化
-export const initGA = (measurementId: string): void
-
-// イベントトラッキング
-export const trackEvent = (action: string, category: string, label?: string): void
-
-// ページビュートラッキング
-export const trackPageView = (path: string): void
-
-// GA状態チェック
-export const checkGAStatus = (): boolean
-```
-
-#### **使用例**
-
-```typescript
-import { initGA, trackEvent } from "@/utils/analytics";
-
-// アプリ初期化時
-initGA("G-XXXXXXXXXX");
-
-// ユーザーアクション時
-trackEvent("search", "restaurant", searchQuery);
-trackEvent("click", "restaurant_card", restaurant.name);
-```
-
-### **districtUtils.ts**
-
-佐渡島の地区分類機能
-
-#### **主要関数**
-
+**主要な関数:**
 ```typescript
 // 住所から地区を判定
-export const getDistrictFromAddress = (address: string): SadoDistrict
+getDistrictFromAddress(address: string): SadoDistrict
 
 // 地区名の正規化
-export const normalizeDistrict = (district: string): SadoDistrict
+normalizeDistrict(district: string): SadoDistrict
 
-// 地区一覧取得
-export const getAllDistricts = (): SadoDistrict[]
+// 地区の有効性チェック
+isValidDistrict(district: string): district is SadoDistrict
+
+// 全地区リスト取得
+getAllDistricts(): readonly SadoDistrict[]
 ```
 
-#### **地区マッピング**
+### ✅ Light Validation (`lightValidation.ts`)
+TypeScriptネイティブな型ガードを提供し、Zodの軽量代替として機能します。
 
+**主な機能:**
+- **基本型ガード**: string、number、array、objectの検証
+- **ドメイン型ガード**: CuisineType、PriceRange、SadoDistrict
+- **座標検証**: LatLngLiteralの形式チェック
+- **レストランデータ検証**: 完全なRestaurantオブジェクトの検証
+- **セキュリティ検証**: APIキー、検索クエリのバリデーション
+- **エラー詳細**: ValidationErrorクラスによる詳細なエラー情報
+
+**主要な関数:**
 ```typescript
-const DISTRICT_KEYWORDS: Record<string, SadoDistrict> = {
-  // 両津地区
-  両津: "両津",
-  夷: "両津",
-  湊: "両津",
+// 基本型ガード
+isString(value: unknown): value is string
+isNumber(value: unknown): value is number
+isArray(value: unknown): value is unknown[]
 
-  // 相川地区
-  相川: "相川",
-  下戸炭目: "相川",
-  上戸炭目: "相川",
+// ドメイン型ガード
+isCuisineType(value: unknown): value is CuisineType
+isPriceRange(value: unknown): value is PriceRange
+isSadoDistrict(value: unknown): value is SadoDistrict
+isLatLngLiteral(value: unknown): value is LatLngLiteral
 
-  // ... 全11地区のマッピング
-};
+// 複合型検証
+isRestaurant(value: unknown): value is Restaurant
+validateRestaurant(value: unknown): ValidationError[]
+
+// セキュリティ関連
+isValidApiKey(value: unknown): value is string
+sanitizeInput(input: string): string
+isValidSearchQuery(value: unknown): value is string
 ```
 
-#### **使用例**
+### 🔒 Security Utils (`securityUtils.ts`)
+アプリケーションのセキュリティ機能を提供します。
 
+**主な機能:**
+- **XSS対策**: HTMLエスケープとタグ除去
+- **入力サニタイゼーション**: ユーザー入力の無害化
+- **URL検証**: 安全なURLのチェック
+- **レート制限**: API呼び出しの制限
+- **安全なストレージ**: SecureStorageクラス
+- **セキュアフェッチ**: 安全なHTTPリクエスト
+
+**主要な関数とクラス:**
 ```typescript
-import { getDistrictFromAddress } from "@/utils/districtUtils";
+// XSS対策
+escapeHtml(text: string): string
+stripHtml(text: string): string
 
-// 住所から地区を判定
-const district = getDistrictFromAddress("新潟県佐渡市両津夷261");
-// => "両津"
+// 入力検証・サニタイゼーション
+sanitizeUserInput(input: string): string
+isSecureUrl(url: string): boolean
+validateApiKey(apiKey: string | undefined): boolean
 
-const unknownDistrict = getDistrictFromAddress("東京都渋谷区");
-// => "その他"
-```
-
-### **lightValidation.ts**
-
-Zod の代替軽量バリデーション
-
-#### **基本型ガード**
-
-```typescript
-// プリミティブ型
-export const isString = (value: unknown): value is string
-export const isNumber = (value: unknown): value is number
-export const isArray = (value: unknown): value is unknown[]
-export const isObject = (value: unknown): value is Record<string, unknown>
-```
-
-#### **ドメイン特化バリデーション**
-
-```typescript
-// 料理タイプバリデーション
-export const isCuisineType = (value: unknown): value is CuisineType
-
-// 価格帯バリデーション
-export const isPriceRange = (value: unknown): value is PriceRange
-
-// 座標バリデーション
-export const isLatLngLiteral = (value: unknown): value is LatLngLiteral
-
-// 飲食店データバリデーション
-export const isRestaurant = (value: unknown): value is Restaurant
-```
-
-#### **エラーハンドリング**
-
-```typescript
-interface ValidationError {
-  field: string;
-  message: string;
-  value: unknown;
+// レート制限
+class RateLimiter {
+  isAllowed(identifier: string): boolean
+  getRemainingRequests(identifier: string): number
 }
 
-export const createValidationError = (
-  field: string,
-  message: string,
-  value: unknown
-): ValidationError => ({
-  field,
-  message,
-  value,
+// 安全なストレージ
+class SecureStorage {
+  static setItem(key: string, value: unknown): void
+  static getItem<T>(key: string, defaultValue: T): T
+}
+
+// セキュアHTTPリクエスト
+secureFetch(url: string, options?: RequestInit): Promise<Response>
+
+// その他のセキュリティ機能
+generateNonce(): string
+generateCSRFToken(): string
+maskApiKey(apiKey: string): string
+```
+
+## 🏗️ アーキテクチャ原則
+
+### 1. **型安全性**
+- TypeScriptの型システムを最大限活用
+- 実行時型チェックによる堅牢性
+- 型ガードによる安全な型変換
+
+### 2. **セキュリティファースト**
+- XSS、CSRF攻撃対策
+- 入力値の厳格な検証とサニタイゼーション
+- レート制限によるDoS攻撃対策
+- 機密情報の適切な取り扱い
+
+### 3. **パフォーマンス最適化**
+- 軽量なバリデーション（Zod代替）
+- 効率的な地区判定アルゴリズム
+- レート制限による負荷制御
+
+### 4. **開発者体験**
+- 豊富なデバッグツール（GA診断機能）
+- 詳細なエラーメッセージ
+- TypeScriptの型推論サポート
+
+## 🔧 開発ツール
+
+### Google Analytics デバッグ
+開発環境でのGA動作確認用のデバッグ機能:
+
+```typescript
+// ブラウザコンソールで利用可能（開発環境のみ）
+window.gaDebug.runDiagnostics()  // GA診断実行
+window.gaDebug.checkStatus()     // GA状態確認
+window.gaDebug.sendTestEvents()  // テストイベント送信
+window.gaDebug.autoFix()         // 自動修復試行
+```
+
+### バリデーションエラー詳細
+詳細なバリデーションエラー情報の取得:
+
+```typescript
+const errors = validateRestaurant(data);
+errors.forEach(error => {
+  console.log(`Field: ${error.field}, Message: ${error.message}`);
 });
-```
-
-#### **使用例**
-
-```typescript
-import { isRestaurant, validateRestaurantData } from "@/utils/lightValidation";
-
-// 型ガード使用
-if (isRestaurant(data)) {
-  // data は Restaurant 型として扱える
-  console.log(data.name);
-}
-
-// バリデーション使用
-const result = validateRestaurantData(unknownData);
-if (result.isValid) {
-  // result.data は Restaurant 型
-} else {
-  // result.errors は ValidationError[]
-}
-```
-
-## 🔒 セキュリティユーティリティ
-
-### **security/securityUtils.ts**
-
-```typescript
-// 入力サニタイゼーション
-export const sanitizeInput = (input: string): string => {
-  return input
-    .trim()
-    .replace(/[<>]/g, "") // HTMLタグ除去
-    .substring(0, 1000); // 長さ制限
-};
-
-// APIキーバリデーション
-export const validateApiKey = (key: string): boolean => {
-  return /^AIza[0-9A-Za-z-_]{35}$/.test(key);
-};
-
-// XSS防止
-export const escapeHtml = (text: string): string => {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
-};
 ```
 
 ## 🧪 テスト戦略
 
-### **単体テスト例**
+### 単体テスト
+- 各ユーティリティ関数の個別テスト
+- 型ガード関数の境界値テスト
+- セキュリティ関数の攻撃パターンテスト
 
+### 統合テスト
+- GA初期化とイベント送信の統合テスト
+- 地区判定の実際の住所データでのテスト
+- セキュリティ機能の実際の攻撃シナリオテスト
+
+### テスト例
 ```typescript
-import { getDistrictFromAddress } from "./districtUtils";
+import { describe, it, expect } from 'vitest';
+import { getDistrictFromAddress, isRestaurant } from '@/utils';
 
-describe("districtUtils", () => {
-  describe("getDistrictFromAddress", () => {
-    test("両津地区の判定", () => {
-      expect(getDistrictFromAddress("佐渡市両津夷261")).toBe("両津");
-      expect(getDistrictFromAddress("新潟県佐渡市夷")).toBe("両津");
-    });
+describe('districtUtils', () => {
+  it('should correctly identify district from address', () => {
+    expect(getDistrictFromAddress('新潟県佐渡市両津夷')).toBe('両津');
+    expect(getDistrictFromAddress('新潟県佐渡市相川下戸村')).toBe('相川');
+  });
+});
 
-    test("相川地区の判定", () => {
-      expect(getDistrictFromAddress("佐渡市相川一町目")).toBe("相川");
-      expect(getDistrictFromAddress("相川下戸村")).toBe("相川");
-    });
-
-    test("不明な住所の処理", () => {
-      expect(getDistrictFromAddress("東京都渋谷区")).toBe("その他");
-      expect(getDistrictFromAddress("")).toBe("その他");
-    });
-
-    test("住所正規化の動作", () => {
-      expect(getDistrictFromAddress("新潟県佐渡市両津夷261")).toBe(
-        getDistrictFromAddress("佐渡市両津夷261")
-      );
-    });
+describe('lightValidation', () => {
+  it('should validate restaurant data', () => {
+    const validRestaurant = {
+      id: '1',
+      name: 'テストレストラン',
+      // ... other required fields
+    };
+    expect(isRestaurant(validRestaurant)).toBe(true);
   });
 });
 ```
 
-### **プロパティベーステスト**
+## 📚 使用例
 
+### 基本的な使用方法
 ```typescript
-import { fc, test } from "@fast-check/vitest";
+import {
+  initGA,
+  trackRestaurantClick,
+  getDistrictFromAddress,
+  isRestaurant,
+  sanitizeUserInput,
+  SecureStorage
+} from '@/utils';
 
-test("sanitizeInput は常に安全な文字列を返す", () => {
-  fc.assert(
-    fc.property(fc.string(), (input) => {
-      const result = sanitizeInput(input);
-      expect(result).not.toContain("<");
-      expect(result).not.toContain(">");
-      expect(result.length).toBeLessThanOrEqual(1000);
-    })
-  );
-});
-```
+// GA初期化
+await initGA();
 
-## 🚀 パフォーマンス最適化
+// 地区判定
+const district = getDistrictFromAddress('新潟県佐渡市両津夷123');
 
-### **メモ化**
-
-```typescript
-// LRUキャッシュ実装
-class LRUCache<K, V> {
-  private cache = new Map<K, V>();
-
-  constructor(private maxSize: number) {}
-
-  get(key: K): V | undefined {
-    const value = this.cache.get(key);
-    if (value !== undefined) {
-      // 最近使用したアイテムを末尾に移動
-      this.cache.delete(key);
-      this.cache.set(key, value);
-    }
-    return value;
-  }
-
-  set(key: K, value: V): void {
-    if (this.cache.has(key)) {
-      this.cache.delete(key);
-    } else if (this.cache.size >= this.maxSize) {
-      // 最も古いアイテムを削除
-      const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
-    }
-    this.cache.set(key, value);
-  }
+// データ検証
+if (isRestaurant(data)) {
+  // 安全にRestaurantとして使用可能
+  trackRestaurantClick(data);
 }
 
-// メモ化ヘルパー
-export const memoize = <T extends (...args: any[]) => any>(
-  fn: T,
-  cacheSize = 100
-): T => {
-  const cache = new LRUCache<string, ReturnType<T>>(cacheSize);
+// 入力サニタイゼーション
+const cleanInput = sanitizeUserInput(userInput);
 
-  return ((...args: Parameters<T>): ReturnType<T> => {
-    const key = JSON.stringify(args);
-    const cached = cache.get(key);
-
-    if (cached !== undefined) {
-      return cached;
-    }
-
-    const result = fn(...args);
-    cache.set(key, result);
-    return result;
-  }) as T;
-};
+// 安全なストレージ操作
+SecureStorage.setItem('userPreferences', preferences);
 ```
 
-### **デバウンス/スロットル**
-
+### 高度な使用例
 ```typescript
-// デバウンス
-export const debounce = <T extends (...args: any[]) => any>(
-  func: T,
-  delay: number
-): ((...args: Parameters<T>) => void) => {
-  let timeoutId: NodeJS.Timeout;
+import { 
+  validateRestaurant, 
+  secureFetch, 
+  apiRateLimiter,
+  runGADiagnostics 
+} from '@/utils';
 
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
-  };
-};
+// 詳細バリデーション
+const errors = validateRestaurant(restaurantData);
+if (errors.length === 0) {
+  // データが有効
+  processRestaurant(restaurantData as Restaurant);
+} else {
+  // エラー処理
+  handleValidationErrors(errors);
+}
 
-// スロットル
-export const throttle = <T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): ((...args: Parameters<T>) => void) => {
-  let lastFunc: NodeJS.Timeout;
-  let lastRan: number;
+// レート制限付きAPI呼び出し
+if (apiRateLimiter.isAllowed(userId)) {
+  const response = await secureFetch('/api/restaurants');
+  // 処理続行
+} else {
+  // レート制限エラー
+  showRateLimitError();
+}
 
-  return (...args: Parameters<T>) => {
-    if (!lastRan) {
-      func(...args);
-      lastRan = Date.now();
-    } else {
-      clearTimeout(lastFunc);
-      lastFunc = setTimeout(() => {
-        if (Date.now() - lastRan >= limit) {
-          func(...args);
-          lastRan = Date.now();
-        }
-      }, limit - (Date.now() - lastRan));
-    }
-  };
-};
+// 開発環境でのGA診断
+if (import.meta.env.DEV) {
+  runGADiagnostics();
+}
 ```
 
-## 📦 エクスポート規則
+## 🚀 拡張ポイント
 
-### **Barrel Export**
+### 新しいユーティリティの追加
+1. **新しいバリデーション関数**: `lightValidation.ts`に追加
+2. **新しいセキュリティ機能**: `securityUtils.ts`に追加
+3. **新しい分析イベント**: `analytics.ts`に追加
+4. **新しい地区**: `districtUtils.ts`のキーワードマッピングに追加
 
-```typescript
-// utils/index.ts
-export * from "./analytics";
-export * from "./districtUtils";
-export * from "./lightValidation";
-export * from "./district";
-export * from "./security";
-export * from "./validation";
-```
+### パフォーマンス最適化
+- 地区判定アルゴリズムの最適化
+- バリデーション関数のキャッシュ機能
+- セキュリティチェックの並列化
 
-### **使用時**
+## 🔗 関連ドキュメント
 
-```typescript
-// ✅ 推奨
-import { getDistrictFromAddress, sanitizeInput, trackEvent } from "@/utils";
-
-// ❌ 非推奨
-import { getDistrictFromAddress } from "@/utils/districtUtils";
-import { sanitizeInput } from "@/utils/security/securityUtils";
-```
-
-## 🔮 将来の拡張予定
-
-### **formatting/ - フォーマット関連**
-
-```typescript
-// 日時フォーマット
-export const formatDate = (date: Date, locale = 'ja-JP'): string
-export const formatTime = (time: string): string
-
-// 通貨フォーマット
-export const formatPrice = (price: number): string
-export const formatPriceRange = (range: PriceRange): string
-
-// 住所フォーマット
-export const formatAddress = (address: string): string
-export const formatPostalCode = (code: string): string
-```
-
-### **calculation/ - 計算関連**
-
-```typescript
-// 距離計算
-export const calculateDistance = (
-  point1: LatLngLiteral,
-  point2: LatLngLiteral
-): number
-
-// 評価計算
-export const calculateAverageRating = (reviews: Review[]): number
-export const calculateRecommendationScore = (restaurant: Restaurant): number
-```
-
-### **storage/ - ストレージ関連**
-
-```typescript
-// LocalStorage ヘルパー
-export const localStorage = {
-  get: <T>(key: string): T | null,
-  set: <T>(key: string, value: T): void,
-  remove: (key: string): void,
-  clear: (): void
-};
-
-// SessionStorage ヘルパー
-export const sessionStorage = {
-  // 同様のAPI
-};
-```
-
-## 📚 参考資料
-
-- [TypeScript Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)
-- [JavaScript Performance Best Practices](https://developer.mozilla.org/en-US/docs/Web/Performance/Critical_rendering_path)
-- [OWASP XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html)
-- [Google Analytics 4 Measurement Protocol](https://developers.google.com/analytics/devguides/collection/protocol/ga4)
+- [Types Layer](../types/README.md) - 型定義システム
+- [Services Layer](../services/README.md) - サービス層アーキテクチャ
+- [Test Infrastructure](../test/README.md) - テスト基盤
 
 ---
 
-**📝 最終更新**: 2025 年 8 月 8 日  
-**🔄 次回更新**: 新ユーティリティ追加時  
-**👥 レビュー**: 開発チーム全体
+**Note**: このユーティリティ層は、アプリケーション全体の基盤となる重要なコンポーネントです。変更時は十分なテストを実施し、セキュリティ面での影響を慎重に検討してください。

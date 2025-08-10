@@ -296,7 +296,7 @@ class UnifiedCIDProcessor:
                 'place_id', 'name', 'formatted_address', 'geometry',
                 'rating', 'user_ratings_total', 'business_status',
                 'opening_hours', 'formatted_phone_number', 'website',
-                'price_level', 'types'
+                'price_level', 'types', 'primary_type'
             ]),
             'language': 'ja',
             'key': self.api_key
@@ -333,6 +333,10 @@ class UnifiedCIDProcessor:
         hours_text = format_opening_hours(details.get('opening_hours', {}))
         japanese_types = translate_types(details.get('types', []))
         
+        # 主要業種の取得と翻訳（Places API (New) v1対応）
+        primary_type = details.get('primary_type', '')
+        primary_type_japanese = translate_types([primary_type])[0] if primary_type else ''
+        
         # 施設タイプを判定（フィールド名決定のため）
         is_restaurant = self._is_restaurant_data(details)
         is_parking = self._is_parking_data(details)
@@ -366,6 +370,8 @@ class UnifiedCIDProcessor:
             # 駐車場・トイレの基本フィールド（headers.py定義に合わせて）
             result.update({
                 '営業状況': translate_business_status(details.get('businessStatus', details.get('business_status', ''))),
+                '主要業種': primary_type_japanese,  # 🆕 主要業種翻訳後
+                '主要業種（原文）': primary_type,    # 🆕 主要業種原文
             })
             # 駐車場・トイレ拡張フィールド（評価、レビュー数なども含む）
             result.update(self._format_extended_parking_toilet_data(details))
@@ -381,6 +387,8 @@ class UnifiedCIDProcessor:
                 'ウェブサイト': details.get('website', ''),
                 '価格帯': translate_price_level(details.get('price_level')),
                 '店舗タイプ': ', '.join(japanese_types),
+                '主要業種': primary_type_japanese,  # 🆕 主要業種翻訳後
+                '主要業種（原文）': primary_type,    # 🆕 主要業種原文
             })
             # 飲食店拡張フィールド
             result.update(self._format_extended_restaurant_data(details))
@@ -428,9 +436,9 @@ class UnifiedCIDProcessor:
         else:
             name = details.get('name', '').lower()
             
-        primary_type = details.get('primaryType', '')
+        primary_type = details.get('primary_type', details.get('primaryType', ''))
         
-        # プライマリタイプを最優先で判定
+        # プライマリタイプを最優先で判定（Legacy & New API対応）
         if primary_type == 'public_bathroom':
             return False  # トイレが主機能の場合は駐車場ではない
         if primary_type == 'parking':
@@ -471,9 +479,9 @@ class UnifiedCIDProcessor:
         else:
             name = details.get('name', '').lower()
             
-        primary_type = details.get('primaryType', '')
+        primary_type = details.get('primary_type', details.get('primaryType', ''))
         
-        # プライマリタイプを最優先で判定
+        # プライマリタイプを最優先で判定（Legacy & New API対応）
         if primary_type == 'public_bathroom':
             return True  # トイレが主機能
         

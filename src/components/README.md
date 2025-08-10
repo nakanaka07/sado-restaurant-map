@@ -1,256 +1,190 @@
-# 🧩 Components Architecture
+# Components Directory
 
-> **目的**: 佐渡飲食店マップアプリケーションの UI コンポーネント設計指針  
-> **更新日**: 2025 年 8 月 8 日
+このディレクトリには、佐渡島レストランマップアプリケーションのすべてのReactコンポーネントが含まれています。
 
-## 📁 ディレクトリ構造
+## 📁 ディレクトリ構成
 
-```tree
-components/
-├── common/           # 汎用UIコンポーネント
-│   ├── AccessibilityComponents.tsx
-│   └── index.ts
-├── map/             # 地図関連コンポーネント
-│   ├── RestaurantMap.tsx
-│   ├── MapView/     # 地図表示の分割コンポーネント
-│   └── index.ts
-├── restaurant/      # 飲食店関連コンポーネント
-│   ├── FilterPanel/     # フィルター機能（分割済み）
-│   ├── ModernFilterPanel/ # モダンフィルター（分割済み）
-│   └── index.ts
-├── App.tsx          # メインアプリケーション
-└── PWABadge.tsx     # PWA機能コンポーネント
+```
+src/components/
+├── common/                 # 共通コンポーネント
+├── layout/                 # レイアウト関連コンポーネント
+├── map/                    # マップ関連コンポーネント
+├── restaurant/             # レストラン関連コンポーネント
+└── index.ts               # バレルエクスポート
 ```
 
-## 🎯 設計原則
+## 🧩 コンポーネント分類
 
-### 1. **単一責任原則 (SRP)**
+### 📋 Common Components (`common/`)
+アプリケーション全体で使用される汎用的なコンポーネント群
 
-- 各コンポーネントは 1 つの明確な責任を持つ
-- 300 行を超える大型コンポーネントは分割対象
+#### `AccessibilityComponents.tsx`
+アクセシビリティ対応のための専用コンポーネント集：
+- **`VisuallyHidden`**: スクリーンリーダー専用テキスト
+- **`SkipLink`**: キーボードナビゲーション用スキップリンク
+- **`AccessibleButton`**: アクセシブルなボタンコンポーネント
+- **`AccessibleInput`**: アクセシブルな入力フィールド
+- **`LiveRegion`**: 動的コンテンツの読み上げ対応
+- **`AccessibleLoadingSpinner`**: アクセシブルなローディング表示
+- **`FocusTrap`**: フォーカス管理コンポーネント
 
-### 2. **コンポーネント分割戦略**
+### 🎨 Layout Components (`layout/`)
+アプリケーションのレイアウトとUI構造を担当
+
+#### `PWABadge.tsx`
+- PWA（Progressive Web App）機能の表示・管理
+- インストール促進とオフライン対応の通知
+
+### 🗺️ Map Components (`map/`)
+Google Mapsとマップ機能を担当する中核コンポーネント群
+
+#### メインコンポーネント
+- **`RestaurantMap.tsx`**: メインのマップコンポーネント
+- **`RestaurantMap.test.tsx`**: マップコンポーネントのテスト
+
+#### MapView サブコンポーネント (`MapView/`)
+- **`MapView.tsx`**: マップビューのメインコンポーネント
+- **`MapContainer.tsx`**: マップコンテナの管理
+- **`MapMarker.tsx`**: マップマーカーの表示
+- **`MapInfoWindow.tsx`**: 情報ウィンドウの表示・管理
+- **`MapErrorFallback.tsx`**: マップエラー時のフォールバック表示
+
+#### ユーティリティ (`utils/`)
+- **`markerUtils.ts`**: マーカー関連のユーティリティ関数
+
+### 🍽️ Restaurant Components (`restaurant/`)
+レストラン情報の表示とフィルタリング機能を担当
+
+#### FilterPanel サブコンポーネント (`FilterPanel/`)
+- **`FilterPanel.tsx`**: メインのフィルターパネル
+- **`CuisineFilter.tsx`**: 料理タイプフィルター
+- **`DistrictFilter.tsx`**: 佐渡地区フィルター
+- **`PriceFilter.tsx`**: 価格帯フィルター
+- **`FeatureFilter.tsx`**: 特徴・設備フィルター
+- **`SearchFilter.tsx`**: 検索フィルター
+- **`MapLegend.tsx`**: マップ凡例表示
+- **`useFilterState.ts`**: フィルター状態管理フック
+
+## 🔄 エクスポート構造
+
+### バレルエクスポート (`index.ts`)
+すべてのコンポーネントは`index.ts`を通じて統一的にエクスポートされています：
 
 ```typescript
-// ✅ 推奨: 機能別分割
-FilterPanel/
-├── FilterPanel.tsx         # メインコンポーネント
-├── SearchFilter.tsx        # 検索機能
-├── CuisineFilter.tsx      # 料理タイプフィルター
-├── useFilterState.ts      # 状態管理Hook
-└── index.ts               # barrel export
+// メインアプリ
+export { default as App } from "../app/App";
 
-// ❌ 非推奨: 巨大な単一ファイル
-FilterPanel.tsx (891行) // 分割済み
+// レイアウト
+export { default as PWABadge } from "./layout/PWABadge";
+
+// 共通コンポーネント
+export {
+  VisuallyHidden,
+  SkipLink,
+  AccessibleButton,
+  // ... その他のアクセシビリティコンポーネント
+} from "./common/AccessibilityComponents";
+
+// マップコンポーネント
+export { MapView, RestaurantMap } from "./map";
+
+// レストランコンポーネント
+export { FilterPanel } from "./restaurant";
 ```
 
-### 3. **型安全性**
+## 🎯 使用方法
 
+### 基本的なインポート
 ```typescript
-// 厳格な型定義
-interface RestaurantCardProps {
-  restaurant: Restaurant;
-  onSelect: (restaurant: Restaurant) => void;
-  className?: string;
-}
+// 統一エクスポートからのインポート
+import { MapView, FilterPanel, PWABadge } from '@/components';
 
-// Props の必須/オプションを明確化
-const RestaurantCard: React.FC<RestaurantCardProps> = ({
-  restaurant,
-  onSelect,
-  className,
-}) => {
-  // 実装
-};
+// 個別インポート
+import { MapView } from '@/components/map';
+import { FilterPanel } from '@/components/restaurant';
 ```
 
-## 🔧 使用パターン
-
-### **1. 汎用コンポーネント (common/)**
-
+### コンポーネント使用例
 ```typescript
-import { AccessibleButton } from "@/components/common";
-
-// WCAG 2.2 AA準拠のアクセシブルなボタン
-<AccessibleButton
-  variant="primary"
-  size="medium"
-  onClick={handleClick}
-  ariaLabel="飲食店を検索"
->
-  検索
-</AccessibleButton>;
-```
-
-### **2. 地図コンポーネント (map/)**
-
-```typescript
-import { RestaurantMap } from "@/components/map";
-
-// Google Maps統合コンポーネント
-<RestaurantMap
-  restaurants={filteredRestaurants}
-  center={SADO_CENTER}
-  zoom={DEFAULT_ZOOM}
-  onRestaurantClick={handleRestaurantClick}
-/>;
-```
-
-### **3. フィルターコンポーネント (restaurant/)**
-
-```typescript
-import { ModernFilterPanel } from "@/components/restaurant";
-
-// 分割済みモダンフィルター
-<ModernFilterPanel
-  onFiltersChange={handleFiltersChange}
-  initialFilters={defaultFilters}
-  restaurants={allRestaurants}
-/>;
-```
-
-## 🎨 スタイリング指針
-
-### **1. CSS Variables 使用**
-
-```css
-/* App.css で定義済みのデザイントークン */
-.component {
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
+function App() {
+  return (
+    <div>
+      <PWABadge />
+      <MapView />
+      <FilterPanel />
+    </div>
+  );
 }
 ```
 
-### **2. レスポンシブ設計**
+## 🏗️ アーキテクチャ原則
 
-```css
-/* モバイルファースト */
-.filter-panel {
-  width: 100%;
-}
+### 1. **関心の分離**
+- 各ディレクトリは明確な責務を持つ
+- `common`: 汎用性の高い再利用可能コンポーネント
+- `layout`: レイアウト・UI構造
+- `map`: マップ機能特化
+- `restaurant`: レストラン情報特化
 
-@media (min-width: 768px) {
-  .filter-panel {
-    width: 320px;
-  }
-}
+### 2. **アクセシビリティファースト**
+- WCAG 2.1 AA準拠
+- スクリーンリーダー対応
+- キーボードナビゲーション対応
+- ARIA属性の適切な使用
+
+### 3. **TypeScript型安全性**
+- 厳密な型定義
+- Props interfaceの明確化
+- 型推論の活用
+
+### 4. **テスト駆動開発**
+- 各主要コンポーネントにテストファイル
+- ユニットテストとインテグレーションテスト
+
+### 5. **パフォーマンス最適化**
+- React.memoの適切な使用
+- useCallbackとuseMemoの活用
+- 遅延ローディング対応
+
+## 🔧 開発ガイドライン
+
+### 新しいコンポーネントの追加
+1. 適切なディレクトリに配置
+2. TypeScript型定義を含める
+3. アクセシビリティを考慮
+4. テストファイルを作成
+5. `index.ts`にエクスポートを追加
+
+### コンポーネント命名規則
+- **PascalCase**: コンポーネント名
+- **camelCase**: Props、関数名
+- **kebab-case**: CSS クラス名
+
+### ファイル構成パターン
+```
+ComponentName/
+├── ComponentName.tsx      # メインコンポーネント
+├── ComponentName.test.tsx # テストファイル
+├── index.ts              # エクスポート
+└── types.ts              # 型定義（必要に応じて）
 ```
 
-## ♿ アクセシビリティ
+## 🚀 パフォーマンス考慮事項
 
-### **必須要件**
+- **コード分割**: React.lazyによる動的インポート
+- **メモ化**: React.memo、useMemo、useCallbackの適切な使用
+- **バンドルサイズ**: 不要なライブラリの除去
+- **レンダリング最適化**: 不要な再レンダリングの防止
 
-- **WCAG 2.2 AA 準拠**
-- **キーボードナビゲーション対応**
-- **スクリーンリーダー対応**
-- **適切な ARIA 属性**
+## 🔍 デバッグとトラブルシューティング
 
-### **実装例**
+### よくある問題
+1. **コンポーネントが表示されない**: インポートパスの確認
+2. **型エラー**: Props interfaceの確認
+3. **スタイルが適用されない**: CSS importの確認
+4. **アクセシビリティ警告**: ARIA属性の確認
 
-```typescript
-// セマンティックHTML + ARIA
-<section role="search" aria-label="飲食店検索フィルター">
-  <h2 id="filter-heading">検索条件</h2>
-  <div role="group" aria-labelledby="filter-heading">
-    {/* フィルター要素 */}
-  </div>
-</section>
-```
-
-## 🧪 テスト方針
-
-### **1. コンポーネントテスト**
-
-```typescript
-// Testing Library推奨パターン
-import { render, screen, fireEvent } from "@testing-library/react";
-import { RestaurantCard } from "./RestaurantCard";
-
-test("飲食店名をクリックで詳細表示", () => {
-  const mockRestaurant = createMockRestaurant();
-  const onSelect = vi.fn();
-
-  render(<RestaurantCard restaurant={mockRestaurant} onSelect={onSelect} />);
-
-  fireEvent.click(screen.getByText(mockRestaurant.name));
-  expect(onSelect).toHaveBeenCalledWith(mockRestaurant);
-});
-```
-
-### **2. アクセシビリティテスト**
-
-```typescript
-import { axe, toHaveNoViolations } from "jest-axe";
-
-test("アクセシビリティ違反なし", async () => {
-  const { container } = render(<FilterPanel />);
-  const results = await axe(container);
-  expect(results).toHaveNoViolations();
-});
-```
-
-## 📦 エクスポート規則
-
-### **Barrel Exports**
-
-```typescript
-// components/restaurant/index.ts
-export { FilterPanel } from "./FilterPanel";
-export { ModernFilterPanel } from "./ModernFilterPanel";
-export type { FilterPanelProps, FilterState } from "./FilterPanel/types";
-```
-
-### **使用時**
-
-```typescript
-// ✅ 推奨: barrel exportから
-import { FilterPanel, ModernFilterPanel } from "@/components/restaurant";
-
-// ❌ 非推奨: 直接パス
-import { FilterPanel } from "@/components/restaurant/FilterPanel/FilterPanel";
-```
-
-## 🚀 パフォーマンス最適化
-
-### **1. React.memo 使用**
-
-```typescript
-import { memo } from "react";
-
-export const RestaurantCard = memo<RestaurantCardProps>(
-  ({ restaurant, onSelect }) => {
-    // 実装
-  }
-);
-```
-
-### **2. useCallback/useMemo**
-
-```typescript
-const expensiveValue = useMemo(
-  () => calculateExpensiveValue(restaurants),
-  [restaurants]
-);
-
-const handleClick = useCallback(
-  (restaurant: Restaurant) => {
-    onSelect(restaurant);
-  },
-  [onSelect]
-);
-```
-
-## 📚 参考資料
-
-- [React Component Patterns](https://reactpatterns.com/)
-- [WCAG 2.2 Guidelines](https://www.w3.org/WAI/WCAG22/quickref/)
-- [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
-- [@vis.gl/react-google-maps](https://visgl.github.io/react-google-maps/)
-
----
-
-**📝 最終更新**: 2025 年 8 月 8 日  
-**🔄 次回更新**: 新機能追加時  
-**👥 レビュー**: 開発チーム全体
+### 開発ツール
+- React Developer Tools
+- Accessibility Insights
+- TypeScript Language Server

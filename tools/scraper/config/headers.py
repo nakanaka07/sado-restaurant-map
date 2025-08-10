@@ -22,6 +22,8 @@ UNIFIED_HEADERS = {
         "ウェブサイト",
         "価格帯",
         "店舗タイプ",
+        "主要業種",           # 🆕 primary_type翻訳後
+        "主要業種（原文）",   # 🆕 primary_type原文
         
         # Places API (New) v1 拡張データ
         "店舗説明",           # editorialSummary
@@ -88,6 +90,8 @@ UNIFIED_HEADERS = {
         "ウェブサイト",
         "価格帯",
         "店舗タイプ",
+        "主要業種",           # 🆕 primary_type翻訳後
+        "主要業種（原文）",   # 🆕 primary_type原文
         "地区", 
         "GoogleマップURL", 
         "取得方法",
@@ -104,6 +108,8 @@ UNIFIED_HEADERS = {
         "カテゴリ", 
         "カテゴリ詳細", 
         "営業状況",
+        "主要業種",           # 🆕 primary_type翻訳後
+        "主要業種（原文）",   # 🆕 primary_type原文
         
         # Places API (New) v1 拡張データ（Phase 1実装）
         "施設説明",           # editorialSummary
@@ -133,6 +139,8 @@ UNIFIED_HEADERS = {
         "カテゴリ", 
         "カテゴリ詳細", 
         "営業状況",
+        "主要業種",           # 🆕 primary_type翻訳後
+        "主要業種（原文）",   # 🆕 primary_type原文
         "地区", 
         "GoogleマップURL", 
         "取得方法",
@@ -149,6 +157,8 @@ UNIFIED_HEADERS = {
         "カテゴリ", 
         "カテゴリ詳細", 
         "営業状況",
+        "主要業種",           # 🆕 primary_type翻訳後
+        "主要業種（原文）",   # 🆕 primary_type原文
         
         # Places API (New) v1 拡張データ（Phase 1実装）
         "施設説明",           # editorialSummary
@@ -177,6 +187,8 @@ UNIFIED_HEADERS = {
         "カテゴリ", 
         "カテゴリ詳細", 
         "営業状況",
+        "主要業種",           # 🆕 primary_type翻訳後
+        "主要業種（原文）",   # 🆕 primary_type原文
         "地区", 
         "GoogleマップURL", 
         "取得方法",

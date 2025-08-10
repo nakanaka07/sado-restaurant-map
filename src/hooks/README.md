@@ -1,375 +1,673 @@
-# 🪝 Custom Hooks Guide
+# Hooks Directory
 
-> **目的**: 佐渡飲食店マップアプリケーションのカスタム Hooks 設計・使用ガイド  
-> **更新日**: 2025 年 8 月 8 日
+このディレクトリには、佐渡島レストランマップアプリケーションで使用されるすべてのカスタムフックが含まれています。React 19の最新機能（Concurrent Features、startTransition等）を活用し、型安全で再利用可能なロジックを提供します。
 
-## 📁 ディレクトリ構造
+## 📁 ディレクトリ構成
 
-```text
-hooks/
-├── api/                    # API関連hooks (将来実装)
-├── ui/                     # UI状態管理hooks (将来実装)
-├── map/                    # 地図関連hooks (将来実装)
-├── useAnalytics.ts         # Google Analytics管理
-├── useErrorHandler.ts      # エラーハンドリング
-├── useMapPoints.ts         # 地図ポイント管理
-├── useRestaurants.ts       # 飲食店データ管理
-└── index.ts               # barrel export
+```
+src/hooks/
+├── api/                       # API関連フック
+│   ├── useRestaurants.ts     # レストランデータ管理フック
+│   ├── useRestaurants.test.ts # テストファイル
+│   └── index.ts              # バレルエクスポート
+├── map/                      # 地図関連フック
+│   ├── useMapPoints.ts       # 統合マップポイント管理フック
+│   ├── useMapPoints.test.ts  # テストファイル
+│   └── index.ts              # バレルエクスポート
+├── ui/                       # UI関連フック
+│   ├── useAnalytics.ts       # アナリティクス追跡フック
+│   ├── useErrorHandler.ts    # エラーハンドリングフック
+│   ├── useErrorHandler.test.ts # テストファイル
+│   └── index.ts              # バレルエクスポート
+├── useAnalytics.ts           # レガシーファイル（ui/useAnalytics.tsを使用）
+├── useMapPoints.ts           # レガシーファイル（map/useMapPoints.tsを使用）
+├── useRestaurants.ts         # レガシーファイル（api/useRestaurants.tsを使用）
+├── index.ts                  # ディレクトリのバレルエクスポート
+└── README.md                 # このファイル
 ```
 
-## 🎯 設計原則
+## 🎯 フック分類
 
-### 1. **単一責任原則**
+### 1. **API フック** (`api/`)
+外部APIとの通信、データ取得・管理を担当
 
-各 Hook は 1 つの明確な責任を持つ
+### 2. **地図フック** (`map/`)
+地図表示、ポイント管理、地理的データ処理を担当
 
-```typescript
-// ✅ 良い例: 特定の機能に特化
-const useRestaurants = () => {
-  // 飲食店データの取得・管理のみ
-};
+### 3. **UI フック** (`ui/`)
+ユーザーインターフェース、アナリティクス、エラーハンドリングを担当
 
-// ❌ 悪い例: 複数の責任
-const useAppData = () => {
-  // 飲食店、地図、ユーザー設定を全て管理
-};
-```
+## 🔧 主要フック詳細
 
-### 2. **型安全性**
+### useRestaurants - レストランデータ管理
+レストラン情報の取得、フィルタリング、ソート機能を提供する統合フック
 
 ```typescript
-// 厳格な型定義
-interface UseRestaurantsReturn {
-  restaurants: Restaurant[];
-  loading: boolean;
-  error: string | null;
-  refetch: () => Promise<void>;
+interface UseRestaurantsResult {
+  readonly restaurants: readonly Restaurant[];
+  readonly filteredRestaurants: readonly Restaurant[];
+  readonly selectedRestaurant: Restaurant | null;
+  readonly asyncState: AsyncState<readonly Restaurant[]>;
+  readonly setFilters: (filters: Partial<MapFilters>) => void;
+  readonly setSortOrder: (order: SortOrder) => void;
+  readonly selectRestaurant: (restaurant: Restaurant | null) => void;
+  readonly refreshData: () => Promise<void>;
 }
 
-const useRestaurants = (): UseRestaurantsReturn => {
-  // 実装
-};
+// 使用例
+const {
+  restaurants,
+  filteredRestaurants,
+  selectedRestaurant,
+  asyncState,
+  setFilters,
+  setSortOrder,
+  selectRestaurant,
+  refreshData,
+} = useRestaurants({
+  cuisineTypes: ["日本料理"],
+  priceRanges: ["2000-3000円"],
+  districts: ["両津"],
+  features: ["駐車場あり"],
+  searchQuery: "",
+});
 ```
 
-### 3. **再利用性**
+**主要機能**:
+- **データ取得**: Google Sheets APIからレストランデータを取得
+- **フィルタリング**: 料理ジャンル、価格帯、地区、特徴による絞り込み
+- **検索**: 名前・説明文での自由検索
+- **ソート**: 名前、評価、距離、価格による並び替え
+- **状態管理**: 選択されたレストランの管理
+- **キャッシュ**: データの効率的なキャッシュ機能
+- **エラーハンドリング**: API エラーの適切な処理
+
+### useMapPoints - 統合マップポイント管理
+レストラン、駐車場、トイレなど全てのマップポイントを統合管理
 
 ```typescript
-// 汎用的なパラメータ化
-const useLocalStorage = <T>(key: string, initialValue: T) => {
-  // 型安全なlocalStorage管理
-};
-```
-
-## 📚 既存 Hooks 詳細
-
-### **useRestaurants.ts**
-
-飲食店データの取得・管理を担当
-
-```typescript
-interface UseRestaurantsOptions {
-  autoFetch?: boolean;
-  cacheKey?: string;
+interface UseMapPointsResult {
+  readonly points: readonly MapPoint[];
+  readonly filteredPoints: readonly MapPoint[];
+  readonly selectedPoint: MapPoint | null;
+  readonly asyncState: AsyncState<MapPoint[]>;
+  readonly setFilters: (filters: Partial<ExtendedMapFilters>) => void;
+  readonly setSortOrder: (order: SortOrder) => void;
+  readonly selectPoint: (point: MapPoint | null) => void;
+  readonly refreshData: () => Promise<void>;
 }
 
-const useRestaurants = (options: UseRestaurantsOptions = {}) => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRestaurants = useCallback(async () => {
-    // Google Sheets APIからデータ取得
-  }, []);
-
-  return { restaurants, loading, error, fetchRestaurants };
-};
+// 使用例
+const {
+  points,
+  filteredPoints,
+  selectedPoint,
+  asyncState,
+  setFilters,
+  setSortOrder,
+  selectPoint,
+  refreshData,
+} = useMapPoints();
 ```
 
-**使用例:**
+**主要機能**:
+- **統合データ管理**: レストラン・駐車場・トイレの統合管理
+- **多次元フィルタリング**: ポイントタイプ、地区、特徴による絞り込み
+- **地理的計算**: 距離計算、範囲検索
+- **パフォーマンス最適化**: React 19のConcurrent Featuresを活用
+- **型安全性**: 厳密な型定義による安全性確保
+
+### useAnalytics - アナリティクス追跡
+ユーザー行動の追跡とGoogle Analyticsとの統合
 
 ```typescript
-const RestaurantApp = () => {
-  const { restaurants, loading, error } = useRestaurants({ autoFetch: true });
-
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage error={error} />;
-
-  return <RestaurantList restaurants={restaurants} />;
-};
-```
-
-### **useMapPoints.ts**
-
-地図ポイントデータの変換・管理
-
-```typescript
-const useMapPoints = (restaurants: Restaurant[]) => {
-  const mapPoints = useMemo(
-    () =>
-      restaurants.map((restaurant) => ({
-        id: restaurant.id,
-        name: restaurant.name,
-        position: restaurant.coordinates,
-        type: "restaurant" as const,
-        data: restaurant,
-      })),
-    [restaurants]
-  );
-
-  return { mapPoints };
-};
-```
-
-### **useAnalytics.ts**
-
-Google Analytics 連携
-
-```typescript
-const useAnalytics = () => {
-  const trackEvent = useCallback((action: string, label?: string) => {
-    if (typeof gtag !== "undefined") {
-      gtag("event", action, { event_label: label });
-    }
-  }, []);
-
-  return { trackEvent };
-};
-```
-
-### **useErrorHandler.ts**
-
-統一的なエラーハンドリング
-
-```typescript
-const useErrorHandler = () => {
-  const [error, setError] = useState<Error | null>(null);
-
-  const handleError = useCallback((error: unknown) => {
-    const errorObj = error instanceof Error ? error : new Error(String(error));
-    setError(errorObj);
-    console.error("Error handled:", errorObj);
-  }, []);
-
-  return { error, handleError, clearError: () => setError(null) };
-};
-```
-
-## 🛠️ カスタム Hook 作成ガイド
-
-### **1. 基本テンプレート**
-
-```typescript
-import { useState, useEffect, useCallback } from "react";
-
-interface UseCustomHookOptions {
-  // オプション定義
+interface UseAnalyticsResult {
+  readonly trackRestaurantView: (restaurant: Restaurant) => void;
+  readonly trackSearchBehavior: (query: string, resultCount: number) => void;
+  readonly trackFilterUsage: (filterType: string, value: string) => void;
+  readonly trackMapUsage: (action: "zoom" | "pan" | "marker_click") => void;
+  readonly trackPWAEvents: (action: "install" | "standalone_mode") => void;
+  readonly trackPageView: (pageName: string) => void;
+  readonly trackCustomEvent: (eventName: string, parameters?: Record<string, any>) => void;
 }
 
-interface UseCustomHookReturn {
-  // 戻り値の型定義
+// 使用例
+const {
+  trackRestaurantView,
+  trackSearchBehavior,
+  trackFilterUsage,
+  trackMapUsage,
+  trackPWAEvents,
+  trackPageView,
+  trackCustomEvent,
+} = useAnalytics();
+
+// レストラン表示追跡
+trackRestaurantView(restaurant);
+
+// 検索行動追跡
+trackSearchBehavior("寿司", 15);
+
+// フィルター使用追跡
+trackFilterUsage("cuisine", "日本料理");
+```
+
+**主要機能**:
+- **レストラン追跡**: レストラン詳細表示の追跡
+- **検索追跡**: 検索クエリと結果数の追跡
+- **フィルター追跡**: フィルター使用状況の追跡
+- **地図操作追跡**: ズーム、パン、マーカークリックの追跡
+- **PWA追跡**: インストール、スタンドアローンモードの追跡
+- **カスタムイベント**: 任意のイベント追跡
+
+### useErrorHandler - エラーハンドリング
+アプリケーション全体のエラー管理と報告
+
+```typescript
+interface UseErrorHandlerResult {
+  readonly error: ErrorState | null;
+  readonly errorHistory: ErrorState[];
+  readonly handleError: (details: ErrorDetails) => void;
+  readonly clearError: () => void;
+  readonly clearErrorHistory: () => void;
+  readonly retryLastAction: () => void;
 }
 
-export const useCustomHook = (
-  params: Parameters,
-  options: UseCustomHookOptions = {}
-): UseCustomHookReturn => {
-  const [state, setState] = useState(initialState);
+// 使用例
+const {
+  error,
+  errorHistory,
+  handleError,
+  clearError,
+  clearErrorHistory,
+  retryLastAction,
+} = useErrorHandler();
 
-  const method = useCallback(() => {
-    // メソッド実装
-  }, [dependencies]);
+// エラーハンドリング
+try {
+  await fetchData();
+} catch (err) {
+  handleError({
+    error: err as Error,
+    context: "データ取得",
+    severity: "high",
+    metadata: { userId: user.id, timestamp: Date.now() },
+  });
+}
+```
 
+**主要機能**:
+- **エラー状態管理**: エラー情報の構造化された管理
+- **エラー履歴**: 過去のエラー履歴の保持
+- **重要度分類**: エラーの重要度による分類
+- **コンテキスト情報**: エラー発生箇所の詳細情報
+- **開発支援**: 開発環境での詳細ログ出力
+- **本番対応**: 本番環境でのエラー報告サービス統合準備
+
+## 🎨 使用方法
+
+### 基本的なインポート
+```typescript
+// 統一エクスポートからのインポート（推奨）
+import {
+  useRestaurants,
+  useMapPoints,
+  useAnalytics,
+  useErrorHandler,
+} from '@/hooks';
+
+// 個別インポート
+import { useRestaurants } from '@/hooks/api/useRestaurants';
+import { useMapPoints } from '@/hooks/map/useMapPoints';
+import { useAnalytics } from '@/hooks/ui/useAnalytics';
+import { useErrorHandler } from '@/hooks/ui/useErrorHandler';
+```
+
+### 統合使用例
+```tsx
+import React, { useEffect } from 'react';
+import {
+  useRestaurants,
+  useMapPoints,
+  useAnalytics,
+  useErrorHandler,
+} from '@/hooks';
+
+const RestaurantMapPage = () => {
+  // フック初期化
+  const {
+    restaurants,
+    filteredRestaurants,
+    selectedRestaurant,
+    asyncState: restaurantState,
+    setFilters,
+    selectRestaurant,
+  } = useRestaurants();
+
+  const {
+    points,
+    filteredPoints,
+    asyncState: pointsState,
+  } = useMapPoints();
+
+  const {
+    trackPageView,
+    trackRestaurantView,
+    trackFilterUsage,
+  } = useAnalytics();
+
+  const {
+    error,
+    handleError,
+    clearError,
+  } = useErrorHandler();
+
+  // ページビュー追跡
   useEffect(() => {
-    // 副作用処理
-  }, [dependencies]);
+    trackPageView('レストランマップ');
+  }, [trackPageView]);
+
+  // エラーハンドリング
+  useEffect(() => {
+    if (restaurantState.error) {
+      handleError({
+        error: restaurantState.error,
+        context: 'レストランデータ取得',
+        severity: 'high',
+      });
+    }
+  }, [restaurantState.error, handleError]);
+
+  // レストラン選択時の追跡
+  const handleRestaurantSelect = (restaurant: Restaurant) => {
+    selectRestaurant(restaurant);
+    trackRestaurantView(restaurant);
+  };
+
+  // フィルター変更時の追跡
+  const handleFilterChange = (filterType: string, value: string) => {
+    setFilters({ [filterType]: value });
+    trackFilterUsage(filterType, value);
+  };
+
+  // ローディング状態
+  if (restaurantState.loading || pointsState.loading) {
+    return <div>読み込み中...</div>;
+  }
+
+  // エラー状態
+  if (error) {
+    return (
+      <div>
+        <p>エラーが発生しました: {error.message}</p>
+        <button onClick={clearError}>エラーをクリア</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* UI実装 */}
+      <h1>佐渡島レストランマップ</h1>
+      <p>レストラン数: {filteredRestaurants.length}</p>
+      <p>全ポイント数: {filteredPoints.length}</p>
+      
+      {selectedRestaurant && (
+        <div>
+          <h2>{selectedRestaurant.name}</h2>
+          <p>{selectedRestaurant.description}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default RestaurantMapPage;
+```
+
+## 🏗️ アーキテクチャ
+
+### 設計原則
+
+1. **単一責任の原則**
+   - 各フックは特定の責任領域に特化
+   - 明確な境界線の維持
+   - 再利用可能な設計
+
+2. **型安全性**
+   - TypeScript 5.9の厳密な型定義
+   - ジェネリクスの積極活用
+   - ランタイムエラーの最小化
+
+3. **パフォーマンス最適化**
+   - React 19のConcurrent Features活用
+   - `startTransition`による非ブロッキング更新
+   - `useMemo`、`useCallback`による最適化
+
+4. **テスタビリティ**
+   - 純粋関数による実装
+   - モック可能な設計
+   - 包括的なテストカバレッジ
+
+### データフロー
+```
+External APIs (Google Sheets, Maps)
+    ↓
+API Hooks (useRestaurants, useMapPoints)
+    ↓
+State Management (useState, useCallback)
+    ↓
+UI Components
+    ↓
+User Interactions
+    ↓
+Analytics Hooks (useAnalytics)
+    ↓
+Error Handling (useErrorHandler)
+```
+
+### 状態管理パターン
+```typescript
+// 非同期状態の統一パターン
+interface AsyncState<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
+
+// フィルター状態の統一パターン
+interface FilterState {
+  [key: string]: string | string[] | number | boolean;
+}
+
+// イベントハンドラーの統一パターン
+type EventHandler<T> = (value: T) => void;
+```
+
+## 🔧 開発ガイドライン
+
+### 新しいフックの作成
+
+1. **フック作成**
+```typescript
+// hooks/category/useNewHook.ts
+import { useState, useCallback, useEffect } from 'react';
+
+interface UseNewHookOptions {
+  initialValue?: string;
+  onValueChange?: (value: string) => void;
+}
+
+interface UseNewHookResult {
+  readonly value: string;
+  readonly setValue: (value: string) => void;
+  readonly reset: () => void;
+}
+
+export function useNewHook(options: UseNewHookOptions = {}): UseNewHookResult {
+  const { initialValue = '', onValueChange } = options;
+  
+  const [value, setValue] = useState(initialValue);
+
+  const handleSetValue = useCallback((newValue: string) => {
+    setValue(newValue);
+    onValueChange?.(newValue);
+  }, [onValueChange]);
+
+  const reset = useCallback(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   return {
-    state,
-    method,
-    // その他の戻り値
+    value,
+    setValue: handleSetValue,
+    reset,
   };
-};
+}
 ```
 
-### **2. パフォーマンス最適化**
-
+2. **テスト作成**
 ```typescript
-// useCallback でメソッドをメモ化
-const fetchData = useCallback(async () => {
-  // 処理
-}, [dependency1, dependency2]);
+// hooks/category/useNewHook.test.ts
+import { renderHook, act } from '@testing-library/react';
+import { useNewHook } from './useNewHook';
 
-// useMemo で計算結果をメモ化
-const expensiveValue = useMemo(() => {
-  return expensiveCalculation(data);
-}, [data]);
-
-// useEffect の依存配列を最小限に
-useEffect(() => {
-  // 必要最小限の依存関係のみ
-}, [essentialDependency]);
-```
-
-### **3. エラーハンドリング**
-
-```typescript
-const useDataFetching = <T>(url: string) => {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  }, [url]);
-
-  return { data, error, loading, fetchData };
-};
-```
-
-## 🧪 テスト戦略
-
-### **1. Hook 単体テスト**
-
-```typescript
-import { renderHook, act } from "@testing-library/react";
-import { useRestaurants } from "./useRestaurants";
-
-describe("useRestaurants", () => {
-  test("初期状態が正しい", () => {
-    const { result } = renderHook(() => useRestaurants());
-
-    expect(result.current.restaurants).toEqual([]);
-    expect(result.current.loading).toBe(false);
-    expect(result.current.error).toBeNull();
+describe('useNewHook', () => {
+  test('初期値が正しく設定される', () => {
+    const { result } = renderHook(() => useNewHook({ initialValue: 'test' }));
+    expect(result.current.value).toBe('test');
   });
 
-  test("データ取得が正常に動作", async () => {
-    const { result } = renderHook(() => useRestaurants());
+  test('値の更新が正しく動作する', () => {
+    const { result } = renderHook(() => useNewHook());
+    
+    act(() => {
+      result.current.setValue('new value');
+    });
+    
+    expect(result.current.value).toBe('new value');
+  });
 
-    await act(async () => {
-      await result.current.fetchRestaurants();
+  test('リセット機能が正しく動作する', () => {
+    const { result } = renderHook(() => useNewHook({ initialValue: 'initial' }));
+    
+    act(() => {
+      result.current.setValue('changed');
+    });
+    
+    act(() => {
+      result.current.reset();
+    });
+    
+    expect(result.current.value).toBe('initial');
+  });
+});
+```
+
+3. **エクスポート追加**
+```typescript
+// hooks/category/index.ts に追加
+export { useNewHook } from './useNewHook';
+
+// hooks/index.ts に追加
+export { useNewHook } from './category/useNewHook';
+```
+
+### フックの命名規則
+- **プレフィックス**: 必ず `use` で始める
+- **機能説明**: フックの主要機能を表現
+- **一貫性**: 既存フックとの命名一貫性を保持
+
+### パフォーマンス最適化
+```typescript
+// React 19のConcurrent Featuresを活用
+import { startTransition } from 'react';
+
+const updateData = useCallback((newData: Data[]) => {
+  startTransition(() => {
+    setData(newData);
+  });
+}, []);
+
+// メモ化による最適化
+const expensiveValue = useMemo(() => {
+  return data.filter(item => item.active).sort((a, b) => a.name.localeCompare(b.name));
+}, [data]);
+```
+
+## 🧪 テスト
+
+### テスト構成
+- **Unit Tests**: 個別フックのロジックテスト
+- **Integration Tests**: フック間の連携テスト
+- **Performance Tests**: パフォーマンス回帰テスト
+
+### テスト実行
+```bash
+# 全フックテスト実行
+npm test hooks
+
+# 特定カテゴリのテスト
+npm test hooks/api
+npm test hooks/map
+npm test hooks/ui
+
+# カバレッジ付きテスト
+npm test hooks -- --coverage
+
+# ウォッチモード
+npm test hooks -- --watch
+```
+
+### テストパターン
+```typescript
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useRestaurants } from './useRestaurants';
+
+describe('useRestaurants', () => {
+  test('初期状態が正しく設定される', () => {
+    const { result } = renderHook(() => useRestaurants());
+    
+    expect(result.current.restaurants).toEqual([]);
+    expect(result.current.asyncState.loading).toBe(true);
+    expect(result.current.asyncState.error).toBe(null);
+  });
+
+  test('フィルター機能が正しく動作する', async () => {
+    const { result } = renderHook(() => useRestaurants());
+    
+    await waitFor(() => {
+      expect(result.current.asyncState.loading).toBe(false);
     });
 
-    expect(result.current.restaurants).toHaveLength(444); // 期待値
-    expect(result.current.loading).toBe(false);
+    act(() => {
+      result.current.setFilters({ cuisineTypes: ['日本料理'] });
+    });
+
+    expect(result.current.filteredRestaurants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cuisineType: '日本料理' })
+      ])
+    );
+  });
+
+  test('エラーハンドリングが正しく動作する', async () => {
+    // モックでエラーを発生させる
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    
+    const { result } = renderHook(() => useRestaurants());
+    
+    // エラー状態の確認
+    await waitFor(() => {
+      expect(result.current.asyncState.error).toBeTruthy();
+    });
   });
 });
 ```
 
-### **2. 統合テスト**
+## 🔍 トラブルシューティング
 
+### よくある問題
+
+1. **フックが再レンダリングを引き起こす**
+   ```typescript
+   // 問題: 依存配列の不適切な設定
+   useEffect(() => {
+     fetchData();
+   }, [data]); // dataが変更されるたびに実行される
+
+   // 解決: 適切な依存配列の設定
+   useEffect(() => {
+     fetchData();
+   }, []); // 初回のみ実行
+
+   // または: useCallbackでの最適化
+   const fetchData = useCallback(async () => {
+     // データ取得処理
+   }, []);
+   ```
+
+2. **非同期処理のメモリリーク**
+   ```typescript
+   // 問題: コンポーネントアンマウント後の状態更新
+   useEffect(() => {
+     fetchData().then(setData);
+   }, []);
+
+   // 解決: クリーンアップ関数の使用
+   useEffect(() => {
+     let cancelled = false;
+     
+     fetchData().then(data => {
+       if (!cancelled) {
+         setData(data);
+       }
+     });
+
+     return () => {
+       cancelled = true;
+     };
+   }, []);
+   ```
+
+3. **型エラーの解決**
+   ```typescript
+   // 問題: 型の不一致
+   const [data, setData] = useState<Restaurant[]>();
+
+   // 解決: 適切な初期値と型定義
+   const [data, setData] = useState<Restaurant[]>([]);
+   
+   // または: nullableな型定義
+   const [data, setData] = useState<Restaurant[] | null>(null);
+   ```
+
+### デバッグ方法
 ```typescript
-test("複数Hookの連携", () => {
-  const Component = () => {
-    const { restaurants } = useRestaurants();
-    const { mapPoints } = useMapPoints(restaurants);
-
-    return <div data-testid="map-points">{mapPoints.length}</div>;
-  };
-
-  render(<Component />);
-
-  // 期待される動作をテスト
-});
-```
-
-## 📦 エクスポート規則
-
-### **Barrel Exports**
-
-```typescript
-// hooks/index.ts
-export { useRestaurants } from "./useRestaurants";
-export { useMapPoints } from "./useMapPoints";
-export { useAnalytics } from "./useAnalytics";
-export { useErrorHandler } from "./useErrorHandler";
-
-// 型定義もエクスポート
-export type {
-  UseRestaurantsReturn,
-  UseMapPointsReturn,
-  UseAnalyticsReturn,
-} from "./types";
-```
-
-### **使用時**
-
-```typescript
-// ✅ 推奨
-import { useRestaurants, useMapPoints } from "@/hooks";
-
-// ❌ 非推奨
-import { useRestaurants } from "@/hooks/useRestaurants";
-```
-
-## 🚀 将来の拡張予定
-
-### **API 関連 (hooks/api/)**
-
-```typescript
-// hooks/api/useGoogleSheets.ts
-export const useGoogleSheets = (spreadsheetId: string) => {
-  // Google Sheets API専用Hook
+// デバッグ用のログ出力
+const debugHook = (hookName: string, state: any) => {
+  if (import.meta.env.DEV) {
+    console.group(`🔧 ${hookName} Debug`);
+    console.log('State:', state);
+    console.log('Timestamp:', new Date().toISOString());
+    console.groupEnd();
+  }
 };
 
-// hooks/api/useGoogleMaps.ts
-export const useGoogleMaps = (apiKey: string) => {
-  // Google Maps API専用Hook
-};
-```
-
-### **UI 状態管理 (hooks/ui/)**
-
-```typescript
-// hooks/ui/useFilters.ts
-export const useFilters = (initialFilters: Filters) => {
-  // フィルター状態管理Hook
-};
-
-// hooks/ui/useModal.ts
-export const useModal = () => {
-  // モーダル状態管理Hook
-};
-```
-
-### **地図関連 (hooks/map/)**
-
-```typescript
-// hooks/map/useMapState.ts
-export const useMapState = (initialCenter: LatLngLiteral) => {
-  // 地図状態管理Hook
-};
-
-// hooks/map/useMarkers.ts
-export const useMarkers = (points: MapPoint[]) => {
-  // マーカー管理Hook
+// パフォーマンス監視
+const measureHookPerformance = (hookName: string, fn: () => void) => {
+  if (import.meta.env.DEV) {
+    console.time(`⚡ ${hookName} Performance`);
+    fn();
+    console.timeEnd(`⚡ ${hookName} Performance`);
+  } else {
+    fn();
+  }
 };
 ```
 
-## 📚 参考資料
+## 🚀 今後の改善予定
 
-- [React Hooks Official Docs](https://react.dev/reference/react/hooks)
-- [Custom Hooks Best Practices](https://react.dev/learn/reusing-logic-with-custom-hooks)
-- [Testing Custom Hooks](https://testing-library.com/docs/react-testing-library/api/#renderhook)
-- [Hook Flow Diagram](https://github.com/donavon/hook-flow)
+### 短期的な改善
+- [ ] より詳細なエラー分類とハンドリング
+- [ ] オフライン対応フックの追加
+- [ ] リアルタイム更新フックの実装
 
----
+### 中期的な改善
+- [ ] GraphQL対応フックの追加
+- [ ] WebSocket統合フックの実装
+- [ ] キャッシュ戦略の高度化
 
-**📝 最終更新**: 2025 年 8 月 8 日  
-**🔄 次回更新**: 新 Hook 追加時  
-**👥 レビュー**: 開発チーム全体
+### 長期的な改善
+- [ ] AI機能統合フックの追加
+- [ ] マルチテナント対応
+- [ ] マイクロフロントエンド対応
+
+## 📚 関連ドキュメント
+
+- [React 19 ドキュメント](https://react.dev/)
+- [TypeScript 5.9 ドキュメント](https://www.typescriptlang.org/)
+- [Testing Library](https://testing-library.com/)
+- [Google Maps API](https://developers.google.com/maps)
+- [Google Sheets API](https://developers.google.com/sheets)
+- [Google Analytics](https://developers.google.com/analytics)

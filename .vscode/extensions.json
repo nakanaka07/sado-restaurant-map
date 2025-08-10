@@ -1,0 +1,63 @@
+{
+  "recommendations": [
+    // React & TypeScript 開発必須
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-json",
+
+    // React 特化
+    "dsznajder.es7-react-js-snippets",
+    "burkeholland.simple-react-snippets",
+    "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-typescript-next",
+
+    // Google Maps & API 開発
+    "humao.rest-client",
+    "rangav.vscode-thunder-client",
+
+    // Git & Version Control
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "github.copilot",
+    "github.copilot-chat",
+
+    // PWA & Web 開発
+    "ms-vscode.vscode-typescript-next",
+    "bradlc.vscode-tailwindcss",
+    "ms-playwright.playwright",
+
+    // コード品質 & セキュリティ
+    "sonarsource.sonarlint-vscode",
+    "ms-vscode.vscode-typescript-next",
+    "streetsidesoftware.code-spell-checker",
+
+    // CSS & スタイリング
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-css-peek",
+    "zignd.html-css-class-completion",
+
+    // パフォーマンス & デバッグ
+    "ms-vscode.vscode-typescript-next",
+    "wallabyjs.console-ninja",
+
+    // ユーティリティ
+    "gruntfuggly.todo-tree",
+    "aaron-bond.better-comments",
+    "pkief.material-icon-theme",
+    "ms-vscode.vscode-typescript-next",
+
+    // 日本語開発支援
+    "ms-ceintl.vscode-language-pack-ja",
+    "streetsidesoftware.code-spell-checker-japanese"
+  ],
+  "unwantedRecommendations": [
+    // 非推奨・競合拡張機能
+    "ms-vscode.vscode-typescript",
+    "hookyqr.beautify",
+    "vscode-icons-team.vscode-icons",
+    "ms-python.python",
+    "ms-toolsai.jupyter"
+  ]
+}
