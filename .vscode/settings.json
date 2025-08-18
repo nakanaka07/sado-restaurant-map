@@ -181,11 +181,15 @@
   // === プロジェクト固有除外設定 ===
   "python-envs.pythonProjects": [],
   "cSpell.words": [
+    "APCA",
     "deduplicator",
     "nakanaka",
     "pytest",
+    "Rolldown",
     "Sado",
     "venv",
+    "Vite",
+    "Vitest",
     "WCAG"
   ]
 }
