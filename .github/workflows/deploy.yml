@@ -19,6 +19,11 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,15 +31,56 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 8
 
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          # デバッグ情報
+          echo "🔍 GitHub Actions環境情報:"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "Node version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+          echo "Available memory: $(free -h | grep Mem | awk '{print $2}')"
+          
+          # レート制限対策: ミラーレジストリとリトライ設定
+          echo "📦 pnpm設定を最適化中..."
+          pnpm config set registry https://registry.npmmirror.com
+          pnpm config set fetch-retries 5
+          pnpm config set fetch-retry-factor 2
+          pnpm config set fetch-retry-mintimeout 10000
+          pnpm config set fetch-retry-maxtimeout 60000
+          pnpm config set network-concurrency 3
+          
+          echo "🚀 依存関係インストール開始..."
+          pnpm install --no-frozen-lockfile || {
+            echo "⚠️ ミラーレジストリで失敗、npmjs.orgで再試行..."
+            pnpm config set registry https://registry.npmjs.org
+            echo "⏳ 30秒待機してからリトライ..."
+            sleep 30
+            pnpm install --no-frozen-lockfile
+          }
+          
+          echo "✅ 依存関係インストール完了"
 
       - name: Run tests
         run: pnpm run test

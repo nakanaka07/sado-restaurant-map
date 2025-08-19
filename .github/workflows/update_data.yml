@@ -35,8 +35,14 @@ jobs:
 
       - name: Install dependencies
         run: |
+          # レート制限対策: pip設定とリトライ
           python -m pip install --upgrade pip
-          pip install -r tools/scraper/requirements.txt
+          pip config set global.timeout 60
+          pip config set global.retries 5
+          pip install -r tools/scraper/requirements.txt --timeout 300 || {
+            echo "デフォルトミラーで失敗、別のミラーで再試行..."
+            pip install -r tools/scraper/requirements.txt -i https://pypi.douban.com/simple/ --timeout 300
+          }
 
       - name: Verify environment setup
         run: |
