@@ -61,7 +61,7 @@ jobs:
           echo "Node version: $(node --version)"
           echo "pnpm version: $(pnpm --version)"
           echo "Available memory: $(free -h | grep Mem | awk '{print $2}')"
-          
+
           # レート制限対策: ミラーレジストリとリトライ設定
           echo "📦 pnpm設定を最適化中..."
           pnpm config set registry https://registry.npmmirror.com
@@ -70,7 +70,7 @@ jobs:
           pnpm config set fetch-retry-mintimeout 10000
           pnpm config set fetch-retry-maxtimeout 60000
           pnpm config set network-concurrency 3
-          
+
           echo "🚀 依存関係インストール開始..."
           pnpm install --no-frozen-lockfile || {
             echo "⚠️ ミラーレジストリで失敗、npmjs.orgで再試行..."
@@ -79,7 +79,7 @@ jobs:
             sleep 30
             pnpm install --no-frozen-lockfile
           }
-          
+
           echo "✅ 依存関係インストール完了"
 
       - name: Run tests
