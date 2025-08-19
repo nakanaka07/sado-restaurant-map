@@ -21,7 +21,7 @@
 
 ### フロントエンド (React + TypeScript)
 
-```
+```text
 src/
 ├── app/           # アプリケーション層・エントリーポイント
 ├── components/    # UIコンポーネント層
@@ -35,7 +35,7 @@ src/
 
 ### バックエンド・データ処理 (Python)
 
-```
+```text
 tools/scraper/
 ├── config/        # 設定管理（環境変数、認証）
 ├── data/          # データソース（URL、検索クエリ）
@@ -49,7 +49,7 @@ tools/scraper/
 
 ### 開発・運用ツール
 
-```
+```text
 tools/
 ├── analysis/      # コード品質分析（結合度、循環依存）
 ├── data/          # データベース操作（PowerShell）
