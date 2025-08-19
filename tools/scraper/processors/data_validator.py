@@ -43,16 +43,16 @@ class SadoBounds:
 
 class DataValidator:
     """Places APIデータ検証・変換クラス"""
-    
+
     def __init__(self):
         """初期化"""
         self.bounds = SadoBounds()
         self.district_mapping = self._load_district_mapping()
         self.sado_keywords = [
-            '佐渡市', '佐渡', '新潟県佐渡', '両津', '相川', '佐和田', '金井', 
+            '佐渡市', '佐渡', '新潟県佐渡', '両津', '相川', '佐和田', '金井',
             '新穂', '畑野', '真野', '小木', '羽茂', '赤泊'
         ]
-    
+
     def _load_district_mapping(self) -> Dict[str, List[str]]:
         """佐渡市公式地区分類マッピングを読み込み"""
         # 佐渡市公式サイト基準: https://www.city.sado.niigata.jp/soshiki/2002/2359.html
@@ -92,7 +92,7 @@ class DataValidator:
             '佐和田地区': [
                 '佐和田', '沢根', '窪田', '中原', '河原田', '八幡', '八幡新町', '八幡町',
                 '河原田本町', '河原田諏訪町', '鍛冶町', '石田', '上長木', '下長木', '長木',
-                '上矢馳', '二宮', '市野沢', '真光寺', '山田', '青野', '東大通', 
+                '上矢馳', '二宮', '市野沢', '真光寺', '山田', '青野', '東大通',
                 '沢根五十里', '沢根篭町', '沢根炭屋町', '沢根町'
             ],
             '金井地区': [
@@ -124,53 +124,53 @@ class DataValidator:
                 '羽茂小泊'
             ],
             '赤泊地区': [
-                '赤泊', '徳和', '柳沢', '莚場', '大杉', '杉野浦', '南新保', '真浦', 
+                '赤泊', '徳和', '柳沢', '莚場', '大杉', '杉野浦', '南新保', '真浦',
                 '三川', '外山', '上川茂', '下川茂'
             ]
         }
-    
+
     def normalize_address(self, raw_address: str) -> str:
         """住所を正規化"""
         if not raw_address:
             return ""
-        
+
         # 日本国表記の除去
         normalized = raw_address.replace('日本、', '').replace('日本 ', '').replace('Japan', '').strip()
-        
+
         # 新潟県表記の統一
         normalized = re.sub(r'新潟県?\s*', '新潟県', normalized)
-        
+
         # 佐渡市表記の統一
         normalized = re.sub(r'佐渡市?\s*', '佐渡市', normalized)
-        
+
         # 余分な空白の除去
         normalized = re.sub(r'\s+', ' ', normalized).strip()
-        
+
         return normalized
-    
+
     def classify_district_by_address(self, address: str) -> str:
         """住所による地区分類"""
         if not address:
             return 'その他'
-        
+
         normalized_address = self.normalize_address(address)
-        
+
         # 各地区の地名をチェック
         for district, locations in self.district_mapping.items():
             for location in locations:
                 if location in normalized_address:
                     return district
-        
+
         return 'その他'
-    
+
     def classify_district_by_coordinates(self, lat: float, lng: float) -> Optional[str]:
         """緯度経度による地区分類（粗い分類）"""
         if not self.is_within_sado_bounds(lat, lng):
             return None
-        
+
         # 佐渡島を大まかに地区分けする座標範囲
         # 実際の行政区画ではなく、おおよその地理的位置による分類
-        
+
         if lat >= 38.15:  # 北部
             if lng <= 138.25:
                 return '相川地区'  # 西北部
@@ -195,103 +195,103 @@ class DataValidator:
                 return '羽茂地区'  # 中南部
             else:
                 return '赤泊地区'  # 東南部
-    
+
     def is_within_sado_bounds(self, lat: float, lng: float) -> bool:
         """緯度経度が佐渡島内かどうかを判定"""
         try:
             lat_f = float(lat)
             lng_f = float(lng)
-            
-            return (self.bounds.south <= lat_f <= self.bounds.north and 
+
+            return (self.bounds.south <= lat_f <= self.bounds.north and
                    self.bounds.west <= lng_f <= self.bounds.east)
         except (ValueError, TypeError):
             return False
-    
+
     def is_within_sado_by_address(self, address: str) -> bool:
         """住所による佐渡島内判定"""
         if not address:
             return False
-        
+
         normalized = self.normalize_address(address)
         return any(keyword in normalized for keyword in self.sado_keywords)
-    
+
     def format_opening_hours(self, opening_hours_data: Optional[Dict]) -> str:
         """営業時間データをフォーマット"""
         if not opening_hours_data:
             return ""
-        
+
         # weekdayDescriptions または periods のいずれかが存在する場合
         descriptions = opening_hours_data.get('weekdayDescriptions', [])
         if descriptions:
             # 曜日順に並び替え（月火水木金土日）
             weekday_order = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日']
             sorted_descriptions = []
-            
+
             for day in weekday_order:
                 for desc in descriptions:
                     if desc.startswith(day):
                         sorted_descriptions.append(desc)
                         break
-            
+
             return '\n'.join(sorted_descriptions)
-        
+
         # periods データがある場合
         periods = opening_hours_data.get('periods', [])
         if periods:
             # periods を weekdayDescriptions 形式に変換
             weekday_names = ['月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日']
             formatted_periods = []
-            
+
             for period in periods:
                 if 'open' in period:
                     day = period['open'].get('day', 0)
                     time = period['open'].get('time', '0000')
                     if day < len(weekday_names):
                         formatted_periods.append(f"{weekday_names[day]}: {time[:2]}:{time[2:]}～")
-            
+
             return '\n'.join(formatted_periods)
-        
+
         return ""
-    
+
     def validate_place_data(self, place: Dict[str, Any], category: str) -> ValidationResult:
         """Places APIレスポンスを検証・変換"""
         errors = []
         warnings = []
-        
+
         # 必須フィールドの検証
         place_id = place.get('id', '')
         if not place_id:
             errors.append("Place ID がありません")
-        
+
         name = place.get('displayName', {}).get('text', '')
         if not name:
             errors.append("店舗名がありません")
-        
+
         # 住所の取得・正規化
         raw_address = place.get('shortFormattedAddress', '')
         if not raw_address:
             raw_address = place.get('formattedAddress', '')
         normalized_address = self.normalize_address(raw_address)
-        
+
         # 名前の取得
         if isinstance(name, dict) and 'text' in name:
             name = name['text']
-        
+
         # 座標の取得
         location = place.get('location', {})
         lat = location.get('latitude', '')
         lng = location.get('longitude', '')
-        
+
         # 地区分類
         district = self.classify_district_by_address(normalized_address)
-        
+
         # 住所による分類が「その他」の場合、座標による分類を試行
         if district == 'その他' and lat and lng:
             coord_district = self.classify_district_by_coordinates(float(lat), float(lng))
             if coord_district:
                 district = coord_district
                 warnings.append(f"緯度経度により {district} に分類されました")
-        
+
         # 佐渡島内判定
         is_in_sado = False
         if lat and lng:
@@ -300,20 +300,20 @@ class DataValidator:
             is_in_sado = self.is_within_sado_by_address(normalized_address)
             if not lat or not lng:
                 warnings.append("緯度経度情報がありません")
-        
+
         if not is_in_sado:
             warnings.append("佐渡島外の場所の可能性があります")
-        
+
         # Google Maps URL の生成
         google_maps_url = ""
         if 'googleMapsUri' in place:
             google_maps_url = place['googleMapsUri']
         elif place_id:
             google_maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
-        
+
         # タイムスタンプ
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-        
+
         # カテゴリ別データ構造
         if category == "restaurants" or category == "飲食店":
             data = {
@@ -366,7 +366,7 @@ class DataValidator:
                 'timestamp': timestamp,
                 'is_in_sado': is_in_sado
             }
-        
+
         return ValidationResult(
             is_valid=len(errors) == 0,
             data=data,
@@ -374,22 +374,23 @@ class DataValidator:
             warnings=warnings,
             district=district
         )
-    
-    def extract_to_row_format_simplified(self, result: ValidationResult, category: str, headers: List[str]) -> List[str]:
-        """検証結果から行データを抽出（簡略版・佐渡市外シート用）"""
+
+    def extract_to_row_format_full(self, result: ValidationResult, category: str, headers: List[str]) -> List[str]:
+        """検証結果から完全な行データを抽出（SpreadsheetManagerヘッダー完全対応版）"""
         data = result.data
         row = []
-        
-        # ヘッダーに基づいて必要なフィールドのみ抽出
+
+        # 各ヘッダーに対応する値を抽出
         for header in headers:
             value = ""
-            
+
+            # 基本情報
             if header == "Place ID":
                 value = data.get('place_id', '')
             elif header in ["店舗名", "駐車場名", "施設名"]:
                 value = data.get('name', '')
             elif header == "所在地":
-                value = data.get('formatted_address', '')
+                value = data.get('address', '') or data.get('formatted_address', '')
             elif header == "緯度":
                 value = str(data.get('latitude', ''))
             elif header == "経度":
@@ -398,55 +399,184 @@ class DataValidator:
                 rating = data.get('rating')
                 value = str(rating) if rating is not None else ''
             elif header == "レビュー数":
-                reviews = data.get('user_ratings_total')
+                reviews = data.get('review_count')
                 value = str(reviews) if reviews is not None else ''
             elif header == "営業状況":
-                value = data.get('business_status_jp', '')
+                value = data.get('business_status', '')
             elif header == "営業時間":
-                hours = data.get('opening_hours')
-                if hours and isinstance(hours, dict):
-                    weekday_text = hours.get('weekday_text', [])
-                    value = '; '.join(weekday_text) if weekday_text else ''
-                else:
-                    value = str(hours) if hours else ''
+                value = data.get('opening_hours', '')
             elif header == "電話番号":
-                value = data.get('formatted_phone_number', '')
+                value = data.get('phone', '')
             elif header == "ウェブサイト":
                 value = data.get('website', '')
             elif header == "価格帯":
-                price_level = data.get('price_level')
-                if price_level is not None:
-                    price_map = {0: '無料', 1: '安い', 2: '手頃', 3: '高い', 4: '非常に高い'}
-                    value = price_map.get(price_level, '')
-                else:
-                    value = ''
+                value = data.get('price_level', '')
             elif header == "店舗タイプ":
-                types = data.get('types_jp', [])
-                value = ', '.join(types) if types else ''
-            elif header in ["カテゴリ", "カテゴリ詳細"]:
-                types = data.get('types_jp', [])
-                if header == "カテゴリ" and types:
-                    value = types[0]  # 最初のタイプをカテゴリとする
-                elif header == "カテゴリ詳細":
-                    value = ', '.join(types) if types else ''
+                types_list = data.get('types', [])
+                if isinstance(types_list, list):
+                    value = ', '.join(types_list)
+                else:
+                    value = str(types_list) if types_list else ''
+            elif header == "店舗説明":
+                value = data.get('editorial_summary', '')
+
+            # サービス関連（Places APIの実際のフィールドマッピング）
+            elif header == "テイクアウト":
+                takeout = data.get('takeout')
+                value = '可' if takeout else '不可' if takeout is not None else ''
+            elif header == "デリバリー":
+                delivery = data.get('delivery')
+                value = '可' if delivery else '不可' if delivery is not None else ''
+            elif header == "店内飲食":
+                dine_in = data.get('dineIn')
+                value = '可' if dine_in else '不可' if dine_in is not None else ''
+            elif header == "カーブサイドピックアップ":
+                value = ''  # Places APIで未提供
+            elif header == "予約可能":
+                reservable = data.get('reservable')
+                value = '可' if reservable else '不可' if reservable is not None else ''
+            elif header == "朝食提供":
+                breakfast = data.get('servesBreakfast')
+                value = '可' if breakfast else '不可' if breakfast is not None else ''
+            elif header == "昼食提供":
+                lunch = data.get('servesLunch')
+                value = '可' if lunch else '不可' if lunch is not None else ''
+            elif header == "夕食提供":
+                dinner = data.get('servesDinner')
+                value = '可' if dinner else '不可' if dinner is not None else ''
+            elif header == "ビール提供":
+                beer = data.get('servesBeer')
+                value = '可' if beer else '不可' if beer is not None else ''
+            elif header == "ワイン提供":
+                wine = data.get('servesWine')
+                value = '可' if wine else '不可' if wine is not None else ''
+            elif header == "カクテル提供":
+                cocktails = data.get('servesCocktails')
+                value = '可' if cocktails else '不可' if cocktails is not None else ''
+            elif header == "コーヒー提供":
+                coffee = data.get('servesCoffee')
+                value = '可' if coffee else '不可' if coffee is not None else ''
+            elif header == "ベジタリアン対応":
+                vegetarian = data.get('servesVegetarianFood')
+                value = '可' if vegetarian else '不可' if vegetarian is not None else ''
+            elif header == "デザート提供":
+                dessert = data.get('servesDessert')
+                value = '可' if dessert else '不可' if dessert is not None else ''
+            elif header == "子供向けメニュー":
+                kids_menu = data.get('menuForChildren')
+                value = '可' if kids_menu else '不可' if kids_menu is not None else ''
+            elif header == "屋外席":
+                outdoor = data.get('outdoorSeating')
+                value = '可' if outdoor else '不可' if outdoor is not None else ''
+            elif header == "ライブ音楽":
+                live_music = data.get('liveMusic')
+                value = '可' if live_music else '不可' if live_music is not None else ''
+            elif header == "トイレ完備":
+                restroom = data.get('restroom')
+                value = '完備' if restroom else '未完備' if restroom is not None else ''
+            elif header == "子供連れ歓迎":
+                good_for_children = data.get('goodForChildren')
+                value = '歓迎' if good_for_children else '不可' if good_for_children is not None else ''
+            elif header == "ペット同伴可":
+                allows_dogs = data.get('allowsDogs')
+                value = '可' if allows_dogs else '不可' if allows_dogs is not None else ''
+            elif header == "グループ向け":
+                good_for_groups = data.get('goodForGroups')
+                value = '可' if good_for_groups else '不可' if good_for_groups is not None else ''
+            elif header == "スポーツ観戦向け":
+                value = ''  # Places APIで未提供
+
+            # 支払い・設備情報
+            elif header == "支払い方法":
+                payment_options = data.get('payment_options', {})
+                if isinstance(payment_options, dict):
+                    methods = []
+                    if payment_options.get('acceptsCashOnly'): methods.append('現金のみ')
+                    if payment_options.get('acceptsCreditCards'): methods.append('クレジットカード')
+                    if payment_options.get('acceptsDebitCards'): methods.append('デビットカード')
+                    if payment_options.get('acceptsNfc'): methods.append('NFC決済')
+                    value = ', '.join(methods)
+                else:
+                    value = str(payment_options) if payment_options else ''
+            elif header == "駐車場情報":
+                parking_options = data.get('parking_options', {})
+                if isinstance(parking_options, dict):
+                    parking_info = []
+                    if parking_options.get('freeParking'): parking_info.append('無料駐車場')
+                    if parking_options.get('paidParking'): parking_info.append('有料駐車場')
+                    if parking_options.get('freeStreetParking'): parking_info.append('無料路上駐車')
+                    if parking_options.get('paidStreetParking'): parking_info.append('有料路上駐車')
+                    value = ', '.join(parking_info)
+                else:
+                    value = str(parking_options) if parking_options else ''
+            elif header == "アクセシビリティ":
+                accessibility = data.get('accessibility_options', {})
+                if isinstance(accessibility, dict):
+                    access_info = []
+                    if accessibility.get('wheelchairAccessibleEntrance'): access_info.append('車椅子入口')
+                    if accessibility.get('wheelchairAccessibleParking'): access_info.append('車椅子駐車場')
+                    if accessibility.get('wheelchairAccessibleRestroom'): access_info.append('車椅子トイレ')
+                    if accessibility.get('wheelchairAccessibleSeating'): access_info.append('車椅子席')
+                    value = ', '.join(access_info)
+                else:
+                    value = str(accessibility) if accessibility else ''
+
+            # 位置・管理情報
             elif header == "地区":
-                value = result.district if result.district else 'その他'
+                value = data.get('district', '')
             elif header == "GoogleマップURL":
-                value = data.get('url', '')
+                value = data.get('google_maps_url', '')
             elif header == "取得方法":
-                value = data.get('retrieval_method', 'API取得')
+                value = 'Places API (New)'  # 固定値
             elif header == "最終更新日時":
-                value = data.get('timestamp', time.strftime('%Y-%m-%d %H:%M:%S'))
-            
+                value = data.get('timestamp', '')
+
+            # デフォルト（未知のヘッダー）
+            else:
+                value = data.get(header.lower().replace(' ', '_'), '')
+
             # 値を文字列として追加（None の場合は空文字）
             row.append(str(value) if value is not None else '')
-        
+
+        return row
+
+    def extract_to_row_format_simplified(self, result: ValidationResult, category: str, headers: List[str]) -> List[str]:
+        """検証結果から行データを抽出（簡略版・佐渡市外シート用）"""
+        data = result.data
+        row = []
+
+        # ヘッダーに基づいて必要なフィールドのみ抽出
+        for header in headers:
+            value = ""
+
+            if header == "Place ID":
+                value = data.get('place_id', '')
+            elif header in ["店舗名", "駐車場名", "施設名"]:
+                value = data.get('name', '')
+            elif header == "所在地":
+                value = data.get('address', '')
+            elif header == "緯度":
+                value = str(data.get('latitude', ''))
+            elif header == "経度":
+                value = str(data.get('longitude', ''))
+            elif header == "地区":
+                value = data.get('district', '')
+            elif header == "GoogleマップURL":
+                value = data.get('google_maps_url', '')
+            elif header == "取得方法":
+                value = 'Places API (New)'
+            elif header == "最終更新日時":
+                value = data.get('timestamp', '')
+
+            # 値を文字列として追加（None の場合は空文字）
+            row.append(str(value) if value is not None else '')
+
         return row
 
     def extract_to_row_format(self, result: ValidationResult, category: str) -> List[str]:
         """検証結果をスプレッドシート行形式に変換（完全版）"""
         data = result.data
-        
+
         if category == "restaurants" or category == "飲食店":
             return [
                 data['place_id'],
@@ -477,46 +607,46 @@ class DataValidator:
                 data['google_maps_url'],
                 data['timestamp']
             ]
-    
+
     def batch_validate(self, places: List[Dict[str, Any]], category: str) -> List[ValidationResult]:
         """複数の場所データを一括検証"""
         results = []
-        
+
         print(f"🔍 データ検証開始: {len(places)}件")
-        
+
         for i, place in enumerate(places, 1):
             result = self.validate_place_data(place, category)
             results.append(result)
-            
+
             # エラー・警告の表示
             if result.errors:
                 print(f"❌ [{i}] エラー: {', '.join(result.errors)}")
             if result.warnings:
                 print(f"⚠️ [{i}] 警告: {', '.join(result.warnings)}")
-            
+
             # 進捗表示
             if i % 10 == 0:
                 print(f"📊 検証進捗: {i}/{len(places)} 完了")
-        
+
         # 統計情報
         valid_count = sum(1 for r in results if r.is_valid)
         error_count = len(places) - valid_count
         sado_count = sum(1 for r in results if r.data.get('is_in_sado', False))
-        
+
         print(f"✅ 検証完了: 有効 {valid_count}件, エラー {error_count}件, 佐渡島内 {sado_count}件")
-        
+
         return results
-    
+
     def get_validation_stats(self, results: List[ValidationResult]) -> Dict[str, Any]:
         """検証統計情報を取得"""
         total = len(results)
         valid = sum(1 for r in results if r.is_valid)
-        
+
         district_counts = {}
         for result in results:
             district = result.district
             district_counts[district] = district_counts.get(district, 0) + 1
-        
+
         return {
             "total": total,
             "valid": valid,
@@ -543,30 +673,30 @@ def quick_district_classification(address: str) -> str:
 if __name__ == "__main__":
     # テスト実行
     import sys
-    
+
     if len(sys.argv) < 2:
         print("使用方法: python data_validator.py <住所または座標>")
         print("例: python data_validator.py '佐渡市両津夷261'")
         print("例: python data_validator.py '38.1234,138.1234'")
         sys.exit(1)
-    
+
     input_str = sys.argv[1]
     validator = DataValidator()
-    
+
     # 座標形式かどうかチェック
     if ',' in input_str:
         try:
             lat_str, lng_str = input_str.split(',')
             lat, lng = float(lat_str.strip()), float(lng_str.strip())
-            
+
             is_in_sado = validator.is_within_sado_bounds(lat, lng)
             district = validator.classify_district_by_coordinates(lat, lng)
-            
+
             print(f"=== 座標分析結果 ===")
             print(f"緯度: {lat}, 経度: {lng}")
             print(f"佐渡島内: {'はい' if is_in_sado else 'いいえ'}")
             print(f"推定地区: {district or ' 判定不可'}")
-            
+
         except ValueError:
             print("❌ 無効な座標形式です")
             sys.exit(1)
@@ -575,7 +705,7 @@ if __name__ == "__main__":
         normalized = validator.normalize_address(input_str)
         district = validator.classify_district_by_address(normalized)
         is_in_sado = validator.is_within_sado_by_address(normalized)
-        
+
         print(f"=== 住所分析結果 ===")
         print(f"元の住所: {input_str}")
         print(f"正規化後: {normalized}")
