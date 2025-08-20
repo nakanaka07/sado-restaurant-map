@@ -3,24 +3,31 @@
  * メインのフィルターパネルコンポーネント（分割後）
  */
 
-import { memo } from "react";
 import type { MapPointType } from "@/types";
-import { useFilterState, type FilterHandlers } from "./useFilterState";
-import { SearchFilter } from "./SearchFilter";
+import { memo } from "react";
 import { CuisineFilter } from "./CuisineFilter";
-import { PriceFilter } from "./PriceFilter";
 import { DistrictFilter } from "./DistrictFilter";
 import { FeatureFilter } from "./FeatureFilter";
 import { MapLegend } from "./MapLegend";
+import { PriceFilter } from "./PriceFilter";
+import { SearchFilter } from "./SearchFilter";
+import { useFilterState, type FilterHandlers } from "./useFilterState";
 
 interface FilterPanelProps extends FilterHandlers {
   readonly loading?: boolean;
   readonly resultCount?: number;
+  readonly stats?: {
+    restaurants: number;
+    parkings: number;
+    toilets: number;
+    total: number;
+  };
 }
 
 export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
   loading = false,
   resultCount = 0,
+  stats,
   ...handlers
 }) {
   const filterState = useFilterState(handlers);
@@ -69,33 +76,80 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
           {/* ヘッダー */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
               marginBottom: "20px",
               paddingBottom: "16px",
               borderBottom: "2px solid #f3f4f6",
             }}
           >
-            <h2
-              style={{
-                fontSize: "18px",
-                fontWeight: "700",
-                color: "var(--color-text-primary)",
-                margin: 0,
-              }}
-            >
-              🔍 フィルター
-            </h2>
+            {/* ヘッダー行 */}
             <div
               style={{
-                fontSize: "13px",
-                color: "var(--color-text-secondary)",
-                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "8px",
               }}
             >
-              {resultCount}件 見つかりました
+              <h2
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "700",
+                  color: "var(--color-text-primary)",
+                  margin: 0,
+                }}
+              >
+                🔍 フィルター
+              </h2>
+              <div
+                aria-live="polite"
+                style={{
+                  fontSize: "13px",
+                  color: "var(--color-text-secondary)",
+                  fontWeight: "600",
+                }}
+              >
+                📊 {resultCount}件
+              </div>
             </div>
+
+            {/* 詳細統計情報 */}
+            {stats && resultCount > 0 && (
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-text-secondary)",
+                  fontWeight: "500",
+                  padding: "8px 12px",
+                  backgroundColor: "var(--color-background-secondary, #f8f9fa)",
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-border-light, #e9ecef)",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                }}
+              >
+                <span>🍽️ {stats.restaurants}</span>
+                <span>🅿️ {stats.parkings}</span>
+                <span>� {stats.toilets}</span>
+              </div>
+            )}
+
+            {/* 結果なしのメッセージ */}
+            {resultCount === 0 && (
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-text-muted, #6c757d)",
+                  fontStyle: "italic",
+                  padding: "8px 12px",
+                  backgroundColor: "var(--color-background-secondary, #f8f9fa)",
+                  borderRadius: "8px",
+                  border: "1px solid var(--color-border-light, #e9ecef)",
+                }}
+              >
+                条件に一致するポイントが見つかりませんでした
+              </div>
+            )}
           </div>
 
           {/* 検索フィルター */}

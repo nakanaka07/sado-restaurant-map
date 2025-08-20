@@ -43,7 +43,6 @@ describe("App", () => {
       render(<App />);
 
       // ローディング状態の確認
-      expect(screen.getByText("🗺️ 佐渡飲食店マップ")).toBeInTheDocument();
       expect(screen.getByText("読み込み中...")).toBeInTheDocument();
     });
 
@@ -68,11 +67,14 @@ describe("App", () => {
       expect(outputElement).toHaveAttribute("aria-live", "polite");
     });
 
-    it("見出しが適切な階層で設定されていること", () => {
+    it("ローディング状態では必要な要素が表示されること", () => {
       render(<App />);
 
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toHaveTextContent("🗺️ 佐渡飲食店マップ");
+      // ローディング状態での表示確認
+      const loadingContainer = screen.getByText("読み込み中...").closest("output");
+      expect(loadingContainer).toBeInTheDocument();
+      expect(loadingContainer).toHaveAttribute("aria-live", "polite");
+      expect(loadingContainer).toHaveClass("loading-container");
     });
   });
 

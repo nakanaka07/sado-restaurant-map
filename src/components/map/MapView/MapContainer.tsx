@@ -48,6 +48,7 @@ export function MapContainer({
       <Map
         defaultCenter={center}
         defaultZoom={11}
+        mapTypeId="terrain" // 🗻 初期表示を地形図（TERRAIN）に設定
         mapId={mapId}
         style={{ width: "100%", height: "100%" }}
         gestureHandling="greedy"
@@ -56,6 +57,20 @@ export function MapContainer({
         fullscreenControl={true}
         streetViewControl={true}
         zoomControl={true}
+        // コントロールの位置を調整してフィルターパネルとの重複を回避
+        mapTypeControlOptions={{
+          position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1,
+          style: window.google?.maps?.MapTypeControlStyle?.DROPDOWN_MENU || 1 // 🎯 プルダウンメニュー形式に変更
+        }}
+        zoomControlOptions={{
+          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6
+        }}
+        fullscreenControlOptions={{
+          position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1
+        }}
+        streetViewControlOptions={{
+          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6
+        }}
       >
         {/* マーカー表示 */}
         {mapPoints.map((point, index) => (

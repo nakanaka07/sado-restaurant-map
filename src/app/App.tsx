@@ -271,7 +271,6 @@ function App() {
   if (!isInitialized) {
     return (
       <output className="loading-container" aria-live="polite">
-        <h1>🗺️ 佐渡飲食店マップ</h1>
         <span>読み込み中...</span>
       </output>
     );
@@ -282,14 +281,6 @@ function App() {
       <SkipLink href="#main-content">メインコンテンツにスキップ</SkipLink>
 
       <div className="app">
-        {/* Floating Header */}
-        <header className="app-header" role="banner">
-          <div className="app-header-content">
-            <h1>🗺️ 佐渡島マップ</h1>
-            <p>飲食店・駐車場・トイレを探す</p>
-          </div>
-        </header>
-
         <main id="main-content" className="app-main">
           <APIProvider
             apiKey={apiKey}
@@ -300,6 +291,7 @@ function App() {
               <FilterPanel
                 loading={loading}
                 resultCount={filteredMapPoints.length}
+                stats={stats}
                 onCuisineFilter={handleCuisineFilter}
                 onPriceFilter={handlePriceFilter}
                 onDistrictFilter={handleDistrictFilter}
@@ -311,24 +303,6 @@ function App() {
                 onPointTypeFilter={handlePointTypeFilter}
                 onResetFilters={handleResetFilters}
               />
-
-              {/* Floating Results Status */}
-              <output className="results-status" aria-live="polite">
-                <h3>
-                  📊 検索結果: {filteredMapPoints.length}件
-                  {stats && (
-                    <span style={{ fontSize: "0.75rem", fontWeight: "normal" }}>
-                      （🍽️{stats.restaurants} 🅿️{stats.parkings} 🚽
-                      {stats.toilets}）
-                    </span>
-                  )}
-                </h3>
-                <p>
-                  {filteredMapPoints.length === 0
-                    ? "条件に一致するポイントが見つかりませんでした"
-                    : "フィルターでさらに絞り込み可能です"}
-                </p>
-              </output>
 
               {/* Fullscreen Map */}
               <MapView

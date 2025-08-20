@@ -78,62 +78,6 @@ body {
   position: relative;
 }
 
-/* フローティングヘッダー - 詳細度を上げて !important を削除 */
-body .app .app-header {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1100;
-  background: var(--color-surface-overlay);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.3);
-  border-radius: var(--radius-lg);
-  padding: 6px var(--spacing-md);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  height: 40px;
-  min-height: 40px;
-  max-height: 40px;
-  opacity: 0.95;
-  white-space: nowrap;
-  min-width: 200px;
-}
-
-.app-header:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateX(-50%) translateY(-1px);
-  opacity: 1;
-}
-
-.app-header-content {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1.2;
-  letter-spacing: 0.5px;
-}
-
-.app-header p {
-  margin: 0;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  display: none;
-}
-
 /* メインコンテンツ - フルスクリーンマップ */
 .app-main {
   flex: 1;
@@ -160,7 +104,7 @@ body .app .filter-panel {
   border: 1px solid rgba(226, 232, 240, 0.3);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  z-index: 900;
+  z-index: 1200;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
@@ -197,6 +141,23 @@ body .app .app-content .map-container {
   position: relative;
 }
 
+/* Google Maps コントロールのz-index調整 */
+.map-container .gm-control-active {
+  z-index: 1100 !important;
+}
+
+.map-container .gmnoprint {
+  z-index: 1100 !important;
+}
+
+.map-container .gm-style .gm-style-cc {
+  z-index: 1100 !important;
+}
+
+.map-container .gm-bundled-control {
+  z-index: 1100 !important;
+}
+
 .map-loading {
   display: flex;
   align-items: center;
@@ -229,47 +190,6 @@ body .app .app-content .map-container {
   font-size: var(--font-size-lg);
   text-align: center;
   padding: var(--spacing-xl);
-}
-
-/* 結果ステータスカード */
-body .app .results-status {
-  position: absolute;
-  top: 58px;
-  right: var(--spacing-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-surface-overlay);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.3);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: 900;
-  min-width: 200px;
-  max-width: 280px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.92;
-}
-
-.results-status:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-1px);
-  opacity: 1;
-}
-
-.results-status h3 {
-  margin: 0 0 var(--spacing-xs) 0;
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  color: var(--color-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.results-status p {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
 }
 
 /* エラー表示 */
@@ -317,38 +237,12 @@ body .app .results-status {
   }
 }
 
-.filter-panel,
-.results-status,
-.app-header {
+.filter-panel {
   animation: fadeIn 0.5s ease-out;
 }
 
 /* レスポンシブデザイン - モバイルファースト */
 @media (max-width: 768px) {
-  /* モバイルではより高い詳細度で !important を避ける */
-  body .app .app-header {
-    top: 6px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    padding: 6px var(--spacing-sm);
-    height: 36px;
-    min-height: 36px;
-    max-height: 36px;
-    min-width: 180px;
-    z-index: 1100;
-  }
-
-  .app-header h1 {
-    font-size: 13px;
-    gap: 4px;
-    line-height: 1;
-  }
-
-  .app-header p {
-    display: none;
-  }
-
   body .app .filter-panel {
     position: fixed;
     bottom: 0;
@@ -361,13 +255,13 @@ body .app .results-status {
     transform: translateY(calc(100% - 36px));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 0.95;
-    z-index: 1000;
+    z-index: 1200;
   }
 
   .filter-panel.expanded {
     transform: translateY(0);
     opacity: 1;
-    z-index: 1050;
+    z-index: 1250;
   }
 
   .filter-panel-toggle {
@@ -381,34 +275,11 @@ body .app .results-status {
     border-radius: 2px;
     cursor: pointer;
   }
-
-  body .app .results-status {
-    position: fixed;
-    bottom: calc(46px + var(--spacing-xs));
-    right: var(--spacing-xs);
-    left: var(--spacing-xs);
-    width: auto;
-    min-width: auto;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    opacity: 0.9;
-    z-index: 950;
-  }
 }
 
 @media (max-width: 480px) {
-  body .app .app-header {
-    padding: var(--spacing-xs) var(--spacing-sm);
-  }
-
   body .app .filter-panel {
     max-height: 80vh;
-  }
-
-  body .app .results-status {
-    bottom: calc(60px + var(--spacing-xs));
-    right: var(--spacing-xs);
-    left: var(--spacing-xs);
-    padding: var(--spacing-sm) var(--spacing-md);
   }
 }
 
@@ -418,27 +289,12 @@ body .app .results-status {
     width: 260px;
     left: var(--spacing-sm);
   }
-
-  body .app .results-status {
-    right: var(--spacing-sm);
-    min-width: 180px;
-  }
 }
 
 /* 大画面デスクトップ */
 @media (min-width: 1400px) {
   body .app .filter-panel {
     width: 320px;
-  }
-
-  body .app .app-header {
-    max-width: 1200px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  body .app .results-status {
-    min-width: 220px;
   }
 }
 
@@ -450,9 +306,7 @@ body .app .results-status {
       0 4px 6px -4px rgb(0 0 0 / 0.3);
   }
 
-  body .app .filter-panel,
-  body .app .results-status,
-  body .app .app-header {
+  body .app .filter-panel {
     border-width: 2px;
     opacity: 1 !important; /* アクセシビリティのため必須 */
   }
