@@ -4,7 +4,7 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/components/map/utils/
 ├── markerUtils.ts           # マーカー関連ユーティリティ関数
 └── index.ts                # バレルエクスポート
@@ -13,11 +13,13 @@ src/components/map/utils/
 ## 🎯 マーカーユーティリティ (`markerUtils.ts`)
 
 ### 概要
+
 地図上のマーカーの視覚的表現を決定するための統合されたユーティリティ関数群です。レストラン・駐車場・トイレなど、ポイントタイプに応じた適切なマーカー設定を提供します。
 
 ## 🎨 カラーマッピング
 
 ### 料理ジャンル別カラーマップ
+
 レストランの料理タイプに基づいた色分けシステム：
 
 ```typescript
@@ -44,6 +46,7 @@ const CUISINE_COLOR_MAP = {
 ```
 
 ### 価格帯別サイズマップ
+
 レストランの価格帯に基づいたマーカーサイズ：
 
 ```typescript
@@ -58,6 +61,7 @@ const PRICE_SIZE_MAP = {
 ## 🔧 ユーティリティ関数
 
 ### `getMarkerColorByCuisine(cuisineType: string): string`
+
 料理ジャンルに基づいてマーカーの色を決定
 
 ```typescript
@@ -67,13 +71,16 @@ const unknownColor = getMarkerColorByCuisine("未知の料理"); // "#9e9e9e" (�
 ```
 
 **パラメータ**:
+
 - `cuisineType`: 料理ジャンル文字列
 
 **戻り値**:
+
 - CSS カラーコード（16進数）
 - 未知のジャンルの場合は `#9e9e9e` (グレー)
 
 ### `getMarkerSizeByPrice(priceRange?: string): number`
+
 価格帯に基づいてマーカーのサイズを決定
 
 ```typescript
@@ -84,13 +91,16 @@ const unknownSize = getMarkerSizeByPrice("未知の価格帯"); // 35 (デフォ
 ```
 
 **パラメータ**:
+
 - `priceRange` (オプション): 価格帯文字列
 
 **戻り値**:
+
 - マーカーサイズ（ピクセル）
 - 未指定または未知の価格帯の場合は `35`
 
 ### `getMarkerIcon(point: MapPoint): MarkerIcon`
+
 ポイントタイプに基づいてマーカーのアイコンを決定
 
 ```typescript
@@ -111,18 +121,22 @@ const parkingIcon = getMarkerIcon({
 ```
 
 **パラメータ**:
+
 - `point`: MapPointオブジェクト
 
 **戻り値**:
+
 - `MarkerIcon`オブジェクト（背景色とグリフ）
 
 **ポイントタイプ別の設定**:
+
 - **レストラン**: 料理タイプ別の色 + 🍽️
 - **駐車場**: グリーン (#4caf50) + 🅿️
-- **トイレ**: ブルー (#2196f3) + 🚽
+- **トイレ**: ブルー (#2196f3) + �
 - **その他**: グレー (#9e9e9e) + 📍
 
 ### `getMarkerSize(point: MapPoint): number`
+
 マップポイントのサイズを決定
 
 ```typescript
@@ -138,17 +152,21 @@ const parkingSize = getMarkerSize({
 ```
 
 **パラメータ**:
+
 - `point`: MapPointオブジェクト
 
 **戻り値**:
+
 - マーカーサイズ（ピクセル）
 
 **ポイントタイプ別のサイズ**:
+
 - **レストラン**: 価格帯に基づく動的サイズ (30-45px)
 - **駐車場・トイレ**: 固定サイズ (32px)
 - **その他**: デフォルトサイズ (35px)
 
 ### `getMarkerConfig(point: MapPoint): MarkerConfig`
+
 統合されたマーカー設定を取得
 
 ```typescript
@@ -174,14 +192,17 @@ const config = getMarkerConfig({
 ```
 
 **パラメータ**:
+
 - `point`: MapPointオブジェクト
 
 **戻り値**:
+
 - 完全な`MarkerConfig`オブジェクト
 
 ## 🎯 使用方法
 
 ### 基本的なインポート
+
 ```typescript
 // 統一エクスポートからのインポート
 import {
@@ -197,6 +218,7 @@ import { getMarkerIcon } from '@/components/map/utils/markerUtils';
 ```
 
 ### MapMarkerコンポーネントでの使用
+
 ```tsx
 import { AdvancedMarker, Pin } from '@vis.gl/react-google-maps';
 import { getMarkerIcon, getMarkerSize } from '@/components/map/utils';
@@ -231,6 +253,7 @@ const MapMarker = ({ point, onClick }: MapMarkerProps) => {
 ```
 
 ### カスタムマーカーレンダラー
+
 ```tsx
 import { getMarkerConfig } from '@/components/map/utils';
 
@@ -239,7 +262,7 @@ const CustomMarkerRenderer = ({ points }: { points: MapPoint[] }) => {
     <>
       {points.map((point, index) => {
         const config = getMarkerConfig(point);
-        
+
         return (
           <div
             key={`${point.type}-${point.id}`}
@@ -263,21 +286,25 @@ const CustomMarkerRenderer = ({ points }: { points: MapPoint[] }) => {
 ## 🏗️ 設計原則
 
 ### 1. **型安全性**
+
 - `as const`アサーションによる厳密な型推論
 - `Readonly`型による不変性の保証
 - 明確なインターフェース定義
 
 ### 2. **拡張性**
+
 - 新しい料理ジャンルの簡単な追加
 - 価格帯の柔軟な設定
 - ポイントタイプの容易な拡張
 
 ### 3. **一貫性**
+
 - 統一されたカラーパレット
 - 論理的なサイズ階層
 - 直感的なアイコン選択
 
 ### 4. **パフォーマンス**
+
 - 定数時間での色・サイズ決定
 - メモリ効率的なマッピング
 - 軽量な関数設計
@@ -285,6 +312,7 @@ const CustomMarkerRenderer = ({ points }: { points: MapPoint[] }) => {
 ## 🎨 カスタマイズ
 
 ### 新しい料理ジャンルの追加
+
 ```typescript
 // markerUtils.ts内のCUISINE_COLOR_MAPに追加
 const CUISINE_COLOR_MAP = {
@@ -294,6 +322,7 @@ const CUISINE_COLOR_MAP = {
 ```
 
 ### 価格帯の調整
+
 ```typescript
 // markerUtils.ts内のPRICE_SIZE_MAPを調整
 const PRICE_SIZE_MAP = {
@@ -307,6 +336,7 @@ const PRICE_SIZE_MAP = {
 ```
 
 ### カスタムアイコンの追加
+
 ```typescript
 export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
   switch (point.type) {
@@ -329,6 +359,7 @@ export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
 ## 🔧 開発ガイドライン
 
 ### 新しいユーティリティ関数の追加
+
 1. **適切な型定義の作成**
 2. **JSDocコメントの追加**
 3. **テストケースの作成**
@@ -336,6 +367,7 @@ export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
 5. **エクスポートの更新**
 
 ### テスト方法
+
 ```typescript
 import {
   getMarkerColorByCuisine,
@@ -361,7 +393,7 @@ describe('markerUtils', () => {
       type: 'restaurant',
       cuisineType: '寿司',
     } as Restaurant;
-    
+
     const icon = getMarkerIcon(restaurant);
     expect(icon.background).toBe('#f97316');
     expect(icon.glyph).toBe('🍽️');
@@ -373,7 +405,7 @@ describe('markerUtils', () => {
       cuisineType: 'イタリアン',
       priceRange: '2000-3000円',
     } as Restaurant;
-    
+
     const config = getMarkerConfig(restaurant);
     expect(config.background).toBe('#10b981');
     expect(config.size).toBe(40);
@@ -402,6 +434,7 @@ describe('markerUtils', () => {
    - デフォルトケースの動作確認
 
 ### デバッグ方法
+
 ```typescript
 // マーカー設定のデバッグ
 const debugMarkerConfig = (point: MapPoint) => {
@@ -422,6 +455,7 @@ const debugColorMapping = () => {
 ```
 
 ### パフォーマンス監視
+
 ```typescript
 // マーカー生成のパフォーマンス測定
 const measureMarkerPerformance = (points: MapPoint[]) => {

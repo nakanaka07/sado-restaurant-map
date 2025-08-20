@@ -130,7 +130,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
               >
                 <span>🍽️ {stats.restaurants}</span>
                 <span>🅿️ {stats.parkings}</span>
-                <span>� {stats.toilets}</span>
+                <span>🚻 {stats.toilets}</span>
               </div>
             )}
 

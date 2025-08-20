@@ -96,7 +96,7 @@ export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
     case "toilet":
       return {
         background: "#2196f3", // ブルー
-        glyph: "🚽",
+        glyph: "�",
       };
     default:
       return {
