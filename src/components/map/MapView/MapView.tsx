@@ -47,18 +47,7 @@ export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
   // ローディング状態
   if (loading) {
     return (
-      <div
-        style={{
-          width: "100%",
-          height: "500px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f8f9fa",
-          borderRadius: "12px",
-          border: "1px solid #e0e0e0",
-        }}
-      >
+      <div className="map-loading">
         <div style={{ textAlign: "center" }}>
           <div style={{ fontSize: "24px", marginBottom: "8px" }}>🔄</div>
           <p style={{ color: "#6c757d" }}>地図を読み込み中...</p>

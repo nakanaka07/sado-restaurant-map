@@ -1,19 +1,18 @@
-import {
-  Map,
-  AdvancedMarker,
-  Pin,
-  InfoWindow,
-} from "@vis.gl/react-google-maps";
-import { useState, useCallback } from "react";
 import type { Restaurant } from "@/types";
-import { trackRestaurantClick, trackMapInteraction } from "@/utils/analytics";
+import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
+import {
+  AdvancedMarker,
+  InfoWindow,
+  Map,
+  Pin,
+} from "@vis.gl/react-google-maps";
+import { useCallback, useState } from "react";
 import { getMarkerColorByCuisine, getMarkerSizeByPrice } from "./utils";
 
 interface RestaurantMapProps {
-  restaurants: readonly Restaurant[];
-  center: { lat: number; lng: number };
-  loading: boolean;
-  error?: string | null;
+  readonly restaurants: readonly Restaurant[];
+  readonly center: { lat: number; lng: number };
+  readonly loading: boolean;
 }
 
 export default function RestaurantMap({
@@ -43,17 +42,7 @@ export default function RestaurantMap({
 
   if (loading) {
     return (
-      <div
-        className="map-loading"
-        style={{
-          height: "500px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f5f5f5",
-          borderRadius: "8px",
-        }}
-      >
+      <div className="map-loading">
         <p>🗺️ 地図を読み込み中...</p>
       </div>
     );
@@ -61,21 +50,7 @@ export default function RestaurantMap({
 
   if (!mapId) {
     return (
-      <div
-        className="map-error"
-        style={{
-          height: "500px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#fee",
-          borderRadius: "8px",
-          border: "1px solid #fcc",
-          padding: "20px",
-          textAlign: "center",
-        }}
-      >
+      <div className="map-loading">
         <p style={{ color: "#d63031", fontSize: "18px", marginBottom: "12px" }}>
           ❌ Map ID が設定されていません
         </p>
@@ -87,7 +62,7 @@ export default function RestaurantMap({
             環境変数: <code>VITE_GOOGLE_MAPS_MAP_ID</code>
           </p>
           <p>
-            現在の値: <code>{mapId || "未設定"}</code>
+            現在の値: <code>{mapId ?? "未設定"}</code>
           </p>
         </div>
       </div>
@@ -95,17 +70,7 @@ export default function RestaurantMap({
   }
 
   return (
-    <div
-      className="map-container"
-      style={{
-        width: "100%",
-        height: "500px",
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        border: "1px solid #e0e0e0",
-      }}
-    >
+    <div className="map-container">
       <Map
         defaultCenter={center}
         defaultZoom={11}
@@ -282,9 +247,9 @@ export default function RestaurantMap({
                     >
                       {selectedRestaurant.features
                         .slice(0, 6)
-                        .map((feature, index) => (
+                        .map((feature) => (
                           <span
-                            key={index}
+                            key={feature}
                             style={{
                               backgroundColor: "#e5e7eb",
                               color: "#374151",

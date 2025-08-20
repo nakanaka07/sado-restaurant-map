@@ -54,21 +54,7 @@ export class MapErrorBoundary extends Component<
       }
 
       return (
-        <div
-          style={{
-            width: "100%",
-            height: "500px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#f8f9fa",
-            border: "1px solid #e0e0e0",
-            borderRadius: "12px",
-            padding: "24px",
-            textAlign: "center",
-          }}
-        >
+        <div className="map-loading">
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>🗺️</div>
           <h3 style={{ margin: "0 0 12px 0", color: "#1f2937" }}>
             地図の読み込みでエラーが発生しました

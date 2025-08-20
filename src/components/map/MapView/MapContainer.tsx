@@ -44,17 +44,7 @@ export function MapContainer({
   }, [onCloseInfoWindow]);
 
   return (
-    <div
-      className="map-container"
-      style={{
-        width: "100%",
-        height: "500px",
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-        border: "1px solid #e0e0e0",
-      }}
-    >
+    <div className="map-container">
       <Map
         defaultCenter={center}
         defaultZoom={11}
