@@ -1,20 +1,20 @@
-import { APIProvider } from "@vis.gl/react-google-maps";
-import { useEffect, useState, useCallback } from "react";
+import { SADO_CENTER } from "@/config";
 import { useMapPoints } from "@/hooks";
-import { MapView } from "../components/map";
-import { FilterPanel } from "../components/restaurant";
-import { SkipLink } from "../components/common/AccessibilityComponents";
-import { initGA, checkGAStatus } from "@/utils";
-import { sanitizeInput } from "@/utils";
-import { validateApiKey } from "../utils/securityUtils";
-import PWABadge from "../components/layout/PWABadge";
 import type {
   CuisineType,
+  MapPointType,
   PriceRange,
   SadoDistrict,
-  MapPointType,
 } from "@/types";
-import { SADO_CENTER } from "@/config";
+import { checkGAStatus, initGA, initializeDevLogging, sanitizeInput } from "@/utils";
+import { logUnknownAddressStats, testDistrictAccuracy } from "@/utils/districtUtils";
+import { APIProvider } from "@vis.gl/react-google-maps";
+import { useCallback, useEffect, useState } from "react";
+import { SkipLink } from "../components/common/AccessibilityComponents";
+import PWABadge from "../components/layout/PWABadge";
+import { MapView } from "../components/map";
+import { FilterPanel } from "../components/restaurant";
+import { validateApiKey } from "../utils/securityUtils";
 // App.cssは main.tsx で読み込み済み
 
 // 佐渡島の中心座標（設定ファイルから取得）
@@ -49,6 +49,9 @@ function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // 🔧 開発環境でのログフィルタリング初期化
+        initializeDevLogging();
+
         // APIキーのバリデーション
         if (!validateApiKey(apiKey)) {
           throw new Error("無効なGoogle Maps APIキーです");
@@ -77,6 +80,38 @@ function App() {
 
     void initializeApp();
   }, [apiKey]);
+
+  // データロード完了時の統計表示（開発環境のみ）
+  useEffect(() => {
+    if (!loading && mapPoints.length > 0 && import.meta.env.DEV) {
+      // データロード完了から少し遅らせて統計を表示
+      const timer = setTimeout(() => {
+        logUnknownAddressStats();
+
+        // 公式データに基づくテストケース（サンプル）
+        const testCases = [
+          { address: "佐渡市西三川", expected: "真野" as const },
+          { address: "佐渡市松ケ崎", expected: "畑野" as const },
+          { address: "佐渡市寺田", expected: "畑野" as const },
+          { address: "佐渡市虫崎", expected: "両津" as const },
+          { address: "佐渡市両津湊", expected: "両津" as const },
+          { address: "佐渡市相川", expected: "相川" as const },
+          { address: "佐渡市八幡", expected: "佐和田" as const },
+          { address: "佐渡市金井", expected: "金井" as const },
+          { address: "佐渡市新穂", expected: "新穂" as const },
+          { address: "佐渡市畑野", expected: "畑野" as const },
+          { address: "佐渡市真野", expected: "真野" as const },
+          { address: "佐渡市小木", expected: "小木" as const },
+          { address: "佐渡市羽茂", expected: "羽茂" as const },
+          { address: "佐渡市赤泊", expected: "赤泊" as const },
+        ];
+
+        testDistrictAccuracy(testCases);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, mapPoints.length]);
 
   // セキュリティ強化: 入力サニタイズ付きフィルター関数
   const handleCuisineFilter = useCallback(
@@ -235,9 +270,9 @@ function App() {
   // 初期化中の表示
   if (!isInitialized) {
     return (
-      <div className="loading-container" role="status" aria-live="polite">
+      <div className="loading-container">
         <h1>🗺️ 佐渡飲食店マップ</h1>
-        <p>読み込み中...</p>
+        <output aria-live="polite">読み込み中...</output>
       </div>
     );
   }
@@ -278,7 +313,7 @@ function App() {
               />
 
               {/* Floating Results Status */}
-              <div className="results-status" role="status" aria-live="polite">
+              <output className="results-status" aria-live="polite">
                 <h3>
                   📊 検索結果: {filteredMapPoints.length}件
                   {stats && (
@@ -293,7 +328,7 @@ function App() {
                     ? "条件に一致するポイントが見つかりませんでした"
                     : "フィルターでさらに絞り込み可能です"}
                 </p>
-              </div>
+              </output>
 
               {/* Fullscreen Map */}
               <MapView

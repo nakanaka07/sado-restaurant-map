@@ -117,14 +117,14 @@
 
   // === 日本語環境最適化 ===
   "cSpell.language": "en,ja",
-  "cSpell.enableFiletypes": [
-    "typescript",
-    "typescriptreact",
-    "javascript",
-    "javascriptreact",
-    "markdown",
-    "json"
-  ],
+  "cSpell.enabledFileTypes": {
+    "typescript": true,
+    "typescriptreact": true,
+    "javascript": true,
+    "javascriptreact": true,
+    "markdown": true,
+    "json": true
+  },
 
   // === セキュリティ ===
   "security.workspace.trust.untrustedFiles": "prompt",
@@ -182,14 +182,21 @@
   "python-envs.pythonProjects": [],
   "cSpell.words": [
     "APCA",
+    "bento",
+    "Contentful",
     "deduplicator",
+    "ECONNREFUSED",
+    "googletagmanager",
     "nakanaka",
+    "Precaching",
     "pytest",
+    "Referer",
     "Rolldown",
     "Sado",
     "venv",
     "Vite",
     "Vitest",
-    "WCAG"
+    "WCAG",
+    "yakiniku"
   ]
 }

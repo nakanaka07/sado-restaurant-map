@@ -19,6 +19,7 @@ tools/
 ### 1. **補完・修復ツール**
 
 #### `complement_missing.py` - 手動URL補完更新スクリプト
+
 - **機能**: 通常検索で見つからない店舗を手動URLで補完
 - **特徴**:
   - 通常のrun_optimized.py実行後の補完処理
@@ -27,6 +28,7 @@ tools/
   - 自動データ整形・スプレッドシート更新
 
 #### `manual_url_extractor.py` - 手動URL抽出・処理ツール
+
 - **機能**: Google Maps URLからPlace IDを抽出してPlace APIで詳細情報を取得
 - **特徴**:
   - 複数URL形式対応（通常URL・短縮URL・CID URL）
@@ -37,6 +39,7 @@ tools/
 ### 2. **デバッグ・診断ツール**
 
 #### `debug_data_flow.py` - データ変換フロー確認ツール
+
 - **機能**: unified_cid_processor → spreadsheet_manager のデータ変換フロー確認
 - **特徴**:
   - 最終更新日時の正確性確認
@@ -45,6 +48,7 @@ tools/
   - 変換エラーの特定・診断
 
 #### `debug_field_mask.py` - Places APIフィールドマスク確認ツール
+
 - **機能**: フィールドマスクの詳細確認と実際のAPIレスポンステスト
 - **特徴**:
   - カテゴリ別フィールドマスク表示
@@ -53,6 +57,7 @@ tools/
   - フィールド取得状況の診断
 
 #### `debug_update.py` - 更新処理デバッグツール
+
 - **機能**: 地区・GoogleマップURL更新が失敗した原因を特定
 - **特徴**:
   - 佐渡市公式地区分類システム

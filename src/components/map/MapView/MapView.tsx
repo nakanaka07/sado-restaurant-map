@@ -3,17 +3,18 @@
  * メインの地図表示コンポーネント（分割後）
  */
 
-import { useState, useCallback } from "react";
-import type { MapPoint, Restaurant } from "@/types";
-import { trackRestaurantClick, trackMapInteraction } from "@/utils/analytics";
+import type { MapPoint } from "@/types";
+import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
+import { useCallback, useState } from "react";
 import { MapContainer } from "./MapContainer";
+import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MapErrorFallback } from "./MapErrorFallback";
 
 interface MapViewProps {
-  mapPoints: readonly MapPoint[];
-  center: { lat: number; lng: number };
-  loading: boolean;
-  error?: string | null;
+  readonly mapPoints: readonly MapPoint[];
+  readonly center: { lat: number; lng: number };
+  readonly loading: boolean;
+  readonly error?: string | null;
 }
 
 export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
@@ -25,13 +26,12 @@ export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
     setSelectedPoint(point);
 
     // 飲食店の場合はクリック分析を追跡
-    if (point.type === "restaurant") {
-      const restaurant = point as Restaurant;
+    if (point.type === "restaurant" && "cuisineType" in point) {
       trackRestaurantClick({
-        id: restaurant.id,
-        name: restaurant.name,
-        category: restaurant.cuisineType,
-        priceRange: restaurant.priceRange || "不明",
+        id: point.id,
+        name: point.name,
+        category: point.cuisineType,
+        priceRange: point.priceRange || "不明",
       });
     }
 
@@ -73,13 +73,15 @@ export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
   }
 
   return (
-    <MapContainer
-      mapPoints={mapPoints}
-      center={center}
-      mapId={mapId}
-      selectedPoint={selectedPoint}
-      onMarkerClick={handleMarkerClick}
-      onCloseInfoWindow={handleCloseInfoWindow}
-    />
+    <MapErrorBoundary>
+      <MapContainer
+        mapPoints={mapPoints}
+        center={center}
+        mapId={mapId}
+        selectedPoint={selectedPoint}
+        onMarkerClick={handleMarkerClick}
+        onCloseInfoWindow={handleCloseInfoWindow}
+      />
+    </MapErrorBoundary>
   );
 }

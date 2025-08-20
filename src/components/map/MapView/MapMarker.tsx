@@ -3,26 +3,30 @@
  * 地図マーカーコンポーネント
  */
 
-import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import type { MapPoint } from "@/types";
+import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
+import { useCallback } from "react";
 import { getMarkerIcon, getMarkerSize } from "../utils";
 
 interface MapMarkerProps {
-  point: MapPoint;
-  index: number;
-  onClick: (point: MapPoint) => void;
+  readonly point: MapPoint;
+  readonly onClick: (point: MapPoint) => void;
 }
 
-export function MapMarker({ point, index, onClick }: MapMarkerProps) {
+export function MapMarker({ point, onClick }: MapMarkerProps) {
   const { background, glyph } = getMarkerIcon(point);
   const size = getMarkerSize(point);
 
+  // クリックハンドラーをメモ化してパフォーマンス最適化
+  const handleClick = useCallback(() => {
+    onClick(point);
+  }, [onClick, point]);
+
   return (
     <AdvancedMarker
-      key={`${point.type}-${point.id}-${index}`}
       position={point.coordinates}
       title={point.name}
-      onClick={() => onClick(point)}
+      onClick={handleClick}
     >
       <Pin
         background={background}

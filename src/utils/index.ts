@@ -29,3 +29,6 @@ export {
   getSecureEnvVar, isSecureUrl,
   maskApiKey, safeJsonParse, sanitizeUserInput, searchRateLimiter, secureFetch, SecureStorage, stripHtml, validateApiKey
 } from './securityUtils';
+
+// ログフィルタリング関連
+export { disableWorkboxLogs, default as initializeDevLogging, setupLogFiltering } from './logFilter';

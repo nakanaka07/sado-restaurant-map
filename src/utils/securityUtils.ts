@@ -97,11 +97,11 @@ export function getSecureEnvVar(key: string): string {
  * レート制限チェック
  */
 class RateLimiter {
-  private requests: Map<string, number[]> = new Map();
+  private readonly requests: Map<string, number[]> = new Map();
 
   constructor(
-    private maxRequests: number = 100,
-    private windowMs: number = 60000 // 1分
+    private readonly maxRequests: number = 100,
+    private readonly windowMs: number = 60000 // 1分
   ) {}
 
   isAllowed(identifier: string): boolean {
@@ -168,7 +168,7 @@ export function safeJsonParse<T>(jsonString: string, defaultValue: T): T {
  * ローカルストレージの安全な操作
  */
 export class SecureStorage {
-  private static prefix = "sado_restaurant_map_";
+  private static readonly prefix = "sado_restaurant_map_";
 
   static setItem(key: string, value: unknown): void {
     try {

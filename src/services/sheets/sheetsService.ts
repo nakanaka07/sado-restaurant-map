@@ -4,15 +4,16 @@
  */
 
 import type {
-  Restaurant,
   CuisineType,
-  PriceRange,
-  SadoDistrict,
-  Parking,
-  Toilet,
   MapPoint,
+  Parking,
+  PriceRange,
+  Restaurant,
+  SadoDistrict,
+  Toilet,
 } from "@/types";
 import { getDistrictFromAddress } from "@/utils";
+import { maskApiKey } from "@/utils/securityUtils";
 
 // 環境変数から設定値を取得
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
@@ -73,92 +74,138 @@ interface SheetsApiResponse {
 }
 
 /**
- * Google Sheets APIからデータを取得
+ * Google Sheets APIからデータを取得（v2.0 - 認知的複雑度削減版）
  */
 async function fetchSheetData(worksheetName: string): Promise<string[][]> {
+  validateApiConfiguration();
+
+  const url = buildSheetsApiUrl(worksheetName);
+  logApiRequest(url);
+
+  const response = await makeApiRequest(url);
+  const data = await handleApiResponse(response, worksheetName);
+
+  return data;
+}
+
+/**
+ * API設定の検証
+ */
+function validateApiConfiguration(): void {
   if (!SPREADSHEET_ID || !API_KEY) {
     throw new SheetsApiError(
       "Google Sheets API設定が不完全です。VITE_SPREADSHEET_IDとVITE_GOOGLE_SHEETS_API_KEYを設定してください。",
       400
     );
   }
+}
 
+/**
+ * Sheets API URLの構築
+ */
+function buildSheetsApiUrl(worksheetName: string): string {
   const range = `${worksheetName}!A:Z`;
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+  return `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
+}
 
+/**
+ * APIリクエストのログ出力（機密情報マスキング済み）
+ */
+function logApiRequest(url: string): void {
+  const maskedUrl = url.replace(/key=[^&]+/, `key=${maskApiKey(API_KEY!)}`);
+  console.log(`📡 Google Sheets APIリクエスト: ${maskedUrl}`);
+}
+
+/**
+ * APIリクエストの実行
+ */
+async function makeApiRequest(url: string): Promise<Response> {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response;
+}
+
+/**
+ * APIエラーの処理
+ */
+async function handleApiError(response: Response): Promise<never> {
+  let errorDetails = `${response.status} ${response.statusText}`;
+
+  if (response.status === 403) {
+    errorDetails = await handle403Error(response);
+  }
+
+  throw new SheetsApiError(
+    `Google Sheets API request failed: ${errorDetails}`,
+    response.status
+  );
+}
+
+/**
+ * 403エラーの詳細処理
+ */
+async function handle403Error(response: Response): Promise<string> {
   try {
-    console.log(`📡 Google Sheets APIリクエスト: ${url}`);
-    const response = await fetch(url);
+    const errorBody = await response.text();
+    console.error("🔒 403エラー詳細:", errorBody);
 
-    if (!response.ok) {
-      let errorDetails = `${response.status} ${response.statusText}`;
-
-      // 403エラーの詳細情報を取得
-      if (response.status === 403) {
-        try {
-          const errorBody = await response.text();
-          console.error("🔒 403エラー詳細:", errorBody);
-
-          if (errorBody.includes("permission")) {
-            errorDetails = `スプレッドシートへのアクセス権限がありません。スプレッドシートを「リンクを知っている全員が閲覧可能」に設定してください。`;
-          } else if (errorBody.includes("API key")) {
-            errorDetails = `APIキーが無効または制限されています。Google Cloud ConsoleでAPIキーの設定を確認してください。`;
-          }
-        } catch (e) {
-          console.warn("エラーレスポンスの解析に失敗:", e);
-        }
-      }
-
-      throw new SheetsApiError(
-        `Google Sheets API request failed: ${errorDetails}`,
-        response.status
-      );
+    if (errorBody.includes("permission")) {
+      return "スプレッドシートへのアクセス権限がありません。スプレッドシートを「リンクを知っている全員が閲覧可能」に設定してください。";
+    } else if (errorBody.includes("API key")) {
+      return "APIキーが無効または制限されています。Google Cloud ConsoleでAPIキーの設定を確認してください。";
     }
 
-    const data = (await response.json()) as SheetsApiResponse;
+    return `403 Forbidden: ${errorBody}`;
+  } catch (e) {
+    console.warn("エラーレスポンスの解析に失敗:", e);
+    return "403 Forbidden: アクセス権限エラー";
+  }
+}
 
-    // レスポンスデータの厳格な検証
-    if (!data || typeof data !== "object") {
-      throw new SheetsApiError(
-        "Invalid response format from Google Sheets API: response is not an object",
-        422
-      );
-    }
+/**
+ * APIレスポンスの処理と検証
+ */
+async function handleApiResponse(response: Response, worksheetName: string): Promise<string[][]> {
+  const data = (await response.json()) as SheetsApiResponse;
 
-    if (!data.values) {
-      // valuesがない場合は空配列として扱う（正常なケース）
-      console.warn(`Worksheet '${worksheetName}' has no data`);
-      return [];
-    }
+  return validateAndExtractData(data, worksheetName);
+}
 
-    if (!Array.isArray(data.values)) {
-      throw new SheetsApiError(
-        "Invalid response format from Google Sheets API: values is not an array",
-        422
-      );
-    }
-
-    // 各行が配列であることを確認
-    if (!data.values.every((row) => Array.isArray(row))) {
-      throw new SheetsApiError(
-        "Invalid response format from Google Sheets API: some rows are not arrays",
-        422
-      );
-    }
-
-    return data.values;
-  } catch (error) {
-    if (error instanceof SheetsApiError) {
-      throw error;
-    }
-
+/**
+ * レスポンスデータの検証と抽出
+ */
+function validateAndExtractData(data: SheetsApiResponse, worksheetName: string): string[][] {
+  if (!data || typeof data !== "object") {
     throw new SheetsApiError(
-      `Google Sheets API request failed: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`,
-      500
+      "Invalid response format from Google Sheets API: response is not an object",
+      422
     );
   }
+
+  if (!data.values) {
+    console.warn(`Worksheet '${worksheetName}' has no data`);
+    return [];
+  }
+
+  if (!Array.isArray(data.values)) {
+    throw new SheetsApiError(
+      "Invalid response format from Google Sheets API: values is not an array",
+      422
+    );
+  }
+
+  if (!data.values.every((row) => Array.isArray(row))) {
+    throw new SheetsApiError(
+      "Invalid response format from Google Sheets API: some rows are not arrays",
+      422
+    );
+  }
+
+  return data.values;
 }
 
 /**
@@ -426,8 +473,68 @@ function convertSheetRowToRestaurant(
   };
 }
 
+// 料理ジャンル判定用の正規表現パターン（パフォーマンス向上のため事前コンパイル）
+const CUISINE_PATTERNS = {
+  sushi: /(寿司|すし|sushi|回転寿司|握り|にぎり)/,
+  seafood: /(海鮮|魚|刺身|鮮魚|漁師|海の家|魚介|あじ|いわし|かに|蟹|えび|海老|たこ|蛸|いか|烏賊|まぐろ|鮪|さば|鯖)/,
+  yakiniku: /(焼肉|焼鳥|ホルモン|串焼|炭火|bbq|バーベキュー|やきとり|やきにく|鶏|チキン|beef|牛)/,
+  ramen: /(ラーメン|らーめん|ramen|つけ麺|担々麺|味噌|醤油|豚骨|塩ラーメン|中華そば|二郎)/,
+  noodles: /(そば|蕎麦|うどん|手打|十割|二八|讃岐|きしめん|ひやむぎ|そうめん)/,
+  chinese: /(中華|中国|餃子|チャーハン|炒飯|麻婆|点心|北京|四川|上海|広東|台湾|小籠包)/,
+  italian: /(イタリア|パスタ|ピザ|ピッツァ|リストランテ|トラットリア|スパゲッティ|italian)/,
+  french: /(フレンチ|フランス|ビストロ|french|西洋料理|洋食)/,
+  curry: /(カレー|curry|インド|タイ|エスニック|スパイス|ナン|タンドール|ココナッツ)/,
+  steak: /(ステーキ|steak|ハンバーグ|オムライス|グリル|beef|pork)/,
+  dessert: /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅|パン屋|パン|ベーカリー|bread|パティスリー)/,
+  cafe: /(カフェ|cafe|珈琲|コーヒー|coffee|喫茶)/,
+  bar: /(バー|bar|居酒屋|酒|スナック|パブ|pub|飲み屋|ビアガーデン|beer|wine)/,
+  fastFood: /(ファスト|マクドナルド|ケンタ|モス|サブウェイ|fast|burger|ハンバーガー)/,
+} as const;
+
 /**
- * Google Places APIの店舗タイプを料理ジャンルに変換 (v2.0 - 大幅改良版)
+ * 料理ジャンル判定のヘルパー関数
+ */
+function checkCuisinePattern(combined: string, pattern: RegExp): boolean {
+  return pattern.test(combined);
+}
+
+/**
+ * 基本的な料理ジャンルの判定
+ */
+function mapBasicCuisineTypes(combined: string): CuisineType | null {
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.sushi)) return "寿司";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.seafood)) return "海鮮";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.yakiniku)) return "焼肉・焼鳥";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.ramen)) return "ラーメン";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.noodles)) return "そば・うどん";
+  return null;
+}
+
+/**
+ * 特別な料理ジャンルの判定
+ */
+function mapSpecialtyCuisineTypes(combined: string): CuisineType | null {
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.chinese)) return "中華";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.italian)) return "イタリアン";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.french)) return "フレンチ";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.curry)) return "カレー・エスニック";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.steak)) return "ステーキ・洋食";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.fastFood)) return "ファストフード";
+  return null;
+}
+
+/**
+ * デザート・ドリンク系の判定
+ */
+function mapDessertAndDrinkTypes(combined: string): CuisineType | null {
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.dessert)) return "デザート・スイーツ";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.cafe)) return "カフェ・喫茶店";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.bar)) return "バー・居酒屋";
+  return null;
+}
+
+/**
+ * Google Places APIの店舗タイプを料理ジャンルに変換 (v3.0 - 認知的複雑度削減版)
  * 店舗名も分析対象に含めて、より精密な分類を実現
  */
 function mapStoreTypeToCuisineType(
@@ -436,159 +543,35 @@ function mapStoreTypeToCuisineType(
 ): CuisineType {
   const combined = `${storeTypeWithName} ${description}`.toLowerCase();
 
-  // より詳細なキーワードパターンマッチング（正規表現使用）
+  return (
+    mapBasicCuisineTypes(combined) ||
+    mapSpecialtyCuisineTypes(combined) ||
+    mapDessertAndDrinkTypes(combined) ||
+    mapAdditionalFoodTypes(combined) ||
+    "その他"
+  );
+}
 
-  // 🍣 寿司・回転寿司
-  if (combined.match(/(寿司|すし|sushi|回転寿司|握り|にぎり)/)) {
-    return "寿司";
-  }
-
-  // 🐟 海鮮・魚料理
-  if (
-    combined.match(
-      /(海鮮|魚|刺身|鮮魚|漁師|海の家|魚介|あじ|いわし|かに|蟹|えび|海老|たこ|蛸|いか|烏賊|まぐろ|鮪|さば|鯖)/
-    )
-  ) {
-    return "海鮮";
-  }
-
-  // 🥩 焼肉・焼鳥・BBQ
-  if (
-    combined.match(
-      /(焼肉|焼鳥|ホルモン|串焼|炭火|bbq|バーベキュー|やきとり|やきにく|鶏|チキン|beef|牛)/
-    )
-  ) {
-    return "焼肉・焼鳥";
-  }
-
-  // 🍜 ラーメン・つけ麺
-  if (
-    combined.match(
-      /(ラーメン|らーめん|ramen|つけ麺|担々麺|味噌|醤油|豚骨|塩ラーメン|中華そば|二郎)/
-    )
-  ) {
-    return "ラーメン";
-  }
-
-  // 🍝 そば・うどん
-  if (
-    combined.match(
-      /(そば|蕎麦|うどん|手打|十割|二八|讃岐|きしめん|ひやむぎ|そうめん)/
-    )
-  ) {
-    return "そば・うどん";
-  }
-
-  // 🥟 中華・中国料理
-  if (
-    combined.match(
-      /(中華|中国|餃子|チャーハン|炒飯|麻婆|点心|北京|四川|上海|広東|台湾|小籠包)/
-    )
-  ) {
-    return "中華";
-  }
-
-  // 🍝 イタリアン
-  if (
-    combined.match(
-      /(イタリア|パスタ|ピザ|ピッツァ|リストランテ|トラットリア|スパゲッティ|italian)/
-    )
-  ) {
-    return "イタリアン";
-  }
-
-  // 🥖 フレンチ・西洋料理
-  if (combined.match(/(フレンチ|フランス|ビストロ|french|西洋料理|洋食)/)) {
-    return "フレンチ";
-  }
-
-  // 🍛 カレー・エスニック
-  if (
-    combined.match(
-      /(カレー|curry|インド|タイ|エスニック|スパイス|ナン|タンドール|ココナッツ)/
-    )
-  ) {
-    return "カレー・エスニック";
-  }
-
-  // 🍖 ステーキ・洋食
-  if (
-    combined.match(/(ステーキ|steak|ハンバーグ|オムライス|グリル|beef|pork)/)
-  ) {
-    return "ステーキ・洋食";
-  }
-
-  // 🧁 デザート・スイーツ・和菓子（パン屋を優先）
-  if (
-    combined.match(
-      /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅|パン屋|パン|ベーカリー|bread|パティスリー)/
-    )
-  ) {
-    return "デザート・スイーツ";
-  }
-
-  // ☕ カフェ・喫茶店（パン屋のチェック後に配置）
-  if (combined.match(/(カフェ|cafe|珈琲|コーヒー|coffee|喫茶)/)) {
-    return "カフェ・喫茶店";
-  }
-
-  // 🍺 バー・居酒屋・スナック
-  if (
-    combined.match(
-      /(バー|bar|居酒屋|酒|スナック|パブ|pub|飲み屋|ビアガーデン|beer|wine)/
-    )
-  ) {
-    return "バー・居酒屋";
-  }
-
-  // 🍟 ファストフード
-  if (
-    combined.match(
-      /(ファスト|マクドナルド|ケンタ|モス|サブウェイ|fast|burger|ハンバーガー)/
-    )
-  ) {
-    return "ファストフード";
-  }
-
-  // 🧁 デザート・スイーツ・和菓子
-  if (
-    combined.match(
-      /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅)/
-    )
-  ) {
-    return "デザート・スイーツ";
-  }
-
+/**
+ * 追加の料理ジャンルの判定（弁当・和食・レストラン等）
+ */
+function mapAdditionalFoodTypes(combined: string): CuisineType | null {
   // 🍱 弁当・テイクアウト
-  if (combined.match(/(弁当|bento|テイクアウト|持ち帰り|惣菜|お惣菜)/)) {
+  if (/弁当|bento|テイクアウト|持ち帰り|惣菜|お惣菜/.test(combined)) {
     return "弁当・テイクアウト";
   }
 
   // 🍱 和食・定食・食堂
-  if (
-    combined.match(
-      /(和食|定食|食堂|日本料理|割烹|料亭|懐石|会席|てんぷら|天ぷら|とんかつ|カツ|丼|どんぶり)/
-    )
-  ) {
+  if (/和食|定食|食堂|日本料理|割烹|料亭|懐石|会席|てんぷら|天ぷら|とんかつ|カツ|丼|どんぶり/.test(combined)) {
     return "日本料理";
   }
 
   // 🏪 レストラン（ジャンル不明）
-  if (
-    combined.match(
-      /(レストラン|restaurant|ダイニング|ビュッフェ|バイキング|食べ放題)/
-    )
-  ) {
+  if (/レストラン|restaurant|ダイニング|ビュッフェ|バイキング|食べ放題/.test(combined)) {
     return "レストラン";
   }
 
-  // 🏪 その他（小売店・コンビニなど）
-  if (combined.match(/(コンビニ|スーパー|商店|売店|自販機|マーケット)/)) {
-    return "その他";
-  }
-
-  // それでも分類できない場合
-  return "その他";
+  return null;
 }
 
 /**
@@ -641,7 +624,7 @@ function mapPriceLevelToPriceRange(
 }
 
 /**
- * Places APIの詳細データから特徴を抽出
+ * Places APIの詳細データから特徴を抽出（v2.0 - 認知的複雑度削減版）
  */
 function extractFeaturesFromPlacesData(data: {
   storeType: string;
@@ -672,70 +655,106 @@ function extractFeaturesFromPlacesData(data: {
 }): string[] {
   const features: string[] = [];
 
-  // サービス形態
-  if (data.takeout === "true" || data.takeout === "可")
-    features.push("テイクアウト可");
-  if (data.delivery === "true" || data.delivery === "可")
-    features.push("デリバリー可");
-  if (data.dineIn === "true" || data.dineIn === "可")
-    features.push("店内飲食可");
-  if (data.curbsidePickup === "true" || data.curbsidePickup === "可")
-    features.push("カーブサイドピックアップ可");
-  if (data.reservable === "true" || data.reservable === "可")
-    features.push("予約可能");
+  // 各カテゴリの特徴を抽出
+  features.push(...extractServiceFeatures(data));
+  features.push(...extractTimeFeatures(data));
+  features.push(...extractDrinkFeatures(data));
+  features.push(...extractAccessibilityFeatures(data));
+  features.push(...extractFeaturesFromStoreType(data.storeType));
 
-  // 食事時間帯
-  if (data.breakfast === "true" || data.breakfast === "可")
-    features.push("朝食提供");
-  if (data.lunch === "true" || data.lunch === "可") features.push("昼食提供");
-  if (data.dinner === "true" || data.dinner === "可") features.push("夕食提供");
+  return features;
+}
 
-  // 飲み物
-  if (data.beer === "true" || data.beer === "可") features.push("ビール提供");
-  if (data.wine === "true" || data.wine === "可") features.push("ワイン提供");
-  if (data.cocktails === "true" || data.cocktails === "可")
-    features.push("カクテル提供");
-  if (data.coffee === "true" || data.coffee === "可")
-    features.push("コーヒー提供");
+/**
+ * サービス形態の特徴を抽出
+ */
+function extractServiceFeatures(data: {
+  takeout: string;
+  delivery: string;
+  dineIn: string;
+  curbsidePickup?: string;
+  reservable?: string;
+}): string[] {
+  const features: string[] = [];
 
-  // 特別対応
-  if (data.vegetarian === "true" || data.vegetarian === "可")
-    features.push("ベジタリアン対応");
-  if (data.kidsMenu === "true" || data.kidsMenu === "可")
-    features.push("子供向けメニュー");
-  if (data.dessert === "true" || data.dessert === "可")
-    features.push("デザート提供");
+  if (data.takeout === "true" || data.takeout === "可") features.push("テイクアウト可");
+  if (data.delivery === "true" || data.delivery === "可") features.push("デリバリー可");
+  if (data.dineIn === "true" || data.dineIn === "可") features.push("店内飲食可");
+  if (data.curbsidePickup === "true" || data.curbsidePickup === "可") features.push("カーブサイドピックアップ可");
+  if (data.reservable === "true" || data.reservable === "可") features.push("予約可");
 
-  // 設備・環境
-  if (data.outdoor === "true" || data.outdoor === "可") features.push("屋外席");
-  if (data.liveMusic === "true" || data.liveMusic === "可")
-    features.push("音楽あり");
-  if (data.restroom === "true" || data.restroom === "可")
-    features.push("トイレあり");
-  if (data.parking === "true" || data.parking === "可")
-    features.push("駐車場あり");
-  if (data.accessibility === "true" || data.accessibility === "可")
-    features.push("バリアフリー");
+  return features;
+}
 
-  // 顧客対応
-  if (data.goodForKids === "true" || data.goodForKids === "可")
-    features.push("子供連れ歓迎");
-  if (data.allowsDogs === "true" || data.allowsDogs === "可")
-    features.push("ペット同伴可");
-  if (data.goodForGroups === "true" || data.goodForGroups === "可")
-    features.push("グループ利用可");
-  if (
-    data.goodForWatchingSports === "true" ||
-    data.goodForWatchingSports === "可"
-  )
-    features.push("スポーツ観戦可");
+/**
+ * 営業時間帯の特徴を抽出
+ */
+function extractTimeFeatures(data: {
+  breakfast: string;
+  lunch: string;
+  dinner: string;
+}): string[] {
+  const features: string[] = [];
 
-  // 店舗タイプから追加特徴を抽出
-  const storeTypeFeatures = extractFeaturesFromStoreType(data.storeType);
-  features.push(...storeTypeFeatures);
+  if (data.breakfast === "true" || data.breakfast === "提供") features.push("朝食提供");
+  if (data.lunch === "true" || data.lunch === "提供") features.push("昼食提供");
+  if (data.dinner === "true" || data.dinner === "提供") features.push("夕食提供");
 
-  // 重複を除去して返す
-  return [...new Set(features)];
+  return features;
+}
+
+/**
+ * 飲み物・アルコールの特徴を抽出
+ */
+function extractDrinkFeatures(data: {
+  beer: string;
+  wine: string;
+  cocktails: string;
+  coffee: string;
+}): string[] {
+  const features: string[] = [];
+
+  if (data.beer === "true" || data.beer === "提供") features.push("ビール提供");
+  if (data.wine === "true" || data.wine === "提供") features.push("ワイン提供");
+  if (data.cocktails === "true" || data.cocktails === "提供") features.push("カクテル提供");
+  if (data.coffee === "true" || data.coffee === "提供") features.push("コーヒー提供");
+
+  return features;
+}
+
+/**
+ * アクセシビリティ・その他の特徴を抽出
+ */
+function extractAccessibilityFeatures(data: {
+  vegetarian?: string;
+  kidsMenu?: string;
+  dessert?: string;
+  outdoor?: string;
+  liveMusic?: string;
+  restroom?: string;
+  parking?: string;
+  accessibility?: string;
+  goodForKids?: string;
+  allowsDogs?: string;
+  goodForGroups?: string;
+  goodForWatchingSports?: string;
+}): string[] {
+  const features: string[] = [];
+
+  if (data.vegetarian === "true" || data.vegetarian === "対応") features.push("ベジタリアン対応");
+  if (data.kidsMenu === "true" || data.kidsMenu === "あり") features.push("キッズメニューあり");
+  if (data.dessert === "true" || data.dessert === "提供") features.push("デザート提供");
+  if (data.outdoor === "true" || data.outdoor === "あり") features.push("屋外席あり");
+  if (data.liveMusic === "true" || data.liveMusic === "あり") features.push("ライブミュージック");
+  if (data.restroom === "true" || data.restroom === "あり") features.push("お手洗いあり");
+  if (data.parking === "true" || data.parking === "あり") features.push("駐車場あり");
+  if (data.accessibility === "true" || data.accessibility === "対応") features.push("車椅子対応");
+  if (data.goodForKids === "true" || data.goodForKids === "対応") features.push("子供連れ歓迎");
+  if (data.allowsDogs === "true" || data.allowsDogs === "可") features.push("ペット可");
+  if (data.goodForGroups === "true" || data.goodForGroups === "対応") features.push("大人数対応");
+  if (data.goodForWatchingSports === "true" || data.goodForWatchingSports === "対応") features.push("スポーツ観戦可");
+
+  return features;
 }
 
 /**
@@ -768,8 +787,12 @@ function parseOpeningHours(openingHoursStr: string) {
   // 改行区切りの営業時間をパース
   const lines = openingHoursStr.split("\n").filter((line) => line.trim());
 
+  // 正規表現を事前にコンパイル
+  const dayTimePattern = /^(.+?):\s*(.+)$/;
+  const timeRangePattern = /(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/;
+
   return lines.map((line) => {
-    const match = line.match(/^(.+?):\s*(.+)$/);
+    const match = dayTimePattern.exec(line);
     if (!match) {
       return { day: line.trim(), open: "", close: "", isHoliday: true };
     }
@@ -784,7 +807,7 @@ function parseOpeningHours(openingHoursStr: string) {
       return { day: day.trim(), open: "", close: "", isHoliday: true };
     }
 
-    const timeMatch = hours.match(/(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/);
+    const timeMatch = timeRangePattern.exec(hours);
     if (timeMatch) {
       return {
         day: day.trim(),

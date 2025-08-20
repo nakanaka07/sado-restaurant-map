@@ -1,145 +1,183 @@
-import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
+import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
+
+// 🔧 開発環境でのWorkbox完全制御
+const enablePWAInDev = process.env.ENABLE_PWA_DEV === "true";
+
+// PWAマニフェスト設定を分離
+const createPWAManifest = (isProduction: boolean) => ({
+  name: "佐渡飲食店マップ",
+  short_name: "佐渡グルメ",
+  description:
+    "佐渡島の美味しい飲食店を発見できるインタラクティブマップアプリケーション。地元グルメから隠れた名店まで、佐渡の食文化を楽しく探索できます。",
+  theme_color: "#2563eb",
+  background_color: "#ffffff",
+  display: "standalone" as const,
+  orientation: "portrait-primary" as const,
+  start_url: isProduction ? "/sado-restaurant-map/" : "/",
+  scope: isProduction ? "/sado-restaurant-map/" : "/",
+  lang: "ja",
+  categories: ["food", "travel", "utilities"],
+  icons: [
+    {
+      src: "pwa-64x64.png",
+      sizes: "64x64",
+      type: "image/png",
+    },
+    {
+      src: "pwa-192x192.png",
+      sizes: "192x192",
+      type: "image/png",
+    },
+    {
+      src: "pwa-512x512.png",
+      sizes: "512x512",
+      type: "image/png",
+    },
+    {
+      src: "maskable-icon-512x512.png",
+      sizes: "512x512",
+      type: "image/png",
+      purpose: "maskable" as const,
+    },
+  ],
+  shortcuts: createPWAShortcuts(isProduction),
+});
+
+// PWAショートカット設定を分離
+const createPWAShortcuts = (isProduction: boolean) => [
+  {
+    name: "全ての飲食店",
+    short_name: "全店舗",
+    description: "佐渡島の全飲食店を表示",
+    url: isProduction ? "/sado-restaurant-map/?filter=all" : "/?filter=all",
+    icons: [
+      {
+        src: isProduction ? "/sado-restaurant-map/favicon.svg" : "/favicon.svg",
+        sizes: "192x192",
+      },
+    ],
+  },
+  {
+    name: "近くの店舗",
+    short_name: "近くの店",
+    description: "現在地周辺の飲食店を検索",
+    url: isProduction ? "/sado-restaurant-map/?filter=nearby" : "/?filter=nearby",
+    icons: [
+      {
+        src: isProduction ? "/sado-restaurant-map/favicon.svg" : "/favicon.svg",
+        sizes: "192x192",
+      },
+    ],
+  },
+];
+
+// Workboxキャッシュ戦略を分離
+const createRuntimeCaching = () => [
+  // Google Maps API キャッシュ戦略
+  {
+    urlPattern: /^https:\/\/maps\.googleapis\.com\/.*/i,
+    handler: "StaleWhileRevalidate" as const,
+    options: {
+      cacheName: "google-maps-api-cache",
+      expiration: {
+        maxEntries: 100,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
+      },
+    },
+  },
+  // Google Sheets API キャッシュ戦略
+  {
+    urlPattern: /^https:\/\/sheets\.googleapis\.com\/.*/i,
+    handler: "NetworkFirst" as const,
+    options: {
+      cacheName: "restaurant-data-cache",
+      expiration: {
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 60 * 2, // 2時間
+      },
+    },
+  },
+  // Google Analytics - ネットワーク優先
+  {
+    urlPattern: /^https:\/\/www\.google-analytics\.com\/.*/i,
+    handler: "NetworkOnly" as const,
+  },
+  {
+    urlPattern: /^https:\/\/www\.googletagmanager\.com\/.*/i,
+    handler: "NetworkOnly" as const,
+  },
+  // 静的アセット（アイコン、画像）のキャッシュ戦略
+  {
+    urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+    handler: "CacheFirst" as const,
+    options: {
+      cacheName: "images-cache",
+      expiration: {
+        maxEntries: 100,
+        maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
+      },
+    },
+  },
+  // WebマニフェストとFavicon
+  {
+    urlPattern: /\/(?:manifest\.webmanifest|favicon\.(ico|svg))$/,
+    handler: "CacheFirst" as const,
+    options: {
+      cacheName: "manifest-cache",
+      expiration: {
+        maxEntries: 10,
+        maxAgeSeconds: 60 * 60 * 24 * 7, // 7日
+      },
+    },
+  },
+];
+
+// PWA設定を分離
+const createPWAConfig = (isProduction: boolean) => ({
+  registerType: "autoUpdate" as const,
+  injectRegister: false as const,
+  pwaAssets: {
+    disabled: true, // CLIで生成済みのため無効化
+  },
+  manifest: createPWAManifest(isProduction),
+  workbox: {
+    globPatterns: isProduction ? ["**/*.{js,css,html,svg,png,ico,woff2}"] : [],
+    cleanupOutdatedCaches: true,
+    clientsClaim: true,
+    skipWaiting: true,
+    globIgnores: [
+      "**/node_modules/**/*",
+      "**/dev-dist/**/*",
+      "**/@vite/**/*",
+      "**/@react-refresh/**/*",
+      "**/src/**/*",
+      "**/*.map",
+    ],
+    // 🔧 開発環境ではランタイムキャッシュを完全無効化
+    runtimeCaching: isProduction ? createRuntimeCaching() : [],
+  },
+  devOptions: {
+    enabled: false,
+    navigateFallback: undefined,
+    suppressWarnings: true,
+    type: "module" as const,
+  },
+});
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  base:
-    process.env.VITE_BASE_URL ||
-    (process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/"),
-  plugins: [
-    react({
-      // React Compiler対応（React 19.1 Stable）
-      // babel: {
-      //   plugins: [['babel-plugin-react-compiler', {}]]
-      // }
-    }),
-    VitePWA({
-      registerType: "autoUpdate",
-      injectRegister: false,
+export default defineConfig(({ mode }) => {
+  const isProduction = mode === "production";
+  const shouldEnablePWA = isProduction || enablePWAInDev;
 
-      pwaAssets: {
-        disabled: true, // CLIで生成済みのため無効化
-      },
-
-      manifest: {
-        name: "佐渡飲食店マップ",
-        short_name: "佐渡グルメ",
-        description:
-          "佐渡島の美味しい飲食店を発見できるインタラクティブマップアプリケーション。地元グルメから隠れた名店まで、佐渡の食文化を楽しく探索できます。",
-        theme_color: "#2563eb",
-        background_color: "#ffffff",
-        display: "standalone",
-        orientation: "portrait-primary",
-        start_url:
-          process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
-        scope:
-          process.env.NODE_ENV === "production" ? "/sado-restaurant-map/" : "/",
-        lang: "ja",
-        categories: ["food", "travel", "utilities"],
-        icons: [
-          {
-            src: "pwa-64x64.png",
-            sizes: "64x64",
-            type: "image/png",
-          },
-          {
-            src: "pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "maskable-icon-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
-        shortcuts: [
-          {
-            name: "全ての飲食店",
-            short_name: "全店舗",
-            description: "佐渡島の全飲食店を表示",
-            url:
-              process.env.NODE_ENV === "production"
-                ? "/sado-restaurant-map/?filter=all"
-                : "/?filter=all",
-            icons: [
-              {
-                src:
-                  process.env.NODE_ENV === "production"
-                    ? "/sado-restaurant-map/favicon.svg"
-                    : "/favicon.svg",
-                sizes: "192x192",
-              },
-            ],
-          },
-          {
-            name: "近くの店舗",
-            short_name: "近くの店",
-            description: "現在地周辺の飲食店を検索",
-            url:
-              process.env.NODE_ENV === "production"
-                ? "/sado-restaurant-map/?filter=nearby"
-                : "/?filter=nearby",
-            icons: [
-              {
-                src:
-                  process.env.NODE_ENV === "production"
-                    ? "/sado-restaurant-map/favicon.svg"
-                    : "/favicon.svg",
-                sizes: "192x192",
-              },
-            ],
-          },
-        ],
-      },
-
-      workbox: {
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/maps\.googleapis\.com\/.*/i,
-            handler: "StaleWhileRevalidate",
-            options: {
-              cacheName: "google-maps-cache",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/sheets\.googleapis\.com\/.*/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "restaurant-data-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 2, // 2時間
-              },
-            },
-          },
-        ],
-      },
-
-      devOptions: {
-        enabled: true, // 開発時もPWA機能をテスト
-        navigateFallback: "index.html",
-        suppressWarnings: true,
-        type: "module",
-      },
-    }),
-  ],
+  return {
+    base: process.env.VITE_BASE_URL || (isProduction ? "/sado-restaurant-map/" : "/"),
+    plugins: [
+      react(),
+      ...(shouldEnablePWA ? [VitePWA(createPWAConfig(isProduction))] : []),
+    ],
 
   // パス解決の最適化
   resolve: {
@@ -159,15 +197,30 @@ export default defineConfig({
   // 開発サーバー最適化
   server: {
     port: 5173,
-    host: true, // ネットワークアクセス許可（モバイルテスト用）
+    host: "127.0.0.1", // IPv4 loopbackを明示的に指定
     open: false,
     cors: true,
+    // IPv6関連の問題を回避
+    strictPort: true,
+    // 🔧 開発環境でのキャッシュ無効化ヘッダー
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
+    // Source map関連の設定
+    sourcemapIgnoreList: (relativeSourcePath) => {
+      return relativeSourcePath.includes('node_modules') ||
+             relativeSourcePath.includes('workbox') ||
+             relativeSourcePath.includes('dev-dist');
+    },
   },
 
   // ビルド最適化
   build: {
     target: "es2020",
-    sourcemap: true,
+    // 開発環境では詳細なソースマップ、本番では軽量化
+    sourcemap: !isProduction ? true : "hidden",
     minify: "terser",
     cssMinify: true,
     rollupOptions: {
@@ -177,8 +230,12 @@ export default defineConfig({
           "google-maps": ["@vis.gl/react-google-maps"],
           "react-vendor": ["react", "react-dom"],
         },
+        // ソースマップファイルの出力先を調整
+        sourcemapExcludeSources: isProduction,
       },
     },
     chunkSizeWarningLimit: 1000,
+    // ビルド時の警告を抑制
+    emptyOutDir: true,
   },
-});
+}});

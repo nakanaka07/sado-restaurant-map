@@ -3,18 +3,19 @@
  * 地図コンテナコンポーネント
  */
 
-import { Map, InfoWindow } from "@vis.gl/react-google-maps";
 import type { MapPoint } from "@/types";
-import { MapMarker } from "./MapMarker";
+import { InfoWindow, Map } from "@vis.gl/react-google-maps";
+import { useCallback } from "react";
 import { MapInfoWindow } from "./MapInfoWindow";
+import { MapMarker } from "./MapMarker";
 
 interface MapContainerProps {
-  mapPoints: readonly MapPoint[];
-  center: { lat: number; lng: number };
-  mapId: string;
-  selectedPoint: MapPoint | null;
-  onMarkerClick: (point: MapPoint) => void;
-  onCloseInfoWindow: () => void;
+  readonly mapPoints: readonly MapPoint[];
+  readonly center: { lat: number; lng: number };
+  readonly mapId: string;
+  readonly selectedPoint: MapPoint | null;
+  readonly onMarkerClick: (point: MapPoint) => void;
+  readonly onCloseInfoWindow: () => void;
 }
 
 export function MapContainer({
@@ -25,6 +26,23 @@ export function MapContainer({
   onMarkerClick,
   onCloseInfoWindow,
 }: MapContainerProps) {
+  // エラー防止のためのクリックハンドラーをメモ化
+  const handleMarkerClick = useCallback((point: MapPoint) => {
+    try {
+      onMarkerClick(point);
+    } catch (error) {
+      console.error("マーカークリック時エラー:", error);
+    }
+  }, [onMarkerClick]);
+
+  const handleInfoWindowClose = useCallback(() => {
+    try {
+      onCloseInfoWindow();
+    } catch (error) {
+      console.error("InfoWindow閉じる時エラー:", error);
+    }
+  }, [onCloseInfoWindow]);
+
   return (
     <div
       className="map-container"
@@ -54,8 +72,7 @@ export function MapContainer({
           <MapMarker
             key={`${point.type}-${point.id}-${index}`}
             point={point}
-            index={index}
-            onClick={onMarkerClick}
+            onClick={handleMarkerClick}
           />
         ))}
 
@@ -63,7 +80,7 @@ export function MapContainer({
         {selectedPoint && (
           <InfoWindow
             position={selectedPoint.coordinates}
-            onCloseClick={onCloseInfoWindow}
+            onCloseClick={handleInfoWindowClose}
             maxWidth={400}
           >
             <MapInfoWindow point={selectedPoint} />

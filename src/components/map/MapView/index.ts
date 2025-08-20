@@ -3,8 +3,9 @@
  * MapViewディレクトリの統一エクスポート
  */
 
-export { MapView } from "./MapView";
 export { MapContainer } from "./MapContainer";
-export { MapMarker } from "./MapMarker";
-export { MapInfoWindow } from "./MapInfoWindow";
+export { MapErrorBoundary } from "./MapErrorBoundary";
 export { MapErrorFallback } from "./MapErrorFallback";
+export { MapInfoWindow } from "./MapInfoWindow";
+export { MapMarker } from "./MapMarker";
+export { MapView } from "./MapView";

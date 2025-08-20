@@ -1,8 +1,68 @@
+import { useEffect, useState } from "react";
 import "../../styles/PWABadge.css";
 
-import { useRegisterSW } from "virtual:pwa-register/react";
+// 🔧 開発環境でのvirtual moduleエラー対応
+// PWAが無効な開発環境では、このコンポーネントは何も表示しない
+const isPWAEnabled = import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
+
+// 🔧 開発環境でのService Worker完全制御
+const isDevelopment = import.meta.env.DEV;
 
 function PWABadge() {
+  // 開発環境でService Workerを強制アンレジスター
+  useEffect(() => {
+    if (isDevelopment && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          console.log('🔧 [PWA] Development mode: Unregistering Service Worker');
+          registration.unregister().catch(console.warn);
+        });
+      }).catch(console.warn);
+    }
+  }, []);
+
+  // PWAが無効化されている場合は何も表示しない
+  if (!isPWAEnabled) {
+    return null;
+  }
+
+  // PWAが有効な場合のみ実際のPWA機能を読み込み
+  return <PWABadgeWithSW />;
+}
+
+// PWA機能を持つコンポーネント（PWA有効時のみ読み込まれる）
+function PWABadgeWithSW() {
+  const [pwaSW, setPwaSW] = useState<any>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // 文字列結合でvirtual moduleを動的構築（静的解析を回避）
+    const pwaModuleName = ['virtual:', 'pwa-register', 'react'].join('/');
+
+    const loadPWAModule = async () => {
+      try {
+        // @ts-ignore - 動的インポートのため型チェックを無視
+        const pwaModule = await import(/* @vite-ignore */ pwaModuleName);
+        setPwaSW(pwaModule);
+      } catch (error) {
+        console.warn("PWA module not available:", error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    void loadPWAModule();
+  }, []);
+
+  // モジュールが読み込まれていない場合は何も表示しない
+  if (!isLoaded || !pwaSW?.useRegisterSW) {
+    return null;
+  }
+
+  return <PWABadgeContent useRegisterSW={pwaSW.useRegisterSW} />;
+}
+
+function PWABadgeContent({ useRegisterSW }: { readonly useRegisterSW: any }) {
   // check for updates every hour
   const period = 60 * 60 * 1000;
 
@@ -11,12 +71,12 @@ function PWABadge() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegisteredSW(swUrl, r) {
+    onRegisteredSW(swUrl: string, r: ServiceWorkerRegistration | undefined) {
       if (period <= 0) return;
       if (r?.active?.state === "activated") {
         registerPeriodicSync(period, swUrl, r);
       } else if (r?.installing) {
-        r.installing.addEventListener("statechange", (e) => {
+        r.installing.addEventListener("statechange", (e: Event) => {
           const sw = e.target as ServiceWorker;
           if (sw.state === "activated") {
             registerPeriodicSync(period, swUrl, r);
