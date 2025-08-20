@@ -1,6 +1,6 @@
-/* 佐渡飲食店マップ - モダンフルスクリーンマップUI v2.2 - Critical Override */
-/* Last Updated: 2025-08-06 18:55 - CSS読み込み順序修正版 */
-/* DEBUG: この行が見えていればCSS更新成功 */
+/* 佐渡飲食店マップ - 最適化されたフルスクリーンマップUI v3.0 */
+/* Last Updated: 2025-08-20 - !important最適化版 */
+/* !importantを適切に削減し、CSS詳細度で管理 */
 
 /* CSS Variables for Design System */
 :root {
@@ -10,28 +10,25 @@
 
   --color-surface: #ffffff;
   --color-surface-elevated: #f8fafc;
-  --color-surface-overlay: rgba(
-    255,
-    255,
-    255,
-    0.9
-  ); /* 地図視認性向上のため透明度を調整 */
+  --color-surface-overlay: rgba(255, 255, 255, 0.9);
 
   --color-text-primary: #0f172a;
   --color-text-secondary: #64748b;
   --color-text-on-primary: #ffffff;
 
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-hover: #f8fafc;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1),
-    0 8px 10px -6px rgb(0 0 0 / 0.1);
-
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
@@ -52,62 +49,64 @@
   box-sizing: border-box;
 }
 
-/* App Layout - Fullscreen Map First - 最高優先度 */
-html,
-body {
-  margin: 0 !important;
-  padding: 0 !important;
-  height: 100vh !important;
-  width: 100vw !important;
-  overflow: hidden !important;
-  display: block !important;
+/* 基本レイアウト - フルスクリーンマップ最優先 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: block;
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif !important;
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-surface-elevated) !important;
+  background-color: var(--color-surface-elevated);
 }
 
+/* アプリケーションコンテナ */
 .app {
-  height: 100vh !important;
-  width: 100vw !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-  position: relative !important;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
-/* Ultra-Compact Floating Header - Map-Optimized */
-.app-header {
-  position: absolute !important;
-  top: 6px !important;
-  left: var(--spacing-md) !important;
-  right: var(--spacing-md) !important;
-  z-index: 1000 !important;
-  background: var(--color-surface-overlay) !important;
-  backdrop-filter: blur(16px) !important; /* より強いブラーで地図を強調 */
-  border: 1px solid rgba(226, 232, 240, 0.3) !important; /* より透明に */
-  border-radius: var(--radius-lg) !important;
-  padding: 6px var(--spacing-sm) !important;
-  box-shadow: var(--shadow-lg) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  height: 36px !important; /* 固定高さで確実にコンパクト化 */
-  min-height: 36px !important;
-  max-height: 36px !important;
-  opacity: 0.9 !important; /* 地図を強調するため透明度追加 */
+/* フローティングヘッダー - 詳細度を上げて !important を削除 */
+body .app .app-header {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  background: var(--color-surface-overlay);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 6px var(--spacing-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  opacity: 0.95;
+  white-space: nowrap;
+  min-width: 200px;
 }
 
 .app-header:hover {
   box-shadow: var(--shadow-xl);
-  transform: translateY(-1px);
-  opacity: 1 !important; /* ホバー時は完全不透明 */
+  transform: translateX(-50%) translateY(-1px);
+  opacity: 1;
 }
 
 .app-header-content {
@@ -118,13 +117,14 @@ body {
 
 .app-header h1 {
   margin: 0;
-  font-size: 14px; /* さらに小さく */
+  font-size: 15px;
   font-weight: 700;
   color: var(--color-text-primary);
   display: flex;
   align-items: center;
-  gap: 4px;
-  line-height: 1;
+  gap: 6px;
+  line-height: 1.2;
+  letter-spacing: 0.5px;
 }
 
 .app-header p {
@@ -134,7 +134,7 @@ body {
   display: none;
 }
 
-/* Main Content - Fullscreen Map */
+/* メインコンテンツ - フルスクリーンマップ */
 .app-main {
   flex: 1;
   position: relative;
@@ -148,16 +148,16 @@ body {
   display: flex;
 }
 
-/* Floating Filter Panel - Ultra Compact & Map-Optimized */
-.filter-panel {
+/* フローティングフィルターパネル */
+body .app .filter-panel {
   position: absolute;
-  top: 48px; /* ヘッダー36px + 余白12px で最大限縦幅活用 */
-  left: var(--spacing-sm); /* 左端により近づけて地図領域拡大 */
-  width: 280px; /* 幅を縮小して地図領域を拡大 */
-  max-height: calc(100vh - 56px); /* 大幅な縦幅活用 */
+  top: 58px;
+  left: var(--spacing-sm);
+  width: 280px;
+  max-height: calc(100vh - 70px);
   background: var(--color-surface-overlay);
-  backdrop-filter: blur(16px); /* より強いブラーで地図を強調 */
-  border: 1px solid rgba(226, 232, 240, 0.3); /* より透明に */
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.3);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   z-index: 900;
@@ -165,12 +165,12 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
-  opacity: 0.92; /* 軽微な透明度で地図を強調 */
+  opacity: 0.92;
 }
 
 .filter-panel:hover {
   box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  opacity: 1; /* ホバー時は完全不透明 */
+  opacity: 1;
 }
 
 .filter-panel-header {
@@ -179,86 +179,22 @@ body {
   background: rgba(248, 250, 252, 0.5);
 }
 
-.filter-panel h2 {
-  margin: 0;
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
 .filter-panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-lg);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(203, 213, 225, 0.5) transparent;
+  padding: var(--spacing-sm);
 }
 
-.filter-panel-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.filter-panel-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.filter-panel-content::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.5);
-  border-radius: 2px;
-}
-
-.filter-section {
-  margin-bottom: var(--spacing-lg);
-}
-
-.filter-section:last-child {
-  margin-bottom: 0;
-}
-
-.filter-section label {
-  display: block;
-  margin-bottom: var(--spacing-sm);
-  font-weight: 600;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-.filter-section input,
-.filter-section select {
-  width: 100%;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  transition: all 0.2s ease;
-}
-
-.filter-section input:focus,
-.filter-section select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.filter-section input::placeholder {
-  color: var(--color-text-secondary);
-}
-
-/* Map Container - Fullscreen */
-.map-container {
-  flex: 1 !important;
-  height: 100vh !important;
-  width: 100vw !important;
-  border-radius: 0 !important;
-  overflow: hidden !important;
-  box-shadow: none !important;
-  border: none !important;
-  position: relative !important;
+/* Google Maps コンテナ - 詳細度を上げて !important を削除 */
+body .app .app-content .map-container {
+  flex: 1;
+  height: 100vh;
+  width: 100vw;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  border: none;
+  position: relative;
 }
 
 .map-loading {
@@ -282,28 +218,41 @@ body {
   margin-right: var(--spacing-sm);
 }
 
-/* Results Status Card - Ultra Compact & Map-Optimized */
-.results-status {
+.map-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  text-align: center;
+  padding: var(--spacing-xl);
+}
+
+/* 結果ステータスカード */
+body .app .results-status {
   position: absolute;
-  top: 48px; /* フィルターパネルと統一 */
-  right: var(--spacing-sm); /* 右端により近づけて地図領域拡大 */
-  padding: var(--spacing-xs) var(--spacing-sm); /* よりコンパクトに */
+  top: 58px;
+  right: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--color-surface-overlay);
-  backdrop-filter: blur(16px); /* より強いブラーで地図を強調 */
-  border: 1px solid rgba(226, 232, 240, 0.3); /* より透明に */
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.3);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   z-index: 900;
-  min-width: 200px; /* 最小幅を縮小 */
-  max-width: 280px; /* 最大幅を制限 */
+  min-width: 200px;
+  max-width: 280px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.92; /* 軽微な透明度で地図を強調 */
+  opacity: 0.92;
 }
 
 .results-status:hover {
   box-shadow: var(--shadow-xl);
   transform: translateY(-1px);
-  opacity: 1; /* ホバー時は完全不透明 */
+  opacity: 1;
 }
 
 .results-status h3 {
@@ -323,7 +272,7 @@ body {
   line-height: 1.5;
 }
 
-/* Error Display */
+/* エラー表示 */
 .error-container {
   display: flex;
   flex-direction: column;
@@ -343,55 +292,21 @@ body {
 
 .error-container p {
   margin: 0;
-  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
-  max-width: 500px;
+  line-height: 1.6;
 }
 
-/* Loading State */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: var(--color-surface);
-}
-
-.loading-container h1 {
-  margin: 0 0 var(--spacing-lg) 0;
-  font-size: var(--font-size-2xl);
-  color: var(--color-text-primary);
-}
-
-.loading-container p {
-  margin: 0;
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-}
-
-/* Animations */
+/* アニメーション */
 @keyframes spin {
-  0% {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(20px);
@@ -408,20 +323,25 @@ body {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* Responsive Design - Mobile First - Map-Optimized */
+/* レスポンシブデザイン - モバイルファースト */
 @media (max-width: 768px) {
-  .app-header {
-    top: 4px;
-    left: var(--spacing-xs); /* モバイルでも地図領域拡大 */
-    right: var(--spacing-xs); /* モバイルでも地図領域拡大 */
-    padding: 4px var(--spacing-sm);
-    height: 32px; /* モバイルでさらにコンパクト */
-    min-height: 32px;
-    max-height: 32px;
+  /* モバイルではより高い詳細度で !important を避ける */
+  body .app .app-header {
+    top: 6px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    padding: 6px var(--spacing-sm);
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    min-width: 180px;
+    z-index: 1100;
   }
 
   .app-header h1 {
-    font-size: 12px; /* モバイルでさらに小さく */
+    font-size: 13px;
+    gap: 4px;
     line-height: 1;
   }
 
@@ -429,23 +349,25 @@ body {
     display: none;
   }
 
-  .filter-panel {
+  body .app .filter-panel {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     top: auto;
     width: 100%;
-    max-height: 75vh; /* モバイルで地図を更に強調 */
+    max-height: 75vh;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    transform: translateY(calc(100% - 36px)); /* ハンドル部分を更に最小化 */
+    transform: translateY(calc(100% - 36px));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0.95; /* モバイルでも透明度で地図を強調 */
+    opacity: 0.95;
+    z-index: 1000;
   }
 
   .filter-panel.expanded {
     transform: translateY(0);
-    opacity: 1; /* 展開時は完全不透明 */
+    opacity: 1;
+    z-index: 1050;
   }
 
   .filter-panel-toggle {
@@ -460,27 +382,29 @@ body {
     cursor: pointer;
   }
 
-  .results-status {
+  body .app .results-status {
     position: fixed;
-    bottom: calc(46px + var(--spacing-xs)); /* ハンドル部分を考慮して調整 */
-    right: var(--spacing-xs); /* 右端により近づけて地図領域拡大 */
+    bottom: calc(46px + var(--spacing-xs));
+    right: var(--spacing-xs);
     left: var(--spacing-xs);
     width: auto;
     min-width: auto;
     padding: var(--spacing-xs) var(--spacing-sm);
-    opacity: 0.9; /* モバイルでも透明度で地図を強調 */
+    opacity: 0.9;
+    z-index: 950;
   }
 }
+
 @media (max-width: 480px) {
-  .app-header {
+  body .app .app-header {
     padding: var(--spacing-xs) var(--spacing-sm);
   }
 
-  .filter-panel {
+  body .app .filter-panel {
     max-height: 80vh;
   }
 
-  .results-status {
+  body .app .results-status {
     bottom: calc(60px + var(--spacing-xs));
     right: var(--spacing-xs);
     left: var(--spacing-xs);
@@ -488,64 +412,59 @@ body {
   }
 }
 
-/* Tablet Landscape - Map-Optimized */
+/* タブレット横向き */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .filter-panel {
-    width: 260px; /* タブレットでも地図領域を拡大 */
-    left: var(--spacing-sm); /* 左端により近づける */
+  body .app .filter-panel {
+    width: 260px;
+    left: var(--spacing-sm);
   }
 
-  .results-status {
-    right: var(--spacing-sm); /* 右端により近づける */
-    min-width: 180px; /* より小さく */
+  body .app .results-status {
+    right: var(--spacing-sm);
+    min-width: 180px;
   }
 }
 
-/* Large Desktop - Map-Optimized */
+/* 大画面デスクトップ */
 @media (min-width: 1400px) {
-  .filter-panel {
-    width: 320px; /* 大画面では少し幅を戻す */
+  body .app .filter-panel {
+    width: 320px;
   }
 
-  .app-header {
+  body .app .app-header {
     max-width: 1200px;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .results-status {
-    min-width: 220px; /* 大画面では少し幅を戻す */
+  body .app .results-status {
+    min-width: 220px;
   }
 }
 
-/* High Contrast Mode - Map Visibility Optimized */
+/* ハイコントラストモード - 必要最小限の !important のみ */
 @media (prefers-contrast: high) {
   :root {
-    --color-surface-overlay: rgba(
-      255,
-      255,
-      255,
-      0.98
-    ); /* ハイコントラスト時もマップの視認性を保つ */
+    --color-surface-overlay: rgba(255, 255, 255, 0.98);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3),
       0 4px 6px -4px rgb(0 0 0 / 0.3);
   }
 
-  .filter-panel,
-  .results-status,
-  .app-header {
+  body .app .filter-panel,
+  body .app .results-status,
+  body .app .app-header {
     border-width: 2px;
-    opacity: 1 !important; /* ハイコントラスト時は透明度なし */
+    opacity: 1 !important; /* アクセシビリティのため必須 */
   }
 }
 
-/* Reduced Motion */
+/* 動作縮小設定 - 必要最小限の !important のみ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important; /* アクセシビリティのため必須 */
+    animation-iteration-count: 1 !important; /* アクセシビリティのため必須 */
+    transition-duration: 0.01ms !important; /* アクセシビリティのため必須 */
   }
 }

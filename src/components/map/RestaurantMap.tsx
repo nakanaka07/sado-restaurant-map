@@ -42,7 +42,7 @@ export default function RestaurantMap({
 
   if (loading) {
     return (
-      <div className="map-loading">
+      <div className="map-loading" style={{ height: "500px" }}>
         <p>🗺️ 地図を読み込み中...</p>
       </div>
     );
@@ -50,7 +50,7 @@ export default function RestaurantMap({
 
   if (!mapId) {
     return (
-      <div className="map-loading">
+      <div className="map-error" style={{ height: "500px" }}>
         <p style={{ color: "#d63031", fontSize: "18px", marginBottom: "12px" }}>
           ❌ Map ID が設定されていません
         </p>

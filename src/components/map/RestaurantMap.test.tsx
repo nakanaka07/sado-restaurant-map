@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { RestaurantMap } from "./RestaurantMap";
 import type { Restaurant } from "@/types";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { RestaurantMap } from "./RestaurantMap";
 
 // 型定義
 interface MockMapProps {
@@ -72,14 +72,22 @@ vi.mock("@vis.gl/react-google-maps", () => ({
     );
   },
   AdvancedMarker: ({ onClick, title, ...props }: MockAdvancedMarkerProps) => (
-    <div
+    <button
       data-testid="advanced-marker"
       data-title={title}
+      aria-label={`Restaurant marker: ${title}`}
       onClick={onClick}
+      style={{
+        cursor: 'pointer',
+        border: 'none',
+        background: 'transparent',
+        padding: 0,
+        font: 'inherit'
+      }}
       {...props}
     >
       Marker: {title}
-    </div>
+    </button>
   ),
   Pin: ({ background, ...props }: MockPinProps) => (
     <div data-testid="pin" data-background={background} {...props}>
@@ -244,7 +252,7 @@ describe("RestaurantMap", () => {
 
       const errorElement = screen.getByText("❌ Map ID が設定されていません")
         .parentElement as HTMLElement;
-      expect(errorElement).toHaveStyle("height: 500px");
+      expect(errorElement).toHaveStyle({ height: "500px" });
       expect(errorElement).toHaveClass("map-error");
     });
   });
