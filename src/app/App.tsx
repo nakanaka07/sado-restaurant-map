@@ -270,10 +270,10 @@ function App() {
   // 初期化中の表示
   if (!isInitialized) {
     return (
-      <div className="loading-container">
+      <output className="loading-container" aria-live="polite">
         <h1>🗺️ 佐渡飲食店マップ</h1>
-        <output aria-live="polite">読み込み中...</output>
-      </div>
+        <span>読み込み中...</span>
+      </output>
     );
   }
 

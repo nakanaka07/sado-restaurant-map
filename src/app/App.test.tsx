@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
 // Google Maps APIをモック
@@ -31,7 +31,7 @@ describe("App", () => {
     cleanup();
     // 残存する要素の強制削除（テスト間の分離保証）
     const remainingContainers = document.querySelectorAll(
-      '.loading-container, [role="status"]'
+      '.loading-container, output[aria-live="polite"]'
     );
     remainingContainers.forEach((container) => container.remove());
     const remainingHeadings = document.querySelectorAll("h1");
@@ -50,10 +50,11 @@ describe("App", () => {
     it("ローディングコンテナが適切なARIA属性を持つこと", () => {
       render(<App />);
 
-      const loadingContainers = screen.getAllByRole("status");
-      const loadingContainer = loadingContainers[0]; // 最初の要素を取得
-      expect(loadingContainer).toHaveAttribute("aria-live", "polite");
-      expect(loadingContainer).toHaveClass("loading-container");
+      // output要素がstatus役割を持っていることを確認
+      const outputElement = screen.getByText("読み込み中...").closest("output");
+      expect(outputElement).toBeInTheDocument();
+      expect(outputElement).toHaveAttribute("aria-live", "polite");
+      expect(outputElement).toHaveClass("loading-container");
     });
   });
 
@@ -61,17 +62,16 @@ describe("App", () => {
     it("適切なARIA属性が設定されていること", () => {
       render(<App />);
 
-      // ライブリージョンが設定されていることを確認
-      const statusElements = screen.getAllByRole("status");
-      const statusElement = statusElements[0]; // 最初の要素を取得
-      expect(statusElement).toBeInTheDocument();
+      // ローディング状態のoutput要素が存在することを確認
+      const outputElement = screen.getByText("読み込み中...").closest("output");
+      expect(outputElement).toBeInTheDocument();
+      expect(outputElement).toHaveAttribute("aria-live", "polite");
     });
 
     it("見出しが適切な階層で設定されていること", () => {
       render(<App />);
 
-      const headings = screen.getAllByRole("heading", { level: 1 });
-      const heading = headings[0]; // 最初の要素を取得
+      const heading = screen.getByRole("heading", { level: 1 });
       expect(heading).toHaveTextContent("🗺️ 佐渡飲食店マップ");
     });
   });
@@ -80,10 +80,10 @@ describe("App", () => {
     it("読み込み状態でも適切にレンダリングされること", () => {
       render(<App />);
 
-      // コンテナが存在することを確認
-      const containers = screen.getAllByRole("status");
-      const container = containers[0]; // 最初の要素を取得
-      expect(container).toBeInTheDocument();
+      // ローディング状態のoutput要素が存在することを確認
+      const outputElement = screen.getByText("読み込み中...").closest("output");
+      expect(outputElement).toBeInTheDocument();
+      expect(outputElement).toHaveClass("loading-container");
     });
   });
 });
