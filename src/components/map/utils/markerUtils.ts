@@ -3,7 +3,7 @@
  * 統合されたマップマーカーユーティリティ関数
  */
 
-import type { MapPoint, Restaurant } from "@/types";
+import type { MapPoint } from "@/types";
 
 /**
  * マーカー設定の型定義
@@ -85,7 +85,7 @@ export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
   switch (point.type) {
     case "restaurant":
       return {
-        background: getMarkerColorByCuisine((point as Restaurant).cuisineType),
+        background: getMarkerColorByCuisine(point.cuisineType),
         glyph: "🍽️",
       };
     case "parking":
@@ -114,7 +114,7 @@ export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
 export const getMarkerSize = (point: MapPoint): number => {
   switch (point.type) {
     case "restaurant":
-      return getMarkerSizeByPrice((point as Restaurant).priceRange);
+      return getMarkerSizeByPrice(point.priceRange);
     case "parking":
     case "toilet":
       return 32; // 固定サイズ
