@@ -1,10 +1,10 @@
 import { SADO_CENTER } from "@/config";
 import { useMapPoints } from "@/hooks";
 import type {
-  CuisineType,
-  MapPointType,
-  PriceRange,
-  SadoDistrict,
+    CuisineType,
+    MapPointType,
+    PriceRange,
+    SadoDistrict,
 } from "@/types";
 import { checkGAStatus, initGA, initializeDevLogging, sanitizeInput } from "@/utils";
 import { logUnknownAddressStats, testDistrictAccuracy } from "@/utils/districtUtils";
@@ -12,7 +12,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import PWABadge from "../components/layout/PWABadge";
-import { MapView } from "../components/map";
+import { MapViewWithTesting } from "../components/map/MapView/MapViewWithTesting";
 import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
 // App.cssは main.tsx で読み込み済み
@@ -41,6 +41,15 @@ function App() {
 
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // マーカーテストモードの状態管理
+  const [markerTestingMode, setMarkerTestingMode] = useState(() => {
+    // URLパラメータまたはlocalStorageからテストモードを判定
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTestMode = urlParams.get('marker-test') === 'true';
+    const storedTestMode = localStorage.getItem('sado-marker-testing') === 'true';
+    return urlTestMode || storedTestMode;
+  });
 
   // セキュリティ強化: APIキーのバリデーション
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -287,6 +296,41 @@ function App() {
             libraries={["maps", "marker", "geometry"]}
           >
             <div className="app-content">
+              {/* マーカーテストモード切り替えボタン */}
+              <div style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                zIndex: 1001,
+                background: 'white',
+                borderRadius: '8px',
+                padding: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                border: '1px solid #e0e0e0'
+              }}>
+                <button
+                  onClick={() => {
+                    const newMode = !markerTestingMode;
+                    setMarkerTestingMode(newMode);
+                    localStorage.setItem('sado-marker-testing', newMode.toString());
+                  }}
+                  style={{
+                    background: markerTestingMode ? '#4caf50' : '#2196f3',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title={markerTestingMode ? 'テストモードを無効化' : 'マーカーテストモードを有効化'}
+                >
+                  {markerTestingMode ? '🧪 テスト中' : '🔧 テスト'}
+                </button>
+              </div>
+
               {/* Floating Filter Panel */}
               <FilterPanel
                 loading={loading}
@@ -305,11 +349,12 @@ function App() {
               />
 
               {/* Fullscreen Map */}
-              <MapView
+              <MapViewWithTesting
                 mapPoints={filteredMapPoints}
                 center={SADO_CENTER}
                 loading={loading}
                 error={error}
+                testingMode={markerTestingMode}
               />
             </div>
           </APIProvider>
