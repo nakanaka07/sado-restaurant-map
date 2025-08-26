@@ -1,10 +1,27 @@
 {
-    "configurations": [
-        {
-            "type": "msedge",
-            "name": "http://localhost:5173/",
-            "request": "launch",
-            "url": "http://localhost:5173/"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "msedge",
+      "name": "Launch Sado Restaurant Map",
+      "request": "launch",
+      "url": "http://localhost:5173/",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true,
+      "userDataDir": false,
+      "runtimeArgs": [
+        "--disable-web-security",
+        "--disable-features=VizDisplayCompositor"
+      ]
+    },
+    {
+      "type": "chrome",
+      "name": "Launch Chrome",
+      "request": "launch",
+      "url": "http://localhost:5173/",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true,
+      "userDataDir": false
+    }
+  ]
 }

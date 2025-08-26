@@ -1,7 +1,7 @@
 {
   // ===== React + TypeScript + Vite 開発最適化設定 =====
   // プロジェクト: 佐渡飲食店マップアプリケーション
-  // 技術スタック: React 19.1 + TypeScript 5.9 + Vite 8.0 + Google Maps API
+  // 技術スタック: React 19.0 + TypeScript 5.7 + Vite 6.0 + Google Maps API
 
   // === TypeScript 設定 ===
   "typescript.preferences.renameShorthandProperties": false,
@@ -41,7 +41,6 @@
     "typescriptreact"
   ],
   "eslint.format.enable": true,
-  "prettier.configPath": "./prettier.config.js",
 
   // === ファイル管理 & 自動保存 ===
   "files.autoSave": "onFocusChange",
@@ -52,23 +51,18 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/build": true,
-    "**/.next": true,
-    "**/.nuxt": true,
     "**/coverage": true,
-    "**/.nyc_output": true,
+    "**/dev-dist": true,
     "**/.cache": true,
     "**/.temp": true,
-    "**/.tmp": true,
-    "**/dev-dist": true
+    "**/.tmp": true
   },
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,
     "**/build": true,
     "**/coverage": true,
-    "**/pnpm-lock.yaml": true,
-    "**/package-lock.json": true,
-    "**/yarn.lock": true
+    "**/pnpm-lock.yaml": true
   },
 
   // === エディタ体験最適化 ===
@@ -96,12 +90,11 @@
   "gitlens.defaultDateFormat": "YYYY/MM/DD HH:mm",
   "gitlens.defaultDateShortFormat": "MM/DD",
 
-  // === PWA & Web 開発 ===
+  // === Web 開発 ===
   "html.format.indentInnerHtml": true,
   "html.format.wrapLineLength": 100,
   "css.validate": true,
   "css.lint.unknownAtRules": "ignore",
-  "scss.validate": true,
 
   // === デバッグ & テスト ===
   "debug.inlineValues": "auto",
@@ -109,11 +102,9 @@
   "testing.automaticallyOpenPeekView": "never",
 
   // === パフォーマンス最適化 ===
-  "extensions.ignoreRecommendations": false,
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
   "workbench.startupEditor": "newUntitledFile",
-  "window.restoreWindows": "preserve",
 
   // === 日本語環境最適化 ===
   "cSpell.language": "en,ja",
@@ -135,7 +126,7 @@
   "terminal.integrated.fontSize": 14,
   "terminal.integrated.scrollback": 10000,
 
-  // === ワークスペース固有設定 ===
+  // === ファイル形式別設定 ===
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.rulers": [80, 120]
@@ -162,9 +153,6 @@
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "[scss]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -178,49 +166,27 @@
     }
   },
 
-  // === プロジェクト固有除外設定 ===
-  "python-envs.pythonProjects": [],
+  // === プロジェクト固有辞書 ===
   "cSpell.words": [
     "aikawa",
     "akadomari",
-    "Analyser",
-    "APCA",
     "bento",
-    "Canva",
-    "Colour",
-    "Contentful",
-    "deduplicator",
-    "ECONNREFUSED",
     "fastfood",
-    "Flaticon",
     "gmnoprint",
     "googletagmanager",
-    "grayscale",
     "hamochi",
     "hatano",
-    "Izakaya",
+    "izakaya",
     "kanai",
     "mano",
     "nakanaka",
     "niibo",
-    "Opti",
-    "Optim",
-    "PIXLR",
-    "Precaching",
-    "pytest",
-    "Referer",
-    "rgba",
-    "Rolldown",
     "ryotsu",
-    "Sado",
+    "sado",
     "sawada",
-    "Squoosh",
-    "Teishoku",
-    "unstub",
-    "venv",
-    "Vite",
-    "Vitest",
-    "WCAG",
+    "teishoku",
+    "vite",
+    "vitest",
     "yakiniku"
   ]
 }
