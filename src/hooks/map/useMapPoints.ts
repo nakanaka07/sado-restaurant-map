@@ -3,20 +3,20 @@
  * React 19 + Concurrent Features + TypeScript 5.7対応
  */
 
-import {
-  useState,
-  useCallback,
-  useMemo,
-  startTransition,
-  useEffect,
-} from "react";
-import type {
-  MapPoint,
-  ExtendedMapFilters,
-  SortOrder,
-  AsyncState,
-} from "@/types";
 import { fetchAllMapPoints, SheetsApiError } from "@/services";
+import type {
+  AsyncState,
+  ExtendedMapFilters,
+  MapPoint,
+  SortOrder,
+} from "@/types";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 // 初期フィルター設定
 const INITIAL_FILTERS: ExtendedMapFilters = {
@@ -63,12 +63,14 @@ export function useMapPoints() {
 
       console.log(`✅ 統合マップポイント取得完了: ${mapPoints.length}件`);
     } catch (error) {
-      const errorMessage =
-        error instanceof SheetsApiError
-          ? `データベース接続エラー: ${error.message}`
-          : `予期しないエラーが発生しました: ${
-              error instanceof Error ? error.message : "Unknown error"
-            }`;
+      let errorMessage: string;
+      if (error instanceof SheetsApiError) {
+        errorMessage = `データベース接続エラー: ${error.message}`;
+      } else if (error instanceof Error) {
+        errorMessage = `予期しないエラーが発生しました: ${error.message}`;
+      } else {
+        errorMessage = "予期しないエラーが発生しました: Unknown error";
+      }
 
       startTransition(() => {
         setState({
@@ -96,99 +98,7 @@ export function useMapPoints() {
     if (!state.data) return [];
 
     return state.data.filter((point) => {
-      // ポイントタイプフィルター
-      if (!filters.pointTypes.includes(point.type)) return false;
-
-      // 地区フィルター
-      if (
-        filters.districts.length > 0 &&
-        !filters.districts.includes(point.district)
-      ) {
-        return false;
-      }
-
-      // 検索クエリフィルター
-      if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
-        const searchableText =
-          `${point.name} ${point.description} ${point.address}`.toLowerCase();
-        if (!searchableText.includes(query)) return false;
-      }
-
-      // 飲食店固有のフィルター
-      if (point.type === "restaurant") {
-        // 料理ジャンルフィルター
-        if (filters.cuisineTypes.length > 0 && point.cuisineType) {
-          if (!filters.cuisineTypes.includes(point.cuisineType)) return false;
-        }
-
-        // 価格帯フィルター
-        if (filters.priceRanges.length > 0 && point.priceRange) {
-          if (!filters.priceRanges.includes(point.priceRange)) return false;
-        }
-
-        // 評価フィルター
-        if (filters.minRating && point.rating) {
-          if (point.rating < filters.minRating) return false;
-        }
-
-        // 営業中フィルター
-        if (filters.openNow && point.openingHours) {
-          const now = new Date();
-          const currentDay = now.toLocaleDateString("ja-JP", {
-            weekday: "long",
-          });
-          const currentTime = now.toTimeString().slice(0, 5);
-
-          const todayHours = point.openingHours.find((hours) =>
-            hours.day.includes(currentDay.slice(0, 1))
-          );
-
-          if (!todayHours || todayHours.isHoliday) return false;
-          if (todayHours.open && todayHours.close) {
-            if (
-              currentTime < todayHours.open ||
-              currentTime > todayHours.close
-            ) {
-              return false;
-            }
-          }
-        }
-      }
-
-      // 特徴フィルター
-      if (filters.features.length > 0) {
-        const hasMatchingFeature = filters.features.some((feature) =>
-          point.features.includes(feature)
-        );
-        if (!hasMatchingFeature) return false;
-      }
-
-      // 駐車場特徴フィルター
-      if (
-        point.type === "parking" &&
-        filters.parkingFeatures &&
-        filters.parkingFeatures.length > 0
-      ) {
-        const hasMatchingFeature = filters.parkingFeatures.some((feature) =>
-          point.features.includes(feature)
-        );
-        if (!hasMatchingFeature) return false;
-      }
-
-      // トイレ特徴フィルター
-      if (
-        point.type === "toilet" &&
-        filters.toiletFeatures &&
-        filters.toiletFeatures.length > 0
-      ) {
-        const hasMatchingFeature = filters.toiletFeatures.some((feature) =>
-          point.features.includes(feature)
-        );
-        if (!hasMatchingFeature) return false;
-      }
-
-      return true;
+      return isPointMatchingFilters(point, filters);
     });
   }, [state.data, filters]);
 
@@ -203,12 +113,13 @@ export function useMapPoints() {
         case "name":
           return a.name.localeCompare(b.name, "ja");
 
-        case "rating":
+        case "rating": {
           const ratingA = a.type === "restaurant" ? a.rating || 0 : 0;
           const ratingB = b.type === "restaurant" ? b.rating || 0 : 0;
           return ratingB - ratingA;
+        }
 
-        case "distance":
+        case "distance": {
           if (filters.currentLocation) {
             const distanceA = calculateDistance(
               filters.currentLocation,
@@ -221,14 +132,16 @@ export function useMapPoints() {
             return distanceA - distanceB;
           }
           return 0;
+        }
 
-        case "priceRange":
+        case "priceRange": {
           if (a.type === "restaurant" && b.type === "restaurant") {
             const priceOrderA = getPriceOrder(a.priceRange);
             const priceOrderB = getPriceOrder(b.priceRange);
             return priceOrderA - priceOrderB;
           }
           return 0;
+        }
 
         default:
           return 0;
@@ -346,4 +259,163 @@ function getPriceOrder(priceRange?: string): number {
     default:
       return 0;
   }
+}
+
+/**
+ * ポイントがフィルター条件に一致するかチェック
+ */
+function isPointMatchingFilters(point: MapPoint, filters: ExtendedMapFilters): boolean {
+  // 基本フィルターチェック
+  if (!isBasicFiltersMatching(point, filters)) return false;
+
+  // 飲食店固有のフィルター
+  if (point.type === "restaurant") {
+    if (!isRestaurantMatchingFilters(point, filters)) return false;
+  }
+
+  // 特徴系フィルターチェック
+  return isFeatureFiltersMatching(point, filters);
+}
+
+/**
+ * 基本フィルター（ポイントタイプ、地区、検索）のチェック
+ */
+function isBasicFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+  // ポイントタイプフィルター
+  if (!filters.pointTypes.includes(point.type)) return false;
+
+  // 地区フィルター
+  if (
+    filters.districts.length > 0 &&
+    !filters.districts.includes(point.district)
+  ) {
+    return false;
+  }
+
+  // 検索クエリフィルター
+  if (filters.searchQuery) {
+    const query = filters.searchQuery.toLowerCase();
+    const searchableText =
+      `${point.name} ${point.description} ${point.address}`.toLowerCase();
+    if (!searchableText.includes(query)) return false;
+  }
+
+  return true;
+}
+
+/**
+ * 特徴フィルターのチェック
+ */
+function isFeatureFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+  // 特徴フィルター
+  if (filters.features.length > 0) {
+    const hasMatchingFeature = filters.features.some((feature) =>
+      point.features.includes(feature)
+    );
+    if (!hasMatchingFeature) return false;
+  }
+
+  // ポイントタイプ別特徴フィルター
+  return isPointTypeSpecificFiltersMatching(point, filters);
+}
+
+/**
+ * ポイントタイプ別特徴フィルターのチェック
+ */
+function isPointTypeSpecificFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+  // 駐車場特徴フィルター
+  if (
+    point.type === "parking" &&
+    filters.parkingFeatures &&
+    filters.parkingFeatures.length > 0
+  ) {
+    const hasMatchingFeature = filters.parkingFeatures.some((feature) =>
+      point.features.includes(feature)
+    );
+    if (!hasMatchingFeature) return false;
+  }
+
+  // トイレ特徴フィルター
+  if (
+    point.type === "toilet" &&
+    filters.toiletFeatures &&
+    filters.toiletFeatures.length > 0
+  ) {
+    const hasMatchingFeature = filters.toiletFeatures.some((feature) =>
+      point.features.includes(feature)
+    );
+    if (!hasMatchingFeature) return false;
+  }
+
+  return true;
+}
+
+/**
+ * レストランがフィルター条件に一致するかチェック
+ */
+function isRestaurantMatchingFilters(point: MapPoint, filters: ExtendedMapFilters): boolean {
+  if (point.type !== "restaurant") return true;
+
+  // 基本属性フィルター
+  if (!isRestaurantBasicFiltersMatching(point, filters)) return false;
+
+  // 営業中フィルター
+  if (filters.openNow && 'openingHours' in point && point.openingHours) {
+    if (!isRestaurantCurrentlyOpen(point)) return false;
+  }
+
+  return true;
+}
+
+/**
+ * レストランの基本属性フィルターチェック
+ */
+function isRestaurantBasicFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+  if (point.type !== "restaurant") return true;
+
+  // 料理ジャンルフィルター
+  if (filters.cuisineTypes.length > 0 && 'cuisineType' in point && point.cuisineType) {
+    if (!filters.cuisineTypes.includes(point.cuisineType)) return false;
+  }
+
+  // 価格帯フィルター
+  if (filters.priceRanges.length > 0 && 'priceRange' in point && point.priceRange) {
+    if (!filters.priceRanges.includes(point.priceRange)) return false;
+  }
+
+  // 評価フィルター
+  if (filters.minRating && 'rating' in point && point.rating) {
+    if (point.rating < filters.minRating) return false;
+  }
+
+  return true;
+}
+
+/**
+ * レストランが現在営業中かチェック
+ */
+function isRestaurantCurrentlyOpen(point: MapPoint): boolean {
+  if (point.type !== "restaurant" || !('openingHours' in point) || !point.openingHours) return false;
+
+  const now = new Date();
+  const currentDay = now.toLocaleDateString("ja-JP", {
+    weekday: "long",
+  });
+  const currentTime = now.toTimeString().slice(0, 5);
+
+  const todayHours = point.openingHours.find((hours) =>
+    hours.day.includes(currentDay.slice(0, 1))
+  );
+
+  if (!todayHours || todayHours.isHoliday) return false;
+  if (todayHours.open && todayHours.close) {
+    if (
+      currentTime < todayHours.open ||
+      currentTime > todayHours.close
+    ) {
+      return false;
+    }
+  }
+
+  return true;
 }

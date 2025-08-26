@@ -3,15 +3,15 @@
  * FilterPanelの状態管理カスタムフック
  */
 
-import { useState, useCallback } from "react";
 import type {
   CuisineType,
+  MapPointType,
   PriceRange,
   SadoDistrict,
   SortOrder,
-  MapPointType,
 } from "@/types";
 import { trackFilter } from "@/utils/analytics";
+import { useCallback, useState } from "react";
 
 /**
  * フィルターイベントハンドラーの型定義
@@ -45,7 +45,8 @@ export interface FilterState {
   selectedSort: SortOrder;
   selectedFeatures: string[];
   selectedPointTypes: MapPointType[];
-  isExpanded: boolean;
+  isDistrictExpanded: boolean;
+  isFeatureExpanded: boolean;
 
   // Action handlers
   handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -58,7 +59,8 @@ export interface FilterState {
   handleFeatureToggle: (feature: string) => void;
   handlePointTypeToggle: (pointType: MapPointType) => void;
   handleResetFilters: () => void;
-  toggleExpanded: () => void;
+  toggleDistrictExpanded: () => void;
+  toggleFeatureExpanded: () => void;
 }
 
 export function useFilterState(handlers: FilterHandlers): FilterState {
@@ -77,8 +79,11 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [selectedPointTypes, setSelectedPointTypes] = useState<MapPointType[]>([
     "restaurant",
+    "parking",
+    "toilet",
   ]);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isDistrictExpanded, setIsDistrictExpanded] = useState(false);
+  const [isFeatureExpanded, setIsFeatureExpanded] = useState(false);
 
   // Event handlers
   const handleSearchChange = useCallback(
@@ -191,13 +196,17 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
     setOpenNow(false);
     setSelectedSort("name");
     setSelectedFeatures([]);
-    setSelectedPointTypes(["restaurant"]);
+    setSelectedPointTypes(["restaurant", "parking", "toilet"]);
     handlers.onResetFilters?.();
     trackFilter("reset", "all");
   }, [handlers]);
 
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded((prev) => !prev);
+  const toggleDistrictExpanded = useCallback(() => {
+    setIsDistrictExpanded((prev) => !prev);
+  }, []);
+
+  const toggleFeatureExpanded = useCallback(() => {
+    setIsFeatureExpanded((prev) => !prev);
   }, []);
 
   return {
@@ -211,7 +220,8 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
     selectedSort,
     selectedFeatures,
     selectedPointTypes,
-    isExpanded,
+    isDistrictExpanded,
+    isFeatureExpanded,
 
     // Handlers
     handleSearchChange,
@@ -224,6 +234,7 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
     handleFeatureToggle,
     handlePointTypeToggle,
     handleResetFilters,
-    toggleExpanded,
+    toggleDistrictExpanded,
+    toggleFeatureExpanded,
   };
 }

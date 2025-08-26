@@ -244,16 +244,16 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
           <DistrictFilter
             selectedDistricts={filterState.selectedDistricts}
             onToggle={filterState.handleDistrictToggle}
-            isExpanded={filterState.isExpanded}
-            onToggleExpanded={filterState.toggleExpanded}
+            isExpanded={filterState.isDistrictExpanded}
+            onToggleExpanded={filterState.toggleDistrictExpanded}
           />
 
           {/* 特徴フィルター */}
           <FeatureFilter
             selectedFeatures={filterState.selectedFeatures}
             onToggle={filterState.handleFeatureToggle}
-            isExpanded={filterState.isExpanded}
-            onToggleExpanded={filterState.toggleExpanded}
+            isExpanded={filterState.isFeatureExpanded}
+            onToggleExpanded={filterState.toggleFeatureExpanded}
           />
 
           {/* ポイントタイプフィルター */}

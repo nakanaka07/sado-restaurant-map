@@ -11,3 +11,6 @@ export * from "./environment";
 
 // Types
 export * from "./types";
+
+// Cuisine Icons
+export * from "./cuisineIcons";

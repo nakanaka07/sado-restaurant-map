@@ -846,6 +846,11 @@ PWA機能との完全統合、オフライン対応、プッシュ通知連携�
 
 ## 📚 関連ドキュメント {#related-docs}
 
+### 企画・計画ドキュメント
+
+- [`MARKER_IMPROVEMENT_INVESTIGATION.md`](MARKER_IMPROVEMENT_INVESTIGATION.md) - マーカー改善調査・検討記録
+- [`ICON_SELECTION_GUIDELINES.md`](ICON_SELECTION_GUIDELINES.md) - 🆕 アイコン選定・設計指針（Phase 1実装結果基準）
+
 ### 技術仕様
 
 - [`TECHNICAL_SPECIFICATIONS.md`](TECHNICAL_SPECIFICATIONS.md) - 詳細技術仕様

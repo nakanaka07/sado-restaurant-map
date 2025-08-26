@@ -6,8 +6,8 @@
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
 import { useCallback } from "react";
+import { EnhancedPNGMarker } from "./EnhancedPNGMarker";
 import { MapInfoWindow } from "./MapInfoWindow";
-import { MapMarker } from "./MapMarker";
 
 interface MapContainerProps {
   readonly mapPoints: readonly MapPoint[];
@@ -74,7 +74,7 @@ export function MapContainer({
       >
         {/* マーカー表示 */}
         {mapPoints.map((point, index) => (
-          <MapMarker
+          <EnhancedPNGMarker
             key={`${point.type}-${point.id}-${index}`}
             point={point}
             onClick={handleMarkerClick}
