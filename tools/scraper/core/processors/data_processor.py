@@ -4,51 +4,53 @@
 新しいAPIクライアント対応版 - CID処理統合プロセッサー
 
 Places API (New) v1を使用した最新版処理システム
+Clean Architecture準拠・依存性注入対応版
 """
 
 import os
 import re
 import time
-import pandas as pd
 from datetime import datetime
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from urllib.parse import unquote, parse_qs, urlparse
 
-# 共通ライブラリをインポート
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# 新しいアーキテクチャ対応インポート
+from core.domain.interfaces import APIClient, DataStorage, DataValidator, AuthenticationService
+from shared.types.core_types import PlaceData, ProcessingResult, CategoryType, QueryData
+from shared.config.settings import ScraperConfig
+from shared.logging.logger import get_logger
+from shared.exceptions import APIError, ValidationError, ConfigurationError
+from shared.utils.translators import translate_business_status, translate_types
 
-# 環境変数の明示的読み込み
-from dotenv import load_dotenv
-current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config_dir = os.path.join(current_dir, 'config')
-config_env_path = os.path.join(config_dir, '.env')
-if os.path.exists(config_env_path):
-    load_dotenv(config_env_path)
+class DataProcessor:
+    """新しいアーキテクチャ対応データプロセッサー"""
 
-from processors.places_api_client import PlacesAPIClient
-from processors.spreadsheet_manager import SpreadsheetManager
-from utils.google_auth import get_places_api_key, get_spreadsheet_id
-from utils.translators import translate_business_status, translate_types, format_opening_hours
+    def __init__(
+        self,
+        api_client: APIClient,
+        storage: DataStorage,
+        validator: DataValidator,
+        config: ScraperConfig,
+        logger=None
+    ):
+        """依存性注入による初期化"""
+        self._api_client = api_client
+        self._storage = storage
+        self._validator = validator
+        self._config = config
+        self._logger = logger or get_logger(__name__)
+        
+        self.results: List[Dict[str, Any]] = []
+        self.failed_queries: List[QueryData] = []
+        self.raw_places_data: List[PlaceData] = []
 
-class NewUnifiedProcessor:
-    """新しいAPIクライアント対応版統合プロセッサー"""
+        self._logger.info("データプロセッサー初期化完了",
+                         api_client=type(api_client).__name__,
+                         storage=type(storage).__name__)
 
-    def __init__(self):
-        self.api_key = get_places_api_key()
-        self.spreadsheet_id = get_spreadsheet_id()
-        self.client = PlacesAPIClient(self.api_key)
-        self.spreadsheet_manager = SpreadsheetManager(self.spreadsheet_id)
-        self.results = []
-        self.failed_queries = []
-        self.raw_places_data = []  # 生のPlaces APIレスポンスを保存
-
-        print(f"✅ API Key: ***{self.api_key[-4:]} (末尾4文字)")
-        print(f"✅ Spreadsheet ID: ***{self.spreadsheet_id[-4:]} (末尾4文字)")
-
-    def parse_query_file(self, file_path: str) -> List[Dict]:
+    def parse_query_file(self, file_path: str) -> List[QueryData]:
         """クエリファイルを解析"""
-        queries = []
+        queries: List[QueryData] = []
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -61,7 +63,12 @@ class NewUnifiedProcessor:
                 if not line or line.startswith('#'):
                     continue
 
-                query_data = {'line_number': line_num, 'original_line': line}
+                query_data: QueryData = {
+                    'line_number': line_num, 
+                    'original_line': line,
+                    'type': 'store_name',  # デフォルト値
+                    'store_name': ''
+                }
 
                 # CID URL形式の判定
                 if 'maps.google.com/place?cid=' in line:
@@ -97,12 +104,12 @@ class NewUnifiedProcessor:
 
                 queries.append(query_data)
 
-            print(f"📋 {len(queries)}件のクエリを解析完了")
+            self._logger.info("クエリファイル解析完了", count=len(queries), file_path=file_path)
             return queries
 
         except Exception as e:
-            print(f"❌ ファイル読み込みエラー: {e}")
-            return []
+            self._logger.error("ファイル読み込みエラー", error=str(e), file_path=file_path)
+            raise ValidationError(f"ファイル読み込みエラー: {e}", "file_path", file_path)
 
     def extract_name_from_url(self, url: str) -> str:
         """URLから店舗名を抽出"""
@@ -128,15 +135,21 @@ class NewUnifiedProcessor:
         except Exception:
             return ''
 
-    def process_all_queries(self, queries: List[Dict]) -> List[Dict]:
+    def process_all_queries(self, queries: List[QueryData]) -> ProcessingResult:
         """全クエリを処理"""
-        print(f"\n⚙️ {len(queries)}件のクエリ処理")
+        start_time = time.time()
+        self._logger.info("クエリ処理開始", count=len(queries))
 
         # 処理開始時に生データ配列をクリア
         self.raw_places_data = []
+        self.results = []
+        self.failed_queries = []
 
         for i, query_data in enumerate(queries, 1):
-            print(f"\n📍 [{i}/{len(queries)}] 処理中: {query_data.get('store_name', 'Unknown')}")
+            self._logger.info("クエリ処理中", 
+                            current=i, 
+                            total=len(queries), 
+                            store_name=query_data.get('store_name', 'Unknown'))
 
             try:
                 result = None
@@ -150,44 +163,50 @@ class NewUnifiedProcessor:
 
                 if result:
                     self.results.append(result)
-                    print("   ✅ 成功")
+                    self._logger.info("クエリ処理成功", place_id=result.get('Place ID'))
                 else:
                     self.failed_queries.append(query_data)
-                    print("   ❌ 失敗")
+                    self._logger.warning("クエリ処理失敗", query_data=query_data)
 
                 # API制限対応
-                time.sleep(1)
+                time.sleep(self._config.processing.api_delay)
 
             except Exception as e:
-                print(f"   ❌ 処理エラー: {e}")
+                self._logger.error("クエリ処理エラー", error=str(e), query_data=query_data)
                 self.failed_queries.append(query_data)
 
-        print(f"\n📊 処理完了")
-        print(f"   成功: {len(self.results)}件")
-        print(f"   失敗: {len(self.failed_queries)}件")
+        duration = time.time() - start_time
+        result = ProcessingResult(
+            success=len(self.results) > 0,
+            category='restaurants',  # デフォルト
+            processed_count=len(self.results),
+            error_count=len(self.failed_queries),
+            duration=duration,
+            errors=[str(q) for q in self.failed_queries]
+        )
 
-        return self.results
+        self._logger.info("クエリ処理完了", 
+                         success_count=len(self.results),
+                         error_count=len(self.failed_queries),
+                         duration=duration)
+        return result
 
-    def process_cid_url(self, query_data: Dict) -> Optional[Dict]:
+    def process_cid_url(self, query_data: QueryData) -> Optional[Dict[str, Any]]:
         """CID URLから店舗名検索"""
         store_name = query_data.get('store_name', '')
-
-        # 店舗名での検索にフォールバック
         return self.search_by_name(store_name, query_data, 'CID URL検索')
 
-    def process_maps_url(self, query_data: Dict) -> Optional[Dict]:
+    def process_maps_url(self, query_data: QueryData) -> Optional[Dict[str, Any]]:
         """Google Maps URLから検索"""
         store_name = query_data.get('store_name', '')
-
         return self.search_by_name(store_name, query_data, 'Maps URL検索')
 
-    def process_store_name(self, query_data: Dict) -> Optional[Dict]:
+    def process_store_name(self, query_data: QueryData) -> Optional[Dict[str, Any]]:
         """店舗名検索"""
         store_name = query_data.get('store_name', '')
-
         return self.search_by_name(store_name, query_data, '店舗名検索')
 
-    def search_by_name(self, store_name: str, query_data: Dict, method: str) -> Optional[Dict]:
+    def search_by_name(self, store_name: str, query_data: QueryData, method: str) -> Optional[Dict[str, Any]]:
         """店舗名で検索"""
         if not store_name:
             return None
@@ -202,9 +221,10 @@ class NewUnifiedProcessor:
 
         for query in search_queries:
             try:
-                status, places = self.client.search_text(query, 'restaurant')
+                # 新しいAPIクライアントインターフェースを使用
+                places = self._api_client.search_places(query)
 
-                if status == 'OK' and places:
+                if places:
                     # 最も関連性の高い結果を選択
                     best_place = self.select_best_match(places, store_name)
                     if best_place:
@@ -212,19 +232,22 @@ class NewUnifiedProcessor:
                         self.raw_places_data.append(best_place)
                         return self.format_result(best_place, query_data, method)
 
-                time.sleep(0.5)  # API制限対応
+                time.sleep(self._config.processing.api_delay)
 
+            except APIError as e:
+                self._logger.error("API検索エラー", query=query, error=str(e))
+                continue
             except Exception as e:
-                print(f"   ❌ 検索エラー ({query}): {e}")
+                self._logger.error("予期しない検索エラー", query=query, error=str(e))
                 continue
 
         return None
 
-    def select_best_match(self, places: List[Dict], target_name: str) -> Optional[Dict]:
+    def select_best_match(self, places: List[PlaceData], target_name: str) -> Optional[PlaceData]:
         """最適な結果を選択"""
         # 佐渡地域内の結果を優先
-        sado_places = []
-        other_places = []
+        sado_places: List[PlaceData] = []
+        other_places: List[PlaceData] = []
 
         for place in places:
             address = place.get('formattedAddress', '')
@@ -241,7 +264,7 @@ class NewUnifiedProcessor:
 
         return None
 
-    def format_result(self, place: Dict, query_data: Dict, method: str) -> Dict:
+    def format_result(self, place: PlaceData, query_data: QueryData, method: str) -> Dict[str, Any]:
         """結果をフォーマット"""
         result = {
             'Place ID': place.get('id', ''),
@@ -270,7 +293,7 @@ class NewUnifiedProcessor:
 
         return result
 
-    def format_opening_hours(self, opening_hours: Optional[Dict]) -> str:
+    def format_opening_hours(self, opening_hours: Optional[Dict[str, Any]]) -> str:
         """営業時間をフォーマット"""
         if not opening_hours or 'weekdayDescriptions' not in opening_hours:
             return ''
@@ -286,9 +309,9 @@ class NewUnifiedProcessor:
             'PRICE_LEVEL_EXPENSIVE': '高価',
             'PRICE_LEVEL_VERY_EXPENSIVE': '非常に高価'
         }
-        return price_map.get(price_level, '')
+        return price_map.get(price_level, '') if price_level else ''
 
-    def separate_sado_data(self, results: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
+    def separate_sado_data(self, results: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """佐渡市内・市外データを分離"""
         # 佐渡島の境界
         SADO_BOUNDS = {
@@ -298,8 +321,8 @@ class NewUnifiedProcessor:
             'west': 137.85
         }
 
-        sado_results = []
-        outside_results = []
+        sado_results: List[Dict[str, Any]] = []
+        outside_results: List[Dict[str, Any]] = []
 
         for result in results:
             try:
@@ -317,8 +340,12 @@ class NewUnifiedProcessor:
                     result['地区'] = '市外'
                     outside_results.append(result)
 
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as e:
                 # 座標が不正な場合は市外として扱う
+                self._logger.warning("座標変換エラー", 
+                                   lat=result.get('緯度'), 
+                                   lng=result.get('経度'), 
+                                   error=str(e))
                 result['地区'] = '市外'
                 outside_results.append(result)
 
@@ -327,140 +354,90 @@ class NewUnifiedProcessor:
     def classify_district(self, lat: float, lng: float, address: str) -> str:
         """地区分類"""
         # 簡易的な地区分類（住所ベース）
-        if '両津' in address:
-            return '両津'
-        elif '相川' in address:
-            return '相川'
-        elif '佐和田' in address:
-            return '佐和田'
-        elif '金井' in address:
-            return '金井'
-        elif '新穂' in address:
-            return '新穂'
-        elif '畑野' in address:
-            return '畑野'
-        elif '真野' in address:
-            return '真野'
-        elif '小木' in address:
-            return '小木'
-        elif '羽茂' in address:
-            return '羽茂'
-        elif '赤泊' in address:
-            return '赤泊'
-        else:
-            return '佐渡市内'
+        district_keywords = [
+            '両津', '相川', '佐和田', '金井', '新穂',
+            '畑野', '真野', '小木', '羽茂', '赤泊'
+        ]
+        
+        for district in district_keywords:
+            if district in address:
+                return district
+        
+        return '佐渡市内'
 
     def save_to_spreadsheet(self, sheet_name: str, separate_location: bool = True) -> bool:
         """スプレッドシートに保存"""
         if not self.results:
-            print("保存するデータがありません")
+            self._logger.warning("保存するデータがありません")
             return False
 
         try:
             if separate_location:
                 # 地区分類処理
-                print("🗾 佐渡市内・市外データ分離を実行中...")
+                self._logger.info("佐渡市内・市外データ分離を実行中")
                 sado_results, outside_results = self.separate_sado_data(self.results)
 
                 # メインシート（佐渡島内）
                 if sado_results:
-                    self.save_data_to_sheet(sado_results, sheet_name)
-                    print(f"   ✅ {sheet_name}: {len(sado_results)}件")
+                    success = self._storage.save(sado_results, sheet_name)
+                    if success:
+                        self._logger.info("佐渡島内データ保存完了", 
+                                        sheet=sheet_name, 
+                                        count=len(sado_results))
 
                 # 佐渡市外シート
                 if outside_results:
                     outside_sheet_name = f"{sheet_name}_佐渡市外"
-                    self.save_data_to_sheet(outside_results, outside_sheet_name)
-                    print(f"   ✅ {outside_sheet_name}: {len(outside_results)}件")
+                    success = self._storage.save(outside_results, outside_sheet_name)
+                    if success:
+                        self._logger.info("佐渡市外データ保存完了", 
+                                        sheet=outside_sheet_name, 
+                                        count=len(outside_results))
             else:
                 # 分離なしで保存
-                self.save_data_to_sheet(self.results, sheet_name)
-                print(f"   ✅ {sheet_name}: {len(self.results)}件")
+                success = self._storage.save(self.results, sheet_name)
+                if success:
+                    self._logger.info("データ保存完了", 
+                                    sheet=sheet_name, 
+                                    count=len(self.results))
 
             return True
 
         except Exception as e:
-            print(f"❌ スプレッドシート保存エラー: {e}")
+            self._logger.error("スプレッドシート保存エラー", error=str(e))
             return False
 
-    def save_data_to_sheet(self, data: List[Dict], sheet_name: str):
-        """データをシートに保存（修正版）"""
+    def save_data_to_sheet(self, data: List[Dict[str, Any]], sheet_name: str) -> bool:
+        """データをシートに保存（新アーキテクチャ対応版）"""
         if not data:
-            print("   ⚠️ 保存するデータがありません")
-            return
+            self._logger.warning("保存するデータがありません", sheet=sheet_name)
+            return False
 
         try:
-            # 1. データが既にフォーマット済みかどうか確認
-            if data and 'Place ID' in data[0]:
-                # 既にフォーマット済みデータの場合、raw_dataを使用
-                if hasattr(self, 'raw_places_data') and self.raw_places_data:
-                    print(f"   🔄 生データを使用して検証: {len(self.raw_places_data)}件")
-                    raw_data = self.raw_places_data
-                else:
-                    print("   ❌ 生データが見つかりません。フォーマット済みデータをそのまま保存します")
-                    return self._save_formatted_data_directly(data, sheet_name)
-            else:
-                # 生データの場合、そのまま使用
-                raw_data = data
-
-            # 2. データ検証プロセス
-            from processors.data_validator import DataValidator
-            validator = DataValidator()
-
+            # データ検証プロセス
             validation_results = []
-            for item in raw_data:
-                result = validator.validate_place_data(item, sheet_name)
-                if result.is_valid:
-                    validation_results.append(result)
+            for item in self.raw_places_data or data:
+                try:
+                    result = self._validator.validate(item, sheet_name)
+                    if result and getattr(result, 'is_valid', True):
+                        validation_results.append(result)
+                except Exception as e:
+                    self._logger.warning("データ検証エラー", error=str(e), item=item)
 
-            print(f"   🔍 データ検証完了: {len(validation_results)}/{len(raw_data)}件が有効")
+            self._logger.info("データ検証完了", 
+                            valid_count=len(validation_results),
+                            total_count=len(self.raw_places_data or data))
 
-            # 2. SpreadsheetManagerの正しいメソッドを使用
-            sado_result, outside_result = self.spreadsheet_manager.update_category_data(
-                sheet_name, validation_results
-            )
-
-            # 3. 結果報告
-            print(f"   ✅ スプレッドシート保存完了")
-            print(f"      📍 佐渡島内: 更新{sado_result.updated_count}件 + 追加{sado_result.appended_count}件")
-            if outside_result.updated_count > 0 or outside_result.appended_count > 0:
-                print(f"      🌍 佐渡市外: 更新{outside_result.updated_count}件 + 追加{outside_result.appended_count}件")
-
-            return True
-
-        except Exception as e:
-            print(f"   ❌ SpreadsheetManager保存エラー: {e}")
-
-            # フォールバック処理
-            try:
-                print("   🔄 代替保存モードを実行中...")
-                success = self.spreadsheet_manager.create_or_update_worksheet(
-                    sheet_name, data, 'restaurants'
-                )
-                if success:
-                    print(f"   ✅ 代替保存完了: {sheet_name}")
-                    return True
-                else:
-                    print(f"   ❌ 代替保存も失敗")
-                    return False
-
-            except Exception as fallback_error:
-                print(f"   ❌ 代替保存エラー: {fallback_error}")
-                return False
-
-    def _save_formatted_data_directly(self, data: List[Dict], sheet_name: str) -> bool:
-        """フォーマット済みデータを直接保存（フォールバック用）"""
-        try:
-            print(f"   🔄 フォーマット済みデータを直接保存: {len(data)}件")
-            success = self.spreadsheet_manager.create_or_update_worksheet(
-                sheet_name, data, 'restaurants'
-            )
+            # ストレージに保存
+            success = self._storage.save(validation_results, sheet_name)
+            
             if success:
-                print(f"   ✅ フォーマット済みデータ保存完了: {sheet_name}")
+                self._logger.info("データ保存成功", sheet=sheet_name, count=len(validation_results))
                 return True
             else:
-                print(f"   ❌ フォーマット済みデータ保存失敗")
+                self._logger.error("データ保存失敗", sheet=sheet_name)
                 return False
+
         except Exception as e:
-            print(f"   ❌ フォーマット済みデータ保存エラー: {e}")
+            self._logger.error("データ保存処理エラー", error=str(e), sheet=sheet_name)
             return False

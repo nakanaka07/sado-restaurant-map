@@ -16,7 +16,7 @@ CategoryType = Literal['restaurants', 'parkings', 'toilets']
 # Business status types
 BusinessStatusType = Literal[
     'OPERATIONAL',
-    'CLOSED_TEMPORARILY', 
+    'CLOSED_TEMPORARILY',
     'CLOSED_PERMANENTLY',
     'UNKNOWN'
 ]
@@ -25,45 +25,88 @@ BusinessStatusType = Literal[
 RatingType = Union[float, int]  # 1.0 to 5.0
 
 
+class QueryData(TypedDict, total=False):
+    """Type definition for query data from input files."""
+    line_number: int
+    original_line: str
+    type: Literal['cid_url', 'maps_url', 'store_name']
+    store_name: str
+    cid: Optional[str]
+    url: Optional[str]
+
+
+@dataclass
+class ProcessingResult:
+    """Result of data processing operation."""
+    success: bool
+    category: CategoryType
+    processed_count: int
+    error_count: int
+    duration: float
+    errors: List[str]
+
+
 class PlaceData(TypedDict, total=False):
     """
     Type definition for place data from Google Places API.
     Using total=False to make all fields optional for flexibility.
     """
     # Required fields
-    place_id: str
-    name: str
+    id: str  # place_id
+    place_id: str  # for backward compatibility
     
-    # Optional core fields
-    formatted_address: Optional[str]
-    types: List[str]
-    rating: Optional[RatingType]
-    user_ratings_total: Optional[int]
-    business_status: Optional[BusinessStatusType]
-    
+    # Display name
+    displayName: Optional[Dict[str, str]]  # {'text': 'Restaurant Name'}
+    name: str  # for backward compatibility
+
+    # Address fields
+    formattedAddress: Optional[str]
+    formatted_address: Optional[str]  # for backward compatibility
+
     # Location data
-    geometry: Optional[Dict[str, Any]]
+    location: Optional[Dict[str, float]]  # {'latitude': xx, 'longitude': yy}
+    geometry: Optional[Dict[str, Any]]  # for backward compatibility
     latitude: Optional[float]
     longitude: Optional[float]
-    
+
+    # Core business fields
+    types: List[str]
+    rating: Optional[RatingType]
+    userRatingCount: Optional[int]
+    user_ratings_total: Optional[int]  # for backward compatibility
+    businessStatus: Optional[str]
+    business_status: Optional[BusinessStatusType]  # for backward compatibility
+
     # Contact information
-    formatted_phone_number: Optional[str]
+    nationalPhoneNumber: Optional[str]
+    formatted_phone_number: Optional[str]  # for backward compatibility
     international_phone_number: Optional[str]
-    website: Optional[str]
+    websiteUri: Optional[str]
+    website: Optional[str]  # for backward compatibility
     url: Optional[str]
-    
+
     # Operational data
-    opening_hours: Optional[Dict[str, Any]]
-    price_level: Optional[int]
-    
+    regularOpeningHours: Optional[Dict[str, Any]]
+    opening_hours: Optional[Dict[str, Any]]  # for backward compatibility
+    priceLevel: Optional[str]
+    price_level: Optional[int]  # for backward compatibility
+
+    # Service availability
+    takeout: Optional[bool]
+    delivery: Optional[bool]
+    dineIn: Optional[bool]
+    servesBreakfast: Optional[bool]
+    servesLunch: Optional[bool]
+    servesDinner: Optional[bool]
+
     # Additional metadata
     plus_code: Optional[Dict[str, str]]
     utc_offset: Optional[int]
     vicinity: Optional[str]
-    
+
     # Photos
     photos: Optional[List[Dict[str, Any]]]
-    
+
     # Reviews
     reviews: Optional[List[Dict[str, Any]]]
 
@@ -74,27 +117,27 @@ class ValidatedPlaceData(TypedDict):
     place_id: str
     name: str
     category: CategoryType
-    
+
     # Normalized address fields
     formatted_address: str
     district: Optional[str]  # Sado city district
     is_in_sado: bool
-    
+
     # Location data
     latitude: Optional[float]
     longitude: Optional[float]
-    
+
     # Business information
     types: List[str]
     rating: Optional[RatingType]
     user_ratings_total: Optional[int]
     business_status: BusinessStatusType
-    
+
     # Contact information (cleaned)
     phone_number: Optional[str]
     website: Optional[str]
     google_maps_url: Optional[str]
-    
+
     # Validation metadata
     validation_status: Literal['valid', 'warning', 'error']
     validation_errors: List[str]
@@ -123,7 +166,7 @@ class BatchProcessingResult:
     successful_items: List[ValidatedPlaceData]
     failed_items: List[Dict[str, Any]]
     errors: List[str]
-    
+
     @property
     def success_rate(self) -> float:
         """Calculate success rate as percentage."""
@@ -180,7 +223,7 @@ TOILET_TYPES = [
 # API field masks for different operations
 PLACE_DETAILS_FIELDS = [
     'place_id',
-    'name', 
+    'name',
     'formatted_address',
     'geometry/location',
     'types',
@@ -199,7 +242,7 @@ PLACE_DETAILS_FIELDS = [
 TEXT_SEARCH_FIELDS = [
     'place_id',
     'name',
-    'formatted_address', 
+    'formatted_address',
     'geometry/location',
     'types',
     'rating',

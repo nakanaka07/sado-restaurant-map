@@ -14,11 +14,11 @@ from pathlib import Path
 @dataclass
 class GoogleAPIConfig:
     """Google API configuration settings."""
-    
+
     places_api_key: str
     service_account_path: str
     spreadsheet_id: str
-    
+
     def __post_init__(self):
         """Validate configuration after initialization."""
         if not self.places_api_key:
@@ -32,13 +32,13 @@ class GoogleAPIConfig:
 @dataclass
 class ProcessingConfig:
     """Data processing configuration settings."""
-    
+
     api_delay: float = 1.0
     max_workers: int = 3
     max_retries: int = 3
     timeout: int = 30
     batch_size: int = 50
-    
+
     def __post_init__(self):
         """Validate processing configuration."""
         if self.api_delay < 0:
@@ -52,13 +52,13 @@ class ProcessingConfig:
 @dataclass
 class LoggingConfig:
     """Logging configuration settings."""
-    
+
     level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     file_enabled: bool = True
     file_path: str = "logs/scraper.log"
     console_enabled: bool = True
-    
+
     def __post_init__(self):
         """Validate logging configuration."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -69,41 +69,41 @@ class LoggingConfig:
 @dataclass
 class ScraperConfig:
     """Main scraper configuration class."""
-    
+
     google_api: GoogleAPIConfig
     processing: ProcessingConfig
     logging: LoggingConfig
     debug: bool = False
     dry_run: bool = False
     supported_categories: List[str] = field(default_factory=lambda: ['restaurants', 'parkings', 'toilets'])
-    
+
     @classmethod
     def from_environment(cls) -> 'ScraperConfig':
         """Create configuration from environment variables."""
-        
+
         # Get environment variables with defaults
         places_api_key = os.getenv('PLACES_API_KEY', '')
         service_account_path = os.getenv(
-            'GOOGLE_SERVICE_ACCOUNT_PATH', 
+            'GOOGLE_SERVICE_ACCOUNT_PATH',
             'config/service-account.json'
         )
         spreadsheet_id = os.getenv('SPREADSHEET_ID', '')
-        
+
         # Processing settings
         api_delay = float(os.getenv('API_DELAY', '1.0'))
         max_workers = int(os.getenv('MAX_WORKERS', '3'))
         max_retries = int(os.getenv('MAX_RETRIES', '3'))
         timeout = int(os.getenv('TIMEOUT', '30'))
         batch_size = int(os.getenv('BATCH_SIZE', '50'))
-        
+
         # Application settings
         debug = os.getenv('DEBUG', 'false').lower() == 'true'
         dry_run = os.getenv('DRY_RUN', 'false').lower() == 'true'
-        
+
         # Logging settings
         log_level = os.getenv('LOG_LEVEL', 'INFO')
         log_file_path = os.getenv('LOG_FILE_PATH', 'logs/scraper.log')
-        
+
         return cls(
             google_api=GoogleAPIConfig(
                 places_api_key=places_api_key,
@@ -124,7 +124,7 @@ class ScraperConfig:
             debug=debug,
             dry_run=dry_run
         )
-    
+
     def validate(self) -> None:
         """Validate the entire configuration."""
         # Individual configs validate themselves in __post_init__
@@ -132,7 +132,7 @@ class ScraperConfig:
         if self.debug and not self.dry_run:
             # In debug mode, suggest using dry run
             pass
-    
+
     def to_dict(self) -> dict:
         """Convert configuration to dictionary for logging/debugging."""
         return {

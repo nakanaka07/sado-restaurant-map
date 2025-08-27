@@ -4,57 +4,80 @@
 新しいAPIクライアント対応版 - 統合実行スクリプト
 
 Places API (New) v1を使用した最新版実行システム
+Clean Architecture準拠・依存性注入対応版
 """
 
 import argparse
 import os
+import sys
 import time
 from datetime import datetime
+from pathlib import Path
 
-# 環境変数の明示的読み込み
-from dotenv import load_dotenv
-import sys
+# パス設定
+current_dir = Path(__file__).parent
+scraper_root = current_dir.parent.parent
+sys.path.insert(0, str(scraper_root))
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)  # tools/scraper を追加
+# 新しいアーキテクチャ対応インポート
+from shared.config.settings import ScraperConfig
+from shared.container import DIContainer
+from shared.logging.logger import get_logger, setup_logging
+from shared.exceptions import ConfigurationError, ValidationError
+from application.workflows.data_processing_workflow import DataProcessingWorkflow
+from shared.types.core_types import CategoryType
 
-config_dir = os.path.join(parent_dir, 'config')  # 修正: 正しいパス
-config_env_path = os.path.join(config_dir, '.env')
-if os.path.exists(config_env_path):
-    load_dotenv(config_env_path)
-    print(f"📄 環境変数を読み込み: {config_env_path}")
+class ScraperCLI:
+    """新しいアーキテクチャ対応CLI実行クラス"""
 
-from processors.new_unified_processor import NewUnifiedProcessor
-from utils.google_auth import validate_environment
+    def __init__(self, config: ScraperConfig, container: DIContainer):
+        """CLI初期化"""
+        self._config = config
+        self._container = container
+        self._logger = get_logger(__name__)
 
-class NewUnifiedRunner:
-    """新しいAPIクライアント対応版統合実行クラス"""
+        # ワークフローを取得
+        self._workflow = self._container.get(DataProcessingWorkflow)
 
-    def __init__(self):
         self.data_files = {
             'restaurants': 'data/urls/restaurants_merged.txt',
             'parkings': 'data/urls/parkings_merged.txt',
             'toilets': 'data/urls/toilets_merged.txt'
         }
 
+    def validate_environment(self) -> bool:
+        """環境設定の検証"""
+        try:
+            # API キーの検証
+            if not self._config.google_api.places_api_key:
+                self._logger.error("Places API キーが設定されていません")
+                return False
+
+            # スプレッドシートIDの検証
+            if not self._config.google_api.spreadsheet_id:
+                self._logger.error("スプレッドシートIDが設定されていません")
+                return False
+
+            # サービスアカウントファイルの検証
+            if not Path(self._config.google_api.service_account_path).exists():
+                self._logger.error("サービスアカウントファイルが見つかりません", 
+                                 path=self._config.google_api.service_account_path)
+                return False
+
+            self._logger.info("環境設定検証完了")
+            return True
+
+        except Exception as e:
+            self._logger.error("環境設定検証エラー", error=str(e))
+            return False
+
     def validate_file(self, file_path: str) -> bool:
         """ファイルの存在確認"""
-        if os.path.exists(file_path):
-            with open(file_path, 'r', encoding='utf-8') as f:
-                lines = [line.strip() for line in f.readlines() if line.strip() and not line.startswith('#')]
-            return len(lines) > 0
-        return False
+        return self._workflow.validate_file(file_path)
 
     def count_queries(self, file_path: str) -> int:
         """クエリ数をカウント"""
-        if not os.path.exists(file_path):
-            return 0
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            lines = [line.strip() for line in f.readlines() if line.strip() and not line.startswith('#')]
-
-        return len(lines)
+        return self._workflow.count_queries(file_path)
 
     def show_execution_plan(self, target: str, mode: str):
         """実行計画を表示"""
