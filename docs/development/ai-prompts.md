@@ -1,7 +1,7 @@
 # AI Assistant Prompts for Code Improvement
 
-> 🎯 **目的**: React+TypeScript開発での効率的なAIアシスタント活用  
-> **最終更新**: 2025年8月2日 | **バージョン**: 5.0 **[2025年最新版]**
+> 🎯 **目的**: React+TypeScript 開発での効率的な AI アシスタント活用
+> **最終更新**: 2025 年 8 月 27 日 | **バージョン**: 6.0
 
 ## 📖 目次
 
@@ -15,17 +15,17 @@
 
 ### 💡 使い分けの基本原則
 
-| 状況                 | 使用する指示    | 目的               |
-| -------------------- | --------------- | ------------------ |
-| **エラー・バグ発生** | #1 修正・強化   | 問題解決           |
-| **コードが汚い**     | #2 整理・清掃   | 品質向上           |
-| **動作が重い**       | #3 最適化       | パフォーマンス改善 |
-| **構造を改善**       | #4 リファクタ   | 設計改善           |
-| **最新技術適用**     | #5 モダナイズ   | 技術更新           |
-| **総合的改善**       | #6 包括改善     | 全面的向上         |
-| **設定・環境**       | #7 環境最適化   | 開発環境改善       |
-| **プロジェクト分析** | #10 診断        | 現状把握           |
-| **緊急時**           | #12 緊急対応    | 即座の問題解決     |
+| 状況                 | 使用する指示  | 目的               |
+| -------------------- | ------------- | ------------------ |
+| **エラー・バグ発生** | #1 修正・強化 | 問題解決           |
+| **コードが汚い**     | #2 整理・清掃 | 品質向上           |
+| **動作が重い**       | #3 最適化     | パフォーマンス改善 |
+| **構造を改善**       | #4 リファクタ | 設計改善           |
+| **最新技術適用**     | #5 モダナイズ | 技術更新           |
+| **総合的改善**       | #6 包括改善   | 全面的向上         |
+| **設定・環境**       | #7 環境最適化 | 開発環境改善       |
+| **プロジェクト分析** | #10 診断      | 現状把握           |
+| **緊急時**           | #12 緊急対応  | 即座の問題解決     |
 
 ### 🎯 使用時の重要な区別
 
@@ -313,7 +313,7 @@
 # パフォーマンス改善フロー
 #10診断 → #3最適化 → #2清掃
 
-# 品質向上フロー  
+# 品質向上フロー
 #11診断 → #4リファクタ → #1修正 → #2清掃
 
 # モダナイズフロー
@@ -335,148 +335,38 @@
 
 ## 🔗 開発リソース
 
-### 📚 **技術ドキュメント（必須参照）**
+### 📚 技術ドキュメント
 
-#### ⚛️ **React & TypeScript**
+- **React 19 公式**: <https://react.dev/> - 最新機能・ベストプラクティス
+- **TypeScript 5.7**: <https://www.typescriptlang.org/> - 型安全性・新機能
+- **Google Maps API**: <https://developers.google.com/maps/documentation/javascript> - 地図 API・Advanced Markers
+- **@vis.gl/react-google-maps**: <https://visgl.github.io/react-google-maps/> - React 統合ライブラリ
+- **Vite 6.0**: <https://vitejs.dev/> - 高速ビルドツール
+- **Google Sheets API v4**: <https://developers.google.com/sheets/api> - スプレッドシート連携
 
-- **React 19.1 公式**: <https://react.dev/> - 最新機能・ベストプラクティス
-- **React Compiler Stable**: <https://react.dev/learn/react-compiler> - パフォーマンス自動最適化
-- **TypeScript 5.9**: <https://www.typescriptlang.org/> - 型安全性・新機能
-- **React DevTools**: <https://github.com/facebook/react/tree/main/packages/react-devtools>
-- **React Activity API**: <https://react.dev/reference/react/experimental> - Concurrent Features
-- **View Transitions API**: <https://developer.mozilla.org/docs/Web/API/View_Transitions_API> - 画面遷移
+### 🛠️ 開発支援
 
-#### 🗺️ **Google Maps API（核心技術）**
-
-- **Maps JavaScript API**: <https://developers.google.com/maps/documentation/javascript> - 日本語ドキュメント
-- **Advanced Markers v2**: <https://developers.google.com/maps/documentation/javascript/advanced-markers/overview> - 次世代マーカー（推奨）
-- **@vis.gl/react-google-maps v3**: <https://visgl.github.io/react-google-maps/> - React統合ライブラリ
-- **3D Maps & WebGL**: <https://developers.google.com/maps/documentation/javascript/3d/overview> - 3D地図機能
-- **Places API (New) v1**: <https://developers.google.com/places/web-service/overview> - 最新Places API
-- **Marker Clustering v2**: <https://developers.google.com/maps/documentation/javascript/marker-clustering> - マーカークラスタリング
-
-#### 🍽️ **佐渡飲食店データベース（プロジェクト特化）**
-
-- **Google Sheets API v4**: <https://developers.google.com/sheets/api> - スプレッドシート連携（2025年8月最新）
-- **JavaScript クイックスタート**: <https://developers.google.com/workspace/sheets/api/quickstart/js> - React実装基礎
-- **データソース**: プロジェクト用Google Sheetsスプレッドシート（環境変数で設定）
-
-##### 📊 **データアクセス方法（優先順）**
-
-1. **CSVエクスポート（推奨）**: `ファイル → ダウンロード → カンマ区切り値(.csv、現在のシート)`
-2. **Web公開**: `ファイル → 共有 → ウェブに公開` - API不要の直接アクセス
-3. **共有リンク**: `共有ボタン → リンクを知っている全員が閲覧可` - 正しい設定必須
-
-##### 🔧 **共有設定トラブルシューティング**
-
-- **問題**: ログイン要求・アクセス拒否 → **解決策**: <https://support.google.com/docs/answer/2494822>
-- **確認手順**: スプレッドシート内で「共有」ボタン → 「一般的なアクセス」→「リンクを知っている全員が閲覧可」
-- **重要**: 「制限付きアクセス」を必ずオフにする
-- **代替方法**: ウェブ公開機能（<https://support.google.com/docs/answer/183965>）
-
-##### 🛠️ **技術実装**
-
-###### 🔌 **API方式（リアルタイム・推奨）**
-
-```typescript
-// Google Sheets API v4 - リアルタイムデータ取得
-const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
-const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY;
-const SHEET_NAME = 'まとめータベース';
-
-const fetchRestaurantData = async () => {
-  const range = `${SHEET_NAME}!A:Z`;
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-  const response = await fetch(url);
-  return response.json();
-};
-```
-
-###### 📁 **静的方式（開発用・バックアップ）**
-
-- **API認証設定**: Google Cloud Console → API有効化 → OAuth設定 → APIキー作成
-- **CSV Export**: スプレッドシート → ファイル → ダウンロード → CSV形式（静的データ用）
-- **JSON変換**: <https://www.convertcsv.com/csv-to-json.htm> - CSV→JSON変換ツール
-- **Geocoding API**: <https://developers.google.com/maps/documentation/geocoding> - 住所→座標変換
-- **読み取り専用スコープ**: `https://www.googleapis.com/auth/spreadsheets.readonly`
-
-#### ⚡ **ビルド・開発ツール**
-
-- **Vite 8.0**: <https://vitejs.dev/> - 高速ビルドツール・最新版（Rolldown統合）
-- **Vite Configuration**: <https://vitejs.dev/config/> - 設定リファレンス
-- **Vite Plugins**: <https://vitejs.dev/plugins/> - 公式プラグイン一覧
-- **Vite PWA v0.20**: <https://vite-pwa-org.netlify.app/guide/> - PWA統合ガイド
-- **vite-plugin-pwa**: <https://github.com/vite-pwa/vite-plugin-pwa> - PWAプラグイン
-- **Vitest 4.0**: <https://vitest.dev/> - テストフレームワーク
-- **PWA Guide 2025**: <https://web.dev/progressive-web-apps/> - プログレッシブWebアプリ
-- **Web Vitals 2025**: <https://web.dev/vitals/> - 最新パフォーマンス指標
-
-##### ⚙️ **プロジェクト設定リファレンス**
-
-###### 🌍 **環境変数設定**
-
-```bash
-# .env.local
-VITE_GOOGLE_MAPS_API_KEY=your_api_key
-VITE_GOOGLE_SHEETS_API_KEY=your_sheets_key
-VITE_SPREADSHEET_ID=your_spreadsheet_id
-```
-
-###### 🚀 **開発・ビルドコマンド**
-
-```bash
-# 開発サーバー起動
-pnpm dev
-
-# 本番ビルド
-pnpm build
-
-# プレビュー
-pnpm preview
-```
-
-### 🛠️ **開発支援サイト**
-
-#### 💬 **コミュニティ・サポート**
-
-- **Stack Overflow (Google Maps)**: <https://stackoverflow.com/questions/tagged/google-maps-api-3>
-- **React Community**: <https://react.dev/community>
-- **TypeScript Discord**: <https://discord.gg/typescript>
-
-#### 📖 **学習・リファレンス**
-
-- **MDN Web Docs**: <https://developer.mozilla.org/> - Web標準リファレンス
+- **MDN Web Docs**: <https://developer.mozilla.org/> - Web 標準リファレンス
 - **Can I Use**: <https://caniuse.com/> - ブラウザ互換性確認
 - **Web.dev**: <https://web.dev/> - パフォーマンス・品質ガイド
 
-### 🎯 **プロンプト連携活用法**
+### 🎯 プロンプト活用例
 
 ```text
-# 2025年最新技術調査時の組み合わせ例
-"#10診断 + React 19.1公式サイト確認" → 現状分析と最新ベストプラクティス比較
-"#5モダナイズ + React Compiler Stable" → パフォーマンス自動最適化の適用
-"#5モダナイズ + Advanced Markers v2" → Google Maps最新マーカーAPIへの移行
-"#8フロントエンド + Web Vitals 2025" → 最新パフォーマンス指標対応
-"#3最適化 + View Transitions API" → 最新UI遷移技術の実装
+# 基本的な改善
+#1: エラー修正 → 問題解決
+#3: 最適化 → パフォーマンス改善
+#6: 包括改善 → 総合的向上
 
-# Google Maps特化連携
-"#3最適化 + Maps 3D & WebGL" → 3D地図・WebGL機能の活用
-"#1修正 + Advanced Markers移行" → 非推奨マーカーAPIからの移行
-"#4リファクタ + マーカークラスタリング最適化" → 大量マーカー表示の改善
+# 定期メンテナンス
+#10: プロジェクト診断（月1回）
+#11: ディレクトリ診断（週1回）
 
-# React 19.1連携
-"#5モダナイズ + Activity API" → Concurrent Features・並行レンダリング
-"#3最適化 + React Compiler Stable" → 自動メモ化・最適化の活用
-"#1修正 + 新Hooks API" → use hookなど最新機能への対応
-
-# 佐渡飲食店データベース連携
-"#10診断 + Google Sheets API v4" → スプレッドシートデータ構造の分析
-"#5モダナイズ + Places API (New) v1" → 最新Places APIへの移行
-"#3最適化 + Geocoding API" → 住所から座標への効率的変換
-"#4リファクタ + 店舗データ型定義" → TypeScript型安全なデータ管理
-"#8フロントエンド + 店舗カード表示" → データ可視化の改善
+# 専門作業
+#5: 技術更新・モダナイズ
+#8: UI/UX・アクセシビリティ改善
 ```
 
 ---
 
-**連携**: `copilot-instructions.md` (自動) + `ai-prompts.md` (手動)
+**連携**: `copilot-instructions.md` (自動)

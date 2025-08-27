@@ -1,127 +1,64 @@
-# Workboxログ制御ガイド（完全解決版）
+# Workbox ログ制御ガイド
 
-> 🎯 **目的**: 開発環境でのWorkboxログ出力の完全制御方法
-> **最終更新**: 2025年8月20日
-> **バージョン**: 3.0 **[完全解決版 - virtual module対応]**
+> 🎯 **目的**: 開発環境での Workbox ログ出力の制御方法
+> **最終更新**: 2025 年 8 月 27 日
 
-## 🚨 問題の背景
+## 🚨 問題
 
-開発環境でWorkboxが大量のログを出力し、重要なデバッグ情報が見づらくなる問題と、`virtual:pwa-register/react`モジュールエラーの**完全解決**方法を説明します。
+開発環境で Workbox が大量のログを出力し、重要なデバッグ情報が見づらくなる問題の解決方法を説明します。
 
-## ✅ 解決済み問題
+## ✅ 制御方法
 
-1. **Workboxログ大量出力** → ✅ 完全無効化
-2. **virtual moduleエラー** → ✅ 動的インポートで解決
-3. **PWABadgeコンポーネントエラー** → ✅ 条件付きレンダリングで対応
+### 1. 通常の開発（推奨）
 
-## 🔧 制御方法（完全版）
-
-### 1. 基本設定（推奨）
-
-**通常の開発時**: Workboxを完全無効化
+Workbox を完全無効化して快適な開発環境を実現：
 
 ```bash
-# 通常の開発（Workboxログなし）
-pnpm dev
+pnpm dev  # Workboxログなし
 ```
 
-### 2. PWA機能テスト時
+### 2. PWA 機能テスト
 
-**PWA機能をテストしたい場合**: 環境変数で一時的に有効化
+PWA 機能をテストしたい場合のみ一時的に有効化：
 
 ```bash
-# PWA機能を含めてテスト
 $env:ENABLE_PWA_DEV="true"; pnpm dev
 ```
 
-### 3. 詳細デバッグ時
-
-**Workbox動作を詳しく調べたい場合**: 設定ファイルを一時的に変更
-
-```typescript
-// vite.config.ts での一時的な変更
-devOptions: {
-  enabled: true,           // 完全有効化
-  suppressWarnings: false, // 警告も表示
-}
-```
-
-## 📊 制御レベル比較
-
-| レベル | enabled | ログ出力 | 用途 |
-|--------|---------|----------|------|
-| **Level 0** | `false` | なし | 通常開発（推奨） |
-| **Level 1** | `ENABLE_PWA_DEV=true` | 最小限 | PWA機能テスト |
-| **Level 2** | `true` + `suppressWarnings: false` | 詳細 | Workboxデバッグ |
-
-## 🎯 実用的な使い分け
-
-### 日常開発
+### 3. 本番確認
 
 ```bash
-# Workboxログなし（快適な開発環境）
-pnpm dev
+pnpm build && pnpm preview  # 完全なPWA機能
 ```
 
-### PWA機能確認
+## � トラブルシューティング
+
+### ログが出力される場合
+
+1. 開発サーバー再起動：`Ctrl+C` → `pnpm dev`
+2. ブラウザキャッシュクリア：`Ctrl+Shift+R`
+3. Service Worker 削除：DevTools → Application → Service Workers → Unregister
+
+### PWA 機能が動作しない場合
+
+環境変数を確認：
 
 ```bash
-# Service Worker、オフライン機能等をテスト
-$env:ENABLE_PWA_DEV="true"; pnpm dev
-```
-
-### 本番確認
-
-```bash
-# 本番ビルドでPWA機能確認
-pnpm build
-pnpm preview
-```
-
-## 🔍 トラブルシューティング
-
-### Q: まだWorkboxログが出力される
-
-**A**: ブラウザのキャッシュをクリアしてください
-
-```bash
-# 開発サーバー再起動
-Ctrl+C
-pnpm dev
-```
-
-### Q: PWA機能が動作しない
-
-**A**: 環境変数を確認してください
-
-```bash
-# 環境変数確認
 echo $env:ENABLE_PWA_DEV
-
-# 設定して再起動
-$env:ENABLE_PWA_DEV="true"
-pnpm dev
-```
-
-### Q: 本番でPWA機能が動作しない
-
-**A**: 本番ビルドでは常に有効です
-
-```bash
-# 本番ビルドでテスト
-pnpm build
-pnpm preview
+$env:ENABLE_PWA_DEV="true"  # 設定
 ```
 
 ## 📁 関連ファイル
 
-- `vite.config.ts` - Workbox設定
-- `dev-dist/` - 開発時生成ファイル（自動削除対象）
-- `.gitignore` - 除外設定
+- `vite.config.ts` - Workbox 設定
+- `src/utils/logFilter.ts` - ログフィルタリング
 
 ## 💡 ベストプラクティス
 
-1. **通常開発**: Workboxオフで快適に作業
-2. **PWA確認**: 環境変数で一時的に有効化
+1. **通常開発**: Workbox オフで快適に作業
+2. **PWA 確認**: 環境変数で一時的に有効化
 3. **本番前確認**: ビルド後のプレビューで最終確認
-4. **定期的**: `dev-dist/`フォルダを削除
+
+---
+
+**参考**: PWA 機能の詳細は `pwa-configuration-guide.md` を参照
