@@ -49,30 +49,30 @@ python -m interface.cli.main --category all
 
 ## 🔑 主要コンポーネント
 
-### Core層（ビジネスロジック）
+### Core 層（ビジネスロジック）
 
 - **`data_processor.py`**: メインデータ処理エンジン
-- **`api_processor.py`**: API通信処理
+- **`api_processor.py`**: API 通信処理
 - **`deduplicator.py`**: 重複除去処理
 - **`location_processor.py`**: 位置情報処理
 - **`store_discoverer.py`**: 新店舗発見システム
 - **`validators.py`**: データ検証・変換
 
-### Infrastructure層（外部システム連携）
+### Infrastructure 層（外部システム連携）
 
 - **`places_client.py`**: Google Places API (New) v1 クライアント
 - **`sheets_manager.py`**: Google Sheets 操作管理
 - **`google_auth.py`**: Google API 認証
 
-### Interface層（外部インターフェース）
+### Interface 層（外部インターフェース）
 
 - **`main.py`**: CLI エントリーポイント
 
-### Shared層（共通ライブラリ）
+### Shared 層（共通ライブラリ）
 
 - **`translators.py`**: 翻訳・正規化ユーティリティ
 - **`formatters.py`**: データフォーマット変換
-- **`url_converter.py`**: URL変換ユーティリティ
+- **`url_converter.py`**: URL 変換ユーティリティ
 
 ## ⚙️ 環境設定
 
@@ -114,7 +114,7 @@ processor = DataProcessor(
 result = processor.process_category('restaurants')
 ```
 
-### CLIでの実行
+### CLI での実行
 
 ```bash
 # レストランデータ処理
@@ -137,18 +137,18 @@ python -m interface.cli.main --category restaurants --dry-run
 
 ### ✅ 実装済み機能
 
-- **Google Places API (New) v1 対応**: 最新APIによる高精度データ取得
+- **Google Places API (New) v1 対応**: 最新 API による高精度データ取得
 - **自動データ検証**: 住所正規化・地区分類・品質チェック
-- **重複除去**: CIDベースの効率的な重複排除
-- **佐渡島内外自動分離**: GPS座標による正確な位置判定
-- **Google Sheets自動更新**: リアルタイムデータ同期
+- **重複除去**: CID ベースの効率的な重複排除
+- **佐渡島内外自動分離**: GPS 座標による正確な位置判定
+- **Google Sheets 自動更新**: リアルタイムデータ同期
 - **エラーハンドリング**: 堅牢なエラー処理・リトライ機能
 
 ### 🚧 進行中の改善
 
 - **依存性注入の完全実装**: テスト容易性・疎結合の実現
-- **型安全性の向上**: TypeScript準拠の厳密な型定義
-- **包括的テストスイート**: 単体・統合・E2Eテスト
+- **型安全性の向上**: TypeScript 準拠の厳密な型定義
+- **包括的テストスイート**: 単体・統合・E2E テスト
 
 ## 🔧 メンテナンス・トラブルシューティング
 
@@ -168,10 +168,12 @@ python -m scripts.debug.field_mask_debug
 ### よくある問題
 
 1. **API 認証エラー**:
+
    - `PLACES_API_KEY` の確認
    - サービスアカウントファイルのパスチェック
 
 2. **データ検証エラー**:
+
    - Places API レスポンス形式の確認
    - 必須フィールドの存在確認
 
