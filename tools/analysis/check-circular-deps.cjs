@@ -163,10 +163,12 @@ class CircularDependencyChecker {
     // 依存関係グラフ出力
     const graph = this.generateDependencyGraph();
     fs.writeFileSync(
-      path.join(__dirname, "../../dependency-graph.json"),
+      path.join(__dirname, "output/dependency-graph.json"),
       JSON.stringify(graph, null, 2)
     );
-    console.log("\n📊 dependency-graph.json を生成しました");
+    console.log(
+      "\n📊 tools/analysis/output/dependency-graph.json を生成しました"
+    );
 
     return {
       circularDependencies: this.circularDeps,

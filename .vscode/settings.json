@@ -188,5 +188,6 @@
     "vite",
     "vitest",
     "yakiniku"
-  ]
+  ],
+  "python-envs.pythonProjects": []
 }

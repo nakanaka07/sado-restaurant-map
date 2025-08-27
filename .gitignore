@@ -89,3 +89,6 @@ workbox-*.js.map
 # Testing
 coverage/
 .nyc_output
+
+# Analysis outputs
+tools/analysis/output/

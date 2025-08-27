@@ -21,10 +21,10 @@ class DependencyAnalyzer {
    * 依存関係グラフを読み込み
    */
   loadDependencyGraph() {
-    const graphPath = path.join(__dirname, "../../dependency-graph.json");
+    const graphPath = path.join(__dirname, "output/dependency-graph.json");
     if (!fs.existsSync(graphPath)) {
       throw new Error(
-        "dependency-graph.json が見つかりません。先に check-circular-deps.cjs を実行してください。"
+        "tools/analysis/output/dependency-graph.json が見つかりません。先に check-circular-deps.cjs を実行してください。"
       );
     }
     this.dependencyGraph = JSON.parse(fs.readFileSync(graphPath, "utf8"));
@@ -308,10 +308,12 @@ class DependencyAnalyzer {
 
     // 詳細レポートをファイルに保存
     fs.writeFileSync(
-      path.join(__dirname, "../../coupling-analysis-report.json"),
+      path.join(__dirname, "output/coupling-analysis-report.json"),
       JSON.stringify(report, null, 2)
     );
-    console.log("\n📄 coupling-analysis-report.json を生成しました");
+    console.log(
+      "\n📄 tools/analysis/output/coupling-analysis-report.json を生成しました"
+    );
 
     return report;
   }

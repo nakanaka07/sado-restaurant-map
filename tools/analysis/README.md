@@ -45,14 +45,14 @@ node tools/analysis/analyze-coupling.cjs
 - **機能**: TypeScript/TSX ファイル間の循環依存検出
 - **スキャン対象**: `src/`ディレクトリの`.ts`、`.tsx`ファイル
 - **除外**: テストファイル（`.test.`）、型定義ファイル（`.d.ts`）
-- **出力**: `dependency-graph.json`（他ツールで使用）
+- **出力**: `tools/analysis/output/dependency-graph.json`（他ツールで使用）
 
 ### analyze-coupling.cjs
 
 - **機能**: モジュール結合度測定・Clean Architecture レイヤー違反検出
 - **指標**: 入力/出力結合度、不安定性、総結合度
 - **レイヤー**: UI、Application、Domain、Infrastructure、Config
-- **出力**: `coupling-analysis-report.json`
+- **出力**: `tools/analysis/output/coupling-analysis-report.json`
 
 ## 📊 分析結果の見方
 
