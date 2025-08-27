@@ -1,7 +1,20 @@
-# 🧪 Google Sheets統合テスト用スクリプト
+#!/usr/bin/env pwsh
 
-# 佐渡飲食店マップ - データ統合テスト
-# places_data_updater.py → Google Sheets → React App
+<#
+.SYNOPSIS
+    Google Sheets統合テスト用スクリプト
+
+.DESCRIPTION
+    佐渡飲食店マップ - データ統合テスト
+    Google Sheets → React App
+
+.EXAMPLE
+    ./test-integration.ps1
+
+.NOTES
+    対象: 開発者
+    最終更新: 2025年8月27日
+#>
 
 Write-Host "🚀 佐渡飲食店マップ - データ統合テスト開始" -ForegroundColor Green
 Write-Host "=" * 50
@@ -10,82 +23,45 @@ Write-Host "=" * 50
 Write-Host "📋 環境変数の確認..." -ForegroundColor Blue
 
 if (-not (Test-Path ".env.local")) {
-    Write-Host "❌ .env.localファイルが見つかりません" -ForegroundColor Red
-    Write-Host "📝 .env.local.exampleをコピーして設定してください" -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "実行コマンド:" -ForegroundColor Green
-    Write-Host "Copy-Item .env.local.example .env.local" -ForegroundColor Cyan
-    exit 1
+  Write-Host "❌ .env.localファイルが見つかりません" -ForegroundColor Red
+  Write-Host "📝 .env.local.exampleをコピーして設定してください" -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "実行コマンド:" -ForegroundColor Green
+  Write-Host "Copy-Item .env.local.example .env.local" -ForegroundColor Cyan
+  exit 1
 }
 
-# 2. Python環境のアクティベート
-Write-Host "🐍 Python環境のアクティベート..." -ForegroundColor Blue
-
-try {
-    & .\.venv\Scripts\Activate.ps1
-    Write-Host "✅ Python環境アクティベート完了" -ForegroundColor Green
-}
-catch {
-    Write-Host "❌ Python環境のアクティベートに失敗" -ForegroundColor Red
-    Write-Host "📝 以下のコマンドで仮想環境を作成してください:" -ForegroundColor Yellow
-    Write-Host "python -m venv .venv" -ForegroundColor Cyan
-    Write-Host "pip install -r scraper/requirements.txt" -ForegroundColor Cyan
-    exit 1
-}
-
-# 3. スクレイパー実行前チェック
-Write-Host "🔍 スクレイパー設定チェック..." -ForegroundColor Blue
-
-if (-not (Test-Path "scraper/places_data_updater.py")) {
-    Write-Host "❌ スクレイパーファイルが見つかりません" -ForegroundColor Red
-    exit 1
-}
-
-# 必要な設定ファイルの確認
-$requiredFiles = @("scraper/restaurants.txt", "scraper/parkings.txt", "scraper/toilets.txt")
-foreach ($file in $requiredFiles) {
-    if (-not (Test-Path $file)) {
-        Write-Host "⚠️  $file が見つかりません" -ForegroundColor Yellow
-    }
-}
-
-# 4. テスト用小規模データでスクレイパー実行
-Write-Host "🤖 テスト用データでスクレイパー実行..." -ForegroundColor Blue
-
-# 環境変数設定（テスト用）
-$env:TARGET_DATA = "restaurants"
-$env:API_DELAY = "2"
-
-try {
-    python scraper/places_data_updater.py
-    Write-Host "✅ スクレイパー実行完了" -ForegroundColor Green
-}
-catch {
-    Write-Host "❌ スクレイパー実行に失敗" -ForegroundColor Red
-    Write-Host "📝 エラー内容を確認して設定を見直してください" -ForegroundColor Yellow
-    exit 1
-}
-
-# 5. フロントエンド依存関係のインストール
+# 2. フロントエンド依存関係のインストール
 Write-Host "📦 フロントエンド依存関係の確認..." -ForegroundColor Blue
 
 if (-not (Test-Path "node_modules")) {
-    Write-Host "📦 依存関係をインストール中..." -ForegroundColor Blue
-    pnpm install
+  Write-Host "📦 依存関係をインストール中..." -ForegroundColor Blue
+  pnpm install
 }
 
-# 6. 型チェックとビルドテスト
+# 3. 型チェックとビルドテスト
 Write-Host "🔧 TypeScript型チェック..." -ForegroundColor Blue
 
 try {
-    pnpm tsc --noEmit
-    Write-Host "✅ 型チェック完了" -ForegroundColor Green
+  pnpm tsc --noEmit
+  Write-Host "✅ 型チェック完了" -ForegroundColor Green
 }
 catch {
-    Write-Host "⚠️  型エラーがあります（続行可能）" -ForegroundColor Yellow
+  Write-Host "⚠️  型エラーがあります（続行可能）" -ForegroundColor Yellow
 }
 
-# 7. テスト用開発サーバー起動
+# 4. テスト実行
+Write-Host "🧪 単体テスト実行..." -ForegroundColor Blue
+
+try {
+  pnpm test:run
+  Write-Host "✅ テスト実行完了" -ForegroundColor Green
+}
+catch {
+  Write-Host "⚠️  テストでエラーがあります" -ForegroundColor Yellow
+}
+
+# 5. テスト用開発サーバー起動
 Write-Host "🌐 開発サーバーを起動します..." -ForegroundColor Blue
 Write-Host "📍 ブラウザで http://localhost:5173 を開いてテストしてください" -ForegroundColor Green
 Write-Host ""

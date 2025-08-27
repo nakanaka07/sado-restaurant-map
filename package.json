@@ -14,8 +14,11 @@
     "deploy": "pnpm run build && gh-pages -d dist",
     "predeploy": "pnpm run build",
     "generate:pwa-assets": "pwa-assets-generator --config config/pwa-assets.config.ts",
-    "data:update": "powershell -ExecutionPolicy Bypass -File scripts/database-operations.ps1",
-    "test:integration": "powershell -ExecutionPolicy Bypass -File scripts/test-integration.ps1"
+    "analyze:deps": "node tools/analysis/check-circular-deps.cjs",
+    "analyze:coupling": "node tools/analysis/analyze-coupling.cjs",
+    "analyze:all": "pnpm run analyze:deps && pnpm run analyze:coupling",
+    "data:update": "powershell -ExecutionPolicy Bypass -File tools/testing/check-environment.ps1",
+    "test:integration": "powershell -ExecutionPolicy Bypass -File tools/testing/test-integration.ps1"
   },
   "dependencies": {
     "@types/google.maps": "^3.58.1",
