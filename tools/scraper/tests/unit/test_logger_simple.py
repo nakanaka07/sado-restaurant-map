@@ -48,7 +48,6 @@ class TestContextualLogger:
         logger.debug("Debug message")
 
         # If no exception is raised, the test passes
-        assert True
 
     def test_context_logging(self):
         """Test context-aware logging."""
@@ -61,8 +60,6 @@ class TestContextualLogger:
         # Test logging with context (should not raise exceptions)
         logger.info("Context message", context=context)
 
-        assert True
-
     def test_error_logging_with_exception(self):
         """Test error logging with exception information."""
         logger = ContextualLogger("test_logger")
@@ -72,5 +69,3 @@ class TestContextualLogger:
         except ValueError as e:
             # Test logging exception (should not raise)
             logger.error("Error occurred", exception=e)
-
-        assert True

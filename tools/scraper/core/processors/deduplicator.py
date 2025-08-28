@@ -12,7 +12,18 @@ CIDとテキスト検索項目の重複排除処理
 
 使用例:
     from core.processors.deduplicator import DataDeduplicator
-    deduplicator = DataDeduplicator()
+    deduplicator =     target_files = [
+        base_dir / "restaurants_merged.txt",
+        base_dir / "parkings_merged.txt"
+    ]
+
+    for file_path in target_files:
+        if file_path.exists():
+            process_file(file_path)
+        else:
+            print(f"❌ ファイルが存在しません: {file_path}")
+
+    print("\n🎯 完了: 重複排除処理が終了しました")or()
     deduplicator.remove_duplicates('data/urls/restaurants_merged.txt')
 """
 
@@ -260,15 +271,13 @@ def main():
         base_dir / "parkings_merged.txt"
     ]
 
-    total_removed = 0
-
     for file_path in target_files:
         if file_path.exists():
             process_file(file_path)
         else:
             print(f"❌ ファイルが存在しません: {file_path}")
 
-    print(f"\n🎯 完了: 重複排除処理が終了しました")
+    print("\n🎯 完了: 重複排除処理が終了しました")
 
 if __name__ == "__main__":
     main()

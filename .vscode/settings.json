@@ -235,6 +235,7 @@
     "SERV",
     "structlog",
     "teishoku",
+    "textsearch",
     "txtpython",
     "urllib",
     "venv",
