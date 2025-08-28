@@ -1,13 +1,13 @@
-# 📋 Planning Documentation
+# 📋 Planning Docume### 🔄 Scraper システム改善（実行中）
+
+- 🚀 **[Scraper Clean Architecture 移行計画](./SCRAPER_MIGRATION_PLAN_EXECUTIVE_SUMMARY.md)** - 実行可能な 7 日間移行計画
+- 📋 **[詳細技術仕様](./SCRAPER_CLEAN_ARCHITECTURE_MIGRATION_PLAN.md)** - 包括的実装計画書
+- 📊 データ品質管理システム構築
+- 📊 API 効率化・コスト最適化 on
 
 プロジェクト計画・ロードマップ・改善計画の管理
 
 ## 📁 ドキュメント一覧
-
-### リファクタリング・改善計画
-
-- **[SCRAPER_REFACTORING_PLAN.md](./SCRAPER_REFACTORING_PLAN.md)** - `tools\scraper` リファクタリング計画
-- **[SCRAPER_REFACTORING_IMPLEMENTATION.md](./SCRAPER_REFACTORING_IMPLEMENTATION.md)** - リファクタリング実装手順書
 
 ### マーカー・UI 改善
 
@@ -23,9 +23,9 @@
 - ✅ Google Maps API 統合
 - ✅ PWA 対応・パフォーマンス最適化
 
-### Phase 2: データシステム改善（進行中）
+### Phase 2: データシステム改善（計画中）
 
-- 🚧 **Scraper リファクタリング** - アーキテクチャ再設計・品質向上
+- � **Scraper システム改善** - アーキテクチャ再設計・品質向上
 - 📋 データ品質管理システム構築
 - 📋 API 効率化・コスト最適化
 
@@ -83,7 +83,7 @@ graph TD
 
 ### 🔴 Critical (即座に対応)
 
-- Scraper アーキテクチャ改善
+- データシステム改善
 - セキュリティ脆弱性対応
 - パフォーマンス劣化修正
 

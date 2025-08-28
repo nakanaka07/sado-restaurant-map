@@ -1,6 +1,8 @@
-# Testing Tools - テスト・診断ツール
+# 🔬 Testing Tools - 環境診断・統合テストツール
 
-佐渡島レストランマップアプリケーションの環境設定と統合テストを行うためのツール群です。
+> **目的**: 開発環境の設定確認・Google APIs 接続テスト・データフロー検証
+> **技術**: PowerShell Core 7.0+ | Google APIs 統合テスト
+> **最終更新**: 2025 年 8 月 28 日
 
 ## 📁 ツール構成
 
@@ -19,11 +21,11 @@ tools/testing/
 
 #### 必須環境変数
 
-```typescript
-VITE_GOOGLE_MAPS_API_KEY; // Google Maps JavaScript API キー
-VITE_GOOGLE_MAPS_MAP_ID; // Google Maps Map ID
-VITE_GOOGLE_SHEETS_API_KEY; // Google Sheets API v4 キー
-VITE_SPREADSHEET_ID; // スプレッドシートID
+```bash
+VITE_GOOGLE_MAPS_API_KEY     # Google Maps JavaScript API キー
+VITE_GOOGLE_MAPS_MAP_ID      # Google Maps Map ID
+VITE_GOOGLE_SHEETS_API_KEY   # Google Sheets API v4 キー
+VITE_SPREADSHEET_ID          # スプレッドシートID
 ```
 
 #### 使用方法
@@ -54,6 +56,9 @@ Google Sheets API との統合テストを実行し、データフローの動�
 ```powershell
 # 統合テスト実行
 .\test-integration.ps1
+
+# または package.json scripts 経由
+pnpm run test:integration
 ```
 
 ## 🚀 実行方法
@@ -72,10 +77,10 @@ Google Sheets API との統合テストを実行し、データフローの動�
 
 ```powershell
 # 週次環境チェック
-.\check-environment.ps1
+pnpm run data:update
 
 # 月次統合テスト
-.\test-integration.ps1
+pnpm run test:integration
 ```
 
 ## 📊 トラブルシューティング
@@ -92,9 +97,10 @@ Copy-Item .env.local.example .env.local
 
 ```powershell
 # 仮想環境作成
+cd tools/scraper
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r tools/scraper/requirements.txt
+pip install -r config/requirements.txt
 ```
 
 ## 🔧 環境要件
@@ -105,4 +111,6 @@ pip install -r tools/scraper/requirements.txt
 
 ---
 
-これらのテストツールを活用することで、開発環境の安定した品質保証を実現できます。
+---
+
+これらのテストツールにより、開発環境の安定した品質保証を実現できます.
