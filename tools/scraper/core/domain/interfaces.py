@@ -16,7 +16,7 @@ class ProcessingResult:
     success: bool
     processed_count: int = 0
     error_count: int = 0
-    errors: List[str] = None
+    errors: Optional[List[str]] = None
     data: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):

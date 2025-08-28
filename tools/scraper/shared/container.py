@@ -5,9 +5,13 @@ This module provides a simple dependency injection container for managing
 service dependencies and promoting loose coupling between components.
 """
 
-from typing import Dict, Any, TypeVar, Type, Callable, Optional
+from typing import Dict, Any, TypeVar, Type, Callable, Optional, Set
 from abc import ABC, abstractmethod
 import inspect
+
+# Import configuration classes
+from .config import ScraperConfig, GoogleAPIConfig, ProcessingConfig
+from .exceptions import ConfigurationError
 
 
 T = TypeVar('T')
@@ -34,10 +38,10 @@ class DIContainer:
     - Circular dependency detection
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._services: Dict[str, Any] = {}
-        self._factories: Dict[str, Callable] = {}
-        self._resolving: set = set()  # For circular dependency detection
+        self._factories: Dict[str, Callable[[], Any]] = {}
+        self._resolving: Set[str] = set()  # For circular dependency detection
 
     def register_singleton(self, service_type: Type[T], instance: T) -> None:
         """Register a singleton service instance."""
@@ -64,14 +68,14 @@ class DIContainer:
 
         # Return singleton if available
         if service_name in self._services:
-            return self._services[service_name]
+            return self._services[service_name]  # type: ignore
 
         # Create from factory
         if service_name in self._factories:
             self._resolving.add(service_name)
             try:
                 instance = self._factories[service_name]()
-                return instance
+                return instance  # type: ignore
             finally:
                 self._resolving.discard(service_name)
 
@@ -79,7 +83,7 @@ class DIContainer:
         try:
             self._resolving.add(service_name)
             instance = self._create_instance(service_type)
-            return instance
+            return instance  # type: ignore
         except Exception:
             raise ServiceNotFoundError(f"Service {service_name} not found and could not be auto-wired")
         finally:
@@ -143,15 +147,25 @@ def create_container(config) -> DIContainer:
     Create and configure the main DI container.
 
     Args:
-        config: The application configuration
+        config: The application configuration (expected to be ScraperConfig)
 
     Returns:
         Configured DI container
+
+    Raises:
+        ConfigurationError: If configuration validation fails
     """
-    from shared.config.settings import ScraperConfig
-    from infrastructure.auth.google_auth import GoogleAuthService
-    from infrastructure.external.places_client import PlacesAPIClient
-    from infrastructure.storage.sheets_manager import SheetsManager
+    # Validate configuration if it's a ScraperConfig instance
+    if hasattr(config, 'validate_or_raise'):
+        config.validate_or_raise()
+
+    from shared.config import ScraperConfig
+    from infrastructure.auth.google_auth_service import GoogleAuthService
+    from infrastructure.external.places_api_adapter import PlacesAPIAdapter
+    from infrastructure.storage.sheets_storage_adapter import SheetsStorageAdapter
+    from core.domain.place_validator import PlaceDataValidator
+    from core.processors.data_processor import DataProcessor
+    from application.workflows.data_processing_workflow import DataProcessingWorkflow
 
     container = DIContainer()
 
@@ -165,8 +179,8 @@ def create_container(config) -> DIContainer:
     )
 
     container.register_factory(
-        PlacesAPIClient,
-        lambda: PlacesAPIClient(
+        PlacesAPIAdapter,
+        lambda: PlacesAPIAdapter(
             api_key=config.google_api.places_api_key,
             delay=config.processing.api_delay,
             max_retries=config.processing.max_retries,
@@ -175,10 +189,36 @@ def create_container(config) -> DIContainer:
     )
 
     container.register_factory(
-        SheetsManager,
-        lambda: SheetsManager(
+        SheetsStorageAdapter,
+        lambda: SheetsStorageAdapter(
             auth_service=container.get(GoogleAuthService),
             spreadsheet_id=config.google_api.spreadsheet_id
+        )
+    )
+
+    # Register validator
+    container.register_factory(
+        PlaceDataValidator,
+        lambda: PlaceDataValidator()
+    )
+
+    # Register core services
+    container.register_factory(
+        DataProcessor,
+        lambda: DataProcessor(
+            api_client=container.get(PlacesAPIAdapter),
+            storage=container.get(SheetsStorageAdapter),
+            validator=container.get(PlaceDataValidator),
+            config=config
+        )
+    )
+
+    # Register application services
+    container.register_factory(
+        DataProcessingWorkflow,
+        lambda: DataProcessingWorkflow(
+            processor=container.get(DataProcessor),
+            config=config
         )
     )
 

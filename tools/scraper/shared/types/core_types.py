@@ -44,6 +44,19 @@ class ProcessingResult:
     error_count: int
     duration: float
     errors: List[str]
+    data: Optional[List[Dict[str, Any]]] = None  # Processed data if successful
+
+    @property
+    def total_count(self) -> int:
+        """Total number of items processed."""
+        return self.processed_count + self.error_count
+
+    @property
+    def success_rate(self) -> float:
+        """Success rate as percentage."""
+        if self.total_count == 0:
+            return 0.0
+        return (self.processed_count / self.total_count) * 100
 
 
 class PlaceData(TypedDict, total=False):
@@ -54,7 +67,7 @@ class PlaceData(TypedDict, total=False):
     # Required fields
     id: str  # place_id
     place_id: str  # for backward compatibility
-    
+
     # Display name
     displayName: Optional[Dict[str, str]]  # {'text': 'Restaurant Name'}
     name: str  # for backward compatibility

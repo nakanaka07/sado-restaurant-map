@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-データ処理ワークフロー
+Data Processing Workflow
 
-新しいアーキテクチャによるデータ処理の統合ワークフロー
+Integrated data processing workflow using new Clean Architecture.
 """
 
 import time
@@ -13,13 +13,13 @@ from pathlib import Path
 from core.processors.data_processor import DataProcessor
 from core.domain.interfaces import APIClient, DataStorage, DataValidator
 from shared.types.core_types import ProcessingResult, CategoryType, QueryData
-from shared.config.settings import ScraperConfig
-from shared.logging.logger import get_logger
+from shared.settings import ScraperConfig
+from shared.logger import get_logger
 from shared.exceptions import ValidationError, ConfigurationError
 
 
 class DataProcessingWorkflow:
-    """データ処理ワークフロー制御クラス"""
+    """Data processing workflow controller for scraper operations"""
 
     def __init__(
         self,
@@ -27,19 +27,19 @@ class DataProcessingWorkflow:
         config: ScraperConfig,
         logger=None
     ):
-        """ワークフロー初期化"""
+        """Initialize workflow with dependencies"""
         self._processor = processor
         self._config = config
         self._logger = logger or get_logger(__name__)
 
         self.data_files = {
-            'restaurants': 'data/urls/restaurants_merged.txt',
-            'parkings': 'data/urls/parkings_merged.txt',
-            'toilets': 'data/urls/toilets_merged.txt'
+            'restaurants': 'data/restaurants_merged.txt',
+            'parkings': 'data/parkings_merged.txt',
+            'toilets': 'data/toilets_merged.txt'
         }
 
     def validate_file(self, file_path: str) -> bool:
-        """ファイルの存在確認"""
+        """Validate file existence and content"""
         path = Path(file_path)
         if not path.exists():
             return False
@@ -47,8 +47,8 @@ class DataProcessingWorkflow:
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 lines = [
-                    line.strip() 
-                    for line in f.readlines() 
+                    line.strip()
+                    for line in f.readlines()
                     if line.strip() and not line.startswith('#')
                 ]
             return len(lines) > 0
@@ -57,15 +57,15 @@ class DataProcessingWorkflow:
             return False
 
     def count_queries(self, file_path: str) -> int:
-        """クエリ数をカウント"""
+        """Count valid queries in file"""
         if not self.validate_file(file_path):
             return 0
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 lines = [
-                    line.strip() 
-                    for line in f.readlines() 
+                    line.strip()
+                    for line in f.readlines()
                     if line.strip() and not line.startswith('#')
                 ]
             return len(lines)
@@ -74,13 +74,13 @@ class DataProcessingWorkflow:
             return 0
 
     def run_category_processing(
-        self, 
-        category: CategoryType, 
+        self,
+        category: CategoryType,
         dry_run: bool = False,
         separate_location: bool = True
     ) -> ProcessingResult:
-        """カテゴリ別データ処理実行"""
-        
+        """Execute category-specific data processing"""
+
         # データファイル確認
         data_file = self.data_files.get(category)
         if not data_file:
@@ -95,8 +95,8 @@ class DataProcessingWorkflow:
         if query_count == 0:
             raise ValidationError(f"有効なクエリが見つかりません: {file_path}")
 
-        self._logger.info("カテゴリ処理開始", 
-                         category=category, 
+        self._logger.info("カテゴリ処理開始",
+                         category=category,
                          query_count=query_count,
                          dry_run=dry_run)
 
@@ -114,7 +114,7 @@ class DataProcessingWorkflow:
         try:
             # クエリファイル解析
             queries = self._processor.parse_query_file(str(file_path))
-            
+
             # データ処理実行
             result = self._processor.process_all_queries(queries)
             result.category = category
@@ -123,14 +123,14 @@ class DataProcessingWorkflow:
             if result.success and result.processed_count > 0:
                 sheet_name = category.capitalize()
                 save_success = self._processor.save_to_spreadsheet(
-                    sheet_name, 
+                    sheet_name,
                     separate_location=separate_location
                 )
-                
+
                 if not save_success:
                     self._logger.warning("スプレッドシート保存に失敗")
 
-            self._logger.info("カテゴリ処理完了", 
+            self._logger.info("カテゴリ処理完了",
                             category=category,
                             success=result.success,
                             processed_count=result.processed_count,
@@ -151,20 +151,20 @@ class DataProcessingWorkflow:
             )
 
     def run_all_categories(
-        self, 
+        self,
         dry_run: bool = False,
         separate_location: bool = True
     ) -> Dict[CategoryType, ProcessingResult]:
-        """全カテゴリ処理実行"""
-        
+        """Execute processing for all categories"""
+
         results: Dict[CategoryType, ProcessingResult] = {}
-        
+
         self._logger.info("全カテゴリ処理開始", dry_run=dry_run)
 
         for category in self.data_files.keys():
             try:
                 result = self.run_category_processing(
-                    category, 
+                    category,
                     dry_run=dry_run,
                     separate_location=separate_location
                 )
@@ -199,8 +199,8 @@ class DataProcessingWorkflow:
         return results
 
     def get_processing_summary(self, results: Dict[CategoryType, ProcessingResult]) -> Dict[str, Any]:
-        """処理結果サマリー生成"""
-        
+        """Generate processing results summary"""
+
         summary = {
             'total_categories': len(results),
             'successful_categories': sum(1 for r in results.values() if r.success),

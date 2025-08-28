@@ -17,8 +17,8 @@ from urllib.parse import unquote, parse_qs, urlparse
 # 新しいアーキテクチャ対応インポート
 from core.domain.interfaces import APIClient, DataStorage, DataValidator, AuthenticationService
 from shared.types.core_types import PlaceData, ProcessingResult, CategoryType, QueryData
-from shared.config.settings import ScraperConfig
-from shared.logging.logger import get_logger
+from shared.settings import ScraperConfig
+from shared.logger import get_logger
 from shared.exceptions import APIError, ValidationError, ConfigurationError
 from shared.utils.translators import translate_business_status, translate_types
 
@@ -39,7 +39,7 @@ class DataProcessor:
         self._validator = validator
         self._config = config
         self._logger = logger or get_logger(__name__)
-        
+
         self.results: List[Dict[str, Any]] = []
         self.failed_queries: List[QueryData] = []
         self.raw_places_data: List[PlaceData] = []
@@ -64,7 +64,7 @@ class DataProcessor:
                     continue
 
                 query_data: QueryData = {
-                    'line_number': line_num, 
+                    'line_number': line_num,
                     'original_line': line,
                     'type': 'store_name',  # デフォルト値
                     'store_name': ''
@@ -146,9 +146,9 @@ class DataProcessor:
         self.failed_queries = []
 
         for i, query_data in enumerate(queries, 1):
-            self._logger.info("クエリ処理中", 
-                            current=i, 
-                            total=len(queries), 
+            self._logger.info("クエリ処理中",
+                            current=i,
+                            total=len(queries),
                             store_name=query_data.get('store_name', 'Unknown'))
 
             try:
@@ -185,7 +185,7 @@ class DataProcessor:
             errors=[str(q) for q in self.failed_queries]
         )
 
-        self._logger.info("クエリ処理完了", 
+        self._logger.info("クエリ処理完了",
                          success_count=len(self.results),
                          error_count=len(self.failed_queries),
                          duration=duration)
@@ -243,7 +243,7 @@ class DataProcessor:
 
         return None
 
-    def select_best_match(self, places: List[PlaceData], target_name: str) -> Optional[PlaceData]:
+    def select_best_match(self, places: List[PlaceData], _target_name: str) -> Optional[PlaceData]:
         """最適な結果を選択"""
         # 佐渡地域内の結果を優先
         sado_places: List[PlaceData] = []
@@ -264,7 +264,7 @@ class DataProcessor:
 
         return None
 
-    def format_result(self, place: PlaceData, query_data: QueryData, method: str) -> Dict[str, Any]:
+    def format_result(self, place: PlaceData, _query_data: QueryData, method: str) -> Dict[str, Any]:
         """結果をフォーマット"""
         result = {
             'Place ID': place.get('id', ''),
@@ -330,39 +330,43 @@ class DataProcessor:
                 lng = float(result.get('経度', 0))
 
                 # 佐渡島内判定
-                if (SADO_BOUNDS['south'] <= lat <= SADO_BOUNDS['north'] and
-                    SADO_BOUNDS['west'] <= lng <= SADO_BOUNDS['east']):
+                is_in_sado = (SADO_BOUNDS['south'] <= lat <= SADO_BOUNDS['north'] and
+                             SADO_BOUNDS['west'] <= lng <= SADO_BOUNDS['east'])
 
+                if is_in_sado:
                     # 地区分類を追加
                     result['地区'] = self.classify_district(lat, lng, result.get('住所', ''))
+                    result['is_in_sado'] = True  # フラグを明示的に設定
                     sado_results.append(result)
                 else:
                     result['地区'] = '市外'
+                    result['is_in_sado'] = False  # フラグを明示的に設定
                     outside_results.append(result)
 
             except (ValueError, TypeError) as e:
                 # 座標が不正な場合は市外として扱う
-                self._logger.warning("座標変換エラー", 
-                                   lat=result.get('緯度'), 
-                                   lng=result.get('経度'), 
+                self._logger.warning("座標変換エラー",
+                                   lat=result.get('緯度'),
+                                   lng=result.get('経度'),
                                    error=str(e))
                 result['地区'] = '市外'
+                result['is_in_sado'] = False  # フラグを明示的に設定
                 outside_results.append(result)
 
         return sado_results, outside_results
 
-    def classify_district(self, lat: float, lng: float, address: str) -> str:
+    def classify_district(self, _lat: float, _lng: float, address: str) -> str:
         """地区分類"""
         # 簡易的な地区分類（住所ベース）
         district_keywords = [
             '両津', '相川', '佐和田', '金井', '新穂',
             '畑野', '真野', '小木', '羽茂', '赤泊'
         ]
-        
+
         for district in district_keywords:
             if district in address:
                 return district
-        
+
         return '佐渡市内'
 
     def save_to_spreadsheet(self, sheet_name: str, separate_location: bool = True) -> bool:
@@ -373,39 +377,54 @@ class DataProcessor:
 
         try:
             if separate_location:
-                # 地区分類処理
-                self._logger.info("佐渡市内・市外データ分離を実行中")
-                sado_results, outside_results = self.separate_sado_data(self.results)
-
-                # メインシート（佐渡島内）
-                if sado_results:
-                    success = self._storage.save(sado_results, sheet_name)
-                    if success:
-                        self._logger.info("佐渡島内データ保存完了", 
-                                        sheet=sheet_name, 
-                                        count=len(sado_results))
-
-                # 佐渡市外シート
-                if outside_results:
-                    outside_sheet_name = f"{sheet_name}_佐渡市外"
-                    success = self._storage.save(outside_results, outside_sheet_name)
-                    if success:
-                        self._logger.info("佐渡市外データ保存完了", 
-                                        sheet=outside_sheet_name, 
-                                        count=len(outside_results))
+                return self._save_with_separation(sheet_name)
             else:
-                # 分離なしで保存
-                success = self._storage.save(self.results, sheet_name)
-                if success:
-                    self._logger.info("データ保存完了", 
-                                    sheet=sheet_name, 
-                                    count=len(self.results))
-
-            return True
+                return self._save_without_separation(sheet_name)
 
         except Exception as e:
             self._logger.error("スプレッドシート保存エラー", error=str(e))
             return False
+
+    def _save_with_separation(self, sheet_name: str) -> bool:
+        """地区分離ありでデータを保存"""
+        self._logger.info("佐渡市内・市外データ分離を実行中")
+        sado_results, outside_results = self.separate_sado_data(self.results)
+
+        # メインシート（佐渡島内）保存
+        self._save_sado_data(sado_results, sheet_name)
+
+        # 佐渡市外シート保存
+        self._save_outside_data(outside_results, sheet_name)
+
+        return True
+
+    def _save_without_separation(self, sheet_name: str) -> bool:
+        """地区分離なしでデータを保存"""
+        success = self._storage.save(self.results, sheet_name)
+        if success:
+            self._logger.info("データ保存完了",
+                            sheet=sheet_name,
+                            count=len(self.results))
+        return success
+
+    def _save_sado_data(self, sado_results: List[Dict[str, Any]], sheet_name: str) -> None:
+        """佐渡島内データを保存"""
+        if sado_results:
+            success = self._storage.save(sado_results, sheet_name)
+            if success:
+                self._logger.info("佐渡島内データ保存完了",
+                                sheet=sheet_name,
+                                count=len(sado_results))
+
+    def _save_outside_data(self, outside_results: List[Dict[str, Any]], sheet_name: str) -> None:
+        """佐渡市外データを保存"""
+        if outside_results:
+            outside_sheet_name = f"{sheet_name}_佐渡市外"
+            success = self._storage.save(outside_results, outside_sheet_name)
+            if success:
+                self._logger.info("佐渡市外データ保存完了",
+                                sheet=outside_sheet_name,
+                                count=len(outside_results))
 
     def save_data_to_sheet(self, data: List[Dict[str, Any]], sheet_name: str) -> bool:
         """データをシートに保存（新アーキテクチャ対応版）"""
@@ -424,13 +443,13 @@ class DataProcessor:
                 except Exception as e:
                     self._logger.warning("データ検証エラー", error=str(e), item=item)
 
-            self._logger.info("データ検証完了", 
+            self._logger.info("データ検証完了",
                             valid_count=len(validation_results),
                             total_count=len(self.raw_places_data or data))
 
             # ストレージに保存
             success = self._storage.save(validation_results, sheet_name)
-            
+
             if success:
                 self._logger.info("データ保存成功", sheet=sheet_name, count=len(validation_results))
                 return True

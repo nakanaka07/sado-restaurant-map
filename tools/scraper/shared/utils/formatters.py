@@ -1,24 +1,25 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-共通出力フォーマット機能
-スクリプト群で統一されたヘッダー・メッセージ出力
+Common Output Formatting Utilities
+
+Provides unified formatting for headers, messages, and output across
+the scraper system with modern Python practices.
 """
 
 from datetime import datetime
+from typing import Optional, Dict, Any
 
 class OutputFormatter:
-    """統一出力フォーマッター"""
-    
-    # 共通設定
+    """Unified output formatter for consistent messaging."""
+
+    # Configuration constants
     HEADER_WIDTH = 60
-    APP_NAME = "佐渡飲食店マップ"
+    APP_NAME = "Sado Restaurant Map"
     VERSION = "v2.0"
-    
-    # 絵文字定数
-    EMOJI = {
+
+    # Icon constants (modern emoji usage)
+    ICONS = {
         'rocket': '🚀',
-        'gear': '⚙️', 
+        'gear': '⚙️',
         'chart': '📊',
         'check': '✅',
         'error': '❌',
@@ -33,90 +34,98 @@ class OutputFormatter:
         'money': '💰',
         'success': '🎉'
     }
-    
+
     @classmethod
-    def print_header(cls, script_name: str, mode: str = None):
-        """統一ヘッダーを出力"""
-        title = f"{cls.EMOJI['rocket']} {cls.APP_NAME} - {script_name}"
+    def print_header(cls, script_name: str, mode: Optional[str] = None) -> None:
+        """Print unified header."""
+        title = f"{cls.ICONS['rocket']} {cls.APP_NAME} - {script_name}"
         if mode:
             title += f" ({mode})"
-        
+
         print(title)
         print("=" * cls.HEADER_WIDTH)
-        print(f"🕐 開始時刻: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"📦 バージョン: {cls.VERSION}")
+        print(f"🕐 Start time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"📦 Version: {cls.VERSION}")
         print("-" * cls.HEADER_WIDTH)
-    
+
     @classmethod
-    def print_footer(cls, success: bool = True, message: str = None):
-        """統一フッターを出力"""
+    def print_footer(cls, success: bool = True, message: Optional[str] = None) -> None:
+        """Print unified footer."""
         print("\n" + "=" * cls.HEADER_WIDTH)
-        
+
         if success:
-            print(f"{cls.EMOJI['success']} 処理が正常に完了しました！")
+            print(f"{cls.ICONS['success']} Processing completed successfully!")
         else:
-            print(f"{cls.EMOJI['error']} 処理中にエラーが発生しました。")
-        
+            print(f"{cls.ICONS['error']} Error occurred during processing.")
+
         if message:
             print(f"📝 {message}")
-        
-        print(f"🕐 終了時刻: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
+
+        print(f"🕐 End time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
     @classmethod
-    def print_section(cls, title: str, emoji_key: str = 'info'):
-        """セクションヘッダーを出力"""
-        emoji = cls.EMOJI.get(emoji_key, cls.EMOJI['info'])
-        print(f"\n{emoji} {title}")
-    
+    def print_section(cls, title: str, icon_key: str = 'info') -> None:
+        """Print section header."""
+        icon = cls.ICONS.get(icon_key, cls.ICONS['info'])
+        print(f"\n{icon} {title}")
+
     @classmethod
-    def print_execution_plan(cls, mode: str, target: str, total_queries: int, 
-                           estimated_cost: float, estimated_time: float):
-        """実行計画を統一フォーマットで出力"""
-        cls.print_section("実行計画", "chart")
-        print(f"   モード: {mode}")
-        print(f"   対象データ: {target}")
-        print(f"   総クエリ数: {total_queries}件")
-        print(f"   推定コスト: ${estimated_cost:.3f} USD")
-        print(f"   推定実行時間: {estimated_time:.1f} 分")
-    
+    def print_execution_plan(
+        cls,
+        mode: str,
+        target: str,
+        total_queries: int,
+        estimated_cost: float,
+        estimated_time: float
+    ) -> None:
+        """Print execution plan in unified format."""
+        cls.print_section("Execution Plan", "chart")
+        print(f"   Mode: {mode}")
+        print(f"   Target Data: {target}")
+        print(f"   Total Queries: {total_queries} items")
+        print(f"   Estimated Cost: ${estimated_cost:.3f} USD")
+        print(f"   Estimated Time: {estimated_time:.1f} minutes")
+
     @classmethod
-    def print_results_summary(cls, results: dict):
-        """結果サマリーを統一フォーマットで出力"""
-        cls.print_section("処理結果", "chart")
+    def print_results_summary(cls, results: Dict[str, int]) -> None:
+        """Print results summary in unified format."""
+        cls.print_section("Processing Results", "chart")
         total_processed = 0
-        
+
         for category, count in results.items():
-            emoji = cls.EMOJI.get(category, cls.EMOJI['info'])
-            print(f"   {emoji} {category}: {count}件")
+            icon = cls.ICONS.get(category, cls.ICONS['info'])
+            print(f"   {icon} {category}: {count} items")
             total_processed += count
-        
-        print(f"\n🎯 総処理件数: {total_processed}件")
-    
+
+        print(f"\n🎯 Total Processed: {total_processed} items")
+
     @classmethod
-    def print_environment_status(cls, api_key_ok: bool, spreadsheet_ok: bool):
-        """環境変数ステータスを出力"""
-        cls.print_section("環境変数確認", "gear")
-        
-        api_status = cls.EMOJI['check'] if api_key_ok else cls.EMOJI['error']
-        sheet_status = cls.EMOJI['check'] if spreadsheet_ok else cls.EMOJI['error']
-        
+    def print_environment_status(cls, api_key_ok: bool, spreadsheet_ok: bool) -> None:
+        """Print environment variable status."""
+        cls.print_section("Environment Check", "gear")
+
+        api_status = cls.ICONS['check'] if api_key_ok else cls.ICONS['error']
+        sheet_status = cls.ICONS['check'] if spreadsheet_ok else cls.ICONS['error']
+
         print(f"   {api_status} PLACES_API_KEY")
         print(f"   {sheet_status} SPREADSHEET_ID")
-        
-        if api_key_ok and spreadsheet_ok:
-            print(f"   {cls.EMOJI['check']} 全ての環境変数が正常に設定されています")
-        else:
-            print(f"   {cls.EMOJI['error']} 一部の環境変数が不正または未設定です")
 
-# 便利な関数エイリアス
-def print_header(script_name: str, mode: str = None):
-    """ヘッダー出力のエイリアス"""
+        if api_key_ok and spreadsheet_ok:
+            print(f"   {cls.ICONS['check']} All environment variables properly configured")
+        else:
+            print(f"   {cls.ICONS['error']} Some environment variables are invalid or missing")
+
+# Convenience function aliases
+def print_header(script_name: str, mode: Optional[str] = None) -> None:
+    """Header output alias."""
     OutputFormatter.print_header(script_name, mode)
 
-def print_footer(success: bool = True, message: str = None):
-    """フッター出力のエイリアス"""
+
+def print_footer(success: bool = True, message: Optional[str] = None) -> None:
+    """Footer output alias."""
     OutputFormatter.print_footer(success, message)
 
-def print_section(title: str, emoji_key: str = 'info'):
-    """セクション出力のエイリアス"""
-    OutputFormatter.print_section(title, emoji_key)
+
+def print_section(title: str, icon_key: str = 'info') -> None:
+    """Section output alias."""
+    OutputFormatter.print_section(title, icon_key)

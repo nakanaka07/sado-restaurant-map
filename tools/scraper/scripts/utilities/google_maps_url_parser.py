@@ -30,7 +30,11 @@ try:
 except ImportError:
     print("⚠️ python-dotenv not installed. Using environment variables directly.")
 
+# 定数定義
 PLACES_API_KEY = os.environ.get('PLACES_API_KEY')
+TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json"
+PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json"
+SADO_CENTER_COORDS = "38.018827,138.367398"  # 佐渡島中心座標
 
 class URLToPlaceExtractor:
     """Google Maps URLからPlace ID抽出・詳細取得クラス"""
@@ -89,7 +93,6 @@ class URLToPlaceExtractor:
 
     def extract_from_data_param(self, url):
         """dataパラメータからPlace IDを抽出"""
-        # data= パラメータを検索
         data_match = re.search(r'data=([^&]+)', url)
         if not data_match:
             return None
@@ -120,7 +123,7 @@ class URLToPlaceExtractor:
                         print(f"   ✅ Place ID発見: {place_id}")
                         return place_id
 
-            print(f"   ⚠️ data パラメータにPlace IDが見つかりません")
+            print("   ⚠️ data パラメータにPlace IDが見つかりません")
             return None
 
         except Exception as e:
@@ -138,12 +141,9 @@ class URLToPlaceExtractor:
 
     def convert_cid_to_place_id(self, cid):
         """CIDからPlace IDへの変換（実験的）"""
-        # CIDを直接Place IDとして使用はできないが、
-        # Text Searchで近似的な検索を試行
         print(f"   🔄 CID {cid} からPlace ID変換を試行中...")
 
         # CIDを含むURLでText Search（実験的）
-        search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
         params = {
             'query': f"site:google.com/maps cid:{cid}",
             'language': 'ja',
@@ -151,7 +151,7 @@ class URLToPlaceExtractor:
         }
 
         try:
-            response = self.session.get(search_url, params=params)
+            response = self.session.get(TEXT_SEARCH_URL, params=params)
             data = response.json()
 
             if data.get('status') == 'OK' and data.get('results'):
@@ -160,14 +160,12 @@ class URLToPlaceExtractor:
                     print(f"   ✅ CID変換成功: {place_id}")
                     return place_id
 
-            print(f"   ❌ CID変換失敗")
+            print("   ❌ CID変換失敗")
             return None
 
         except Exception as e:
             print(f"   ❌ CID変換エラー: {e}")
-            return None
-
-    def extract_coords_and_name(self, url):
+            return None    def extract_coords_and_name(self, url):
         """URLから座標と店舗名を抽出"""
         coords = None
         name = None
@@ -198,8 +196,6 @@ class URLToPlaceExtractor:
 
     def search_by_coords_and_name(self, coords, name):
         """座標と店舗名でPlace IDを検索"""
-        search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-        lat, lng = coords.split(',')
 
         params = {
             'query': name,
@@ -210,7 +206,7 @@ class URLToPlaceExtractor:
         }
 
         try:
-            response = self.session.get(search_url, params=params)
+            response = self.session.get(TEXT_SEARCH_URL, params=params)
             data = response.json()
 
             if data.get('status') == 'OK' and data.get('results'):
@@ -219,7 +215,7 @@ class URLToPlaceExtractor:
                     print(f"   ✅ 座標+店舗名検索成功: {place_id}")
                     return place_id
 
-            print(f"   ❌ 座標+店舗名検索失敗")
+            print("   ❌ 座標+店舗名検索失敗")
             return None
 
         except Exception as e:
@@ -228,21 +224,19 @@ class URLToPlaceExtractor:
 
     def search_by_name_only(self, name):
         """店舗名のみでPlace IDを検索"""
-        search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-
         # 佐渡関連キーワードを追加
         enhanced_query = f"{name} 佐渡"
 
         params = {
             'query': enhanced_query,
-            'location': "38.018827,138.367398",  # 佐渡島中心
-            'radius': 50000,  # 50km
+            'location': SADO_CENTER_COORDS,  # 佐渡島中心座標
+            'radius': 50000,  # 50km範囲
             'language': 'ja',
             'key': self.api_key
         }
 
         try:
-            response = self.session.get(search_url, params=params)
+            response = self.session.get(TEXT_SEARCH_URL, params=params)
             data = response.json()
 
             if data.get('status') == 'OK' and data.get('results'):
@@ -251,7 +245,7 @@ class URLToPlaceExtractor:
                     print(f"   ✅ 店舗名検索成功: {place_id}")
                     return place_id
 
-            print(f"   ❌ 店舗名検索失敗")
+            print("   ❌ 店舗名検索失敗")
             return None
 
         except Exception as e:
@@ -260,7 +254,6 @@ class URLToPlaceExtractor:
 
     def get_place_details(self, place_id):
         """Place IDから詳細情報を取得"""
-        details_url = "https://maps.googleapis.com/maps/api/place/details/json"
 
         params = {
             'place_id': place_id,
@@ -283,7 +276,7 @@ class URLToPlaceExtractor:
         }
 
         try:
-            response = self.session.get(details_url, params=params)
+            response = self.session.get(PLACE_DETAILS_URL, params=params)
             data = response.json()
 
             if data.get('status') == 'OK':
@@ -294,9 +287,7 @@ class URLToPlaceExtractor:
 
         except Exception as e:
             print(f"❌ 詳細取得例外: {e}")
-            return None
-
-    def process_url(self, url):
+            return None    def process_url(self, url):
         """URLを処理してPlace情報を取得"""
         print(f"\n{'='*80}")
         print(f"🎯 処理中: {url}")
@@ -329,7 +320,7 @@ class URLToPlaceExtractor:
                 'details': details
             }
         else:
-            print(f"❌ 詳細情報取得失敗")
+            print("❌ 詳細情報取得失敗")
             return None
 
 def main():
@@ -357,12 +348,10 @@ def main():
 
         print("🧪 テストモードで実行中...")
         for url in test_urls:
-            result = extractor.process_url(url)
+            extractor.process_url(url)
 
     elif args.url:
-        result = extractor.process_url(args.url)
-
-    elif args.file:
+        extractor.process_url(args.url)    elif args.file:
         if not os.path.exists(args.file):
             print(f"❌ ファイルが見つかりません: {args.file}")
             return
