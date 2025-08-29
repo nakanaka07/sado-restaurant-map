@@ -4,7 +4,7 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/hooks/
 ├── api/                       # API関連フック
 │   ├── useRestaurants.ts     # レストランデータ管理フック
@@ -24,22 +24,26 @@ src/hooks/
 ├── useRestaurants.ts         # レガシーファイル（api/useRestaurants.tsを使用）
 ├── index.ts                  # ディレクトリのバレルエクスポート
 └── README.md                 # このファイル
-```
+```text
 
 ## 🎯 フック分類
 
 ### 1. **API フック** (`api/`)
+
 外部APIとの通信、データ取得・管理を担当
 
 ### 2. **地図フック** (`map/`)
+
 地図表示、ポイント管理、地理的データ処理を担当
 
 ### 3. **UI フック** (`ui/`)
+
 ユーザーインターフェース、アナリティクス、エラーハンドリングを担当
 
 ## 🔧 主要フック詳細
 
 ### useRestaurants - レストランデータ管理
+
 レストラン情報の取得、フィルタリング、ソート機能を提供する統合フック
 
 ```typescript
@@ -71,9 +75,10 @@ const {
   features: ["駐車場あり"],
   searchQuery: "",
 });
-```
+```text
 
 **主要機能**:
+
 - **データ取得**: Google Sheets APIからレストランデータを取得
 - **フィルタリング**: 料理ジャンル、価格帯、地区、特徴による絞り込み
 - **検索**: 名前・説明文での自由検索
@@ -83,6 +88,7 @@ const {
 - **エラーハンドリング**: API エラーの適切な処理
 
 ### useMapPoints - 統合マップポイント管理
+
 レストラン、駐車場、トイレなど全てのマップポイントを統合管理
 
 ```typescript
@@ -108,9 +114,10 @@ const {
   selectPoint,
   refreshData,
 } = useMapPoints();
-```
+```text
 
 **主要機能**:
+
 - **統合データ管理**: レストラン・駐車場・トイレの統合管理
 - **多次元フィルタリング**: ポイントタイプ、地区、特徴による絞り込み
 - **地理的計算**: 距離計算、範囲検索
@@ -118,6 +125,7 @@ const {
 - **型安全性**: 厳密な型定義による安全性確保
 
 ### useAnalytics - アナリティクス追跡
+
 ユーザー行動の追跡とGoogle Analyticsとの統合
 
 ```typescript
@@ -150,9 +158,10 @@ trackSearchBehavior("寿司", 15);
 
 // フィルター使用追跡
 trackFilterUsage("cuisine", "日本料理");
-```
+```text
 
 **主要機能**:
+
 - **レストラン追跡**: レストラン詳細表示の追跡
 - **検索追跡**: 検索クエリと結果数の追跡
 - **フィルター追跡**: フィルター使用状況の追跡
@@ -161,6 +170,7 @@ trackFilterUsage("cuisine", "日本料理");
 - **カスタムイベント**: 任意のイベント追跡
 
 ### useErrorHandler - エラーハンドリング
+
 アプリケーション全体のエラー管理と報告
 
 ```typescript
@@ -194,9 +204,10 @@ try {
     metadata: { userId: user.id, timestamp: Date.now() },
   });
 }
-```
+```text
 
 **主要機能**:
+
 - **エラー状態管理**: エラー情報の構造化された管理
 - **エラー履歴**: 過去のエラー履歴の保持
 - **重要度分類**: エラーの重要度による分類
@@ -207,6 +218,7 @@ try {
 ## 🎨 使用方法
 
 ### 基本的なインポート
+
 ```typescript
 // 統一エクスポートからのインポート（推奨）
 import {
@@ -221,9 +233,10 @@ import { useRestaurants } from '@/hooks/api/useRestaurants';
 import { useMapPoints } from '@/hooks/map/useMapPoints';
 import { useAnalytics } from '@/hooks/ui/useAnalytics';
 import { useErrorHandler } from '@/hooks/ui/useErrorHandler';
-```
+```text
 
 ### 統合使用例
+
 ```tsx
 import React, { useEffect } from 'react';
 import {
@@ -323,7 +336,7 @@ const RestaurantMapPage = () => {
 };
 
 export default RestaurantMapPage;
-```
+```text
 
 ## 🏗️ アーキテクチャ
 
@@ -334,23 +347,24 @@ export default RestaurantMapPage;
    - 明確な境界線の維持
    - 再利用可能な設計
 
-2. **型安全性**
+1. **型安全性**
    - TypeScript 5.9の厳密な型定義
    - ジェネリクスの積極活用
    - ランタイムエラーの最小化
 
-3. **パフォーマンス最適化**
+1. **パフォーマンス最適化**
    - React 19のConcurrent Features活用
    - `startTransition`による非ブロッキング更新
    - `useMemo`、`useCallback`による最適化
 
-4. **テスタビリティ**
+1. **テスタビリティ**
    - 純粋関数による実装
    - モック可能な設計
    - 包括的なテストカバレッジ
 
 ### データフロー
-```
+
+```text
 External APIs (Google Sheets, Maps)
     ↓
 API Hooks (useRestaurants, useMapPoints)
@@ -364,9 +378,10 @@ User Interactions
 Analytics Hooks (useAnalytics)
     ↓
 Error Handling (useErrorHandler)
-```
+```text
 
 ### 状態管理パターン
+
 ```typescript
 // 非同期状態の統一パターン
 interface AsyncState<T> {
@@ -382,13 +397,14 @@ interface FilterState {
 
 // イベントハンドラーの統一パターン
 type EventHandler<T> = (value: T) => void;
-```
+```text
 
 ## 🔧 開発ガイドライン
 
 ### 新しいフックの作成
 
 1. **フック作成**
+
 ```typescript
 // hooks/category/useNewHook.ts
 import { useState, useCallback, useEffect } from 'react';
@@ -424,9 +440,10 @@ export function useNewHook(options: UseNewHookOptions = {}): UseNewHookResult {
     reset,
   };
 }
-```
+```text
 
-2. **テスト作成**
+1. **テスト作成**
+
 ```typescript
 // hooks/category/useNewHook.test.ts
 import { renderHook, act } from '@testing-library/react';
@@ -462,23 +479,26 @@ describe('useNewHook', () => {
     expect(result.current.value).toBe('initial');
   });
 });
-```
+```text
 
-3. **エクスポート追加**
+1. **エクスポート追加**
+
 ```typescript
 // hooks/category/index.ts に追加
 export { useNewHook } from './useNewHook';
 
 // hooks/index.ts に追加
 export { useNewHook } from './category/useNewHook';
-```
+```text
 
 ### フックの命名規則
+
 - **プレフィックス**: 必ず `use` で始める
 - **機能説明**: フックの主要機能を表現
 - **一貫性**: 既存フックとの命名一貫性を保持
 
 ### パフォーマンス最適化
+
 ```typescript
 // React 19のConcurrent Featuresを活用
 import { startTransition } from 'react';
@@ -493,16 +513,18 @@ const updateData = useCallback((newData: Data[]) => {
 const expensiveValue = useMemo(() => {
   return data.filter(item => item.active).sort((a, b) => a.name.localeCompare(b.name));
 }, [data]);
-```
+```text
 
 ## 🧪 テスト
 
 ### テスト構成
+
 - **Unit Tests**: 個別フックのロジックテスト
 - **Integration Tests**: フック間の連携テスト
 - **Performance Tests**: パフォーマンス回帰テスト
 
 ### テスト実行
+
 ```bash
 # 全フックテスト実行
 npm test hooks
@@ -517,9 +539,10 @@ npm test hooks -- --coverage
 
 # ウォッチモード
 npm test hooks -- --watch
-```
+```text
 
 ### テストパターン
+
 ```typescript
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useRestaurants } from './useRestaurants';
@@ -563,13 +586,14 @@ describe('useRestaurants', () => {
     });
   });
 });
-```
+```text
 
 ## 🔍 トラブルシューティング
 
 ### よくある問題
 
 1. **フックが再レンダリングを引き起こす**
+
    ```typescript
    // 問題: 依存配列の不適切な設定
    useEffect(() => {
@@ -587,7 +611,8 @@ describe('useRestaurants', () => {
    }, []);
    ```
 
-2. **非同期処理のメモリリーク**
+1. **非同期処理のメモリリーク**
+
    ```typescript
    // 問題: コンポーネントアンマウント後の状態更新
    useEffect(() => {
@@ -610,7 +635,8 @@ describe('useRestaurants', () => {
    }, []);
    ```
 
-3. **型エラーの解決**
+1. **型エラーの解決**
+
    ```typescript
    // 問題: 型の不一致
    const [data, setData] = useState<Restaurant[]>();
@@ -623,6 +649,7 @@ describe('useRestaurants', () => {
    ```
 
 ### デバッグ方法
+
 ```typescript
 // デバッグ用のログ出力
 const debugHook = (hookName: string, state: any) => {
@@ -644,21 +671,24 @@ const measureHookPerformance = (hookName: string, fn: () => void) => {
     fn();
   }
 };
-```
+```text
 
 ## 🚀 今後の改善予定
 
 ### 短期的な改善
+
 - [ ] より詳細なエラー分類とハンドリング
 - [ ] オフライン対応フックの追加
 - [ ] リアルタイム更新フックの実装
 
 ### 中期的な改善
+
 - [ ] GraphQL対応フックの追加
 - [ ] WebSocket統合フックの実装
 - [ ] キャッシュ戦略の高度化
 
 ### 長期的な改善
+
 - [ ] AI機能統合フックの追加
 - [ ] マルチテナント対応
 - [ ] マイクロフロントエンド対応

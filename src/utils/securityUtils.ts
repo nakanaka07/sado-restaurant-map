@@ -176,7 +176,9 @@ export class SecureStorage {
       const jsonValue = JSON.stringify(value);
       localStorage.setItem(secureKey, jsonValue);
     } catch (error) {
-      console.warn("Failed to save to localStorage:", error);
+      if (import.meta.env.DEV) {
+        console.warn("Failed to save to localStorage:", error);
+      }
     }
   }
 
@@ -187,7 +189,9 @@ export class SecureStorage {
       if (item === null) return defaultValue;
       return safeJsonParse(item, defaultValue);
     } catch (error) {
-      console.warn("Failed to read from localStorage:", error);
+      if (import.meta.env.DEV) {
+        console.warn("Failed to read from localStorage:", error);
+      }
       return defaultValue;
     }
   }
@@ -197,7 +201,9 @@ export class SecureStorage {
       const secureKey = this.prefix + key;
       localStorage.removeItem(secureKey);
     } catch (error) {
-      console.warn("Failed to remove from localStorage:", error);
+      if (import.meta.env.DEV) {
+        console.warn("Failed to remove from localStorage:", error);
+      }
     }
   }
 
@@ -210,7 +216,9 @@ export class SecureStorage {
         }
       });
     } catch (error) {
-      console.warn("Failed to clear localStorage:", error);
+      if (import.meta.env.DEV) {
+        console.warn("Failed to clear localStorage:", error);
+      }
     }
   }
 }
@@ -269,7 +277,9 @@ export async function secureFetch(
 
     return response;
   } catch (error) {
-    console.error("Secure fetch failed:", error);
+    if (import.meta.env.DEV) {
+      console.error("Secure fetch failed:", error);
+    }
     throw error;
   }
 }

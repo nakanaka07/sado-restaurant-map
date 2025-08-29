@@ -5,8 +5,8 @@ process.env.VITE_GOOGLE_SHEETS_API_KEY = "test-sheets-api-key";
 process.env.VITE_SPREADSHEET_ID = "test-spreadsheet-id";
 
 import "@testing-library/jest-dom";
-import { vi } from "vitest";
 import { configure } from "@testing-library/react";
+import { vi } from "vitest";
 
 // React Testing Library の設定
 // 非同期更新の自動 act() ラッピングを有効化
@@ -15,6 +15,59 @@ configure({
   asyncUtilTimeout: 2000,
   // React 19 Concurrent Features対応
   reactStrictMode: true,
+});
+
+// DOM API のモック設定
+Object.defineProperty(window, "location", {
+  value: {
+    href: "http://localhost:3000/test",
+    origin: "http://localhost:3000",
+    protocol: "http:",
+    host: "localhost:3000",
+    hostname: "localhost",
+    port: "3000",
+    pathname: "/test",
+    search: "",
+    hash: "",
+  },
+  writable: true,
+});
+
+Object.defineProperty(window, "navigator", {
+  value: {
+    userAgent: "Mozilla/5.0 (Test Browser) TestAgent/1.0",
+    language: "ja-JP",
+    languages: ["ja-JP", "en-US"],
+    platform: "Test Platform",
+    cookieEnabled: true,
+    onLine: true,
+  },
+  writable: true,
+});
+
+// DOM イベントリスナーのモック
+const mockAddEventListener = vi.fn();
+const mockRemoveEventListener = vi.fn();
+
+Object.defineProperty(window, "addEventListener", {
+  value: mockAddEventListener,
+  writable: true,
+});
+
+Object.defineProperty(window, "removeEventListener", {
+  value: mockRemoveEventListener,
+  writable: true,
+});
+
+// Document のモック
+Object.defineProperty(document, "addEventListener", {
+  value: mockAddEventListener,
+  writable: true,
+});
+
+Object.defineProperty(document, "removeEventListener", {
+  value: mockRemoveEventListener,
+  writable: true,
 });
 
 // Act warning の抑制（開発時のみ）
@@ -82,7 +135,9 @@ const mockGoogle: MockGoogleMaps = {
       open: vi.fn(),
       close: vi.fn(),
     })),
-    LatLng: vi.fn().mockImplementation((lat, lng) => ({ lat, lng })),
+    LatLng: vi
+      .fn()
+      .mockImplementation((lat: number, lng: number) => ({ lat, lng })),
     event: {
       addListener: vi.fn(),
       removeListener: vi.fn(),

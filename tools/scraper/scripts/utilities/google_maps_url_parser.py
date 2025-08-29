@@ -165,7 +165,9 @@ class URLToPlaceExtractor:
 
         except Exception as e:
             print(f"   ❌ CID変換エラー: {e}")
-            return None    def extract_coords_and_name(self, url):
+            return None
+
+    def extract_coords_and_name(self, url):
         """URLから座標と店舗名を抽出"""
         coords = None
         name = None
@@ -287,7 +289,9 @@ class URLToPlaceExtractor:
 
         except Exception as e:
             print(f"❌ 詳細取得例外: {e}")
-            return None    def process_url(self, url):
+            return None
+
+    def process_url(self, url):
         """URLを処理してPlace情報を取得"""
         print(f"\n{'='*80}")
         print(f"🎯 処理中: {url}")
@@ -351,7 +355,9 @@ def main():
             extractor.process_url(url)
 
     elif args.url:
-        extractor.process_url(args.url)    elif args.file:
+        extractor.process_url(args.url)
+
+    elif args.file:
         if not os.path.exists(args.file):
             print(f"❌ ファイルが見つかりません: {args.file}")
             return

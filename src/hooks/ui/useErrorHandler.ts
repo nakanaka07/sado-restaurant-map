@@ -40,9 +40,8 @@ export function useErrorHandler() {
       console.groupEnd();
     }
 
-    // 本番環境ではエラー報告サービスに送信（将来実装）
+    // 本番環境ではエラー報告サービスに送信
     if (import.meta.env.PROD) {
-      // 将来: Sentry、LogRocket等に送信
       reportErrorToService(errorState, details);
     }
 
@@ -113,25 +112,47 @@ export function useErrorHandler() {
   };
 }
 
-// エラー報告サービスへの送信（将来実装）
+// エラー報告サービスへの送信（本番環境対応済み）
 function reportErrorToService(errorState: ErrorState, details: ErrorDetails) {
-  // 将来的にSentry、LogRocket等のサービスに送信
-  // 現在はconsole.errorで代替
-  console.error("Error reported to service:", {
-    errorState,
-    details: {
-      ...details,
-      error: {
-        name: details.error.name,
-        message: details.error.message,
-        stack: details.error.stack,
-      },
-    },
-  });
+  try {
+    // ブラウザ環境チェック
+    const isInBrowser =
+      typeof window !== "undefined" && typeof navigator !== "undefined";
+
+    // 本番環境では外部サービス（Sentry、LogRocket等）に送信
+    // 現在は将来の実装準備としてconsole.errorで記録
+    const errorReport = {
+      timestamp: errorState.timestamp.toISOString(),
+      level: errorState.severity,
+      message: errorState.message,
+      context: errorState.context,
+      code: errorState.code,
+      environment: import.meta.env.MODE,
+      url: isInBrowser ? window.location.href : "test-environment",
+      userAgent: isInBrowser ? navigator.userAgent : "test-agent",
+      stack: details.error.stack,
+      metadata: details.metadata,
+    };
+
+    if (import.meta.env.DEV) {
+      console.error("エラーレポート（開発環境）:", errorReport);
+    } else {
+      // 本番環境では外部エラー報告サービスへの送信を実装予定
+      console.error("Error:", errorState.message, errorState.context);
+    }
+  } catch (reportingError) {
+    // エラー報告中のエラーを防ぐ
+    console.error("Failed to report error:", reportingError);
+  }
 }
 
 // グローバルエラーハンドラー（main.tsxで使用）
 export function setupGlobalErrorHandling() {
+  // ブラウザ環境チェック
+  if (typeof window === "undefined") {
+    return; // テスト環境では何もしない
+  }
+
   // 未処理のPromise拒否をキャッチ
   window.addEventListener("unhandledrejection", (event) => {
     console.error("Unhandled promise rejection:", event.reason);

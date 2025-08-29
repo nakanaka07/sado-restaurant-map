@@ -4,18 +4,19 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/hooks/api/
 ├── index.ts                    # バレルエクスポート
 ├── useRestaurants.ts          # レストランデータ管理フック
 └── useRestaurants.test.ts     # useRestaurantsテストファイル
-```
+```text
 
 ## 🎯 概要
 
 このディレクトリは、アプリケーションの外部API通信を担当するフック群を提供します。現在は主にGoogle Sheets APIを使用したレストランデータの取得・管理を行っています。
 
 ### 主要な責務
+
 - **データ取得**: 外部APIからのデータフェッチング
 - **キャッシュ管理**: ローカルストレージを活用した効率的なデータキャッシュ
 - **状態管理**: 非同期データの状態（ローディング、エラー、成功）管理
@@ -61,7 +62,7 @@ function RestaurantList() {
     </div>
   );
 }
-```
+```text
 
 #### 初期フィルター付きの使用
 
@@ -91,7 +92,7 @@ function FilteredRestaurantMap() {
     </div>
   );
 }
-```
+```text
 
 #### 高度な使用例
 
@@ -156,7 +157,7 @@ function AdvancedRestaurantManager() {
     </div>
   );
 }
-```
+```text
 
 ## 📊 型定義
 
@@ -170,7 +171,7 @@ interface MapFilters {
   features: Feature[];
   searchQuery: string;
 }
-```
+```text
 
 ### UseRestaurantsResult
 
@@ -187,7 +188,7 @@ interface UseRestaurantsResult {
   refreshData: () => Promise<void>;
   clearCache: () => void;
 }
-```
+```text
 
 ### Restaurant
 
@@ -213,17 +214,17 @@ interface Restaurant {
   description?: string;
   lastUpdated: Date;
 }
-```
+```text
 
 ## 🏗️ アーキテクチャ
 
 ### データフロー
 
-```
+```text
 Google Sheets API → useRestaurants → キャッシュ → フィルタリング → UI
                                   ↓
                             ローカルストレージ
-```
+```text
 
 ### 状態管理パターン
 
@@ -258,7 +259,7 @@ const filteredData = useMemo(() => {
   if (!state.data) return [];
   return applyFilters(state.data, filters);
 }, [state.data, filters]);
-```
+```text
 
 ### キャッシュ戦略
 
@@ -296,7 +297,7 @@ const getFromCache = (key: string, maxAge: number = CACHE_DURATION) => {
     return null;
   }
 };
-```
+```text
 
 ## 🧪 テスト
 
@@ -331,7 +332,7 @@ describe('useRestaurants - 基本機能', () => {
     expect(result.current.restaurants).toEqual(mockData);
   });
 });
-```
+```text
 
 #### 2. フィルタリングテスト
 
@@ -363,7 +364,7 @@ describe('useRestaurants - フィルタリング', () => {
     expect(result.current.filteredRestaurants[0].cuisineType).toBe('和食');
   });
 });
-```
+```text
 
 #### 3. キャッシュテスト
 
@@ -400,7 +401,7 @@ describe('useRestaurants - キャッシュ', () => {
     expect(result.current.loading).toBe(false);
   });
 });
-```
+```text
 
 #### 4. エラーハンドリングテスト
 
@@ -420,7 +421,7 @@ describe('useRestaurants - エラーハンドリング', () => {
     expect(result.current.restaurants).toEqual([]);
   });
 });
-```
+```text
 
 ### テスト実行
 
@@ -433,7 +434,7 @@ npm run test:coverage src/hooks/api
 
 # ウォッチモード
 npm run test:watch src/hooks/api
-```
+```text
 
 ## 🚀 開発ガイドライン
 
@@ -488,7 +489,7 @@ export function useNewAPI(): UseNewAPIResult {
     refetch: fetchData
   };
 }
-```
+```text
 
 #### 2. テストファイル作成
 
@@ -509,7 +510,7 @@ describe('useNewAPI', () => {
     expect(result.current.data).toBeDefined();
   });
 });
-```
+```text
 
 #### 3. バレルエクスポート更新
 
@@ -517,7 +518,7 @@ describe('useNewAPI', () => {
 // src/hooks/api/index.ts
 export { useRestaurants } from "./useRestaurants";
 export { useNewAPI } from "./useNewAPI";
-```
+```text
 
 ### 命名規則
 
@@ -538,7 +539,7 @@ const updateState = (newData: DataType[]) => {
     setState({ data: newData, loading: false, error: null });
   });
 };
-```
+```text
 
 #### 2. メモ化の活用
 
@@ -553,7 +554,7 @@ const filteredData = useMemo(() => {
 const handleRefresh = useCallback(async () => {
   await fetchData();
 }, [fetchData]);
-```
+```text
 
 #### 3. キャッシュ戦略
 
@@ -568,7 +569,7 @@ const CACHE_VERSION = '1.0.0';
 const invalidateCache = (key: string) => {
   localStorage.removeItem(key);
 };
-```
+```text
 
 ## 🔍 トラブルシューティング
 
@@ -579,6 +580,7 @@ const invalidateCache = (key: string) => {
 **症状**: `loading` が `true` のまま変わらない
 
 **原因と解決方法**:
+
 ```typescript
 // 原因: API キーが設定されていない
 // 解決: 環境変数を確認
@@ -591,13 +593,14 @@ useEffect(() => {
     console.error('データ取得エラー:', error);
   });
 }, []);
-```
+```text
 
 #### 2. フィルタリングが動作しない
 
 **症状**: フィルターを変更しても結果が変わらない
 
 **原因と解決方法**:
+
 ```typescript
 // 原因: 依存配列が正しくない
 const filteredData = useMemo(() => {
@@ -614,13 +617,14 @@ const applyFilters = (data: Restaurant[], filters: MapFilters) => {
     return matches;
   });
 };
-```
+```text
 
 #### 3. キャッシュが効かない
 
 **症状**: 毎回APIからデータを取得している
 
 **原因と解決方法**:
+
 ```typescript
 // 原因: localStorage が利用できない
 const isLocalStorageAvailable = () => {
@@ -636,13 +640,14 @@ const isLocalStorageAvailable = () => {
 
 // 原因: キャッシュキーが一致しない
 const CACHE_KEY = 'sado-restaurant-restaurants'; // 一貫したキーを使用
-```
+```text
 
 #### 4. メモリリークの発生
 
 **症状**: アプリケーションが重くなる
 
 **原因と解決方法**:
+
 ```typescript
 // 原因: useEffectのクリーンアップが不適切
 useEffect(() => {
@@ -658,7 +663,7 @@ useEffect(() => {
     controller.abort(); // クリーンアップ
   };
 }, []);
-```
+```text
 
 ### デバッグ方法
 
@@ -675,7 +680,7 @@ useEffect(() => {
     console.groupEnd();
   }
 }, [restaurants, loading, error, filters, filteredRestaurants]);
-```
+```text
 
 #### 2. React Developer Tools
 
@@ -684,7 +689,7 @@ useEffect(() => {
 useDebugValue(
   loading ? 'Loading...' : `${restaurants.length} restaurants loaded`
 );
-```
+```text
 
 #### 3. パフォーマンス監視
 
@@ -698,7 +703,7 @@ useEffect(() => {
     console.log(`useRestaurants rendered ${renderCount.current} times`);
   }
 });
-```
+```text
 
 ## 📈 パフォーマンス監視
 
@@ -730,21 +735,24 @@ const usePerformanceMonitoring = () => {
   
   return { startMeasure, endMeasure };
 };
-```
+```text
 
 ## 🚀 今後の改善予定
 
 ### 短期的な改善
+
 - [ ] GraphQL対応の検討
 - [ ] リアルタイム更新機能の追加
 - [ ] オフライン対応の強化
 
 ### 中期的な改善
+
 - [ ] WebSocket統合
 - [ ] 高度なキャッシュ戦略
 - [ ] バックグラウンド同期
 
 ### 長期的な改善
+
 - [ ] AI機能統合
 - [ ] マルチテナント対応
 - [ ] エッジコンピューティング対応

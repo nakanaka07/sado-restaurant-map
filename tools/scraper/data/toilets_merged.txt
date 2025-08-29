@@ -79,8 +79,3 @@ https://maps.google.com/place?cid=5642326512132736585  # 蓮華峰寺+公衆ト�
 https://maps.google.com/place?cid=17084048846901269497  # 大橋緑地公園公衆トイレ
 https://maps.google.com/place?cid=12288212966447297108  # 沢崎大橋パーキング公衆トイレ
 https://maps.google.com/place?cid=12042619573840195286  # 小木強清水+公衆トイレ
-
-# ========================================
-# テキスト検索: 公衆トイレ名
-# ========================================
-# Places Text Search API で検索される項目

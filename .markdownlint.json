@@ -1,0 +1,45 @@
+{
+  "default": true,
+  "extends": null,
+
+  "MD001": false,
+  "MD003": { "style": "atx" },
+  "MD007": { "indent": 2 },
+  "MD010": { "code_blocks": false },
+  "MD013": {
+    "line_length": 120,
+    "code_blocks": false,
+    "tables": false,
+    "headings": false
+  },
+  "MD024": { "siblings_only": true },
+  "MD025": { "front_matter_title": "" },
+  "MD033": {
+    "allowed_elements": [
+      "br",
+      "img",
+      "details",
+      "summary",
+      "div",
+      "span",
+      "table",
+      "thead",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+      "kbd",
+      "sup",
+      "sub",
+      "mark",
+      "del",
+      "ins"
+    ]
+  },
+  "MD034": false,
+  "MD040": { "allowed_languages": [], "language_only": false },
+  "MD046": { "style": "fenced" },
+  "MD048": { "style": "backtick" },
+  "MD049": { "style": "underscore" },
+  "MD050": { "style": "asterisk" }
+}

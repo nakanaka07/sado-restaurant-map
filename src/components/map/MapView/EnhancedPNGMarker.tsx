@@ -5,9 +5,10 @@
 
 import { getCuisineIconUrl } from "@/config/cuisineIcons";
 import type { MapPoint } from "@/types";
+import type { CuisineType } from "@/types/restaurant.types";
 import { isRestaurant } from "@/types/type-guards";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
-import React from 'react';
+import React from "react";
 import { getMarkerColorByCuisine } from "../utils/markerUtils";
 
 // 既存施設アセットのインポート
@@ -44,7 +45,7 @@ export function EnhancedPNGMarker({ point, onClick }: EnhancedPNGMarkerProps) {
       <button
         type="button"
         style={{
-          width: "48px",  // 35px → 48px (37%拡大) - ユーザーテストで最適と確認
+          width: "48px", // 35px → 48px (37%拡大) - ユーザーテストで最適と確認
           height: "48px",
           borderRadius: "50%",
           background: `linear-gradient(135deg, ${config.primaryColor}, ${config.secondaryColor})`,
@@ -74,7 +75,9 @@ export function EnhancedPNGMarker({ point, onClick }: EnhancedPNGMarkerProps) {
             width: "32px",
             height: "32px",
             objectFit: "contain",
-            filter: config.shouldInvertIcon ? "brightness(0) invert(1)" : "none", // 条件付き白色化
+            filter: config.shouldInvertIcon
+              ? "brightness(0) invert(1)"
+              : "none", // 条件付き白色化
           }}
         />
 
@@ -156,7 +159,7 @@ function getEnhancedPNGConfig(point: MapPoint) {
  */
 function adjustColorBrightness(hex: string, percent: number): string {
   // #を除去
-  const cleanHex = hex.replace('#', '');
+  const cleanHex = hex.replace("#", "");
 
   // RGBに変換
   const r = parseInt(cleanHex.substring(0, 2), 16);
@@ -170,7 +173,9 @@ function adjustColorBrightness(hex: string, percent: number): string {
   const newB = Math.max(0, Math.min(255, Math.round(b * factor)));
 
   // 16進数に戻す
-  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+  return `#${newR.toString(16).padStart(2, "0")}${newG
+    .toString(16)
+    .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
 }
 
 /**
@@ -179,7 +184,7 @@ function adjustColorBrightness(hex: string, percent: number): string {
  */
 function getCuisineSpecificIcon(cuisineType: string, district: string): string {
   // 新しい料理ジャンル別アイコン設定を使用
-  const iconUrl = getCuisineIconUrl(cuisineType as any);
+  const iconUrl = getCuisineIconUrl(cuisineType as CuisineType);
 
   // アイコンが取得できない場合はフォールバック
   if (!iconUrl) {

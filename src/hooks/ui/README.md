@@ -4,19 +4,20 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/hooks/ui/
 ├── index.ts                    # バレルエクスポート
 ├── useAnalytics.ts            # Google Analytics統合フック
 ├── useErrorHandler.ts         # エラーハンドリング統合フック
 └── useErrorHandler.test.ts    # useErrorHandlerテストファイル
-```
+```text
 
 ## 🎯 概要
 
 このディレクトリは、ユーザーインターフェースに関連する機能を提供するフック群を管理します。ユーザー行動の追跡、エラーの統合管理、UX向上のための機能を提供し、アプリケーションの品質と使いやすさを向上させます。
 
 ### 主要な責務
+
 - **アナリティクス統合**: Google Analyticsによるユーザー行動追跡
 - **エラーハンドリング**: 統合的なエラー管理と報告
 - **ユーザー体験向上**: パフォーマンス監視とUX最適化
@@ -56,7 +57,7 @@ function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
     </div>
   );
 }
-```
+```text
 
 #### 検索・フィルター追跡
 
@@ -81,7 +82,7 @@ function SearchAndFilter() {
     </div>
   );
 }
-```
+```text
 
 #### 地図インタラクション追跡
 
@@ -111,7 +112,7 @@ function MapComponent() {
     />
   );
 }
-```
+```text
 
 ### useErrorHandler
 
@@ -154,7 +155,7 @@ function DataFetchingComponent() {
     </div>
   );
 }
-```
+```text
 
 #### 高度なエラーハンドリング
 
@@ -222,7 +223,7 @@ function AdvancedErrorHandling() {
     </div>
   );
 }
-```
+```text
 
 ## 📊 型定義
 
@@ -251,7 +252,7 @@ interface MapInteractionData {
   restaurantId?: string;
   restaurantName?: string;
 }
-```
+```text
 
 ### ErrorDetails
 
@@ -279,7 +280,7 @@ interface UseErrorHandlerResult {
   clearError: () => void;
   clearErrorHistory: () => void;
 }
-```
+```text
 
 ### UseAnalyticsResult
 
@@ -291,26 +292,26 @@ interface UseAnalyticsResult {
   trackMapInteraction: (action: string, data?: MapInteractionData) => void;
   trackPWAEvent: (event: string, data?: Record<string, any>) => void;
 }
-```
+```text
 
 ## 🏗️ アーキテクチャ
 
 ### アナリティクスフロー
 
-```
+```text
 ユーザーアクション → useAnalytics → Google Analytics → データ分析
                                   ↓
                             ローカルデバッグログ
-```
+```text
 
 ### エラーハンドリングフロー
 
-```
+```text
 エラー発生 → useErrorHandler → エラー分類 → 表示/報告 → ログ保存
                             ↓
                       開発環境: コンソール出力
                       本番環境: エラー報告サービス
-```
+```text
 
 ### アナリティクス実装パターン
 
@@ -335,7 +336,7 @@ const trackEvent = (event: AnalyticsEvent) => {
     console.groupEnd();
   }
 };
-```
+```text
 
 ### エラー管理パターン
 
@@ -381,7 +382,7 @@ const useErrorHandler = (): UseErrorHandlerResult => {
     clearErrorHistory: () => setErrorHistory([])
   };
 };
-```
+```text
 
 ## 🧪 テスト
 
@@ -455,7 +456,7 @@ describe('useErrorHandler', () => {
     expect(result.current.error).toBeNull();
   });
 });
-```
+```text
 
 #### 2. useAnalytics テスト
 
@@ -495,7 +496,7 @@ describe('useAnalytics', () => {
     });
   });
 });
-```
+```text
 
 ### テスト実行
 
@@ -508,7 +509,7 @@ npm run test:coverage src/hooks/ui
 
 # ウォッチモード
 npm run test:watch src/hooks/ui
-```
+```text
 
 ## 🚀 開発ガイドライン
 
@@ -573,7 +574,7 @@ export function useNotifications(): UseNotificationsResult {
     clearAllNotifications
   };
 }
-```
+```text
 
 #### 2. テストファイル作成
 
@@ -599,7 +600,7 @@ describe('useNotifications', () => {
     expect(result.current.notifications[0].type).toBe('success');
   });
 });
-```
+```text
 
 #### 3. バレルエクスポート更新
 
@@ -608,7 +609,7 @@ describe('useNotifications', () => {
 export { useAnalytics } from "./useAnalytics";
 export { useErrorHandler } from "./useErrorHandler";
 export { useNotifications } from "./useNotifications";
-```
+```text
 
 ### パフォーマンス最適化
 
@@ -644,7 +645,7 @@ const useBatchedAnalytics = () => {
 
   return { queueEvent, flushEvents };
 };
-```
+```text
 
 #### 2. エラーハンドリングの最適化
 
@@ -674,7 +675,7 @@ const useDedupedErrorHandler = () => {
 
   return { handleError };
 };
-```
+```text
 
 ## 🔍 トラブルシューティング
 
@@ -685,6 +686,7 @@ const useDedupedErrorHandler = () => {
 **症状**: Google Analyticsにデータが送信されない
 
 **解決方法**:
+
 ```typescript
 // Google Analytics の初期化確認
 const checkAnalyticsSetup = () => {
@@ -706,13 +708,14 @@ const { trackRestaurantView } = useAnalytics();
 if (checkAnalyticsSetup()) {
   trackRestaurantView(restaurant);
 }
-```
+```text
 
 #### 2. エラーが正しく表示されない
 
 **症状**: エラーハンドラーでキャッチしたエラーが表示されない
 
 **解決方法**:
+
 ```typescript
 // エラー状態の確認
 const debugErrorHandler = () => {
@@ -734,13 +737,14 @@ const debugErrorHandler = () => {
 
   return { triggerTestError };
 };
-```
+```text
 
 #### 3. メモリリークの発生
 
 **症状**: 長時間使用でメモリ使用量が増加
 
 **解決方法**:
+
 ```typescript
 // エラー履歴のサイズ制限
 const useErrorHandlerWithLimit = (maxHistorySize: number = 10) => {
@@ -766,7 +770,7 @@ useEffect(() => {
     }
   };
 }, []);
-```
+```text
 
 ### デバッグ方法
 
@@ -790,7 +794,7 @@ const useAnalyticsDebug = () => {
 
   return { debugEvents, trackWithDebug };
 };
-```
+```text
 
 #### 2. エラーハンドリングデバッグ
 
@@ -812,7 +816,7 @@ const ErrorDebugPanel = () => {
     </div>
   );
 };
-```
+```text
 
 ## 📈 パフォーマンス監視
 
@@ -847,21 +851,24 @@ const useUIPerformanceMonitoring = () => {
 
   return { metrics, measureErrorHandling };
 };
-```
+```text
 
 ## 🚀 今後の改善予定
 
 ### 短期的な改善
+
 - [ ] 通知システムの追加
 - [ ] A/Bテスト機能の統合
 - [ ] パフォーマンス監視の強化
 
 ### 中期的な改善
+
 - [ ] 高度なユーザー行動分析
 - [ ] リアルタイムエラー報告
 - [ ] カスタムメトリクス収集
 
 ### 長期的な改善
+
 - [ ] AI による UX 最適化提案
 - [ ] 予測的エラー防止
 - [ ] 自動パフォーマンス調整

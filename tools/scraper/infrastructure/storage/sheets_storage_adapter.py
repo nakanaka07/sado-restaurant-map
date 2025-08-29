@@ -9,6 +9,7 @@ Google Sheetsストレージの実装クラス
 import time
 import os
 import gspread
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List, Tuple
 from google.oauth2.service_account import Credentials
 
@@ -24,12 +25,13 @@ PLACE_ID_JP_HEADER = 'プレイスID'
 REVIEW_COUNT_HEADER = 'レビュー数'
 MAPS_URL_HEADER = 'GoogleマップURL'
 LAST_UPDATED_HEADER = '最終更新日時'
+WEBSITE_HEADER = 'ウェブサイト'
 UNKNOWN_CATEGORY_MSG = "Unknown category"
 
 # 共通ヘッダー定数
 RESTAURANT_HEADERS = [
     PLACE_ID_HEADER, '店舗名', '所在地', '緯度', '経度', '評価', REVIEW_COUNT_HEADER,
-    '営業状況', '営業時間', '電話番号', 'ウェブサイト', '価格帯', '店舗タイプ',
+    '営業状況', '営業時間', '電話番号', WEBSITE_HEADER, '価格帯', '店舗タイプ',
     '店舗説明', 'テイクアウト', 'デリバリー', '店内飲食', 'カーブサイドピックアップ',
     '予約可能', '朝食提供', '昼食提供', '夕食提供', 'ビール提供', 'ワイン提供',
     'カクテル提供', 'コーヒー提供', 'ベジタリアン対応', 'デザート提供',
@@ -236,9 +238,13 @@ class SheetsStorageAdapter(DataStorage):
         return existing_data
 
     def _prepare_update_data(self, validation_results: List, existing_data: Dict, headers: List[str]) -> Tuple[List[Dict], List[List[str]]]:
-        """更新・追加データを準備"""
+        """更新・追加データを準備（スマート更新対応）"""
         updates = []
         appends = []
+
+        # スマート更新設定の初期化
+        update_policy = os.getenv('UPDATE_POLICY', 'smart')
+        force_update_days = int(os.getenv('UPDATE_THRESHOLD_DAYS', '7'))
 
         for result in validation_results:
             if not result.is_valid:
@@ -251,13 +257,29 @@ class SheetsStorageAdapter(DataStorage):
             row_data = self._extract_row_data(result, headers)
 
             if place_id in existing_data:
-                existing_row = existing_data[place_id]['row']
-                updates.append({
-                    'range': f'A{existing_row}',
-                    'values': [row_data]
-                })
+                # 既存データがある場合、スマート更新判定を実行
+                existing_record = existing_data[place_id]['data']
+                should_update, reason = self._should_update_record(
+                    result.data, existing_record, update_policy, force_update_days
+                )
+
+                if should_update:
+                    existing_row = existing_data[place_id]['row']
+                    updates.append({
+                        'range': f'A{existing_row}',
+                        'values': [row_data]
+                    })
+                    self._logger.info("Record updated",
+                                    place_id=place_id,
+                                    reason=reason)
+                else:
+                    self._logger.debug("Record skipped",
+                                     place_id=place_id,
+                                     reason=reason)
             else:
+                # 新規データは常に追加
                 appends.append(row_data)
+                self._logger.info("New record added", place_id=place_id)
 
         return updates, appends
 
@@ -297,7 +319,7 @@ class SheetsStorageAdapter(DataStorage):
             '営業状況': 'business_status',
             '営業時間': 'opening_hours',
             '電話番号': 'phone',
-            'ウェブサイト': 'website',
+            WEBSITE_HEADER: 'website',
             '地区': 'district',
             MAPS_URL_HEADER: 'google_maps_url',
             LAST_UPDATED_HEADER: 'timestamp'
@@ -313,6 +335,114 @@ class SheetsStorageAdapter(DataStorage):
             row_data.append(str(value) if value is not None else '')
 
         return row_data
+
+    def _should_update_record(self, new_data: Dict[str, Any], existing_data: Dict[str, Any],
+                             update_policy: str, force_update_days: int) -> Tuple[bool, str]:
+        """
+        レコードを更新すべきかを判定（スマート更新）
+
+        Args:
+            new_data: 新しいデータ
+            existing_data: 既存のデータ
+            update_policy: 更新ポリシー (smart/always/never)
+            force_update_days: 強制更新日数
+
+        Returns:
+            (更新すべきか, 理由)
+        """
+
+        # ポリシーチェック
+        if update_policy == 'always':
+            return True, "UPDATE_POLICY=always"
+        elif update_policy == 'never':
+            return False, "UPDATE_POLICY=never"
+
+        # smart ポリシーの場合の詳細判定
+        return self._smart_update_check(new_data, existing_data, force_update_days)
+
+    def _smart_update_check(self, new_data: Dict[str, Any], existing_data: Dict[str, Any],
+                           force_update_days: int) -> Tuple[bool, str]:
+        """スマート更新判定の詳細ロジック"""
+
+        # 1. 強制更新日数チェック
+        last_updated = existing_data.get('timestamp', existing_data.get('最終更新日時', ''))
+        if last_updated:
+            try:
+                last_update_date = datetime.strptime(last_updated.split()[0], '%Y-%m-%d')
+                days_since_update = (datetime.now() - last_update_date).days
+
+                if days_since_update >= force_update_days:
+                    return True, f"強制更新: {days_since_update}日経過"
+            except (ValueError, AttributeError):
+                pass
+
+        # 2. 重要フィールドの変化チェック
+        important_fields = ['name', 'address', 'rating', 'review_count', 'business_status',
+                           'opening_hours', 'phone', 'website', 'category', 'description']
+        changes = []
+
+        for field in important_fields:
+            old_value = self._normalize_value(existing_data.get(field, ''))
+            new_value = self._normalize_value(new_data.get(field, ''))
+
+            if old_value != new_value:
+                changes.append(f"{field}: '{old_value}' → '{new_value}'")
+
+        if changes:
+            return True, f"重要フィールド変更: {', '.join(changes[:2])}"
+
+        # 3. 評価・レビュー数の改善チェック
+        if self._has_rating_improvement(new_data, existing_data):
+            return True, "評価・レビュー数の改善"
+
+        # 4. 営業状況の変化チェック
+        old_status = existing_data.get('business_status', existing_data.get('営業状況', ''))
+        new_status = new_data.get('business_status', '')
+        if old_status != new_status and new_status:
+            return True, f"営業状況変更: {old_status} → {new_status}"
+
+        # 5. 空フィールドの補完チェック
+        if self._can_fill_empty_fields(new_data, existing_data):
+            return True, "空フィールドの補完"
+
+        return False, "変更なし"
+
+    def _normalize_value(self, value: Any) -> str:
+        """値を正規化して比較用に変換"""
+        if value is None:
+            return ""
+        return str(value).strip()
+
+    def _has_rating_improvement(self, new_data: Dict[str, Any], existing_data: Dict[str, Any]) -> bool:
+        """評価・レビュー数の改善があるかチェック"""
+        try:
+            # 評価の改善
+            old_rating = float(existing_data.get('rating', existing_data.get('評価', 0)) or 0)
+            new_rating = float(new_data.get('rating', 0) or 0)
+
+            # レビュー数の増加
+            old_reviews = int(existing_data.get('review_count', existing_data.get('レビュー数', 0)) or 0)
+            new_reviews = int(new_data.get('review_count', 0) or 0)
+
+            return new_rating > old_rating or new_reviews > old_reviews
+
+        except (ValueError, TypeError):
+            return False
+
+    def _can_fill_empty_fields(self, new_data: Dict[str, Any], existing_data: Dict[str, Any]) -> bool:
+        """空のフィールドを新しいデータで補完できるかチェック"""
+        useful_fields = ['phone', 'website', 'opening_hours', 'description',
+                        '電話番号', WEBSITE_HEADER, '営業時間', '施設説明']
+
+        for field in useful_fields:
+            old_value = self._normalize_value(existing_data.get(field, ''))
+            new_value = self._normalize_value(new_data.get(field, ''))
+
+            # 既存が空で新しいデータに値がある場合
+            if not old_value and new_value:
+                return True
+
+        return False
 
     def load(self, identifier: str, category: str) -> Optional[Dict[str, Any]]:
         """

@@ -5,6 +5,7 @@
 ## ファイル構成
 
 ### `App.tsx`
+
 メインアプリケーションコンポーネント。以下の機能を提供します：
 
 - **Google Maps API統合**: `@vis.gl/react-google-maps`を使用したマップ表示
@@ -16,6 +17,7 @@
 - **Google Analytics**: アクセス解析の初期化
 
 #### 主要な機能
+
 - マップポイントの表示と管理
 - レストラン情報のフィルタリング
 - エラーハンドリング
@@ -23,6 +25,7 @@
 - セキュリティ強化
 
 ### `main.tsx`
+
 アプリケーションのエントリーポイント。以下を担当します：
 
 - **React DOM レンダリング**: `createRoot`を使用したモダンなReactアプリの起動
@@ -31,16 +34,19 @@
 - **エラーハンドリング**: ルート要素の存在確認
 
 ### `App.test.tsx`
+
 アプリケーションコンポーネントのテストファイル。
 
 ## 依存関係
 
 ### 外部ライブラリ
+
 - `@vis.gl/react-google-maps`: Google Maps統合
 - `react`: UIライブラリ
 - `react-dom`: DOM操作
 
 ### 内部モジュール
+
 - `@/hooks`: カスタムフック（`useMapPoints`）
 - `@/components`: UIコンポーネント（MapView, FilterPanel等）
 - `@/utils`: ユーティリティ関数（GA初期化、セキュリティ等）
@@ -59,7 +65,7 @@
 
 ```typescript
 import App from './src/app/App';
-```
+```text
 
 アプリケーションは`main.tsx`によって自動的に初期化され、DOM要素`#root`にマウントされます。
 

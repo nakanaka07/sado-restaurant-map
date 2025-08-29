@@ -4,7 +4,7 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/components/restaurant/FilterPanel/
 ├── FilterPanel.tsx            # メインフィルターパネルコンポーネント
 ├── useFilterState.ts          # フィルター状態管理カスタムフック
@@ -16,11 +16,12 @@ src/components/restaurant/FilterPanel/
 ├── MapLegend.tsx              # マップ凡例表示
 ├── index.ts                   # バレルエクスポート
 └── README.md                  # このファイル
-```
+```text
 
 ## 🎯 主要コンポーネント
 
 ### 1. **FilterPanel** - メインコンポーネント
+
 統合されたフィルターパネルの中核コンポーネント。すべてのフィルター機能を統合し、レスポンシブなUIを提供します。
 
 ```typescript
@@ -28,9 +29,10 @@ interface FilterPanelProps extends FilterHandlers {
   readonly loading?: boolean;
   readonly resultCount?: number;
 }
-```
+```text
 
 ### 2. **useFilterState** - 状態管理フック
+
 フィルター状態の管理とイベントハンドリングを担当するカスタムフック。型安全性とパフォーマンスを重視した設計です。
 
 ```typescript
@@ -46,11 +48,12 @@ interface FilterState {
   selectedPointTypes: MapPointType[];
   isExpanded: boolean;
 }
-```
+```text
 
 ## 🔧 フィルターコンポーネント
 
 ### SearchFilter - 検索フィルター
+
 レストラン名や説明文での自由検索機能を提供
 
 ```tsx
@@ -66,9 +69,10 @@ interface SearchFilterProps {
   onChange={handleSearchChange}
   placeholder="レストラン名で検索..."
 />
-```
+```text
 
 ### CuisineFilter - 料理ジャンルフィルター
+
 18種類の料理ジャンルによる絞り込み機能
 
 ```tsx
@@ -85,9 +89,10 @@ const CUISINE_OPTIONS = [
   value={selectedCuisine}
   onChange={handleCuisineChange}
 />
-```
+```text
 
 ### PriceFilter - 価格帯フィルター
+
 4段階の価格帯による絞り込み機能
 
 ```tsx
@@ -103,9 +108,10 @@ const PRICE_OPTIONS = [
   value={selectedPrice}
   onChange={handlePriceChange}
 />
-```
+```text
 
 ### DistrictFilter - 佐渡地区フィルター
+
 佐渡島の11地区による複数選択フィルター
 
 ```tsx
@@ -128,9 +134,10 @@ interface DistrictFilterProps {
   isExpanded={isDistrictExpanded}
   onToggleExpanded={toggleDistrictExpanded}
 />
-```
+```text
 
 ### FeatureFilter - 特徴・設備フィルター
+
 30種類以上の特徴・設備による複数選択フィルター
 
 ```tsx
@@ -159,9 +166,10 @@ interface FeatureFilterProps {
   isExpanded={isFeatureExpanded}
   onToggleExpanded={toggleFeatureExpanded}
 />
-```
+```text
 
 ### MapLegend - マップ凡例
+
 地図マーカーの色分けと意味を説明する凡例コンポーネント
 
 ```tsx
@@ -175,11 +183,12 @@ interface MapLegendProps {
   isExpanded={isLegendExpanded}
   onToggleExpanded={toggleLegendExpanded}
 />
-```
+```text
 
 ## 🎨 使用方法
 
 ### 基本的なインポート
+
 ```typescript
 // メインコンポーネント
 import { FilterPanel } from '@/components/restaurant/FilterPanel';
@@ -197,9 +206,10 @@ import {
 
 // 型定義
 import type { FilterHandlers } from '@/components/restaurant/FilterPanel';
-```
+```text
 
 ### FilterPanel の基本使用
+
 ```tsx
 import { FilterPanel } from '@/components/restaurant/FilterPanel';
 import type { FilterHandlers } from '@/components/restaurant/FilterPanel';
@@ -248,9 +258,10 @@ const RestaurantPage = () => {
     </div>
   );
 };
-```
+```text
 
 ### カスタムフィルター実装
+
 ```tsx
 import { useFilterState } from '@/components/restaurant/FilterPanel';
 import type { FilterHandlers } from '@/components/restaurant/FilterPanel';
@@ -278,7 +289,7 @@ const CustomFilterComponent = () => {
     </div>
   );
 };
-```
+```text
 
 ## 🏗️ アーキテクチャ
 
@@ -289,23 +300,24 @@ const CustomFilterComponent = () => {
    - 単一責任の原則に基づく設計
    - 再利用可能なコンポーネント構造
 
-2. **状態管理の統一**
+1. **状態管理の統一**
    - `useFilterState`フックによる中央集権的な状態管理
    - 型安全なイベントハンドラー
    - immutableな状態更新
 
-3. **パフォーマンス最適化**
+1. **パフォーマンス最適化**
    - `memo`による不要な再レンダリング防止
    - `useCallback`によるイベントハンドラーの最適化
    - `useMemo`による計算結果のキャッシュ
 
-4. **アクセシビリティ**
+1. **アクセシビリティ**
    - セマンティックなHTML要素の使用
    - 適切なARIA属性の設定
    - キーボードナビゲーション対応
 
 ### データフロー
-```
+
+```text
 Parent Component
     ↓ (FilterHandlers)
 FilterPanel
@@ -315,9 +327,10 @@ useFilterState Hook
 Individual Filter Components
     ↓ (user interactions)
 Analytics Tracking
-```
+```text
 
 ### 状態管理パターン
+
 ```typescript
 // 状態の初期化
 const initialState: FilterState = {
@@ -340,13 +353,14 @@ const updateState = useCallback((updates: Partial<FilterState>) => {
     ...updates,
   }));
 }, []);
-```
+```text
 
 ## 🔧 開発ガイドライン
 
 ### 新しいフィルターの追加
 
 1. **フィルターコンポーネントの作成**
+
 ```typescript
 // NewFilter.tsx
 import { memo } from 'react';
@@ -372,9 +386,10 @@ export const NewFilter = memo<NewFilterProps>(function NewFilter({
     </div>
   );
 });
-```
+```text
 
-2. **状態管理の拡張**
+1. **状態管理の拡張**
+
 ```typescript
 // useFilterState.ts に追加
 export interface FilterState {
@@ -386,9 +401,10 @@ export interface FilterHandlers {
   // 既存のハンドラー...
   readonly onNewFilter?: (value: string) => void;
 }
-```
+```text
 
-3. **FilterPanelへの統合**
+1. **FilterPanelへの統合**
+
 ```typescript
 // FilterPanel.tsx に追加
 import { NewFilter } from './NewFilter';
@@ -398,15 +414,17 @@ import { NewFilter } from './NewFilter';
   value={filterState.newFilterValue}
   onChange={filterState.handleNewFilter}
 />
-```
+```text
 
-4. **エクスポートの追加**
+1. **エクスポートの追加**
+
 ```typescript
 // index.ts に追加
 export { NewFilter } from './NewFilter';
-```
+```text
 
 ### カスタムスタイリング
+
 ```tsx
 // スタイル定数の定義
 const FILTER_STYLES = {
@@ -443,16 +461,18 @@ const FILTER_STYLES = {
     {/* オプション */}
   </select>
 </div>
-```
+```text
 
 ## 🧪 テスト
 
 ### テスト構成
+
 - **Unit Tests**: 個別フィルターコンポーネントのテスト
 - **Integration Tests**: FilterPanelとフィルター間の連携テスト
 - **Hook Tests**: useFilterStateフックのテスト
 
 ### テスト例
+
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
 import { FilterPanel } from './FilterPanel';
@@ -502,9 +522,10 @@ describe('FilterPanel', () => {
     expect(mockHandlers.onResetFilters).toHaveBeenCalled();
   });
 });
-```
+```text
 
 ### フックのテスト
+
 ```typescript
 import { renderHook, act } from '@testing-library/react';
 import { useFilterState } from './useFilterState';
@@ -536,13 +557,14 @@ describe('useFilterState', () => {
     expect(mockHandlers.onSearchFilter).toHaveBeenCalledWith('寿司');
   });
 });
-```
+```text
 
 ## 🔍 トラブルシューティング
 
 ### よくある問題
 
 1. **フィルターが反映されない**
+
    ```typescript
    // イベントハンドラーの確認
    const handleCuisineFilter = useCallback((cuisine: CuisineType | "") => {
@@ -551,7 +573,8 @@ describe('useFilterState', () => {
    }, []);
    ```
 
-2. **パフォーマンスの問題**
+1. **パフォーマンスの問題**
+
    ```typescript
    // メモ化の確認
    const memoizedOptions = useMemo(() => {
@@ -562,7 +585,8 @@ describe('useFilterState', () => {
    }, []);
    ```
 
-3. **状態の同期問題**
+1. **状態の同期問題**
+
    ```typescript
    // 状態の確認
    useEffect(() => {
@@ -575,6 +599,7 @@ describe('useFilterState', () => {
    ```
 
 ### デバッグ方法
+
 ```typescript
 // デバッグ用のログ出力
 const debugFilterState = (state: FilterState) => {
@@ -595,16 +620,18 @@ const measureFilterPerformance = () => {
   // フィルター処理
   console.timeEnd('Filter Render');
 };
-```
+```text
 
 ## 🚀 今後の改善予定
 
 ### 短期的な改善
+
 - [ ] フィルター履歴機能の追加
 - [ ] 保存されたフィルター設定
 - [ ] フィルター結果のエクスポート機能
 
 ### 長期的な改善
+
 - [ ] AI による推奨フィルター
 - [ ] 地理的範囲フィルター
 - [ ] リアルタイム営業状況フィルター

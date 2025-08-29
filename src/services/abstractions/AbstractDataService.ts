@@ -5,13 +5,13 @@
  */
 
 import type {
-  IMapPointProvider,
   ICacheProvider,
   IErrorHandler,
+  IMapPointProvider,
   IValidator,
-  Restaurant,
   MapPoint,
   Parking,
+  Restaurant,
   Toilet,
 } from "@/types";
 
@@ -93,9 +93,7 @@ export class RestaurantService extends AbstractDataService<Restaurant> {
   async getAll(): Promise<Restaurant[]> {
     return this.fetchWithCache("restaurants", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("restaurant");
-      return mapPoints.filter(
-        (point) => point.type === "restaurant"
-      ) as Restaurant[];
+      return mapPoints.filter((point) => point.type === "restaurant");
     });
   }
 
@@ -109,9 +107,7 @@ export class RestaurantService extends AbstractDataService<Restaurant> {
     radius: number
   ): Promise<Restaurant[]> {
     const nearby = await this.dataSource.searchNearby(center, radius);
-    return nearby.filter(
-      (point) => point.type === "restaurant"
-    ) as Restaurant[];
+    return nearby.filter((point) => point.type === "restaurant");
   }
 }
 
@@ -122,7 +118,7 @@ export class ParkingService extends AbstractDataService<Parking> {
   async getAll(): Promise<Parking[]> {
     return this.fetchWithCache("parkings", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("parking");
-      return mapPoints.filter((point) => point.type === "parking") as Parking[];
+      return mapPoints.filter((point) => point.type === "parking");
     });
   }
 }
@@ -134,7 +130,7 @@ export class ToiletService extends AbstractDataService<Toilet> {
   async getAll(): Promise<Toilet[]> {
     return this.fetchWithCache("toilets", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("toilet");
-      return mapPoints.filter((point) => point.type === "toilet") as Toilet[];
+      return mapPoints.filter((point) => point.type === "toilet");
     });
   }
 }
@@ -149,7 +145,7 @@ export class ToiletService extends AbstractDataService<Toilet> {
 export class ServiceFactory {
   constructor(
     private readonly mapPointProvider: IMapPointProvider,
-    private readonly cacheProvider: ICacheProvider<any>,
+    private readonly cacheProvider: ICacheProvider<unknown>,
     private readonly errorHandler: IErrorHandler,
     private readonly restaurantValidator: IValidator<Restaurant>,
     private readonly parkingValidator: IValidator<Parking>,
@@ -159,7 +155,7 @@ export class ServiceFactory {
   createRestaurantService(): RestaurantService {
     return new RestaurantService(
       this.mapPointProvider,
-      this.cacheProvider,
+      this.cacheProvider as ICacheProvider<Restaurant[]>,
       this.errorHandler,
       this.restaurantValidator
     );
@@ -168,7 +164,7 @@ export class ServiceFactory {
   createParkingService(): ParkingService {
     return new ParkingService(
       this.mapPointProvider,
-      this.cacheProvider,
+      this.cacheProvider as ICacheProvider<Parking[]>,
       this.errorHandler,
       this.parkingValidator
     );
@@ -177,7 +173,7 @@ export class ServiceFactory {
   createToiletService(): ToiletService {
     return new ToiletService(
       this.mapPointProvider,
-      this.cacheProvider,
+      this.cacheProvider as ICacheProvider<Toilet[]>,
       this.errorHandler,
       this.toiletValidator
     );

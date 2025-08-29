@@ -7,38 +7,47 @@
 ## ファイル構成
 
 ### `index.ts`
+
 - **バレルエクスポート** - 全型定義への統一アクセスポイント
 - **サイズ**: 3.0KB - Barrel Export Patternによる型の整理
 
 ### `core.types.ts`
+
 - **基盤・共通型** - アプリケーション全体で使用される基本型
 - **サイズ**: 1.6KB - 軽量な基盤型定義
 
 ### `restaurant.types.ts`
+
 - **飲食店・マップポイント関連型** - ドメイン固有の型定義
 - **サイズ**: 3.7KB - 詳細なビジネスロジック型
 
 ### `interfaces.types.ts`
+
 - **インターフェース分離実装** - 依存関係逆転原則対応
 - **サイズ**: 6.9KB - 包括的な抽象化インターフェース
 
 ### `type-guards.ts`
+
 - **型ガード関数** - 実行時型チェック機能
 - **サイズ**: 5.0KB - 堅牢な型安全性保証
 
 ### `api.types.ts`
+
 - **API関連型** - 外部API通信の型定義
 - **サイズ**: 3.8KB - API契約の型安全性
 
 ### `ui.types.ts`
+
 - **UI・コンポーネント型** - フロントエンド固有の型
 - **サイズ**: 5.6KB - React コンポーネントの型定義
 
 ### `map.types.ts`
+
 - **地図関連型** - Google Maps API関連の型
 - **サイズ**: 2.3KB - 地図機能の型定義
 
 ### `app.types.ts`
+
 - **アプリケーション全体型** - グローバル状態と設定
 - **サイズ**: 5.5KB - アプリケーション設定型
 
@@ -46,7 +55,7 @@
 
 ### 階層構造
 
-```
+```text
 Types Hierarchy
 ├── Core Types (基盤型)
 │   ├── LatLngLiteral
@@ -65,40 +74,44 @@ Types Hierarchy
     ├── Type Guards
     ├── API Types
     └── UI Types
-```
+```text
 
 ## 主要型定義
 
 ### 1. 基盤型（Core Types）
 
 #### 地理座標
+
 ```typescript
 export interface LatLngLiteral {
   readonly lat: number;
   readonly lng: number;
 }
-```
+```text
 
 #### 佐渡地区分類
+
 ```typescript
 export type SadoDistrict =
   | "両津" | "相川" | "佐和田" | "金井"
   | "新穂" | "畑野" | "真野" | "小木"
   | "羽茂" | "赤泊";
-```
+```text
 
 #### 営業時間
+
 ```typescript
 export interface OpeningHours {
   readonly day: string;
   readonly hours: string;
   readonly isOpen: boolean;
 }
-```
+```text
 
 ### 2. ドメイン型（Domain Types）
 
 #### 飲食店型
+
 ```typescript
 export interface Restaurant {
   readonly id: string;
@@ -118,9 +131,10 @@ export interface Restaurant {
   readonly features: readonly string[];
   readonly lastUpdated: string;
 }
-```
+```text
 
 #### 料理ジャンル
+
 ```typescript
 export type CuisineType =
   | "日本料理" | "寿司" | "海鮮" | "焼肉・焼鳥"
@@ -129,16 +143,18 @@ export type CuisineType =
   | "ファストフード" | "デザート・スイーツ"
   | "カレー・エスニック" | "ステーキ・洋食"
   | "弁当・テイクアウト" | "レストラン" | "その他";
-```
+```text
 
 #### 統合マップポイント
+
 ```typescript
 export type MapPoint = Restaurant | Parking | Toilet;
-```
+```text
 
 ### 3. インターフェース型（Interface Types）
 
 #### データソース抽象化
+
 ```typescript
 export interface IDataSource<T> {
   fetch(): Promise<T[]>;
@@ -151,9 +167,10 @@ export interface IMapPointProvider {
   getMapPointsByType(type: MapPointType): Promise<MapPoint[]>;
   searchNearby(center: LatLngLiteral, radius: number): Promise<MapPoint[]>;
 }
-```
+```text
 
 #### バリデーション抽象化
+
 ```typescript
 export interface IValidator<T> {
   validate(data: T): IValidationResult;
@@ -165,9 +182,10 @@ export interface IValidationResult {
   readonly errors: string[];
   readonly warnings: string[];
 }
-```
+```text
 
 #### キャッシュ管理抽象化
+
 ```typescript
 export interface ICacheProvider<T> {
   get(key: string): Promise<T | null>;
@@ -175,11 +193,12 @@ export interface ICacheProvider<T> {
   delete(key: string): Promise<void>;
   clear(): Promise<void>;
 }
-```
+```text
 
 ### 4. 型ガード（Type Guards）
 
 #### マップポイント型ガード
+
 ```typescript
 export const isRestaurant = (point: MapPoint): point is Restaurant => {
   return point.type === "restaurant";
@@ -192,9 +211,10 @@ export const isParking = (point: MapPoint): point is Parking => {
 export const isToilet = (point: MapPoint): point is Toilet => {
   return point.type === "toilet";
 };
-```
+```text
 
 #### 座標検証
+
 ```typescript
 export const isValidLatLng = (
   coords: unknown
@@ -208,13 +228,14 @@ export const isValidLatLng = (
     Math.abs((coords as any).lng) <= 180
   );
 };
-```
+```text
 
 ## 設計原則
 
 ### 1. インターフェース分離原則（ISP）
 
 #### 細分化されたインターフェース
+
 - **IDataSource<T>** - データ取得の基本契約
 - **IRestaurantDataSource** - 飲食店固有の機能
 - **IMapPointProvider** - マップポイント統合機能
@@ -222,6 +243,7 @@ export const isValidLatLng = (
 - **IAnalyticsProvider** - 分析機能
 
 #### 利点
+
 - **依存関係の最小化** - 必要な機能のみに依存
 - **テスト容易性** - モック作成の簡素化
 - **拡張性** - 新機能追加時の影響範囲限定
@@ -229,15 +251,17 @@ export const isValidLatLng = (
 ### 2. 型安全性の保証
 
 #### Readonly修飾子
+
 ```typescript
 export interface Restaurant {
   readonly id: string;
   readonly coordinates: LatLngLiteral;
   readonly features: readonly string[];
 }
-```
+```text
 
 #### Union Types
+
 ```typescript
 export type MapPointType = "restaurant" | "parking" | "toilet";
 export type AsyncState<T> = 
@@ -245,11 +269,12 @@ export type AsyncState<T> =
   | { status: "loading" }
   | { status: "success"; data: T }
   | { status: "error"; error: string };
-```
+```text
 
 ### 3. 実行時型チェック
 
 #### 型ガード活用
+
 ```typescript
 // 安全な型変換
 const processMapPoint = (point: MapPoint) => {
@@ -261,9 +286,10 @@ const processMapPoint = (point: MapPoint) => {
     console.log(point.capacity);
   }
 };
-```
+```text
 
 #### バリデーション統合
+
 ```typescript
 const validateAndProcess = (data: unknown) => {
   if (validateMapPoint(data)) {
@@ -272,7 +298,7 @@ const validateAndProcess = (data: unknown) => {
   }
   throw new Error("Invalid map point data");
 };
-```
+```text
 
 ## 使用例
 
@@ -298,7 +324,7 @@ const findNearbyRestaurants = (
       calculateDistance(center, restaurant.coordinates) <= radius
     );
 };
-```
+```text
 
 ### インターフェース実装
 
@@ -325,7 +351,7 @@ class RestaurantService implements IDataSource<Restaurant> {
     // キャッシュクリア実装
   }
 }
-```
+```text
 
 ### 型ガード活用
 
@@ -339,7 +365,7 @@ const categorizeMapPoints = (points: MapPoint[]) => {
 
   return { restaurants, parkings, toilets };
 };
-```
+```text
 
 ## パフォーマンス最適化
 
@@ -354,7 +380,7 @@ const createMapPoint = <T extends MapPoint>(
   id: generateId(),
   lastUpdated: new Date().toISOString(),
 } as T);
-```
+```text
 
 ### 条件型の使用
 
@@ -362,7 +388,7 @@ const createMapPoint = <T extends MapPoint>(
 // 条件型による型レベル最適化
 type ExtractCoordinates<T> = T extends { coordinates: infer C } ? C : never;
 type RestaurantCoords = ExtractCoordinates<Restaurant>; // LatLngLiteral
-```
+```text
 
 ### Template Literal Types
 
@@ -373,7 +399,7 @@ type AnalyticsEvent = {
   name: EventName;
   properties: Record<string, unknown>;
 };
-```
+```text
 
 ## 開発ツール統合
 
@@ -386,7 +412,7 @@ type AnalyticsEvent = {
   "typescript.suggest.autoImports": true,
   "typescript.preferences.importModuleSpecifier": "relative"
 }
-```
+```text
 
 ### ESLint TypeScript設定
 
@@ -403,7 +429,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error'
   }
 };
-```
+```text
 
 ## テスト戦略
 
@@ -419,7 +445,7 @@ type _RestaurantHasId = AssertTrue<'id' extends keyof Restaurant ? true : false>
 type _RestaurantReadonly = AssertTrue<
   Restaurant['id'] extends readonly string ? true : false
 >;
-```
+```text
 
 ### 型ガードテスト
 
@@ -436,7 +462,7 @@ describe('Type Guards', () => {
     expect(isValidLatLng({ lat: 91, lng: 0 })).toBe(false);
   });
 });
-```
+```text
 
 ## 拡張ポイント
 
@@ -461,7 +487,7 @@ export type MapPoint = Restaurant | Parking | Toilet | Hospital;
 export const isHospital = (point: MapPoint): point is Hospital => {
   return point.type === "hospital";
 };
-```
+```text
 
 ### カスタムユーティリティ型
 
@@ -477,7 +503,7 @@ export type PartialUpdate<T> = {
 export type RequiredFields<T> = {
   [K in keyof T]-?: T[K];
 };
-```
+```text
 
 ## ベストプラクティス
 
@@ -497,7 +523,7 @@ export namespace Restaurant {
   export type Filters = Pick<Restaurant, 'cuisineType' | 'priceRange'>;
   export type Summary = Pick<Restaurant, 'id' | 'name' | 'rating'>;
 }
-```
+```text
 
 ### パフォーマンス考慮
 

@@ -4,14 +4,14 @@
  */
 
 import type {
-  MapPoint,
-  Restaurant,
-  Parking,
-  Toilet,
   ApiError,
-  SheetsApiError,
+  MapPoint,
   MapPointType,
+  Parking,
+  Restaurant,
   SadoDistrict,
+  SheetsApiError,
+  Toilet,
 } from "./index";
 
 // ==============================
@@ -91,19 +91,20 @@ export const isSheetsApiError = (error: unknown): error is SheetsApiError => {
 export const isValidLatLng = (
   coords: unknown
 ): coords is { lat: number; lng: number } => {
+  if (typeof coords !== "object" || coords === null) return false;
+
+  const obj = coords as Record<string, unknown>;
   return (
-    typeof coords === "object" &&
-    coords !== null &&
-    "lat" in coords &&
-    "lng" in coords &&
-    typeof (coords as any).lat === "number" &&
-    typeof (coords as any).lng === "number" &&
-    !isNaN((coords as any).lat) &&
-    !isNaN((coords as any).lng) &&
-    (coords as any).lat >= -90 &&
-    (coords as any).lat <= 90 &&
-    (coords as any).lng >= -180 &&
-    (coords as any).lng <= 180
+    "lat" in obj &&
+    "lng" in obj &&
+    typeof obj.lat === "number" &&
+    typeof obj.lng === "number" &&
+    !isNaN(obj.lat) &&
+    !isNaN(obj.lng) &&
+    obj.lat >= -90 &&
+    obj.lat <= 90 &&
+    obj.lng >= -180 &&
+    obj.lng <= 180
   );
 };
 
@@ -148,7 +149,7 @@ export const validateMapPoint = (point: unknown): point is MapPoint => {
     return false;
   }
 
-  const p = point as any;
+  const p = point as Record<string, unknown>;
 
   // 必須フィールドのチェック
   const requiredFields = [
@@ -172,12 +173,12 @@ export const validateMapPoint = (point: unknown): point is MapPoint => {
   }
 
   // 型の詳細チェック
-  if (!isValidMapPointType(p.type)) {
+  if (typeof p.type !== "string" || !isValidMapPointType(p.type)) {
     console.warn("MapPoint validation failed: invalid type", p.type);
     return false;
   }
 
-  if (!isValidSadoDistrict(p.district)) {
+  if (typeof p.district !== "string" || !isValidSadoDistrict(p.district)) {
     console.warn("MapPoint validation failed: invalid district", p.district);
     return false;
   }

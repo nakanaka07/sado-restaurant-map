@@ -29,7 +29,9 @@ export const SEARCH_RADIUS_OPTIONS = [1, 3, 5, 10, 20] as const;
 // ==============================
 
 /** Google Analytics測定ID */
-export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID;
+export const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID as
+  | string
+  | undefined;
 
 /** Google Sheets API設定 */
 export const SHEETS_CONFIG = {

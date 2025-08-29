@@ -4,18 +4,19 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/hooks/map/
 ├── index.ts                    # バレルエクスポート
 ├── useMapPoints.ts            # 地図ポイント統合管理フック
 └── useMapPoints.test.ts       # useMapPointsテストファイル
-```
+```text
 
 ## 🎯 概要
 
 このディレクトリは、Google Maps APIと連携した地図機能に関するフック群を提供します。レストラン、駐車場、トイレなどの地図上のポイントを統合的に管理し、効率的な地理的データ処理を実現します。
 
 ### 主要な責務
+
 - **地図ポイント統合管理**: レストラン、駐車場、トイレの統一的な管理
 - **地理的データ処理**: 座標計算、距離測定、範囲フィルタリング
 - **リアルタイム更新**: 地図表示の動的更新とパフォーマンス最適化
@@ -57,7 +58,7 @@ function MapComponent() {
     </GoogleMap>
   );
 }
-```
+```text
 
 #### フィルタリング付きの使用
 
@@ -92,7 +93,7 @@ function FilteredMapView() {
     </div>
   );
 }
-```
+```text
 
 ## 📊 型定義
 
@@ -128,7 +129,7 @@ interface MapPoint {
   accessible?: boolean;
   babyChanging?: boolean;
 }
-```
+```text
 
 ### UseMapPointsResult
 
@@ -139,17 +140,17 @@ interface UseMapPointsResult {
   error: Error | null;
   refreshMapPoints: () => Promise<void>;
 }
-```
+```text
 
 ## 🏗️ アーキテクチャ
 
 ### データフロー
 
-```
+```text
 Google Sheets API → useMapPoints → 統合処理 → 地理的フィルタリング → UI
                                 ↓
                           ローカルキャッシュ
-```
+```text
 
 ### 統合処理パターン
 
@@ -174,7 +175,7 @@ const fetchAllMapPoints = async (): Promise<MapPoint[]> => {
     return a.coordinates.lng - b.coordinates.lng;
   });
 };
-```
+```text
 
 ### 地理的計算ユーティリティ
 
@@ -210,7 +211,7 @@ export const findNearestPoints = (
     .sort((a, b) => a.distance - b.distance)
     .slice(0, limit);
 };
-```
+```text
 
 ## 🧪 テスト
 
@@ -244,7 +245,7 @@ describe('useMapPoints - 基本機能', () => {
     expect(result.current.mapPoints).toEqual(mockPoints);
   });
 });
-```
+```text
 
 #### 2. 地理的計算テスト
 
@@ -272,7 +273,7 @@ describe('地理的計算ユーティリティ', () => {
     expect(nearest[0].type).toBe('restaurant');
   });
 });
-```
+```text
 
 ### テスト実行
 
@@ -285,7 +286,7 @@ npm run test:coverage src/hooks/map
 
 # ウォッチモード
 npm run test:watch src/hooks/map
-```
+```text
 
 ## 🚀 開発ガイドライン
 
@@ -323,7 +324,7 @@ export function useMapRegions() {
 
   return { regions, loading, refreshRegions: fetchRegions };
 }
-```
+```text
 
 #### 2. バレルエクスポート更新
 
@@ -331,7 +332,7 @@ export function useMapRegions() {
 // src/hooks/map/index.ts
 export { useMapPoints } from "./useMapPoints";
 export { useMapRegions } from "./useMapRegions";
-```
+```text
 
 ### パフォーマンス最適化
 
@@ -352,7 +353,7 @@ const createSpatialIndex = (points: MapPoint[]) => {
   
   return index;
 };
-```
+```text
 
 #### 2. メモ化とキャッシュ
 
@@ -373,7 +374,7 @@ const memoizedCalculateDistance = useMemo(() => {
     return distance;
   };
 }, []);
-```
+```text
 
 ## 🔍 トラブルシューティング
 
@@ -384,6 +385,7 @@ const memoizedCalculateDistance = useMemo(() => {
 **症状**: 地図上にマーカーが表示されない
 
 **解決方法**:
+
 ```typescript
 // 座標の妥当性チェック
 const validateCoordinates = (coords: { lat: number; lng: number }) => {
@@ -394,13 +396,14 @@ const validateCoordinates = (coords: { lat: number; lng: number }) => {
 const validPoints = mapPoints.filter(point => 
   validateCoordinates(point.coordinates)
 );
-```
+```text
 
 #### 2. パフォーマンスの問題
 
 **症状**: 大量のポイントで地図が重くなる
 
 **解決方法**:
+
 ```typescript
 // 表示範囲によるフィルタリング
 const useVisiblePoints = (mapPoints: MapPoint[], bounds: GeographicBounds) => {
@@ -408,13 +411,14 @@ const useVisiblePoints = (mapPoints: MapPoint[], bounds: GeographicBounds) => {
     return filterPointsInBounds(mapPoints, bounds);
   }, [mapPoints, bounds]);
 };
-```
+```text
 
 #### 3. 距離計算の精度問題
 
 **症状**: 距離計算が不正確
 
 **解決方法**:
+
 ```typescript
 // 正確なハバーサイン公式の実装
 const calculateDistanceAccurate = (point1: Coordinates, point2: Coordinates) => {
@@ -429,7 +433,7 @@ const calculateDistanceAccurate = (point1: Coordinates, point2: Coordinates) => 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
-```
+```text
 
 ## 📈 パフォーマンス監視
 
@@ -453,21 +457,24 @@ const useMapPerformance = () => {
 
   return { measureTime };
 };
-```
+```text
 
 ## 🚀 今後の改善予定
 
 ### 短期的な改善
+
 - [ ] クラスタリング機能の追加
 - [ ] リアルタイム位置追跡
 - [ ] オフライン地図対応
 
 ### 中期的な改善
+
 - [ ] 高度な空間検索機能
 - [ ] 地図レイヤー管理
 - [ ] ルート検索統合
 
 ### 長期的な改善
+
 - [ ] AI による最適ルート提案
 - [ ] AR機能統合
 - [ ] 3D地図表示

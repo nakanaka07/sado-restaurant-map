@@ -406,7 +406,9 @@ const normalizeAddress = (address: string): string => {
  * @param normalizedAddress 正規化された住所
  * @returns 判定された地区、判定できない場合は null
  */
-const findDistrictByKeywords = (normalizedAddress: string): SadoDistrict | null => {
+const findDistrictByKeywords = (
+  normalizedAddress: string
+): SadoDistrict | null => {
   // 地区キーワードでマッチング（長いキーワードから順にチェック）
   const sortedKeywords = Object.keys(DISTRICT_KEYWORDS).sort(
     (a, b) => b.length - a.length
@@ -459,7 +461,7 @@ export const getDistrictFromAddress = (address: string): SadoDistrict => {
   }
 
   // どの地区にも該当しない場合
-  if (process.env.NODE_ENV === "development") {
+  if (import.meta.env.DEV) {
     unknownAddresses.add(address);
     console.warn(`地区を判定できませんでした: ${address}`);
   }
@@ -565,7 +567,7 @@ export const getUnknownAddresses = (): readonly string[] => {
  * 未判定住所の統計情報を出力（開発環境のみ）
  */
 export const logUnknownAddressStats = (): void => {
-  if (process.env.NODE_ENV !== "development" || unknownAddresses.size === 0) {
+  if (!import.meta.env.DEV || unknownAddresses.size === 0) {
     return;
   }
 
@@ -578,7 +580,9 @@ export const logUnknownAddressStats = (): void => {
       console.log(`  ${index + 1}. ${address}`);
     });
   console.log("\n📝 改善のヒント:");
-  console.log("  - 新しい地名が見つかった場合は、佐渡市公式サイトで地区を確認してください");
+  console.log(
+    "  - 新しい地名が見つかった場合は、佐渡市公式サイトで地区を確認してください"
+  );
   console.log("  - https://www.city.sado.niigata.jp/soshiki/2002/2359.html");
   console.groupEnd();
 };
@@ -596,7 +600,11 @@ export const testDistrictAccuracy = (
 
   let correct = 0;
   const total = testCases.length;
-  const errors: Array<{ address: string; expected: SadoDistrict; actual: SadoDistrict }> = [];
+  const errors: Array<{
+    address: string;
+    expected: SadoDistrict;
+    actual: SadoDistrict;
+  }> = [];
 
   console.group("🧪 地区判定精度テスト");
 

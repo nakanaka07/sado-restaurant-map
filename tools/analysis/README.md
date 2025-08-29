@@ -1,24 +1,22 @@
-# 📊 Analysis Tools - コード品質分析ツール# 📊 Analysis Tools - コード品質分析ツール# 📊 Analysis Tools - コード品質分析ツール
+# 📊 Analysis Tools - コード品質分析ツール
 
-> **目的**: TypeScript/TSX コードの品質分析・依存関係チェック・Clean Architecture 遵守確認 > **目的**: TypeScript/TSX コードの品質分析・依存関係チェック・Clean Architecture 遵守確認 > **目的**: TypeScript/TSX コードの品質分析・依存関係チェック・Clean Architecture 遵守確認
+> **目的**: TypeScript/TSX コードの品質分析・依存関係チェック・Clean Architecture 遵守確認
 > **技術**: Node.js + JavaScript (ES6+) | AST 解析 | 依存関係グラフ
-> **最終更新**: 2025 年 8 月 28 日> **技術**: Node.js + JavaScript (ES6+) | AST 解析 | 依存関係グラフ > **技術**: Node.js + JavaScript (ES6+) | AST 解析 | 依存関係グラフ
+> **最終更新**: 2025 年 8 月 28 日
 
-## 📁 ツール構成> **最終更新**: 2025 年 8 月 28 日> **最終更新**: 2025 年 8 月 28 日
-
-````text## 📁 ツール構成## 📁 ツール構成
+## 📁 ツール構成
 
 tools/analysis/
 
-├── check-circular-deps.cjs  # 循環依存検出ツール```text```text
+├── check-circular-deps.cjs # 循環依存検出ツール`text`text
 
-├── analyze-coupling.cjs     # 結合度・レイヤー違反分析ツール
+├── analyze-coupling.cjs # 結合度・レイヤー違反分析ツール
 
-├── output/                  # 分析結果出力ディレクトリ（.gitignore対象）tools/analysis/tools/analysis/
+├── output/ # 分析結果出力ディレクトリ（.gitignore 対象）tools/analysis/tools/analysis/
 
-└── README.md               # このファイル
+└── README.md # このファイル
 
-```├── check-circular-deps.cjs  # 循環依存検出ツール├── check-circular-deps.cjs  # 循環依存検出ツール
+````├── check-circular-deps.cjs  # 循環依存検出ツール├── check-circular-deps.cjs  # 循環依存検出ツール
 
 
 
@@ -190,7 +188,7 @@ pnpm run analyze:all### 推奨実行順序
 ---### 循環依存解決
 
 **開発支援**: プロジェクトの技術的負債管理・Clean Architecture 実践1. **インターフェース抽出**: 共通インターフェースで依存を分離
-2. **依存関係逆転**: 抽象化による具象依存の排除
+1. **依存関係逆転**: 抽象化による具象依存の排除
 
 ### 高結合度解決
 

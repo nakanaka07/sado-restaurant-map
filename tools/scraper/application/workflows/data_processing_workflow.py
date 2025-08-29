@@ -13,7 +13,7 @@ from pathlib import Path
 from core.processors.data_processor import DataProcessor
 from core.domain.interfaces import APIClient, DataStorage, DataValidator
 from shared.types.core_types import ProcessingResult, CategoryType, QueryData
-from shared.settings import ScraperConfig
+from shared.config import ScraperConfig
 from shared.logger import get_logger
 from shared.exceptions import ValidationError, ConfigurationError
 

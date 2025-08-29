@@ -8,13 +8,13 @@
 
 ### 依存関係逆転の実装
 
-```
+```text
 高レベルモジュール（MapDataService）
          ↓ 依存
 抽象化層（AbstractDataService）
          ↑ 実装
 低レベルモジュール（RestaurantService, ParkingService, ToiletService）
-```
+```text
 
 ## ファイル構成
 
@@ -24,16 +24,16 @@
 
 ## 主要コンポーネント
 
-### 1. AbstractDataService<T>
+### 1. AbstractDataService\<T\>
 
-**抽象データサービス基底クラス**
+#### 抽象データサービス基底クラス
 
 - **目的**: 具象実装への依存を排除
-- **機能**: 
+- **機能**:
   - キャッシュ戦略付きデータ取得
   - エラーハンドリング
   - データバリデーション
-  - 共通的なCRUD操作の抽象化
+  - 共通的な CRUD 操作の抽象化
 
 ```typescript
 export abstract class AbstractDataService<T> {
@@ -44,53 +44,59 @@ export abstract class AbstractDataService<T> {
     protected readonly validator: IValidator<T>
   ) {}
 }
-```
+```text
 
 ### 2. 具象サービス実装
 
 #### RestaurantService
+
 - **機能**: 飲食店データの管理
 - **メソッド**: `getAll()`, `getById()`, `getNearby()`
 
 #### ParkingService
+
 - **機能**: 駐車場データの管理
 - **メソッド**: `getAll()`
 
 #### ToiletService
+
 - **機能**: トイレデータの管理
 - **メソッド**: `getAll()`
 
 ### 3. ServiceFactory
 
-**依存関係注入ファクトリー**
+#### 依存関係注入ファクトリー
 
 - **目的**: サービスインスタンスの生成と依存関係の注入
-- **利点**: 
+- **利点**:
   - 依存関係の一元管理
   - テスト時のモック注入が容易
   - 設定変更の影響範囲を限定
 
 ### 4. MapDataService
 
-**統合マップデータサービス**
+#### 統合マップデータサービス
 
 - **目的**: 複数のサービスを協調させる高レベルサービス
 - **機能**:
   - 全マップポイントの統合取得
   - エリア内検索
   - 距離ベースフィルタリング
-  - Haversine公式による距離計算
+  - Haversine 公式による距離計算
 
 ## 設計原則
 
 ### 1. 依存関係逆転原則（DIP）
+
 - 高レベルモジュールは低レベルモジュールに依存しない
 - 両方とも抽象化に依存する
 
 ### 2. 単一責任原則（SRP）
+
 - 各サービスは特定のデータタイプの管理のみを担当
 
 ### 3. 開放閉鎖原則（OCP）
+
 - 新しいサービスタイプの追加は拡張で対応
 - 既存コードの修正は不要
 
@@ -119,7 +125,7 @@ const mapDataService = new MapDataService(
 );
 
 const allMapPoints = await mapDataService.getAllMapPoints();
-```
+```text
 
 ## テスト戦略
 
@@ -139,17 +145,19 @@ const service = new RestaurantService(
   mockErrorHandler,
   mockValidator
 );
-```
+```text
 
 ## パフォーマンス最適化
 
 ### キャッシュ戦略
-- **L1キャッシュ**: メモリ内キャッシュ
+
+- **L1 キャッシュ**: メモリ内キャッシュ
 - **キャッシュキー**: データタイプ別の階層化
 - **TTL**: データの性質に応じた有効期限設定
 
 ### 距離計算最適化
-- **Haversine公式**: 高精度な地球上の距離計算
+
+- **Haversine 公式**: 高精度な地球上の距離計算
 - **フィルタリング**: 不要な計算の事前除外
 
 ## 拡張ポイント
@@ -167,7 +175,7 @@ const service = new RestaurantService(
 class CustomCacheProvider implements ICacheProvider<T> {
   // カスタムキャッシュロジックの実装
 }
-```
+```text
 
 ## 関連ドキュメント
 
@@ -177,7 +185,7 @@ class CustomCacheProvider implements ICacheProvider<T> {
 
 ## 注意事項
 
-- **型安全性**: TypeScriptの型システムを最大限活用
+- **型安全性**: TypeScript の型システムを最大限活用
 - **エラーハンドリング**: 各層での適切なエラー処理
 - **パフォーマンス**: キャッシュとバリデーションのバランス
 - **テスタビリティ**: 依存関係注入によるテスト容易性の確保

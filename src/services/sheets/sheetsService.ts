@@ -112,7 +112,8 @@ function buildSheetsApiUrl(worksheetName: string): string {
  * APIリクエストのログ出力（機密情報マスキング済み）
  */
 function logApiRequest(url: string): void {
-  const maskedUrl = url.replace(/key=[^&]+/, `key=${maskApiKey(API_KEY!)}`);
+  const apiKey = API_KEY || "undefined";
+  const maskedUrl = url.replace(/key=[^&]+/, `key=${maskApiKey(apiKey)}`);
   console.log(`📡 Google Sheets APIリクエスト: ${maskedUrl}`);
 }
 
@@ -169,7 +170,10 @@ async function handle403Error(response: Response): Promise<string> {
 /**
  * APIレスポンスの処理と検証
  */
-async function handleApiResponse(response: Response, worksheetName: string): Promise<string[][]> {
+async function handleApiResponse(
+  response: Response,
+  worksheetName: string
+): Promise<string[][]> {
   const data = (await response.json()) as SheetsApiResponse;
 
   return validateAndExtractData(data, worksheetName);
@@ -178,7 +182,10 @@ async function handleApiResponse(response: Response, worksheetName: string): Pro
 /**
  * レスポンスデータの検証と抽出
  */
-function validateAndExtractData(data: SheetsApiResponse, worksheetName: string): string[][] {
+function validateAndExtractData(
+  data: SheetsApiResponse,
+  worksheetName: string
+): string[][] {
   if (!data || typeof data !== "object") {
     throw new SheetsApiError(
       "Invalid response format from Google Sheets API: response is not an object",
@@ -211,10 +218,12 @@ function validateAndExtractData(data: SheetsApiResponse, worksheetName: string):
 /**
  * Restaurant データの型安全性を検証
  */
-function validateRestaurantData(data: any): data is Restaurant {
+function validateRestaurantData(data: unknown): data is Restaurant {
   if (!data || typeof data !== "object") {
     return false;
   }
+
+  const obj = data as Record<string, unknown>;
 
   // 必須プロパティの検証
   const requiredStringFields = [
@@ -226,47 +235,45 @@ function validateRestaurantData(data: any): data is Restaurant {
     "priceRange",
   ];
   for (const field of requiredStringFields) {
-    if (!data[field] || typeof data[field] !== "string") {
+    if (!obj[field] || typeof obj[field] !== "string") {
       console.warn(`Missing or invalid required field: ${field}`);
       return false;
     }
   }
 
   // type プロパティの検証
-  if (data.type !== "restaurant") {
+  if (obj.type !== "restaurant") {
     console.warn(
-      `Invalid type property: expected 'restaurant', got '${data.type}'`
+      `Invalid type property: expected 'restaurant', got '${String(obj.type)}'`
     );
     return false;
   }
 
   // coordinates の検証
-  if (!data.coordinates || typeof data.coordinates !== "object") {
+  if (!obj.coordinates || typeof obj.coordinates !== "object") {
     console.warn("Missing or invalid coordinates");
     return false;
   }
 
-  if (
-    typeof data.coordinates.lat !== "number" ||
-    typeof data.coordinates.lng !== "number"
-  ) {
+  const coords = obj.coordinates as Record<string, unknown>;
+  if (typeof coords.lat !== "number" || typeof coords.lng !== "number") {
     console.warn("Invalid coordinate values");
     return false;
   }
 
-  if (isNaN(data.coordinates.lat) || isNaN(data.coordinates.lng)) {
+  if (isNaN(coords.lat) || isNaN(coords.lng)) {
     console.warn("NaN coordinate values");
     return false;
   }
 
   // features の検証
-  if (!Array.isArray(data.features)) {
+  if (!Array.isArray(obj.features)) {
     console.warn("Features must be an array");
     return false;
   }
 
   // openingHours の検証
-  if (!Array.isArray(data.openingHours)) {
+  if (!Array.isArray(obj.openingHours)) {
     console.warn("OpeningHours must be an array");
     return false;
   }
@@ -476,19 +483,27 @@ function convertSheetRowToRestaurant(
 // 料理ジャンル判定用の正規表現パターン（パフォーマンス向上のため事前コンパイル）
 const CUISINE_PATTERNS = {
   sushi: /(寿司|すし|sushi|回転寿司|握り|にぎり)/,
-  seafood: /(海鮮|魚|刺身|鮮魚|漁師|海の家|魚介|あじ|いわし|かに|蟹|えび|海老|たこ|蛸|いか|烏賊|まぐろ|鮪|さば|鯖)/,
-  yakiniku: /(焼肉|焼鳥|ホルモン|串焼|炭火|bbq|バーベキュー|やきとり|やきにく|鶏|チキン|beef|牛)/,
-  ramen: /(ラーメン|らーめん|ramen|つけ麺|担々麺|味噌|醤油|豚骨|塩ラーメン|中華そば|二郎)/,
+  seafood:
+    /(海鮮|魚|刺身|鮮魚|漁師|海の家|魚介|あじ|いわし|かに|蟹|えび|海老|たこ|蛸|いか|烏賊|まぐろ|鮪|さば|鯖)/,
+  yakiniku:
+    /(焼肉|焼鳥|ホルモン|串焼|炭火|bbq|バーベキュー|やきとり|やきにく|鶏|チキン|beef|牛)/,
+  ramen:
+    /(ラーメン|らーめん|ramen|つけ麺|担々麺|味噌|醤油|豚骨|塩ラーメン|中華そば|二郎)/,
   noodles: /(そば|蕎麦|うどん|手打|十割|二八|讃岐|きしめん|ひやむぎ|そうめん)/,
-  chinese: /(中華|中国|餃子|チャーハン|炒飯|麻婆|点心|北京|四川|上海|広東|台湾|小籠包)/,
-  italian: /(イタリア|パスタ|ピザ|ピッツァ|リストランテ|トラットリア|スパゲッティ|italian)/,
+  chinese:
+    /(中華|中国|餃子|チャーハン|炒飯|麻婆|点心|北京|四川|上海|広東|台湾|小籠包)/,
+  italian:
+    /(イタリア|パスタ|ピザ|ピッツァ|リストランテ|トラットリア|スパゲッティ|italian)/,
   french: /(フレンチ|フランス|ビストロ|french|西洋料理|洋食)/,
-  curry: /(カレー|curry|インド|タイ|エスニック|スパイス|ナン|タンドール|ココナッツ)/,
+  curry:
+    /(カレー|curry|インド|タイ|エスニック|スパイス|ナン|タンドール|ココナッツ)/,
   steak: /(ステーキ|steak|ハンバーグ|オムライス|グリル|beef|pork)/,
-  dessert: /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅|パン屋|パン|ベーカリー|bread|パティスリー)/,
+  dessert:
+    /(デザート|スイーツ|ケーキ|アイス|sweet|dessert|洋菓子|和菓子|だんご|まんじゅう|どら焼き|大福|餅|パン屋|パン|ベーカリー|bread|パティスリー)/,
   cafe: /(カフェ|cafe|珈琲|コーヒー|coffee|喫茶)/,
   bar: /(バー|bar|居酒屋|酒|スナック|パブ|pub|飲み屋|ビアガーデン|beer|wine)/,
-  fastFood: /(ファスト|マクドナルド|ケンタ|モス|サブウェイ|fast|burger|ハンバーガー)/,
+  fastFood:
+    /(ファスト|マクドナルド|ケンタ|モス|サブウェイ|fast|burger|ハンバーガー)/,
 } as const;
 
 /**
@@ -504,9 +519,11 @@ function checkCuisinePattern(combined: string, pattern: RegExp): boolean {
 function mapBasicCuisineTypes(combined: string): CuisineType | null {
   if (checkCuisinePattern(combined, CUISINE_PATTERNS.sushi)) return "寿司";
   if (checkCuisinePattern(combined, CUISINE_PATTERNS.seafood)) return "海鮮";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.yakiniku)) return "焼肉・焼鳥";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.yakiniku))
+    return "焼肉・焼鳥";
   if (checkCuisinePattern(combined, CUISINE_PATTERNS.ramen)) return "ラーメン";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.noodles)) return "そば・うどん";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.noodles))
+    return "そば・うどん";
   return null;
 }
 
@@ -515,11 +532,15 @@ function mapBasicCuisineTypes(combined: string): CuisineType | null {
  */
 function mapSpecialtyCuisineTypes(combined: string): CuisineType | null {
   if (checkCuisinePattern(combined, CUISINE_PATTERNS.chinese)) return "中華";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.italian)) return "イタリアン";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.italian))
+    return "イタリアン";
   if (checkCuisinePattern(combined, CUISINE_PATTERNS.french)) return "フレンチ";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.curry)) return "カレー・エスニック";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.steak)) return "ステーキ・洋食";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.fastFood)) return "ファストフード";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.curry))
+    return "カレー・エスニック";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.steak))
+    return "ステーキ・洋食";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.fastFood))
+    return "ファストフード";
   return null;
 }
 
@@ -527,9 +548,12 @@ function mapSpecialtyCuisineTypes(combined: string): CuisineType | null {
  * デザート・ドリンク系の判定
  */
 function mapDessertAndDrinkTypes(combined: string): CuisineType | null {
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.dessert)) return "デザート・スイーツ";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.cafe)) return "カフェ・喫茶店";
-  if (checkCuisinePattern(combined, CUISINE_PATTERNS.bar)) return "バー・居酒屋";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.dessert))
+    return "デザート・スイーツ";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.cafe))
+    return "カフェ・喫茶店";
+  if (checkCuisinePattern(combined, CUISINE_PATTERNS.bar))
+    return "バー・居酒屋";
   return null;
 }
 
@@ -562,12 +586,20 @@ function mapAdditionalFoodTypes(combined: string): CuisineType | null {
   }
 
   // 🍱 和食・定食・食堂
-  if (/和食|定食|食堂|日本料理|割烹|料亭|懐石|会席|てんぷら|天ぷら|とんかつ|カツ|丼|どんぶり/.test(combined)) {
+  if (
+    /和食|定食|食堂|日本料理|割烹|料亭|懐石|会席|てんぷら|天ぷら|とんかつ|カツ|丼|どんぶり/.test(
+      combined
+    )
+  ) {
     return "日本料理";
   }
 
   // 🏪 レストラン（ジャンル不明）
-  if (/レストラン|restaurant|ダイニング|ビュッフェ|バイキング|食べ放題/.test(combined)) {
+  if (
+    /レストラン|restaurant|ダイニング|ビュッフェ|バイキング|食べ放題/.test(
+      combined
+    )
+  ) {
     return "レストラン";
   }
 
@@ -677,11 +709,16 @@ function extractServiceFeatures(data: {
 }): string[] {
   const features: string[] = [];
 
-  if (data.takeout === "true" || data.takeout === "可") features.push("テイクアウト可");
-  if (data.delivery === "true" || data.delivery === "可") features.push("デリバリー可");
-  if (data.dineIn === "true" || data.dineIn === "可") features.push("店内飲食可");
-  if (data.curbsidePickup === "true" || data.curbsidePickup === "可") features.push("カーブサイドピックアップ可");
-  if (data.reservable === "true" || data.reservable === "可") features.push("予約可");
+  if (data.takeout === "true" || data.takeout === "可")
+    features.push("テイクアウト可");
+  if (data.delivery === "true" || data.delivery === "可")
+    features.push("デリバリー可");
+  if (data.dineIn === "true" || data.dineIn === "可")
+    features.push("店内飲食可");
+  if (data.curbsidePickup === "true" || data.curbsidePickup === "可")
+    features.push("カーブサイドピックアップ可");
+  if (data.reservable === "true" || data.reservable === "可")
+    features.push("予約可");
 
   return features;
 }
@@ -696,9 +733,11 @@ function extractTimeFeatures(data: {
 }): string[] {
   const features: string[] = [];
 
-  if (data.breakfast === "true" || data.breakfast === "提供") features.push("朝食提供");
+  if (data.breakfast === "true" || data.breakfast === "提供")
+    features.push("朝食提供");
   if (data.lunch === "true" || data.lunch === "提供") features.push("昼食提供");
-  if (data.dinner === "true" || data.dinner === "提供") features.push("夕食提供");
+  if (data.dinner === "true" || data.dinner === "提供")
+    features.push("夕食提供");
 
   return features;
 }
@@ -716,8 +755,10 @@ function extractDrinkFeatures(data: {
 
   if (data.beer === "true" || data.beer === "提供") features.push("ビール提供");
   if (data.wine === "true" || data.wine === "提供") features.push("ワイン提供");
-  if (data.cocktails === "true" || data.cocktails === "提供") features.push("カクテル提供");
-  if (data.coffee === "true" || data.coffee === "提供") features.push("コーヒー提供");
+  if (data.cocktails === "true" || data.cocktails === "提供")
+    features.push("カクテル提供");
+  if (data.coffee === "true" || data.coffee === "提供")
+    features.push("コーヒー提供");
 
   return features;
 }
@@ -741,18 +782,33 @@ function extractAccessibilityFeatures(data: {
 }): string[] {
   const features: string[] = [];
 
-  if (data.vegetarian === "true" || data.vegetarian === "対応") features.push("ベジタリアン対応");
-  if (data.kidsMenu === "true" || data.kidsMenu === "あり") features.push("キッズメニューあり");
-  if (data.dessert === "true" || data.dessert === "提供") features.push("デザート提供");
-  if (data.outdoor === "true" || data.outdoor === "あり") features.push("屋外席あり");
-  if (data.liveMusic === "true" || data.liveMusic === "あり") features.push("ライブミュージック");
-  if (data.restroom === "true" || data.restroom === "あり") features.push("お手洗いあり");
-  if (data.parking === "true" || data.parking === "あり") features.push("駐車場あり");
-  if (data.accessibility === "true" || data.accessibility === "対応") features.push("車椅子対応");
-  if (data.goodForKids === "true" || data.goodForKids === "対応") features.push("子供連れ歓迎");
-  if (data.allowsDogs === "true" || data.allowsDogs === "可") features.push("ペット可");
-  if (data.goodForGroups === "true" || data.goodForGroups === "対応") features.push("大人数対応");
-  if (data.goodForWatchingSports === "true" || data.goodForWatchingSports === "対応") features.push("スポーツ観戦可");
+  if (data.vegetarian === "true" || data.vegetarian === "対応")
+    features.push("ベジタリアン対応");
+  if (data.kidsMenu === "true" || data.kidsMenu === "あり")
+    features.push("キッズメニューあり");
+  if (data.dessert === "true" || data.dessert === "提供")
+    features.push("デザート提供");
+  if (data.outdoor === "true" || data.outdoor === "あり")
+    features.push("屋外席あり");
+  if (data.liveMusic === "true" || data.liveMusic === "あり")
+    features.push("ライブミュージック");
+  if (data.restroom === "true" || data.restroom === "あり")
+    features.push("お手洗いあり");
+  if (data.parking === "true" || data.parking === "あり")
+    features.push("駐車場あり");
+  if (data.accessibility === "true" || data.accessibility === "対応")
+    features.push("車椅子対応");
+  if (data.goodForKids === "true" || data.goodForKids === "対応")
+    features.push("子供連れ歓迎");
+  if (data.allowsDogs === "true" || data.allowsDogs === "可")
+    features.push("ペット可");
+  if (data.goodForGroups === "true" || data.goodForGroups === "対応")
+    features.push("大人数対応");
+  if (
+    data.goodForWatchingSports === "true" ||
+    data.goodForWatchingSports === "対応"
+  )
+    features.push("スポーツ観戦可");
 
   return features;
 }

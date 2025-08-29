@@ -1,10 +1,42 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useErrorHandler } from "./useErrorHandler";
+
+// ブラウザAPI のモック
+Object.defineProperty(window, "location", {
+  value: {
+    href: "http://localhost:3000/test",
+  },
+  writable: true,
+});
+
+Object.defineProperty(window, "navigator", {
+  value: {
+    userAgent: "Mozilla/5.0 (Test Browser) TestAgent/1.0",
+  },
+  writable: true,
+});
+
+// DOM イベントリスナーのモック
+const mockAddEventListener = vi.fn();
+const mockRemoveEventListener = vi.fn();
+
+Object.defineProperty(window, "addEventListener", {
+  value: mockAddEventListener,
+  writable: true,
+});
+
+Object.defineProperty(window, "removeEventListener", {
+  value: mockRemoveEventListener,
+  writable: true,
+});
 
 describe("useErrorHandler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAddEventListener.mockClear();
+    mockRemoveEventListener.mockClear();
+
     // console エラーをモック
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(console, "group").mockImplementation(() => {});

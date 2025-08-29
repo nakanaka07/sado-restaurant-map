@@ -8,7 +8,7 @@
 src/components/map/utils/
 ├── markerUtils.ts           # マーカー関連ユーティリティ関数
 └── index.ts                # バレルエクスポート
-```
+```text
 
 ## 🎯 マーカーユーティリティ (`markerUtils.ts`)
 
@@ -43,7 +43,7 @@ const CUISINE_COLOR_MAP = {
   レストラン: "#06b6d4",     // シアン
   その他: "#6b7280",         // グレー
 } as const;
-```
+```text
 
 ### 価格帯別サイズマップ
 
@@ -56,7 +56,7 @@ const PRICE_SIZE_MAP = {
   "2000-3000円": 40,   // 大サイズ
   "3000円～": 45,      // 特大サイズ
 } as const;
-```
+```text
 
 ## 🔧 ユーティリティ関数
 
@@ -68,7 +68,7 @@ const PRICE_SIZE_MAP = {
 // 使用例
 const color = getMarkerColorByCuisine("日本料理"); // "#ef4444"
 const unknownColor = getMarkerColorByCuisine("未知の料理"); // "#9e9e9e" (デフォルト)
-```
+```text
 
 **パラメータ**:
 
@@ -88,7 +88,7 @@ const unknownColor = getMarkerColorByCuisine("未知の料理"); // "#9e9e9e" (�
 const size = getMarkerSizeByPrice("2000-3000円"); // 40
 const defaultSize = getMarkerSizeByPrice(); // 35 (デフォルト)
 const unknownSize = getMarkerSizeByPrice("未知の価格帯"); // 35 (デフォルト)
-```
+```text
 
 **パラメータ**:
 
@@ -118,7 +118,7 @@ const restaurantIcon = getMarkerIcon({
 const parkingIcon = getMarkerIcon({
   type: "parking"
 }); // { background: "#4caf50", glyph: "🅿️" }
-```
+```text
 
 **パラメータ**:
 
@@ -149,7 +149,7 @@ const restaurantSize = getMarkerSize({
 const parkingSize = getMarkerSize({
   type: "parking"
 }); // 32
-```
+```text
 
 **パラメータ**:
 
@@ -189,7 +189,7 @@ const config = getMarkerConfig({
 //   size: 40,
 //   scale: 1.14
 // }
-```
+```text
 
 **パラメータ**:
 
@@ -215,7 +215,7 @@ import {
 
 // 個別インポート
 import { getMarkerIcon } from '@/components/map/utils/markerUtils';
-```
+```text
 
 ### MapMarkerコンポーネントでの使用
 
@@ -250,7 +250,7 @@ const MapMarker = ({ point, onClick }: MapMarkerProps) => {
     </AdvancedMarker>
   );
 };
-```
+```text
 
 ### カスタムマーカーレンダラー
 
@@ -281,7 +281,7 @@ const CustomMarkerRenderer = ({ points }: { points: MapPoint[] }) => {
     </>
   );
 };
-```
+```text
 
 ## 🏗️ 設計原則
 
@@ -319,7 +319,7 @@ const CUISINE_COLOR_MAP = {
   // 既存のマッピング...
   "新しい料理ジャンル": "#新しい色コード",
 } as const;
-```
+```text
 
 ### 価格帯の調整
 
@@ -333,7 +333,7 @@ const PRICE_SIZE_MAP = {
   "3000-5000円": 45,
   "5000円～": 50,     // より大きいサイズ
 } as const;
-```
+```text
 
 ### カスタムアイコンの追加
 
@@ -354,7 +354,7 @@ export const getMarkerIcon = (point: MapPoint): MarkerIcon => {
     // デフォルトケース...
   }
 };
-```
+```text
 
 ## 🔧 開発ガイドライン
 
@@ -412,7 +412,7 @@ describe('markerUtils', () => {
     expect(config.scale).toBeCloseTo(1.14);
   });
 });
-```
+```text
 
 ## 🔍 トラブルシューティング
 
@@ -423,12 +423,12 @@ describe('markerUtils', () => {
    - CUISINE_COLOR_MAPの定義確認
    - CSSでの色の上書き確認
 
-2. **マーカーサイズが適用されない**
+1. **マーカーサイズが適用されない**
    - 価格帯文字列の形式確認
    - PRICE_SIZE_MAPの定義確認
    - スケール計算の確認
 
-3. **新しいポイントタイプが表示されない**
+1. **新しいポイントタイプが表示されない**
    - getMarkerIcon関数のswitch文更新確認
    - 型定義の更新確認
    - デフォルトケースの動作確認
@@ -452,7 +452,7 @@ const debugColorMapping = () => {
   console.log('Available cuisine colors:', CUISINE_COLOR_MAP);
   console.log('Available price sizes:', PRICE_SIZE_MAP);
 };
-```
+```text
 
 ### パフォーマンス監視
 
@@ -464,4 +464,4 @@ const measureMarkerPerformance = (points: MapPoint[]) => {
   console.timeEnd('Marker Config Generation');
   return configs;
 };
-```
+```text

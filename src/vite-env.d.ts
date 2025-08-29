@@ -6,7 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_GOOGLE_MAPS_API_KEY: string;
   readonly VITE_GOOGLE_MAPS_MAP_ID: string;
 
-  // Google Sheets API設定（将来実装用）
+  // Google Sheets API設定（拡張機能用）
   readonly VITE_GOOGLE_SHEETS_API_KEY?: string;
   readonly VITE_SPREADSHEET_ID?: string;
 

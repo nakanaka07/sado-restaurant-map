@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# -*- coding: utf-8 -*-
 
 <#
 .SYNOPSIS
@@ -13,8 +14,31 @@
 
 .NOTES
     対象: 開発者
-    最終更新: 2025年8月27日
+    最終更新: 2025年8月29日
 #>
+
+# 文字エンコーディング設定
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# ロケール設定（日本語対応）
+try {
+    $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8NoBOM'
+    }
+} catch {
+    # PowerShell 5.x の場合は無視
+}
+
+# Windows のコードページを UTF-8 に設定
+if ($IsWindows -or $PSVersionTable.PSVersion.Major -le 5) {
+    try {
+        chcp 65001 > $null
+    } catch {
+        # chcp コマンドが失敗しても続行
+    }
+}
 
 Write-Host "🚀 佐渡飲食店マップ - データ統合テスト開始" -ForegroundColor Green
 Write-Host "=" * 50

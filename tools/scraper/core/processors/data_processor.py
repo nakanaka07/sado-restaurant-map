@@ -17,7 +17,7 @@ from urllib.parse import unquote, parse_qs, urlparse
 # 新しいアーキテクチャ対応インポート
 from core.domain.interfaces import APIClient, DataStorage, DataValidator, AuthenticationService
 from shared.types.core_types import PlaceData, ProcessingResult, CategoryType, QueryData
-from shared.settings import ScraperConfig
+from shared.config import ScraperConfig
 from shared.logger import get_logger
 from shared.exceptions import APIError, ValidationError, ConfigurationError
 from shared.utils.translators import translate_business_status, translate_types

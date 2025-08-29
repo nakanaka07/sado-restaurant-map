@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
 import "../../styles/PWABadge.css";
 
+// 🔧 PWA関連の型定義
+type PWAModule = {
+  useRegisterSW: (options: {
+    onRegisteredSW?: (swUrl: string, r?: ServiceWorkerRegistration) => void;
+  }) => {
+    offlineReady: [boolean, (value: boolean) => void];
+    needRefresh: [boolean, (value: boolean) => void];
+    updateServiceWorker: (reloadPage?: boolean) => Promise<void>;
+  };
+};
+
 // 🔧 開発環境でのvirtual moduleエラー対応
 // PWAが無効な開発環境では、このコンポーネントは何も表示しない
-const isPWAEnabled = import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
+const isPWAEnabled =
+  import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
 
 // 🔧 開発環境でのService Worker完全制御
 const isDevelopment = import.meta.env.DEV;
@@ -11,13 +23,18 @@ const isDevelopment = import.meta.env.DEV;
 function PWABadge() {
   // 開発環境でService Workerを強制アンレジスター
   useEffect(() => {
-    if (isDevelopment && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        registrations.forEach((registration) => {
-          console.log('🔧 [PWA] Development mode: Unregistering Service Worker');
-          registration.unregister().catch(console.warn);
-        });
-      }).catch(console.warn);
+    if (isDevelopment && "serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => {
+          registrations.forEach((registration) => {
+            console.log(
+              "🔧 [PWA] Development mode: Unregistering Service Worker"
+            );
+            registration.unregister().catch(console.warn);
+          });
+        })
+        .catch(console.warn);
     }
   }, []);
 
@@ -32,17 +49,18 @@ function PWABadge() {
 
 // PWA機能を持つコンポーネント（PWA有効時のみ読み込まれる）
 function PWABadgeWithSW() {
-  const [pwaSW, setPwaSW] = useState<any>(null);
+  const [pwaSW, setPwaSW] = useState<PWAModule | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // 文字列結合でvirtual moduleを動的構築（静的解析を回避）
-    const pwaModuleName = ['virtual:', 'pwa-register', 'react'].join('/');
+    const pwaModuleName = ["virtual:", "pwa-register", "react"].join("/");
 
     const loadPWAModule = async () => {
       try {
-        // @ts-ignore - 動的インポートのため型チェックを無視
-        const pwaModule = await import(/* @vite-ignore */ pwaModuleName);
+        const pwaModule = (await import(
+          /* @vite-ignore */ pwaModuleName
+        )) as PWAModule;
         setPwaSW(pwaModule);
       } catch (error) {
         console.warn("PWA module not available:", error);
@@ -62,7 +80,11 @@ function PWABadgeWithSW() {
   return <PWABadgeContent useRegisterSW={pwaSW.useRegisterSW} />;
 }
 
-function PWABadgeContent({ useRegisterSW }: { readonly useRegisterSW: any }) {
+function PWABadgeContent({
+  useRegisterSW,
+}: {
+  readonly useRegisterSW: PWAModule["useRegisterSW"];
+}) {
   // check for updates every hour
   const period = 60 * 60 * 1000;
 

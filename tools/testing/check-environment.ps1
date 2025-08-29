@@ -1,24 +1,48 @@
 #!/usr/bin/env pwsh
+# -*- coding: utf-8 -*-
 
 <#
 .SYNOPSIS
     環境変数設定チェックスクリプト
-    
+
 .DESCRIPTION
     佐渡飲食店マップの環境変数設定をチェックし、問題があれば解決方法を提示します。
-    
+
 .EXAMPLE
     ./check-environment.ps1
-    
+
 .NOTES
     対象: 開発者・CI/CD担当者
-    最終更新: 2025年8月8日
+    最終更新: 2025年8月29日
 #>
 
 param(
     [switch]$Verbose = $false,
     [switch]$Fix = $false
 )
+
+# 文字エンコーディング設定
+$OutputEncoding = [Console]::InputEncoding = [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# ロケール設定（日本語対応）
+try {
+    $PSDefaultParameterValues['*:Encoding'] = 'utf8'
+    if ($PSVersionTable.PSVersion.Major -ge 6) {
+        $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8NoBOM'
+    }
+} catch {
+    # PowerShell 5.x の場合は無視
+}
+
+# Windows のコードページを UTF-8 に設定
+if ($IsWindows -or $PSVersionTable.PSVersion.Major -le 5) {
+    try {
+        chcp 65001 > $null
+    } catch {
+        # chcp コマンドが失敗しても続行
+    }
+}
 
 # カラー出力の設定
 $Colors = @{
@@ -34,7 +58,7 @@ function Write-Status {
         [string]$Message,
         [string]$Type = "Info"
     )
-    
+
     $color = $Colors[$Type]
     if ($color) {
         Write-Host $Message -ForegroundColor $color
@@ -50,9 +74,9 @@ function Test-EnvironmentVariable {
         [string]$Description,
         [bool]$Required = $true
     )
-    
+
     $value = Get-ChildItem Env: | Where-Object Name -eq $Name | Select-Object -ExpandProperty Value
-    
+
     if ($value) {
         Write-Status "✅ $Name : 設定済み" -Type Success
         if ($Verbose) {
@@ -79,7 +103,7 @@ function Test-FileExists {
         [string]$Path,
         [string]$Description
     )
-    
+
     if (Test-Path $Path) {
         Write-Status "✅ $Path : 存在" -Type Success
         return $true
@@ -96,14 +120,14 @@ function Show-FixSuggestion {
         [string[]]$MissingEnvVars,
         [string[]]$MissingFiles
     )
-    
+
     Write-Status "`n🔧 修正提案:" -Type Header
-    
+
     if ($MissingFiles -contains ".env.local") {
         Write-Status "1. .env.localファイルを作成:" -Type Info
         Write-Status "   cp .env.local.example .env.local" -Type Info
     }
-    
+
     if ($MissingEnvVars.Count -gt 0) {
         Write-Status "2. 以下の環境変数を設定:" -Type Info
         foreach ($var in $MissingEnvVars) {
@@ -111,12 +135,12 @@ function Show-FixSuggestion {
         }
         Write-Status "   詳細: docs/development/environment-setup-guide.md" -Type Info
     }
-    
+
     Write-Status "3. Google Cloud Console設定確認:" -Type Info
     Write-Status "   - APIキーが正しく設定されているか" -Type Info
     Write-Status "   - HTTPリファラー制限が適切か" -Type Info
     Write-Status "   - Maps JavaScript API、Sheets APIが有効か" -Type Info
-    
+
     Write-Status "4. スプレッドシート共有設定確認:" -Type Info
     Write-Status "   - 「リンクを知っている全員が閲覧可」に設定" -Type Info
     Write-Status "   - 編集権限ではなく閲覧権限で共有" -Type Info
@@ -180,32 +204,32 @@ Write-Status "オプション環境変数: $setOptional/$totalOptional 設定済
 
 if ($missingRequired.Count -eq 0 -and $envLocalExists) {
     Write-Status "✅ すべての必須設定が完了しています！" -Type Success
-    
+
     # テスト実行提案
     Write-Status "`n🧪 テスト実行確認:" -Type Header
     Write-Status "以下のコマンドでテストを実行して設定を確認してください:" -Type Info
     Write-Status "pnpm test src/services/sheets/sheetsService.test.ts" -Type Info
-    
+
     exit 0
 }
 else {
     Write-Status "⚠️  設定が不完全です" -Type Warning
-    
+
     $missingFiles = @()
     if (-not $envLocalExists) { $missingFiles += ".env.local" }
-    
+
     Show-FixSuggestion -MissingEnvVars $missingRequired -MissingFiles $missingFiles
-    
+
     if ($Fix) {
         Write-Status "`n🔧 自動修正を試行しています..." -Type Info
-        
+
         if (-not $envLocalExists -and $envExampleExists) {
             Copy-Item ".env.local.example" ".env.local"
             Write-Status "✅ .env.localファイルを作成しました" -Type Success
             Write-Status "   次に実際のAPIキー値を設定してください" -Type Warning
         }
     }
-    
+
     exit 1
 }
 

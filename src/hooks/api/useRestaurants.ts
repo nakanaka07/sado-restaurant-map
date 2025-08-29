@@ -5,18 +5,24 @@
  */
 
 import {
-  useState,
-  useCallback,
-  useMemo,
-  startTransition,
-  useEffect,
-} from "react";
-import type { Restaurant, MapFilters, SortOrder, AsyncState } from "@/types";
-import {
-  fetchRestaurantsFromSheets,
   checkDataFreshness,
+  fetchRestaurantsFromSheets,
   SheetsApiError,
 } from "@/services";
+import type {
+  AsyncState,
+  MapFilters,
+  OpeningHours,
+  Restaurant,
+  SortOrder,
+} from "@/types";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 // モックデータ（開発用）
 const MOCK_RESTAURANTS: readonly Restaurant[] = [
@@ -186,7 +192,11 @@ export function useRestaurants(
     // 評価フィルター
     if (filters.minRating) {
       filtered = filtered.filter((restaurant) => {
-        return restaurant.rating && restaurant.rating >= filters.minRating!;
+        return (
+          restaurant.rating &&
+          filters.minRating !== undefined &&
+          restaurant.rating >= filters.minRating
+        );
       });
     }
 
@@ -207,7 +217,7 @@ export function useRestaurants(
           return false;
         }
 
-        return restaurant.openingHours.some((hours) => {
+        return restaurant.openingHours.some((hours: OpeningHours) => {
           if (hours.isHoliday || !hours.day?.includes(currentDay)) {
             return false;
           }

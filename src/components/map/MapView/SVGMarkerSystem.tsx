@@ -3,11 +3,11 @@
  * SVGマーカーシステム - Phase 2実装
  */
 
-import { getIconComponent } from "@/config/svgIcons";
+import { getIconComponent } from "@/config/iconMaps";
 import type { MapPoint } from "@/types";
 import { isRestaurant } from "@/types/type-guards";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
-import React from 'react';
+import React from "react";
 import { getMarkerColorByCuisine } from "../utils/markerUtils";
 
 interface SVGMarkerSystemProps {
@@ -67,17 +67,23 @@ export function SVGMarkerSystem({ point, onClick }: SVGMarkerSystemProps) {
         >
           <defs>
             {/* グラデーション定義 */}
-            <linearGradient id={`gradient-${point.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            <linearGradient
+              id={`gradient-${point.id}`}
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor={primaryColor} />
               <stop offset="100%" stopColor={secondaryColor} />
             </linearGradient>
 
             {/* 外側のグロー効果 */}
             <filter id={`glow-${point.id}`}>
-              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
               <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
           </defs>
@@ -105,11 +111,7 @@ export function SVGMarkerSystem({ point, onClick }: SVGMarkerSystemProps) {
             justifyContent: "center",
           }}
         >
-          <IconComponent
-            width={iconSize}
-            height={iconSize}
-            fill="white"
-          />
+          <IconComponent width={iconSize} height={iconSize} fill="white" />
         </div>
 
         {/* 評価表示（レストランの場合） */}
@@ -199,7 +201,7 @@ function getMarkerPath(size: number): string {
  */
 function adjustColorBrightness(hex: string, percent: number): string {
   // #を除去
-  const cleanHex = hex.replace('#', '');
+  const cleanHex = hex.replace("#", "");
 
   // RGBに変換
   const r = parseInt(cleanHex.substring(0, 2), 16);
@@ -213,5 +215,7 @@ function adjustColorBrightness(hex: string, percent: number): string {
   const newB = Math.max(0, Math.min(255, Math.round(b * factor)));
 
   // 16進数に戻す
-  return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+  return `#${newR.toString(16).padStart(2, "0")}${newG
+    .toString(16)
+    .padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
 }

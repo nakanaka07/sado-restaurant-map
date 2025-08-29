@@ -3,7 +3,8 @@
  * 地図のInfoWindowコンテンツコンポーネント
  */
 
-import type { MapPoint, Restaurant, Parking, Toilet } from "@/types";
+import type { MapPoint } from "@/types";
+import { isRestaurant } from "@/types/type-guards";
 import { getMarkerIcon } from "../utils";
 
 interface MapInfoWindowProps {
@@ -45,11 +46,13 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
               fontWeight: "500",
             }}
           >
-            {point.type === "restaurant" && (point as Restaurant).cuisineType}
+            {point.type === "restaurant" &&
+              isRestaurant(point) &&
+              point.cuisineType}
             {point.type === "parking" && "駐車場"}
             {point.type === "toilet" && "公衆トイレ"}
           </span>
-          {point.type === "restaurant" && (
+          {point.type === "restaurant" && isRestaurant(point) && (
             <span
               style={{
                 backgroundColor: "#f3f4f6",
@@ -59,7 +62,7 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
                 fontSize: "12px",
               }}
             >
-              {(point as Restaurant).priceRange}
+              {point.priceRange}
             </span>
           )}
         </div>
@@ -81,7 +84,7 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
         </div>
 
         {/* 電話番号（飲食店のみ） */}
-        {point.type === "restaurant" && (point as Restaurant).phone && (
+        {point.type === "restaurant" && isRestaurant(point) && point.phone && (
           <div
             style={{
               display: "flex",
@@ -93,16 +96,16 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
           >
             <span style={{ marginRight: "8px" }}>📞</span>
             <a
-              href={`tel:${(point as Restaurant).phone}`}
+              href={`tel:${point.phone}`}
               style={{ color: "#2563eb", textDecoration: "none" }}
             >
-              {(point as Restaurant).phone}
+              {point.phone}
             </a>
           </div>
         )}
 
         {/* 評価（飲食店のみ） */}
-        {point.type === "restaurant" && (point as Restaurant).rating && (
+        {point.type === "restaurant" && isRestaurant(point) && point.rating && (
           <div
             style={{
               display: "flex",
@@ -114,15 +117,14 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
           >
             <span style={{ marginRight: "8px" }}>⭐</span>
             <span>
-              {(point as Restaurant).rating!.toFixed(1)}
-              {(point as Restaurant).reviewCount &&
-                ` (${(point as Restaurant).reviewCount}件)`}
+              {point.rating.toFixed(1)}
+              {point.reviewCount && ` (${point.reviewCount}件)`}
             </span>
           </div>
         )}
 
         {/* 容量（駐車場のみ） */}
-        {point.type === "parking" && (point as Parking).capacity && (
+        {point.type === "parking" && point.capacity && (
           <div
             style={{
               display: "flex",
@@ -133,12 +135,12 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
             }}
           >
             <span style={{ marginRight: "8px" }}>🚗</span>
-            <span>容量: {(point as Parking).capacity}台</span>
+            <span>容量: {point.capacity}台</span>
           </div>
         )}
 
         {/* 料金（駐車場のみ） */}
-        {point.type === "parking" && (point as Parking).fee && (
+        {point.type === "parking" && point.fee && (
           <div
             style={{
               display: "flex",
@@ -149,14 +151,14 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
             }}
           >
             <span style={{ marginRight: "8px" }}>💰</span>
-            <span>料金: {(point as Parking).fee}</span>
+            <span>料金: {point.fee}</span>
           </div>
         )}
 
         {/* 営業時間（駐車場・トイレ） */}
         {(point.type === "parking" || point.type === "toilet") &&
-          (point as Parking | Toilet).openingHours &&
-          (point as Parking | Toilet).openingHours!.length > 0 && (
+          point.openingHours &&
+          point.openingHours.length > 0 && (
             <div
               style={{
                 display: "flex",
@@ -168,8 +170,8 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
             >
               <span style={{ marginRight: "8px" }}>🕐</span>
               <span>
-                {(point as Parking | Toilet)
-                  .openingHours!.map(
+                {point.openingHours
+                  .map(
                     (hours) =>
                       `${hours.day}: ${
                         hours.isHoliday
@@ -273,11 +275,9 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
           🗺️ ルート案内
         </button>
 
-        {point.type === "restaurant" && (point as Restaurant).website && (
+        {point.type === "restaurant" && point.website && (
           <button
-            onClick={() =>
-              window.open((point as Restaurant).website!, "_blank")
-            }
+            onClick={() => window.open(point.website, "_blank")}
             style={{
               background: "#2563eb",
               color: "white",

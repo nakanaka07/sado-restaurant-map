@@ -88,7 +88,7 @@ export function useMapPoints() {
    * 初期データ読み込み
    */
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, [fetchData]);
 
   /**
@@ -264,7 +264,10 @@ function getPriceOrder(priceRange?: string): number {
 /**
  * ポイントがフィルター条件に一致するかチェック
  */
-function isPointMatchingFilters(point: MapPoint, filters: ExtendedMapFilters): boolean {
+function isPointMatchingFilters(
+  point: MapPoint,
+  filters: ExtendedMapFilters
+): boolean {
   // 基本フィルターチェック
   if (!isBasicFiltersMatching(point, filters)) return false;
 
@@ -280,7 +283,10 @@ function isPointMatchingFilters(point: MapPoint, filters: ExtendedMapFilters): b
 /**
  * 基本フィルター（ポイントタイプ、地区、検索）のチェック
  */
-function isBasicFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+function isBasicFiltersMatching(
+  point: MapPoint,
+  filters: ExtendedMapFilters
+): boolean {
   // ポイントタイプフィルター
   if (!filters.pointTypes.includes(point.type)) return false;
 
@@ -306,7 +312,10 @@ function isBasicFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): b
 /**
  * 特徴フィルターのチェック
  */
-function isFeatureFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+function isFeatureFiltersMatching(
+  point: MapPoint,
+  filters: ExtendedMapFilters
+): boolean {
   // 特徴フィルター
   if (filters.features.length > 0) {
     const hasMatchingFeature = filters.features.some((feature) =>
@@ -322,7 +331,10 @@ function isFeatureFiltersMatching(point: MapPoint, filters: ExtendedMapFilters):
 /**
  * ポイントタイプ別特徴フィルターのチェック
  */
-function isPointTypeSpecificFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+function isPointTypeSpecificFiltersMatching(
+  point: MapPoint,
+  filters: ExtendedMapFilters
+): boolean {
   // 駐車場特徴フィルター
   if (
     point.type === "parking" &&
@@ -353,14 +365,17 @@ function isPointTypeSpecificFiltersMatching(point: MapPoint, filters: ExtendedMa
 /**
  * レストランがフィルター条件に一致するかチェック
  */
-function isRestaurantMatchingFilters(point: MapPoint, filters: ExtendedMapFilters): boolean {
+function isRestaurantMatchingFilters(
+  point: MapPoint,
+  filters: ExtendedMapFilters
+): boolean {
   if (point.type !== "restaurant") return true;
 
   // 基本属性フィルター
   if (!isRestaurantBasicFiltersMatching(point, filters)) return false;
 
   // 営業中フィルター
-  if (filters.openNow && 'openingHours' in point && point.openingHours) {
+  if (filters.openNow && "openingHours" in point && point.openingHours) {
     if (!isRestaurantCurrentlyOpen(point)) return false;
   }
 
@@ -370,21 +385,32 @@ function isRestaurantMatchingFilters(point: MapPoint, filters: ExtendedMapFilter
 /**
  * レストランの基本属性フィルターチェック
  */
-function isRestaurantBasicFiltersMatching(point: MapPoint, filters: ExtendedMapFilters): boolean {
+function isRestaurantBasicFiltersMatching(
+  point: MapPoint,
+  filters: ExtendedMapFilters
+): boolean {
   if (point.type !== "restaurant") return true;
 
   // 料理ジャンルフィルター
-  if (filters.cuisineTypes.length > 0 && 'cuisineType' in point && point.cuisineType) {
+  if (
+    filters.cuisineTypes.length > 0 &&
+    "cuisineType" in point &&
+    point.cuisineType
+  ) {
     if (!filters.cuisineTypes.includes(point.cuisineType)) return false;
   }
 
   // 価格帯フィルター
-  if (filters.priceRanges.length > 0 && 'priceRange' in point && point.priceRange) {
+  if (
+    filters.priceRanges.length > 0 &&
+    "priceRange" in point &&
+    point.priceRange
+  ) {
     if (!filters.priceRanges.includes(point.priceRange)) return false;
   }
 
   // 評価フィルター
-  if (filters.minRating && 'rating' in point && point.rating) {
+  if (filters.minRating && "rating" in point && point.rating) {
     if (point.rating < filters.minRating) return false;
   }
 
@@ -395,7 +421,12 @@ function isRestaurantBasicFiltersMatching(point: MapPoint, filters: ExtendedMapF
  * レストランが現在営業中かチェック
  */
 function isRestaurantCurrentlyOpen(point: MapPoint): boolean {
-  if (point.type !== "restaurant" || !('openingHours' in point) || !point.openingHours) return false;
+  if (
+    point.type !== "restaurant" ||
+    !("openingHours" in point) ||
+    !point.openingHours
+  )
+    return false;
 
   const now = new Date();
   const currentDay = now.toLocaleDateString("ja-JP", {
@@ -409,10 +440,7 @@ function isRestaurantCurrentlyOpen(point: MapPoint): boolean {
 
   if (!todayHours || todayHours.isHoliday) return false;
   if (todayHours.open && todayHours.close) {
-    if (
-      currentTime < todayHours.open ||
-      currentTime > todayHours.close
-    ) {
+    if (currentTime < todayHours.open || currentTime > todayHours.close) {
       return false;
     }
   }

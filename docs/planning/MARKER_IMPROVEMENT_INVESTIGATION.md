@@ -387,13 +387,13 @@ export function InteractiveSVGMarker({ point, onClick }: MarkerProps) {
 
 **主要タスク**:
 
-*Week 1 (8/20-26)*:
+_Week 1 (8/20-26)_:
 
 - Day 1-2: 現状マーカー実装の詳細分析
 - Day 3-4: [`MapMarker.tsx`](../../src/components/map/MapView/MapMarker.tsx) の改良
 - Day 5-7: EnhancedPNGMarker実装・テスト
 
-*Week 2 (8/27-31)*:
+_Week 2 (8/27-31)_:
 
 - Day 1-3: ブラウザ・デバイス互換性テスト
 - Day 4-5: 本番デプロイ・効果測定
@@ -410,25 +410,25 @@ export function InteractiveSVGMarker({ point, onClick }: MarkerProps) {
 
 **主要タスク**:
 
-*Week 1 (9/1-7)*:
+_Week 1 (9/1-7)_:
 
 - SVGアイコンライブラリ設計
 - 料理ジャンル別アイコン作成
 - マーカーコンポーネント設計
 
-*Week 2 (9/8-14)*:
+_Week 2 (9/8-14)_:
 
 - SVGMarkerSystem基本実装
 - 動的色変更システム
 - アクセシビリティ対応
 
-*Week 3 (9/15-21)*:
+_Week 3 (9/15-21)_:
 
 - レスポンシブサイズ調整
 - パフォーマンス最適化
 - ブラウザ互換性確保
 
-*Week 4 (9/22-30)*:
+_Week 4 (9/22-30)_:
 
 - 統合テスト・調整
 - ドキュメント整備

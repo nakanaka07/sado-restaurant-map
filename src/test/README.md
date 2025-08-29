@@ -6,23 +6,25 @@
 
 ## ディレクトリ構成
 
-```
+```text
 src/test/
 ├── mocks/              # テスト用モック実装
 │   ├── pwa-register.ts # PWA機能のモック
 │   └── README.md       # モック実装の詳細
 ├── setup.ts            # テスト環境セットアップ
 └── README.md           # このファイル
-```
+```text
 
 ## ファイル構成
 
 ### `setup.ts`
+
 - **テスト環境セットアップファイル** - グローバルなテスト設定
 - **サイズ**: 5.4KB - 包括的なモック設定とテスト環境初期化
 - **機能**: 環境変数、API モック、ブラウザAPI モック
 
 ### `mocks/`
+
 - **モック実装ディレクトリ** - 外部依存関係のモック
 - **PWA機能** - Service Worker関連のモック
 - **詳細**: [`mocks/README.md`](./mocks/README.md)参照
@@ -37,9 +39,10 @@ process.env.VITE_GA_MEASUREMENT_ID = "G-TEST123456";
 process.env.VITE_GOOGLE_MAPS_API_KEY = "TEST_API_KEY";
 process.env.VITE_GOOGLE_SHEETS_API_KEY = "test-sheets-api-key";
 process.env.VITE_SPREADSHEET_ID = "test-spreadsheet-id";
-```
+```text
 
 #### 設定項目
+
 - **Google Analytics** - 測定IDのテスト値
 - **Google Maps API** - 地図機能のテストキー
 - **Google Sheets API** - スプレッドシート連携のテストキー
@@ -54,9 +57,10 @@ configure({
   asyncUtilTimeout: 2000,        // 非同期処理のタイムアウト
   reactStrictMode: true,         // React 19 Concurrent Features対応
 });
-```
+```text
 
 #### 特徴
+
 - **非同期更新の自動ラッピング** - act()の自動適用
 - **React Strict Mode対応** - 開発モードでの厳密チェック
 - **タイムアウト設定** - 非同期テストの適切な待機時間
@@ -79,9 +83,10 @@ interface MockGoogleMaps {
     };
   };
 }
-```
+```text
 
 #### 機能
+
 - **地図初期化** - Map コンストラクターのモック
 - **マーカー管理** - Marker 作成・操作のモック
 - **イベント処理** - 地図イベントのモック
@@ -98,9 +103,10 @@ const localStorageMock = {
   get length() { return Object.keys(store).length; },
   key: vi.fn((index: number) => keys[index] || null),
 };
-```
+```text
 
 #### 特徴
+
 - **完全な互換性** - ブラウザのLocalStorageと同じAPI
 - **状態管理** - テスト間での状態保持・リセット
 - **型安全性** - TypeScriptによる型チェック
@@ -123,9 +129,10 @@ vi.mock("../utils/analytics", () => ({
   sendTestEvents: vi.fn(),
   autoFixGA: vi.fn().mockReturnValue({}),
 }));
-```
+```text
 
 #### 対象機能
+
 - **検索トラッキング** - ユーザー検索行動の記録
 - **フィルタートラッキング** - フィルター使用状況の記録
 - **地図インタラクション** - 地図操作の記録
@@ -142,9 +149,10 @@ vi.mock("../services/sheets/sheetsService", () => ({
   checkDataFreshness: vi.fn().mockResolvedValue({ needsUpdate: false }),
   SheetsApiError: class SheetsApiError extends Error { /* ... */ },
 }));
-```
+```text
 
 #### 機能範囲
+
 - **データ取得** - レストラン、駐車場、トイレデータの取得
 - **統合データ** - 全マップポイントの統合取得
 - **データ更新チェック** - キャッシュ状態の確認
@@ -155,12 +163,14 @@ vi.mock("../services/sheets/sheetsService", () => ({
 ### 1. 単体テスト（Unit Tests）
 
 #### 対象
+
 - **コンポーネント** - React コンポーネントの個別テスト
 - **フック** - カスタムフックの動作検証
 - **ユーティリティ** - 純粋関数の入出力テスト
 - **サービス** - API呼び出しとデータ変換のテスト
 
 #### アプローチ
+
 ```typescript
 describe('Component', () => {
   beforeEach(() => {
@@ -172,17 +182,19 @@ describe('Component', () => {
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });
-```
+```text
 
 ### 2. 統合テスト（Integration Tests）
 
 #### 対象
+
 - **コンポーネント間連携** - 複数コンポーネントの協調動作
 - **サービス層統合** - API とコンポーネントの統合
 - **状態管理** - グローバル状態の更新と反映
 - **ルーティング** - ページ遷移とデータ連携
 
 #### アプローチ
+
 ```typescript
 describe('Feature Integration', () => {
   it('should handle complete user flow', async () => {
@@ -198,11 +210,12 @@ describe('Feature Integration', () => {
     });
   });
 });
-```
+```text
 
 ### 3. E2Eテスト（End-to-End Tests）
 
 #### 対象
+
 - **ユーザージャーニー** - 完全なユーザー体験の検証
 - **ブラウザ互換性** - 異なるブラウザでの動作確認
 - **パフォーマンス** - 実際の使用条件での性能測定
@@ -213,6 +226,7 @@ describe('Feature Integration', () => {
 ### テスト実行速度
 
 #### 並列実行
+
 ```typescript
 // vitest.config.ts
 export default defineConfig({
@@ -222,9 +236,10 @@ export default defineConfig({
     minThreads: 2,          // 最小スレッド数
   },
 });
-```
+```text
 
 #### モック最適化
+
 - **遅延読み込み** - 必要時のみモックを生成
 - **共有モック** - 複数テストでの再利用
 - **メモリ効率** - 大量データモックの最適化
@@ -232,6 +247,7 @@ export default defineConfig({
 ### メモリ管理
 
 #### クリーンアップ
+
 ```typescript
 afterEach(() => {
   vi.clearAllMocks();     // モック状態のクリア
@@ -241,13 +257,14 @@ afterEach(() => {
 afterAll(() => {
   vi.restoreAllMocks();   // モックの完全復元
 });
-```
+```text
 
 ## デバッグとトラブルシューティング
 
 ### よくある問題
 
 #### 1. Act Warning の抑制
+
 ```typescript
 // setup.ts での自動処理
 if (process.env.NODE_ENV === "test") {
@@ -259,9 +276,10 @@ if (process.env.NODE_ENV === "test") {
     originalError.call(console, ...args);
   };
 }
-```
+```text
 
 #### 2. 非同期処理のテスト
+
 ```typescript
 // 適切な待機処理
 await waitFor(() => {
@@ -272,9 +290,10 @@ await waitFor(() => {
 await act(async () => {
   await Promise.resolve();
 });
-```
+```text
 
 #### 3. モック状態の確認
+
 ```typescript
 // モック呼び出し履歴の確認
 console.log(mockFunction.mock.calls);
@@ -282,11 +301,12 @@ console.log(mockFunction.mock.results);
 
 // モック状態のリセット確認
 expect(mockFunction).not.toHaveBeenCalled();
-```
+```text
 
 ### デバッグ技法
 
 #### テスト分離
+
 ```typescript
 describe.only('Focused Test', () => {
   // 特定のテストのみ実行
@@ -295,15 +315,16 @@ describe.only('Focused Test', () => {
 it.skip('Skipped Test', () => {
   // テストをスキップ
 });
-```
+```text
 
 #### 詳細ログ
+
 ```typescript
 // テスト環境でのログ出力
 if (process.env.NODE_ENV === "test") {
   console.log("Test debug info:", debugData);
 }
-```
+```text
 
 ## CI/CD統合
 
@@ -324,7 +345,7 @@ jobs:
       - run: npm ci
       - run: npm run test
       - run: npm run test:coverage
-```
+```text
 
 ### テストカバレッジ
 
@@ -346,13 +367,14 @@ export default defineConfig({
     },
   },
 });
-```
+```text
 
 ## ベストプラクティス
 
 ### テスト設計原則
 
 #### AAA パターン
+
 ```typescript
 it('should calculate total correctly', () => {
   // Arrange - 準備
@@ -364,9 +386,10 @@ it('should calculate total correctly', () => {
   // Assert - 検証
   expect(total).toBe(300);
 });
-```
+```text
 
 #### テスト命名規則
+
 - **should + 期待する動作** - 明確な期待値の表現
 - **given + 条件 + when + 操作 + then + 結果** - BDD スタイル
 - **日本語での説明** - 複雑なビジネスロジックの場合
@@ -374,12 +397,14 @@ it('should calculate total correctly', () => {
 ### モック使用指針
 
 #### モックすべきもの
+
 - **外部API** - ネットワーク依存の排除
 - **ブラウザAPI** - 環境依存の排除
 - **時間依存処理** - 実行時間の制御
 - **ランダム値** - 予測可能な結果
 
 #### モックすべきでないもの
+
 - **テスト対象の実装** - 実際のロジックをテスト
 - **単純な計算** - 純粋関数の直接テスト
 - **型定義** - TypeScript の型チェックを活用
@@ -397,6 +422,7 @@ it('should calculate total correctly', () => {
 ### 新しいテストタイプの追加
 
 #### Visual Regression Tests
+
 ```typescript
 // 視覚的回帰テストの例
 import { toMatchImageSnapshot } from 'jest-image-snapshot';
@@ -407,9 +433,10 @@ it('should match visual snapshot', async () => {
   const screenshot = await page.screenshot();
   expect(screenshot).toMatchImageSnapshot();
 });
-```
+```text
 
 #### Performance Tests
+
 ```typescript
 // パフォーマンステストの例
 it('should load within performance budget', async () => {
@@ -419,7 +446,7 @@ it('should load within performance budget', async () => {
   
   expect(endTime - startTime).toBeLessThan(100); // 100ms以内
 });
-```
+```text
 
 ### カスタムマッチャー
 
@@ -434,7 +461,7 @@ expect.extend({
     };
   },
 });
-```
+```text
 
 ## 注意事項
 

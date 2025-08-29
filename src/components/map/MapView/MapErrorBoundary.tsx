@@ -39,11 +39,15 @@ export class MapErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("MapErrorBoundary caught an error:", error, errorInfo);
+    if (import.meta.env.DEV) {
+      console.error("MapErrorBoundary caught an error:", error, errorInfo);
+    }
 
     // Google Maps特有のエラー対処
-    if (error.message.includes("AdvancedMarker")) {
-      console.warn("AdvancedMarker エラーが発生しました。地図の再読み込みを試してください。");
+    if (error.message.includes("AdvancedMarker") && import.meta.env.DEV) {
+      console.warn(
+        "AdvancedMarker エラーが発生しました。地図の再読み込みを試してください。"
+      );
     }
   }
 

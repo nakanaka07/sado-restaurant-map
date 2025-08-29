@@ -58,16 +58,14 @@ class ScraperCLI:
                 self._logger.error("Places API キーが設定されていません")
                 return False
 
-            # スプレッドシートIDの検証
+            # スプレッドシートIDの検証（警告レベル）
             if not self._config.google_api.spreadsheet_id:
-                self._logger.error("スプレッドシートIDが設定されていません")
-                return False
+                self._logger.warning("スプレッドシートIDが設定されていません（Google Sheets保存無効）")
 
-            # サービスアカウントファイルの検証
-            if not Path(self._config.google_api.service_account_path).exists():
-                self._logger.error("サービスアカウントファイルが見つかりません",
-                                 path=self._config.google_api.service_account_path)
-                return False
+            # サービスアカウントファイルの検証（警告レベル）
+            if not self._config.google_api.service_account_path or not Path(self._config.google_api.service_account_path).exists():
+                self._logger.warning("サービスアカウントファイルが見つかりません（Google Sheets保存無効）",
+                                   path=self._config.google_api.service_account_path)
 
             self._logger.info("環境設定検証完了")
             return True
@@ -246,22 +244,25 @@ def _handle_connection_test() -> None:
     print("=" * 60)
 
     try:
+        # 環境ファイル読み込み（デフォルトで config/.env を使用）
+        from shared.config import load_env_to_os
+        load_env_to_os("config/.env")
+
         # 設定読み込み
         config = ScraperConfig.from_environment()
         container = create_container(config)
 
         # Google Places API接続テスト
         print("\n📍 Google Places API接続テスト...")
-        places_client = container.get_service('places_client')
 
-        # 簡単な検索リクエストでテスト
-        test_result = places_client.search_places(
-            query="佐渡市 レストラン",
-            location_restriction={'region': 'JP'},
-            max_results=1
-        )
+        from infrastructure.external.places_api_adapter import PlacesAPIAdapter
+        places_client = container.get(PlacesAPIAdapter)
 
-        if test_result and test_result.get('places'):
+        # 簡単なAPI キー検証を実行
+        test_place_id = "ChIJN1t_tDeuEmsRUsoyG83frY4"  # 有名な場所のPlace ID
+        test_result = places_client.fetch_place_details(test_place_id)
+
+        if test_result and test_result.get('id'):
             print("✅ Google Places API: 接続成功")
         else:
             print("⚠️ Google Places API: レスポンスが空です")
@@ -297,7 +298,7 @@ def _create_argument_parser():
     parser.add_argument('--separate-only', action='store_true', help='データ分離のみ実行')
     parser.add_argument('--config-check', action='store_true', help='環境変数設定の検証のみ実行')
     parser.add_argument('--test-connections', action='store_true', help='API接続テストを実行')
-    parser.add_argument('--env-file', type=str, help='環境ファイルのパス（.env.production等）')
+    parser.add_argument('--env-file', type=str, default='config/.env', help='環境ファイルのパス（.env.production等）')
     return parser
 
 
@@ -326,6 +327,12 @@ def _run_main_processing(args) -> None:
 def _setup_config_and_logging(args):
     """設定とロギングのセットアップ"""
     print("⚙️ 設定読み込み中...")
+
+    # 環境ファイルの読み込み
+    if args.env_file:
+        from shared.config import load_env_to_os
+        load_env_to_os(args.env_file)
+
     config = ScraperConfig.from_environment()
 
     logging_config = LoggingConfig(

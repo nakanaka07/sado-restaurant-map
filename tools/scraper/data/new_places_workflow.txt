@@ -1,0 +1,55 @@
+# 📋 新しいお店・場所のURL追加システム
+# 作成日時: 2025年08月29日
+# 目的: 新規店舗・施設をデータベースに追加するためのワークファイル
+
+# ========================================
+# 🔄 変換待ちURL - ここに新しいURLを追加してください
+# ========================================
+
+# 📝 使用方法:
+# 1. 下記にGoogle MapsのURLを1行ずつ追加
+# 2. python scripts/new_url_converter.py --convert-file data/new_places_workflow.txt を実行
+# 3. 変換されたCID形式のURLを適切なカテゴリファイルにコピー
+
+# 例: CHERRYレストラン（変換済み例）
+# https://www.google.com/maps/place/CHERRY%EF%BC%88%E3%83%81%E3%82%A7%E3%83%AA%E3%83%BC%EF%BC%89/@38.0850947,138.4297749,17z/data=!3m1!4b1!4m6!3m5!1s0x5ff35d5c3c21fb93:0xf329460faaea7cb3!8m2!3d38.0850905!4d138.4323498!16s%2Fg%2F11l8sb99r5?authuser=0&entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D
+
+# 🆕 新しいURLをここに追加 ↓
+
+
+
+# ========================================
+# ✅ 変換完了 - カテゴリファイルにコピー準備完了
+# ========================================
+
+# 🍽️ レストラン用 (restaurants_merged.txt にコピー)
+
+# 🚗 駐車場用 (parkings_merged.txt にコピー)
+# 変換済みの駐車場URLをここに表示
+
+# 🚻 トイレ用 (toilets_merged.txt にコピー)
+# 変換済みのトイレURLをここに表示
+
+# ========================================
+# 📝 使用手順
+# ========================================
+#
+# 1. 新しいURL追加:
+#    - 「新しいURLをここに追加」セクションにGoogle Maps URLを記述
+#
+# 2. 変換実行:
+#    python scripts/new_url_converter.py --convert-file data/new_places_workflow.txt
+#
+# 3. カテゴリ分類:
+#    - 変換されたCID URLを適切なカテゴリにコピー
+#    - restaurants_merged.txt (レストラン)
+#    - parkings_merged.txt (駐車場)
+#    - toilets_merged.txt (トイレ)
+#
+# 4. データ収集実行:
+#    python interface/cli/main.py --target [category] --mode standard
+#
+# 5. 品質確認:
+#    - Google Sheetsで結果を確認
+#    - 必要に応じて手動修正
+#

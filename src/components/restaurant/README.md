@@ -4,7 +4,7 @@
 
 ## 📁 ディレクトリ構成
 
-```
+```text
 src/components/restaurant/
 ├── FilterPanel/               # フィルタリング機能コンポーネント群
 │   ├── FilterPanel.tsx       # メインフィルターパネル
@@ -19,11 +19,12 @@ src/components/restaurant/
 │   └── README.md             # FilterPanel詳細ドキュメント
 ├── index.ts                  # ディレクトリのバレルエクスポート
 └── README.md                 # このファイル
-```
+```text
 
 ## 🎯 主要機能
 
 ### 1. **フィルタリングシステム**
+
 レストラン検索と絞り込み機能の中核を担う統合システム
 
 - **多次元フィルタリング**: 料理ジャンル、価格帯、地区、特徴による複合検索
@@ -32,11 +33,13 @@ src/components/restaurant/
 - **アクセシビリティ**: WCAG 2.1 AA準拠のユーザーインターフェース
 
 ### 2. **検索機能**
+
 - **自由検索**: レストラン名、説明文での柔軟な検索
 - **オートコンプリート**: 検索候補の提案（将来実装予定）
 - **検索履歴**: ユーザーの検索履歴管理（将来実装予定）
 
 ### 3. **カテゴリ分類**
+
 - **料理ジャンル**: 18種類の詳細な料理カテゴリ
 - **価格帯**: 4段階の価格レンジ分類
 - **地理的分類**: 佐渡島の11地区による地域分け
@@ -45,6 +48,7 @@ src/components/restaurant/
 ## 🔧 コンポーネント詳細
 
 ### FilterPanel - 統合フィルターシステム
+
 レストラン検索・絞り込み機能の中核コンポーネント群
 
 ```typescript
@@ -82,9 +86,10 @@ const RestaurantPage = () => {
     />
   );
 };
-```
+```text
 
 **主要機能**:
+
 - **SearchFilter**: 自由検索入力フィールド
 - **CuisineFilter**: 料理ジャンル選択ドロップダウン
 - **PriceFilter**: 価格帯選択ドロップダウン
@@ -97,6 +102,7 @@ const RestaurantPage = () => {
 ## 🎨 使用方法
 
 ### 基本的なインポート
+
 ```typescript
 // メインコンポーネント
 import { FilterPanel } from '@/components/restaurant';
@@ -114,9 +120,10 @@ import {
 
 // 型定義
 import type { FilterHandlers } from '@/components/restaurant';
-```
+```text
 
 ### 完全な実装例
+
 ```tsx
 import React, { useState, useCallback, useMemo } from 'react';
 import { FilterPanel } from '@/components/restaurant';
@@ -232,7 +239,7 @@ const RestaurantMapPage = () => {
 };
 
 export default RestaurantMapPage;
-```
+```text
 
 ## 🏗️ アーキテクチャ
 
@@ -243,23 +250,24 @@ export default RestaurantMapPage;
    - 明確な責任分界の維持
    - 再利用可能な設計
 
-2. **型安全性**
+1. **型安全性**
    - TypeScriptによる厳密な型定義
    - ランタイムエラーの最小化
    - 開発時の型チェック
 
-3. **パフォーマンス最適化**
+1. **パフォーマンス最適化**
    - React.memoによる不要な再レンダリング防止
    - useCallbackによるイベントハンドラーの最適化
    - useMemoによる計算結果のキャッシュ
 
-4. **アクセシビリティ**
+1. **アクセシビリティ**
    - WCAG 2.1 AA準拠
    - キーボードナビゲーション対応
    - スクリーンリーダー対応
 
 ### データフロー
-```
+
+```text
 Parent Component (App/Page)
     ↓ (FilterHandlers)
 Restaurant Components
@@ -269,9 +277,10 @@ Filter State Management
 Map/List Components
     ↓ (User Interactions)
 Analytics Tracking
-```
+```text
 
 ### 状態管理パターン
+
 ```typescript
 // フィルター状態の型定義
 interface RestaurantFilters {
@@ -291,13 +300,14 @@ const updateFilters = useCallback((newFilters: Partial<RestaurantFilters>) => {
     ...newFilters,
   }));
 }, []);
-```
+```text
 
 ## 🔧 開発ガイドライン
 
 ### 新しいレストランコンポーネントの追加
 
 1. **コンポーネント作成**
+
 ```typescript
 // NewRestaurantComponent.tsx
 import React, { memo } from 'react';
@@ -324,15 +334,17 @@ export const NewRestaurantComponent = memo<NewRestaurantComponentProps>(
     );
   }
 );
-```
+```text
 
-2. **エクスポートの追加**
+1. **エクスポートの追加**
+
 ```typescript
 // index.ts に追加
 export { NewRestaurantComponent } from './NewRestaurantComponent';
-```
+```text
 
-3. **テストの作成**
+1. **テストの作成**
+
 ```typescript
 // NewRestaurantComponent.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -343,9 +355,10 @@ describe('NewRestaurantComponent', () => {
     // テスト実装
   });
 });
-```
+```text
 
 ### レストランデータの型定義
+
 ```typescript
 // types/restaurant.types.ts
 export interface Restaurant {
@@ -368,16 +381,18 @@ export interface Restaurant {
   readonly openingHours?: OpeningHours;
   readonly images?: readonly string[];
 }
-```
+```text
 
 ## 🧪 テスト
 
 ### テスト構成
+
 - **Unit Tests**: 個別コンポーネントのテスト
 - **Integration Tests**: コンポーネント間の連携テスト
 - **E2E Tests**: ユーザーフローの統合テスト
 
 ### テスト例
+
 ```typescript
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RestaurantMapPage } from './RestaurantMapPage';
@@ -425,13 +440,14 @@ describe('Restaurant Components Integration', () => {
     expect(screen.getByLabelText('料理ジャンル')).toHaveValue('');
   });
 });
-```
+```text
 
 ## 🔍 トラブルシューティング
 
 ### よくある問題
 
 1. **フィルターが正常に動作しない**
+
    ```typescript
    // デバッグ用のログ出力
    const debugFilters = (filters: RestaurantFilters) => {
@@ -440,7 +456,8 @@ describe('Restaurant Components Integration', () => {
    };
    ```
 
-2. **パフォーマンスの問題**
+1. **パフォーマンスの問題**
+
    ```typescript
    // メモ化の確認
    const memoizedRestaurants = useMemo(() => {
@@ -450,7 +467,8 @@ describe('Restaurant Components Integration', () => {
    }, [restaurants, filters]);
    ```
 
-3. **状態の同期問題**
+1. **状態の同期問題**
+
    ```typescript
    // 状態の確認
    useEffect(() => {
@@ -463,6 +481,7 @@ describe('Restaurant Components Integration', () => {
    ```
 
 ### デバッグ方法
+
 ```typescript
 // レストランコンポーネントのデバッグ
 const debugRestaurantComponents = () => {
@@ -480,23 +499,26 @@ const measureRestaurantPerformance = () => {
   // フィルタリング処理
   console.timeEnd('Restaurant Filter Performance');
 };
-```
+```text
 
 ## 🚀 今後の改善予定
 
 ### 短期的な改善
+
 - [ ] レストランリスト表示コンポーネントの追加
 - [ ] レストラン詳細モーダルコンポーネント
 - [ ] お気に入り機能の実装
 - [ ] レビュー・評価システム
 
 ### 中期的な改善
+
 - [ ] レストラン比較機能
 - [ ] 予約システム統合
 - [ ] ソーシャル共有機能
 - [ ] オフライン対応
 
 ### 長期的な改善
+
 - [ ] AI による推奨システム
 - [ ] リアルタイム混雑状況表示
 - [ ] AR メニュー表示機能
@@ -505,16 +527,19 @@ const measureRestaurantPerformance = () => {
 ## 🔗 関連コンポーネント
 
 ### 内部依存
+
 - **Map Components**: レストラン位置の地図表示
 - **Common Components**: アクセシビリティ機能
 - **Layout Components**: PWA機能統合
 
 ### 外部API連携
+
 - **Google Maps API**: 地図表示と位置情報
 - **Google Sheets API**: レストランデータ取得
 - **Google Analytics**: ユーザー行動分析
 
 ### データソース
+
 ```typescript
 // レストランデータの取得
 import { useRestaurants } from '@/hooks/api/useRestaurants';
@@ -529,7 +554,7 @@ const RestaurantPage = () => {
 
   // コンポーネント実装
 };
-```
+```text
 
 ## 📚 関連ドキュメント
 
