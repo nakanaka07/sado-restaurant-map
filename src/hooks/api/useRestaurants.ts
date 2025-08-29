@@ -129,10 +129,11 @@ export function useRestaurants(
     searchQuery: "",
   }
 ): UseRestaurantsResult {
+  // 状態管理 - SonarQube対応の標準分割代入
   const [restaurants, setRestaurants] = useState<readonly Restaurant[]>([]);
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
-  const [filters, setInternalFilters] = useState<MapFilters>(initialFilters);
+  const [filters, setFilters] = useState<MapFilters>(initialFilters);
   const [sortOrder, setSortOrder] = useState<SortOrder>("name");
   const [asyncState, setAsyncState] = useState<
     AsyncState<readonly Restaurant[]>
@@ -255,9 +256,9 @@ export function useRestaurants(
   }, [restaurants, filters, sortOrder]);
 
   // フィルター更新（React 19 startTransition使用）
-  const setFilters = useCallback((newFilters: Partial<MapFilters>) => {
+  const updateFilters = useCallback((newFilters: Partial<MapFilters>) => {
     startTransition(() => {
-      setInternalFilters((prev) => ({ ...prev, ...newFilters }));
+      setFilters((prev) => ({ ...prev, ...newFilters }));
     });
   }, []);
 
@@ -265,6 +266,69 @@ export function useRestaurants(
   const selectRestaurant = useCallback((restaurant: Restaurant | null) => {
     setSelectedRestaurant(restaurant);
   }, []);
+
+  // データ更新用のヘルパー関数
+  const loadFromCache = useCallback(async (): Promise<Restaurant[] | null> => {
+    const cachedData = localStorage.getItem("restaurantData");
+    if (!cachedData) {
+      return null;
+    }
+
+    try {
+      const parsedData = JSON.parse(cachedData) as Restaurant[];
+      if (!Array.isArray(parsedData)) {
+        throw new Error("Cached data is not an array");
+      }
+      return parsedData;
+    } catch (parseError) {
+      console.warn("キャッシュデータの解析に失敗:", parseError);
+      return null;
+    }
+  }, []);
+
+  const loadFromApi = useCallback(async (): Promise<Restaurant[]> => {
+    console.log("📡 Google Sheetsからデータを取得中...");
+    const data = await fetchRestaurantsFromSheets();
+
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid data format: expected array");
+    }
+
+    console.log(`✅ ${data.length}件の飲食店データを取得しました`);
+
+    // データをキャッシュ
+    localStorage.setItem("restaurantData", JSON.stringify(data));
+    localStorage.setItem("restaurantDataTimestamp", new Date().toISOString());
+
+    return data;
+  }, []);
+
+  const handleDataError = useCallback(
+    async (errorMessage: string): Promise<readonly Restaurant[]> => {
+      console.error("データ取得エラー:", errorMessage);
+
+      // フォールバック: キャッシュされたデータを使用
+      const cachedData = await loadFromCache();
+      if (cachedData && cachedData.length > 0) {
+        setAsyncState({
+          data: cachedData,
+          loading: false,
+          error: `${errorMessage}（キャッシュデータを使用中）`,
+        });
+        return cachedData;
+      }
+
+      // 最終フォールバック: モックデータ
+      console.warn("モックデータにフォールバック");
+      setAsyncState({
+        data: MOCK_RESTAURANTS,
+        loading: false,
+        error: `${errorMessage}（サンプルデータを表示中）`,
+      });
+      return MOCK_RESTAURANTS;
+    },
+    [loadFromCache]
+  );
 
   // データ更新（Google Sheets API連携）
   const refreshData = useCallback(async () => {
@@ -275,44 +339,21 @@ export function useRestaurants(
       const { needsUpdate } = await checkDataFreshness();
 
       // キャッシュされたデータがある場合はそれを使用
-      const cachedData = localStorage.getItem("restaurantData");
-      if (!needsUpdate && cachedData) {
-        try {
-          const parsedData = JSON.parse(cachedData) as Restaurant[];
-
-          // キャッシュデータの基本検証
-          if (!Array.isArray(parsedData)) {
-            throw new Error("Cached data is not an array");
-          }
-
-          setRestaurants(parsedData);
+      if (!needsUpdate) {
+        const cachedData = await loadFromCache();
+        if (cachedData) {
+          setRestaurants(cachedData);
           setAsyncState({
-            data: parsedData,
+            data: cachedData,
             loading: false,
             error: null,
           });
           return;
-        } catch (parseError) {
-          console.warn("キャッシュデータの解析に失敗:", parseError);
-          // キャッシュが無効な場合は新しいデータを取得
         }
       }
 
       // Google Sheets APIからデータ取得
-      console.log("📡 Google Sheetsからデータを取得中...");
-      const data = await fetchRestaurantsFromSheets();
-
-      // データの基本検証
-      if (!Array.isArray(data)) {
-        throw new Error("Invalid data format: expected array");
-      }
-
-      console.log(`✅ ${data.length}件の飲食店データを取得しました`);
-
-      // データをキャッシュ
-      localStorage.setItem("restaurantData", JSON.stringify(data));
-      localStorage.setItem("restaurantDataTimestamp", new Date().toISOString());
-
+      const data = await loadFromApi();
       setRestaurants(data);
       setAsyncState({
         data,
@@ -328,40 +369,10 @@ export function useRestaurants(
         errorMessage = error.message;
       }
 
-      console.error("データ取得エラー:", error);
-
-      // フォールバック: キャッシュされたデータを使用
-      const cachedData = localStorage.getItem("restaurantData");
-      if (cachedData) {
-        try {
-          const parsedData = JSON.parse(cachedData) as Restaurant[];
-
-          // キャッシュデータの検証
-          if (Array.isArray(parsedData) && parsedData.length > 0) {
-            setRestaurants(parsedData);
-            setAsyncState({
-              data: parsedData,
-              loading: false,
-              error: `${errorMessage}（キャッシュデータを使用中）`,
-            });
-            return;
-          }
-        } catch (cacheError) {
-          console.warn("キャッシュデータの解析も失敗:", cacheError);
-          // キャッシュデータも無効な場合はモックデータを使用
-        }
-      }
-
-      // 最終フォールバック: モックデータ
-      console.warn("モックデータにフォールバック");
-      setRestaurants(MOCK_RESTAURANTS);
-      setAsyncState({
-        data: MOCK_RESTAURANTS,
-        loading: false,
-        error: `${errorMessage}（サンプルデータを表示中）`,
-      });
+      const fallbackData = await handleDataError(errorMessage);
+      setRestaurants(fallbackData);
     }
-  }, []);
+  }, [loadFromCache, loadFromApi, handleDataError]);
 
   // 初回データ読み込み
   useEffect(() => {
@@ -373,7 +384,7 @@ export function useRestaurants(
     filteredRestaurants,
     selectedRestaurant,
     asyncState,
-    setFilters,
+    setFilters: updateFilters,
     setSortOrder,
     selectRestaurant,
     refreshData,
@@ -418,7 +429,8 @@ function parseTimeToMinutes(timeStr: string): number | null {
     return null;
   }
 
-  const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+  const timeRegex = /^(\d{1,2}):(\d{2})$/;
+  const match = timeRegex.exec(timeStr);
   if (!match) {
     return null;
   }

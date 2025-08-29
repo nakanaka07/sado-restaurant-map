@@ -81,15 +81,6 @@ export abstract class AbstractDataService<T> {
  * 抽象化されたインターフェースに依存
  */
 export class RestaurantService extends AbstractDataService<Restaurant> {
-  constructor(
-    dataSource: IMapPointProvider,
-    cache: ICacheProvider<Restaurant[]>,
-    errorHandler: IErrorHandler,
-    validator: IValidator<Restaurant>
-  ) {
-    super(dataSource, cache, errorHandler, validator);
-  }
-
   async getAll(): Promise<Restaurant[]> {
     return this.fetchWithCache("restaurants", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("restaurant");

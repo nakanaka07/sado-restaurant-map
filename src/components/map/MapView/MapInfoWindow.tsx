@@ -8,10 +8,10 @@ import { isRestaurant } from "@/types/type-guards";
 import { getMarkerIcon } from "../utils";
 
 interface MapInfoWindowProps {
-  point: MapPoint;
+  readonly point: MapPoint;
 }
 
-export function MapInfoWindow({ point }: MapInfoWindowProps) {
+export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
   const { background } = getMarkerIcon(point);
 
   return (
@@ -219,9 +219,9 @@ export function MapInfoWindow({ point }: MapInfoWindowProps) {
               gap: "4px",
             }}
           >
-            {point.features.map((feature, index) => (
+            {point.features.map((feature) => (
               <span
-                key={index}
+                key={`feature-${feature}`}
                 style={{
                   backgroundColor: "#e5e7eb",
                   color: "#374151",

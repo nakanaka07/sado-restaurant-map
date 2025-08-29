@@ -374,6 +374,56 @@ class DuplicateChecker:
             return False
 
 
+def _print_check_results(result, url):
+    """チェック結果の表示"""
+    if 'error' in result:
+        print(f"❌ {result['error']}")
+        return
+
+    new_entry = result['new_entry']
+    print(f"📥 URL: {url[:80]}...")
+    print(f"🏪 店舗名: {new_entry.name}")
+    if new_entry.cid:
+        print(f"📍 CID: {new_entry.cid}")
+
+    if result['has_duplicates']:
+        print("\n🚨 重複検出:")
+        for dup in result['cid_duplicates']:
+            entry = dup['entry']
+            print(f"  ❌ CID重複: {entry.file_source}:{entry.line_number} → {entry.name}")
+        for dup in result['name_duplicates']:
+            entry = dup['entry']
+            print(f"  ⚠️ 名前類似({dup['similarity']:.1%}): {entry.file_source}:{entry.line_number} → {entry.name}")
+    else:
+        print("✅ 重複なし")
+
+
+def _handle_url_check(checker, args):
+    """URL重複チェックの処理"""
+    category = args.category or 'restaurants'
+    if category not in checker.category_files:
+        print(f"❌ 無効なカテゴリ: {category}")
+        return
+
+    print(f"🔍 URL重複チェック: {category}")
+    result = checker.check_new_entry_duplicates(args.check_url, category)
+    _print_check_results(result, args.check_url)
+
+
+def _handle_check_commands(checker, args):
+    """チェックコマンドの処理"""
+    if args.check_all:
+        # 全ファイルの重複チェック
+        print("🔍 全ファイルの重複チェック実行中...")
+        all_entries = checker.get_all_entries()
+        report = checker.generate_duplicate_report(all_entries)
+        print(report)
+        return
+
+    if args.check_url:
+        _handle_url_check(checker, args)
+
+
 def main():
     """メイン処理"""
     parser = argparse.ArgumentParser(
@@ -395,44 +445,8 @@ def main():
 
     checker = DuplicateChecker()
 
-    if args.check_all:
-        # 全ファイルの重複チェック
-        print("🔍 全ファイルの重複チェック実行中...")
-        all_entries = checker.get_all_entries()
-        report = checker.generate_duplicate_report(all_entries)
-        print(report)
-
-    elif args.check_url:
-        # URL重複チェックのみ
-        category = args.category or 'restaurants'
-        if category not in checker.category_files:
-            print(f"❌ 無効なカテゴリ: {category}")
-            return
-
-        print(f"🔍 URL重複チェック: {category}")
-        result = checker.check_new_entry_duplicates(args.check_url, category)
-
-        if 'error' in result:
-            print(f"❌ {result['error']}")
-            return
-
-        new_entry = result['new_entry']
-        print(f"📥 URL: {args.check_url[:80]}...")
-        print(f"🏪 店舗名: {new_entry.name}")
-        if new_entry.cid:
-            print(f"📍 CID: {new_entry.cid}")
-
-        if result['has_duplicates']:
-            print("\n🚨 重複検出:")
-            for dup in result['cid_duplicates']:
-                entry = dup['entry']
-                print(f"  ❌ CID重複: {entry.file_source}:{entry.line_number} → {entry.name}")
-            for dup in result['name_duplicates']:
-                entry = dup['entry']
-                print(f"  ⚠️ 名前類似({dup['similarity']:.1%}): {entry.file_source}:{entry.line_number} → {entry.name}")
-        else:
-            print("✅ 重複なし")
-
+    if args.check_all or args.check_url:
+        _handle_check_commands(checker, args)
     else:
         # 追加コマンドの処理
         _handle_add_commands(checker, args)
