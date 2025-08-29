@@ -131,6 +131,59 @@ class PlacesAPIAdapter(APIClient):
             self._logger.error("Failed to fetch place details", place_id=place_id, error=str(e))
             raise APIError(f"Failed to fetch place details: {e}")
 
+    def fetch_place_by_cid(self, cid: str) -> Optional[PlaceData]:
+        """
+        CID (Customer ID) から Place詳細を取得
+
+        Args:
+            cid: Google Maps CID (Customer ID)
+
+        Returns:
+            Place詳細データまたはNone
+        """
+        try:
+            # CIDをPlace IDに変換してから詳細取得
+            place_id = self._convert_cid_to_place_id(cid)
+            if place_id:
+                return self.fetch_place_details(place_id)
+
+            # 代替方法：CIDから直接検索
+            search_query = f"cid:{cid}"
+            places = self.search_places(search_query)
+
+            if places and len(places) > 0:
+                return places[0]
+
+            return None
+
+        except Exception as e:
+            self._logger.error("Failed to fetch place by CID", cid=cid, error=str(e))
+            return None
+
+    def _convert_cid_to_place_id(self, cid: str) -> Optional[str]:
+        """
+        CIDをPlace IDに変換（簡易実装）
+
+        Args:
+            cid: Google Maps CID
+
+        Returns:
+            Place ID or None
+        """
+        try:
+            # CIDを使ったFind Place検索
+            search_query = f"cid:{cid}"
+            places = self.search_places(search_query)
+
+            if places and len(places) > 0:
+                return places[0].get('id')
+
+            return None
+
+        except Exception as e:
+            self._logger.warning("CID to Place ID conversion failed", cid=cid, error=str(e))
+            return None
+
     def _get_place_details(self, place_id: str, category: str = 'restaurants') -> Optional[Dict]:
         """
         Place IDから詳細情報を取得

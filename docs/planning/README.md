@@ -9,7 +9,16 @@
 
 ## 📁 ドキュメント一覧
 
-### マーカー・UI 改善
+### 🔧 システム拡張計画
+
+- **[`PHASE3_FULL_IMPLEMENTATION_PLAN.md`](PHASE3_FULL_IMPLEMENTATION_PLAN.md)** - Phase 3-Full: スクレイパー高度拡張計画（3 ヶ月実装プラン）
+
+### 📋 移行完了済み
+
+- ✅ **スクレイパー Clean Architecture 移行**: 完全実装済み
+- ✅ **重要問題分析・改善**: Phase 2 実装完了済み
+
+### 🎯 マーカー改善関連
 
 - **[MARKER_IMPROVEMENT_ROADMAP.md](./MARKER_IMPROVEMENT_ROADMAP.md)** - マーカー機能改善ロードマップ
 - **[MARKER_IMPROVEMENT_INVESTIGATION.md](./MARKER_IMPROVEMENT_INVESTIGATION.md)** - マーカー改善調査報告

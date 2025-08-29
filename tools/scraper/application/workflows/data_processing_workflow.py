@@ -76,6 +76,7 @@ class DataProcessingWorkflow:
     def run_category_processing(
         self,
         category: CategoryType,
+        mode: str = 'standard',  # モードパラメータを追加
         dry_run: bool = False,
         separate_location: bool = True
     ) -> ProcessingResult:
@@ -97,6 +98,7 @@ class DataProcessingWorkflow:
 
         self._logger.info("カテゴリ処理開始",
                          category=category,
+                         mode=mode,  # モード情報をログに追加
                          query_count=query_count,
                          dry_run=dry_run)
 
@@ -115,8 +117,8 @@ class DataProcessingWorkflow:
             # クエリファイル解析
             queries = self._processor.parse_query_file(str(file_path))
 
-            # データ処理実行
-            result = self._processor.process_all_queries(queries)
+            # モードに応じた処理実行
+            result = self._processor.process_all_queries(queries, mode=mode)
             result.category = category
 
             # スプレッドシート保存

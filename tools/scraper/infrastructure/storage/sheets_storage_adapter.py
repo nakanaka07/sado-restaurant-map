@@ -28,6 +28,9 @@ LAST_UPDATED_HEADER = '最終更新日時'
 WEBSITE_HEADER = 'ウェブサイト'
 UNKNOWN_CATEGORY_MSG = "Unknown category"
 
+# フィールドマッピング用の定数
+PLACE_ID_FIELD = PLACE_ID_HEADER  # 重複を避けるための統一
+
 # 共通ヘッダー定数
 RESTAURANT_HEADERS = [
     PLACE_ID_HEADER, '店舗名', '所在地', '緯度', '経度', '評価', REVIEW_COUNT_HEADER,
@@ -103,6 +106,41 @@ class SheetsStorageAdapter(DataStorage):
             time.sleep(self.request_delay - elapsed)
         self.last_request_time = time.time()
 
+    def test_connection(self) -> Optional[Dict[str, Any]]:
+        """
+        Google Sheets API接続テスト
+
+        Returns:
+            スプレッドシート情報辞書またはNone
+        """
+        try:
+            # 認証確認
+            if not self._auth_service.is_authenticated():
+                self._auth_service.authenticate()
+
+            # クライアント取得
+            gc = self._get_gspread_client()
+
+            # スプレッドシート存在確認
+            self._wait_for_rate_limit()
+            spreadsheet = gc.open_by_key(self._spreadsheet_id)
+
+            # 基本情報取得
+            spreadsheet_info = {
+                'title': spreadsheet.title,
+                'id': spreadsheet.id,
+                'url': spreadsheet.url,
+                'sheet_count': len(spreadsheet.worksheets()),
+                'locale': getattr(spreadsheet, 'locale', 'unknown')
+            }
+
+            self._logger.info("Google Sheets接続テスト成功", **spreadsheet_info)
+            return spreadsheet_info
+
+        except Exception as e:
+            self._logger.error("Google Sheets接続テスト失敗", error=str(e))
+            return None
+
     def _get_gspread_client(self) -> gspread.Client:
         """Get or create gspread client"""
         if self._gc is None:
@@ -159,7 +197,7 @@ class SheetsStorageAdapter(DataStorage):
         Save data to Google Sheets.
 
         Args:
-            data: List of data items to save
+            data: List of data items to save (already processed with location info)
             category: The category/type of data
 
         Returns:
@@ -177,16 +215,16 @@ class SheetsStorageAdapter(DataStorage):
                 self._logger.error(UNKNOWN_CATEGORY_MSG, category=category)
                 return False
 
-            # 佐渡島内外に振り分け
+            # データをそのまま使用（既にformat_resultでLocationServiceによる処理済み）
             sado_data = []
             outside_data = []
 
             for item in data:
-                validation_result = MockValidationResult(item)
-                if validation_result.data.get('is_in_sado', False):
-                    sado_data.append(validation_result)
+                # データが既にis_in_sadoフラグを持っている前提
+                if item.get('is_in_sado', False):
+                    sado_data.append(item)
                 else:
-                    outside_data.append(validation_result)
+                    outside_data.append(item)
 
             success = True
 
@@ -210,12 +248,12 @@ class SheetsStorageAdapter(DataStorage):
             self._logger.error("Save operation failed", category=category, error=str(e))
             return False
 
-    def _update_single_worksheet(self, worksheet_name: str, headers: List[str], validation_results: List) -> bool:
+    def _update_single_worksheet(self, worksheet_name: str, headers: List[str], data_items: List[Dict[str, Any]]) -> bool:
         """単一ワークシートの更新"""
         try:
             worksheet = self.get_or_create_worksheet(worksheet_name, headers)
             existing_data = self._get_existing_data_map(worksheet, headers)
-            updates, appends = self._prepare_update_data(validation_results, existing_data, headers)
+            updates, appends = self._prepare_update_data(data_items, existing_data, headers)
             return self._execute_updates(worksheet, updates, appends)
 
         except Exception as e:
@@ -229,7 +267,7 @@ class SheetsStorageAdapter(DataStorage):
 
         existing_data = {}
         for i, record in enumerate(all_records):
-            place_id = record.get(PLACE_ID_HEADER)
+            place_id = record.get(PLACE_ID_FIELD)
             if place_id:
                 existing_data[place_id] = {
                     'data': record,
@@ -237,7 +275,7 @@ class SheetsStorageAdapter(DataStorage):
                 }
         return existing_data
 
-    def _prepare_update_data(self, validation_results: List, existing_data: Dict, headers: List[str]) -> Tuple[List[Dict], List[List[str]]]:
+    def _prepare_update_data(self, data_items: List[Dict[str, Any]], existing_data: Dict, headers: List[str]) -> Tuple[List[Dict], List[List[str]]]:
         """更新・追加データを準備（スマート更新対応）"""
         updates = []
         appends = []
@@ -246,21 +284,18 @@ class SheetsStorageAdapter(DataStorage):
         update_policy = os.getenv('UPDATE_POLICY', 'smart')
         force_update_days = int(os.getenv('UPDATE_THRESHOLD_DAYS', '7'))
 
-        for result in validation_results:
-            if not result.is_valid:
-                continue
-
-            place_id = result.data.get('place_id', '')
+        for data_item in data_items:
+            place_id = data_item.get(PLACE_ID_FIELD, '')
             if not place_id:
                 continue
 
-            row_data = self._extract_row_data(result, headers)
+            row_data = self._extract_row_data(data_item, headers)
 
             if place_id in existing_data:
                 # 既存データがある場合、スマート更新判定を実行
                 existing_record = existing_data[place_id]['data']
                 should_update, reason = self._should_update_record(
-                    result.data, existing_record, update_policy, force_update_days
+                    data_item, existing_record, update_policy, force_update_days
                 )
 
                 if should_update:
@@ -300,19 +335,18 @@ class SheetsStorageAdapter(DataStorage):
             self._logger.error("Update execution failed", error=str(e))
             return False
 
-    def _extract_row_data(self, result, headers: List[str]) -> List[str]:
+    def _extract_row_data(self, data_item: Dict[str, Any], headers: List[str]) -> List[str]:
         """結果データから行データを抽出"""
         row_data = []
-        data = result.data
 
         # 基本的なフィールドマッピング
         field_mapping = {
-            PLACE_ID_HEADER: 'place_id',
-            '店舗名': 'name',
-            '施設名': 'name',
-            '駐車場名': 'name',
-            '所在地': 'address',
-            '緯度': 'latitude',
+            PLACE_ID_FIELD: 'Place ID',
+            '店舗名': '店舗名',
+            '施設名': '店舗名',  # 店舗名をフォールバック
+            '駐車場名': '店舗名',  # 店舗名をフォールバック
+            '所在地': '住所',
+            '緯度': '緯度',
             '経度': 'longitude',
             '評価': 'rating',
             REVIEW_COUNT_HEADER: 'review_count',
@@ -327,10 +361,10 @@ class SheetsStorageAdapter(DataStorage):
 
         for header in headers:
             value = ''
-            if header in data:
-                value = data[header]
-            elif header in field_mapping and field_mapping[header] in data:
-                value = data[field_mapping[header]]
+            if header in data_item:
+                value = data_item[header]
+            elif header in field_mapping and field_mapping[header] in data_item:
+                value = data_item[field_mapping[header]]
 
             row_data.append(str(value) if value is not None else '')
 
@@ -671,96 +705,6 @@ class SheetsStorageAdapter(DataStorage):
             self._logger.error("Get summary failed", category=category, error=str(e))
             return {"error": str(e)}
 
-
-class MockValidationResult:
-    """Mock validation result for bridging old and new architectures"""
-
-    def __init__(self, data: Dict[str, Any]):
-        self.data = data.copy()  # データのコピーを作成
-        self.is_valid = True
-        self.errors = []
-
-        # is_in_sadoフィールドが設定されていない場合は判定を行う
-        if 'is_in_sado' not in self.data:
-            self._set_is_in_sado()
-
-    def _set_is_in_sado(self):
-        """佐渡島内判定を実行してis_in_sadoフィールドを設定"""
-        try:
-            lat, lng = self._extract_coordinates()
-
-            if lat is not None and lng is not None:
-                self._set_location_by_coordinates(lat, lng)
-            else:
-                self._set_location_by_address()
-
-        except Exception:
-            # エラーの場合は市外として扱う
-            self.data['is_in_sado'] = False
-            self.data['district'] = '市外'
-
-    def _extract_coordinates(self) -> Tuple[Optional[float], Optional[float]]:
-        """データから緯度経度を抽出"""
-        lat = self._extract_coordinate(['latitude', '緯度', 'lat'])
-        lng = self._extract_coordinate(['longitude', '経度', 'lng', 'lon'])
-        return lat, lng
-
-    def _extract_coordinate(self, key_names: List[str]) -> Optional[float]:
-        """指定されたキー名から座標値を抽出"""
-        for key in key_names:
-            if key in self.data and self.data[key] is not None:
-                try:
-                    return float(self.data[key])
-                except (ValueError, TypeError):
-                    continue
-        return None
-
-    def _set_location_by_coordinates(self, lat: float, lng: float) -> None:
-        """座標による佐渡島内判定"""
-        SADO_BOUNDS = {
-            'north': 38.39, 'south': 37.74,
-            'east': 138.62, 'west': 137.85
-        }
-
-        is_in_sado = (SADO_BOUNDS['south'] <= lat <= SADO_BOUNDS['north'] and
-                     SADO_BOUNDS['west'] <= lng <= SADO_BOUNDS['east'])
-
-        self.data['is_in_sado'] = is_in_sado
-
-        if is_in_sado:
-            if 'district' not in self.data or not self.data['district']:
-                self.data['district'] = self._classify_district(lat, lng)
-        else:
-            self.data['district'] = '市外'
-
-    def _set_location_by_address(self) -> None:
-        """住所による佐渡島内判定"""
-        address = (self.data.get('address', '') or
-                  self.data.get('住所', '') or
-                  self.data.get('所在地', ''))
-
-        self.data['is_in_sado'] = self._is_sado_by_address(address)
-        self.data['district'] = '市外' if not self.data['is_in_sado'] else '佐渡市内'
-
-    def _classify_district(self, lat: float, lng: float) -> str:
-        """簡易的な地区分類"""
-        # 中心部の大まかな分類
-        if lat > 38.0:
-            return '両津'
-        elif lng < 138.0:
-            return '相川'
-        elif lat < 37.9:
-            return '小木・羽茂'
-        else:
-            return '佐和田・金井'
-
-    def _is_sado_by_address(self, address: str) -> bool:
-        """住所による佐渡島判定"""
-        if not address:
-            return False
-
-        sado_keywords = ['佐渡', '新潟県佐渡市', '両津', '相川', '佐和田', '金井', '新穂', '畑野', '真野', '小木', '羽茂', '赤泊']
-        return any(keyword in address for keyword in sado_keywords)
 
 def create_sheets_storage(auth_service: GoogleAuthService, spreadsheet_id: str) -> SheetsStorageAdapter:
     """

@@ -164,6 +164,7 @@ def create_container(config) -> DIContainer:
     from infrastructure.external.places_api_adapter import PlacesAPIAdapter
     from infrastructure.storage.sheets_storage_adapter import SheetsStorageAdapter
     from core.domain.place_validator import PlaceDataValidator
+    from core.domain.location_service import LocationService
     from core.processors.data_processor import DataProcessor
     from application.workflows.data_processing_workflow import DataProcessingWorkflow
 
@@ -202,6 +203,12 @@ def create_container(config) -> DIContainer:
         lambda: PlaceDataValidator()
     )
 
+    # Register domain services
+    container.register_factory(
+        LocationService,
+        lambda: LocationService()
+    )
+
     # Register core services
     container.register_factory(
         DataProcessor,
@@ -209,6 +216,7 @@ def create_container(config) -> DIContainer:
             api_client=container.get(PlacesAPIAdapter),
             storage=container.get(SheetsStorageAdapter),
             validator=container.get(PlaceDataValidator),
+            location_service=container.get(LocationService),
             config=config
         )
     )
