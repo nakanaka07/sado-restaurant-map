@@ -1,12 +1,16 @@
 # 佐渡飲食店マップ
 
-> 🗾 佐渡島の飲食店、駐車場、トイレをインタラクティブマップで簡単発見
-> 観光客と地元の方のための、モダンな Web マップアプリケーション
+> 🎯 **目的**: 佐渡島の飲食店、駐車場、トイレをインタラクティブマップで簡単発見
+> **対象**: 観光客・地元の方・開発者
+> **最終更新**: 2025 年 8 月 31 日
+
+🗾 観光客と地元の方のための、モダンな Web マップアプリケーション
 
 [![GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-brightgreen)](https://nakanaka07.github.io/sado-restaurant-map/)
-[![React](https://img.shields.io/badge/React-19.0-blue)](https://react.dev/)
+[![React](https://img.shields.io/badge/React-19.1-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 [![PWA](https://img.shields.io/badge/PWA-Ready-purple)](https://web.dev/progressive-web-apps/)
+[![Security](https://img.shields.io/badge/Security-Policy-red)](./docs/security/SECURITY.md)
 
 ## ✨ 主な機能
 
@@ -39,19 +43,21 @@ pnpm dev
 
 ## 🛠️ 技術スタック
 
-### フロントエンド
+### 🎯 コアテクノロジー
 
-- React 19.0 + TypeScript 5.7
-- Vite 6.0 (ビルドツール)
-- Google Maps JavaScript API + @vis.gl/react-google-maps v1.5
-- PWA (vite-plugin-pwa)
+- **フレームワーク**: React 19.0.0
+- **言語**: TypeScript
+- **ランタイム**: Node.js (Latest LTS)
+- **ビルドツール**: Vite
 
-### データ処理
+### 🔧 開発ツール
 
-- Python 3.x + Google Places API
-- Google Sheets API (データストレージ)
-- GitHub Actions (自動データ更新)
+- **テスト**: Vitest, React Testing Library
+- **リンティング**: ESLint
 
+### 🌐 API・データ管理
+
+- Axios
 ## 📋 開発コマンド
 
 ```bash
@@ -94,25 +100,29 @@ docs/              # プロジェクトドキュメント
 
 ## 🔧 環境設定
 
-### 必要な環境変数
+詳細な環境設定については、[環境設定ガイド](docs/development/environment-setup-guide.md)をご覧ください。
+
+### クイック設定
 
 ```bash
-# .env.local ファイルを作成
-VITE_GOOGLE_MAPS_API_KEY=your_maps_api_key
-VITE_GOOGLE_SHEETS_ID=your_sheets_id
+# 1. 環境変数ファイル作成
+cp .env.local.example .env.local
+
+# 2. 必要なAPIキーを設定
+# - VITE_GOOGLE_MAPS_API_KEY (必須)
+# - VITE_GOOGLE_SHEETS_ID (必須)
+# 詳細: docs/development/environment-setup-guide.md
+
+# 3. 設定確認
+pnpm run env:check
 ```
-
-### 前提条件
-
-- Node.js 18+
-- pnpm
-- Google Maps API キー
-- Google Sheets API アクセス
 
 ## 📄 ライセンス・サポート
 
 - **ライセンス**: MIT License
+- **セキュリティ**: [セキュリティポリシー](docs/security/SECURITY.md)
 - **バグ報告**: [GitHub Issues](https://github.com/nakanaka07/sado-restaurant-map/issues)
+- **開発ドキュメント**: [docs/](docs/README.md)
 - **開発者**: [@nakanaka07](https://github.com/nakanaka07)
 
 ---

@@ -1,10 +1,10 @@
 # Services Abstractions
 
-## 概要
+> 🎯 **目的**: 依存関係逆転原則（DIP）の実装・テスタブルなアーキテクチャ構築
+> **対象**: アーキテクチャ設計・テスト戦略を担当する開発者
+> **最終更新**: 2025 年 8 月 30 日
 
-このディレクトリは、**依存関係逆転原則（Dependency Inversion Principle）** を実装したサービス層の抽象化を提供します。具象実装への依存を排除し、テスタブルで保守性の高いアーキテクチャを実現します。
-
-## アーキテクチャ
+## 🏗️ アーキテクチャ原則
 
 ### 依存関係逆転の実装
 
@@ -14,9 +14,9 @@
 抽象化層（AbstractDataService）
          ↑ 実装
 低レベルモジュール（RestaurantService, ParkingService, ToiletService）
-```text
+```
 
-## ファイル構成
+このディレクトリは、**依存関係逆転原則（Dependency Inversion Principle）** を実装したサービス層の抽象化を提供します。具象実装への依存を排除し、テスタブルで保守性の高いアーキテクチャを実現します。
 
 ### `AbstractDataService.ts`
 
@@ -35,7 +35,7 @@
   - データバリデーション
   - 共通的な CRUD 操作の抽象化
 
-```typescript
+````typescript
 export abstract class AbstractDataService<T> {
   constructor(
     protected readonly dataSource: IMapPointProvider,
@@ -189,3 +189,4 @@ class CustomCacheProvider implements ICacheProvider<T> {
 - **エラーハンドリング**: 各層での適切なエラー処理
 - **パフォーマンス**: キャッシュとバリデーションのバランス
 - **テスタビリティ**: 依存関係注入によるテスト容易性の確保
+````

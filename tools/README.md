@@ -1,35 +1,71 @@
 # 🛠️ Tools - 開発・運用支援ツール
 
-> **目的**: 佐渡飲食店マップアプリケーションの開発効率化・品質保証・データ管理
-> **最終更新**: 2025 年 8 月 28 日
+> 🎯 **目的**: 佐渡飲食店マップアプリケーションの開発効率化・品質保証・データ管理
+> **対象**: 開発チーム・データ管理者・システム運用者
+> **最終更新**: 2025 年 8 月 31 日
 
 ## 📁 ディレクトリ構成
 
 ```text
 tools/
-├── scraper/              # データ収集システム（Clean Architecture）
-│   ├── README.md         # 詳細なセットアップ・使用方法
-│   ├── application/      # アプリケーション層
-│   ├── core/            # ドメイン・ビジネスロジック層
-│   ├── infrastructure/  # インフラストラクチャ層
-│   ├── interface/       # インターフェース層
-│   ├── config/          # 設定ファイル
-│   ├── data/           # データファイル
-│   └── tests/          # テストスイート
-├── analysis/            # コード品質分析ツール
-│   ├── README.md        # 分析ツールの使用方法
+├── automation/          # 自動化システム統合
+│   ├── readme/         # README品質管理・自動化
+│   │   ├── automation-system.ts    # 統合自動化システム
+│   │   ├── tech-stack-sync.ts      # 技術スタック同期
+│   │   ├── link-validator.ts       # リンク検証
+│   │   └── quality-checker.ts      # 品質評価
+│   └── reports/        # 自動化レポート・週次処理
+│       └── weekly-quality-report.ps1  # 週次品質レポート
+├── scraper/             # データ収集システム（Clean Architecture）
+│   ├── README.md        # 詳細なセットアップ・使用方法
+│   ├── application/     # アプリケーション層
+│   ├── core/           # ドメイン・ビジネスロジック層
+│   ├── infrastructure/ # インフラストラクチャ層
+│   ├── interface/      # インターフェース層
+│   ├── config/         # 設定ファイル
+│   ├── data/          # データファイル
+│   └── tests/         # テストスイート
+├── analysis/           # コード品質分析ツール
 │   ├── check-circular-deps.cjs  # 循環依存検出
 │   └── analyze-coupling.cjs     # 結合度分析
-├── testing/             # 環境診断・統合テストツール
-│   ├── README.md        # テストツールの使用方法
+├── markdown/           # Markdownファイル品質管理ツール
+│   ├── README.md       # Markdown linting ツールの使用方法
+│   ├── index.js        # メインスクリプト
+│   ├── rules/          # カスタムルール定義
+│   └── utils/          # ユーティリティ関数
+├── testing/            # 環境診断・統合テストツール
+│   ├── README.md       # テストツールの使用方法
 │   ├── check-environment.ps1   # 環境変数チェック
 │   └── test-integration.ps1    # 統合テスト実行
-└── README.md           # このファイル
+├── reports/            # 自動生成レポート・ログ
+│   ├── README.md       # レポート管理ガイド
+│   ├── automation-result.json  # 自動化実行結果
+│   ├── link-validation-report.md  # リンク検証レポート
+│   ├── readme-quality-report.md   # README品質レポート
+│   └── weekly/         # 週次品質レポート
+└── README.md          # このファイル
 ```
 
 ## 🎯 各ツールの用途
 
-### 1. Scraper - データ収集システム
+### 1. Automation - 自動化システム統合
+
+**用途**: プロジェクト品質管理・ドキュメント自動化の統合システム
+
+**主要機能**:
+
+- 📝 README 品質管理・技術スタック同期
+- 🔗 リンク検証・自動修正
+- 📊 品質評価・レポート生成
+- ⏰ 週次品質監視・アラート
+
+**使用場面**:
+
+- 日次の品質チェック
+- ドキュメント自動更新
+- 週次品質レビュー
+
+### 2. Scraper - データ収集システム
 
 **用途**: Google Places API から飲食店データを収集して Google Sheets に保存
 
@@ -46,7 +82,7 @@ tools/
 - 定期的な店舗情報更新
 - 新規エリアのデータ追加
 
-### 2. Analysis - コード品質分析
+### 3. Analysis - コード品質分析
 
 **用途**: TypeScript/TSX コードの品質分析・依存関係チェック
 
@@ -62,7 +98,24 @@ tools/
 - リファクタリング計画の策定
 - 技術的負債の定量評価
 
-### 3. Testing - 環境診断・統合テスト
+### 3. Markdown - ドキュメント品質管理
+
+**用途**: プロジェクト内 Markdown ファイルの品質向上・統一
+
+**主要機能**:
+
+- 📝 Markdown lint ルールの自動適用
+- 🔧 コードブロック言語指定の自動修正
+- 📋 順序付きリスト番号の統一
+- 🎯 見出し構造の最適化
+
+**使用場面**:
+
+- ドキュメント品質チェック
+- README.md の自動整形
+- プロジェクト全体の文書統一
+
+### 4. Testing - 環境診断・統合テスト
 
 **用途**: 開発環境の設定確認・エンドツーエンドテスト
 
@@ -77,6 +130,23 @@ tools/
 - 新規開発者のオンボーディング
 - 本番デプロイ前の環境確認
 - CI/CD パイプラインでの自動チェック
+
+### 5. Reports - レポート管理・自動化ログ
+
+**用途**: 自動化処理の結果管理・品質監視
+
+**主要機能**:
+
+- 📊 自動化実行結果の記録
+- 🔗 リンク検証レポートの生成
+- 📋 README 品質スコアの追跡
+- 📈 週次品質トレンドの可視化
+
+**使用場面**:
+
+- 品質改善の進捗追跡
+- 自動化処理の監視
+- 定期的な品質レビュー
 
 ## 🚀 クイックスタート
 
@@ -122,11 +192,14 @@ pnpm run test:integration
 
 ## 📋 使用頻度・優先度
 
-| ツール       | 使用頻度 | 優先度    | 説明                                   |
-| ------------ | -------- | --------- | -------------------------------------- |
-| **Scraper**  | 週次     | 🔥 **高** | データベース更新・新規データ収集に必須 |
-| **Testing**  | 日次     | 🔥 **高** | 開発環境の安定性確保に重要             |
-| **Analysis** | 月次     | ⚡ 中     | コード品質保証・技術的負債管理         |
+| ツール         | 使用頻度 | 優先度    | 説明                                   |
+| -------------- | -------- | --------- | -------------------------------------- |
+| **Automation** | 日次     | 🔥 **高** | ドキュメント品質・自動化の中核システム |
+| **Scraper**    | 週次     | 🔥 **高** | データベース更新・新規データ収集に必須 |
+| **Testing**    | 日次     | 🔥 **高** | 開発環境の安定性確保に重要             |
+| **Analysis**   | 月次     | ⚡ 中     | コード品質保証・技術的負債管理         |
+| **Markdown**   | 日次     | ⚡ **中** | ドキュメント品質保証・統一性確保       |
+| **Reports**    | 週次     | 📊 低     | 品質監視・進捗追跡（自動生成）         |
 
 ## 🔧 メンテナンス・アップデート
 
@@ -134,7 +207,9 @@ pnpm run test:integration
 
 - **Scraper**: Google APIs の変更対応、データスキーマ更新
 - **Analysis**: TypeScript バージョンアップ対応、ルール調整
+- **Markdown**: Markdownlint ルール更新、新規ルール追加
 - **Testing**: 新しい環境変数・API の追加対応
+- **Reports**: レポート形式の改善、新規指標の追加
 
 ### アップデート手順
 
@@ -148,7 +223,9 @@ pnpm run test:integration
 
 - [Scraper 詳細ガイド](./scraper/README.md)
 - [Analysis ツール詳細](./analysis/README.md)
+- [Markdown ツール詳細](./markdown/README.md)
 - [Testing ツール詳細](./testing/README.md)
+- [Reports 管理ガイド](./reports/README.md)
 
 ## 🔗 関連リソース
 
@@ -160,7 +237,7 @@ pnpm run test:integration
 ### アーキテクチャ
 
 - [ADR-003: Scraper Architecture Redesign](../docs/architecture/ADR-003-scraper-architecture-redesign.md)
-- [Clean Architecture Migration Plan](../docs/planning/SCRAPER_CLEAN_ARCHITECTURE_MIGRATION_PLAN.md)
+- [Clean Architecture Migration Plan](scraper)
 
 ---
 

@@ -1,10 +1,14 @@
 # Components Directory
 
-このディレクトリには、佐渡島レストランマップアプリケーションのすべてのReactコンポーネントが含まれています。
+> 🎯 **目的**: React 19.1 コンポーネントアーキテクチャ
+> **対象**: フロントエンド開発者・コンポーネント設計者
+> **最終更新**: 2025 年 8 月 30 日
+
+このディレクトリには、佐渡島レストランマップアプリケーションの React 19.1 コンポーネントが含まれています。React Compiler Stable、Concurrent Features、最新のアクセシビリティ対応を活用した設計です。
 
 ## 📁 ディレクトリ構成
 
-```text
+````text
 src/components/
 ├── common/                 # 共通コンポーネント
 ├── layout/                 # レイアウト関連コンポーネント
@@ -212,3 +216,4 @@ ComponentName/
 - React Developer Tools
 - Accessibility Insights
 - TypeScript Language Server
+````

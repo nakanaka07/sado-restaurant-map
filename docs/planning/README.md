@@ -1,30 +1,19 @@
-# 📋 Planning Docume### 🔄 Scraper システム改善（実行中）
+# Planning Documents
 
-- 🚀 **[Scraper Clean Architecture 移行計画](./SCRAPER_MIGRATION_PLAN_EXECUTIVE_SUMMARY.md)** - 実行可能な 7 日間移行計画
-- 📋 **[詳細技術仕様](./SCRAPER_CLEAN_ARCHITECTURE_MIGRATION_PLAN.md)** - 包括的実装計画書
-- 📊 データ品質管理システム構築
-- 📊 API 効率化・コスト最適化 on
+> 🎯 **目的**: プロジェクト計画・ロードマップ・改善計画の管理
+> **対象**: プロジェクトマネージャー・システム設計者
+> **最終更新**: 2025 年 8 月 30 日
 
-プロジェクト計画・ロードマップ・改善計画の管理
+## 📋 計画書一覧
 
-## 📁 ドキュメント一覧
+| 分類             | ドキュメント                        | 状況      | 更新日               |
+| ---------------- | ----------------------------------- | --------- | -------------------- |
+| **システム拡張** | PHASE3_FULL_IMPLEMENTATION_PLAN.md  | 📋 計画中 | Phase 3 対応         |
+| **マーカー改善** | MARKER_IMPROVEMENT_ROADMAP.md       | 🔄 進行中 | マーカー機能改善     |
+| **マーカー調査** | MARKER_IMPROVEMENT_INVESTIGATION.md | ✅ 完了   | 調査報告済み         |
+| **アイコン選択** | ICON_SELECTION_GUIDELINES.md        | ✅ 完了   | ガイドライン策定済み |
 
-### 🔧 システム拡張計画
-
-- **[`PHASE3_FULL_IMPLEMENTATION_PLAN.md`](PHASE3_FULL_IMPLEMENTATION_PLAN.md)** - Phase 3-Full: スクレイパー高度拡張計画（3 ヶ月実装プラン）
-
-### 📋 移行完了済み
-
-- ✅ **スクレイパー Clean Architecture 移行**: 完全実装済み
-- ✅ **重要問題分析・改善**: Phase 2 実装完了済み
-
-### 🎯 マーカー改善関連
-
-- **[MARKER_IMPROVEMENT_ROADMAP.md](./MARKER_IMPROVEMENT_ROADMAP.md)** - マーカー機能改善ロードマップ
-- **[MARKER_IMPROVEMENT_INVESTIGATION.md](./MARKER_IMPROVEMENT_INVESTIGATION.md)** - マーカー改善調査報告
-- **[ICON_SELECTION_GUIDELINES.md](./ICON_SELECTION_GUIDELINES.md)** - アイコン選択ガイドライン
-
-## 🎯 プロジェクト改善状況
+## 🚀 プロジェクト改善状況
 
 ### Phase 1: 基盤整備（完了）
 

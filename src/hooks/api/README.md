@@ -1,29 +1,22 @@
-# src/hooks/api - API関連フック
+# API Hooks
 
-佐渡島レストランマップアプリケーションのAPI関連カスタムフック群を管理するディレクトリです。外部APIとの通信、データ取得、キャッシュ管理を担当します。
+> 🎯 **目的**: 外部 API 通信・データ取得・キャッシュ管理・状態管理
+> **対象**: API 統合・データフロー管理を担当する開発者
+> **最終更新**: 2025 年 8 月 30 日
 
-## 📁 ディレクトリ構成
+## � 主要フック
 
-```text
-src/hooks/api/
-├── index.ts                    # バレルエクスポート
-├── useRestaurants.ts          # レストランデータ管理フック
-└── useRestaurants.test.ts     # useRestaurantsテストファイル
-```text
+| フック             | 機能                     | 用途                                 |
+| ------------------ | ------------------------ | ------------------------------------ |
+| **useRestaurants** | レストランデータ統合管理 | データ取得・フィルタリング・状態管理 |
 
-## 🎯 概要
+## 🏗️ アーキテクチャ原則
 
-このディレクトリは、アプリケーションの外部API通信を担当するフック群を提供します。現在は主にGoogle Sheets APIを使用したレストランデータの取得・管理を行っています。
-
-### 主要な責務
-
-- **データ取得**: 外部APIからのデータフェッチング
+- **データ取得**: 外部 API からのデータフェッチング
 - **キャッシュ管理**: ローカルストレージを活用した効率的なデータキャッシュ
 - **状態管理**: 非同期データの状態（ローディング、エラー、成功）管理
 - **フィルタリング**: 取得したデータのリアルタイムフィルタリング
-- **パフォーマンス最適化**: React 19のConcurrent Featuresを活用
-
-## 🔧 主要フック
+- **パフォーマンス最適化**: React 19 の Concurrent Features を活用
 
 ### useRestaurants
 
@@ -31,7 +24,7 @@ src/hooks/api/
 
 #### 基本的な使用方法
 
-```typescript
+````typescript
 import { useRestaurants } from '@/hooks/api';
 
 function RestaurantList() {
@@ -53,8 +46,8 @@ function RestaurantList() {
   return (
     <div>
       {filteredRestaurants.map(restaurant => (
-        <RestaurantCard 
-          key={restaurant.id} 
+        <RestaurantCard
+          key={restaurant.id}
           restaurant={restaurant}
           onClick={() => setSelectedRestaurant(restaurant)}
         />
@@ -76,15 +69,15 @@ function FilteredRestaurantMap() {
     searchQuery: ''
   };
 
-  const { 
-    filteredRestaurants, 
-    filters, 
-    setFilters 
+  const {
+    filteredRestaurants,
+    filters,
+    setFilters
   } = useRestaurants(initialFilters);
 
   return (
     <div>
-      <FilterPanel 
+      <FilterPanel
         filters={filters}
         onFiltersChange={setFilters}
       />
@@ -140,16 +133,16 @@ function AdvancedRestaurantManager() {
   return (
     <div>
       <SearchBar onSearch={handleSearch} />
-      <FilterControls 
+      <FilterControls
         filters={filters}
         onFiltersChange={setFilters}
         onReset={handleResetFilters}
       />
       <RefreshButton onClick={handleRefresh} loading={loading} />
-      
+
       {error && <ErrorMessage error={error} />}
-      
-      <RestaurantList 
+
+      <RestaurantList
         restaurants={filteredRestaurants}
         selectedRestaurant={selectedRestaurant}
         onRestaurantSelect={setSelectedRestaurant}
@@ -246,10 +239,10 @@ const fetchData = useCallback(async () => {
     const data = await fetchRestaurants();
     setState({ data, loading: false, error: null });
   } catch (error) {
-    setState(prev => ({ 
-      ...prev, 
-      loading: false, 
-      error: error as Error 
+    setState(prev => ({
+      ...prev,
+      loading: false,
+      error: error as Error
     }));
   }
 }, []);
@@ -287,10 +280,10 @@ const getFromCache = (key: string, maxAge: number = CACHE_DURATION) => {
     if (!cached) return null;
 
     const { data, timestamp, version } = JSON.parse(cached);
-    
+
     if (version !== CACHE_VERSION) return null;
     if (Date.now() - timestamp > maxAge) return null;
-    
+
     return data;
   } catch (error) {
     console.warn('キャッシュ取得に失敗:', error);
@@ -313,7 +306,7 @@ const getFromCache = (key: string, maxAge: number = CACHE_DURATION) => {
 describe('useRestaurants - 基本機能', () => {
   it('初期状態が正しく設定される', () => {
     const { result } = renderHook(() => useRestaurants());
-    
+
     expect(result.current.restaurants).toEqual([]);
     expect(result.current.loading).toBe(true);
     expect(result.current.error).toBeNull();
@@ -470,10 +463,10 @@ export function useNewAPI(): UseNewAPIResult {
       const data = await fetchFromAPI();
       setState({ data, loading: false, error: null });
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        loading: false, 
-        error: error as Error 
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: error as Error
       }));
     }
   }, []);
@@ -652,7 +645,7 @@ const CACHE_KEY = 'sado-restaurant-restaurants'; // 一貫したキーを使用
 // 原因: useEffectのクリーンアップが不適切
 useEffect(() => {
   const controller = new AbortController();
-  
+
   fetchData(controller.signal).catch(error => {
     if (error.name !== 'AbortError') {
       console.error(error);
@@ -719,12 +712,12 @@ useEffect(() => {
 ```typescript
 const usePerformanceMonitoring = () => {
   const startTime = useRef<number>();
-  
+
   const startMeasure = (label: string) => {
     startTime.current = performance.now();
     console.time(label);
   };
-  
+
   const endMeasure = (label: string) => {
     console.timeEnd(label);
     if (startTime.current) {
@@ -732,7 +725,7 @@ const usePerformanceMonitoring = () => {
       console.log(`${label}: ${duration.toFixed(2)}ms`);
     }
   };
-  
+
   return { startMeasure, endMeasure };
 };
 ```text
@@ -772,3 +765,4 @@ const usePerformanceMonitoring = () => {
 - `src/hooks/ui/README.md` - UI関連フック
 - `src/types/restaurant.ts` - レストラン型定義
 - `src/services/api.ts` - API サービス層
+````

@@ -92,3 +92,8 @@ coverage/
 
 # Analysis outputs
 tools/analysis/output/
+
+# Automated reports (temporary/generated files)
+tools/reports/*.json
+tools/reports/*.md
+tools/reports/weekly/

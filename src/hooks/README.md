@@ -1,10 +1,14 @@
 # Hooks Directory
 
-このディレクトリには、佐渡島レストランマップアプリケーションで使用されるすべてのカスタムフックが含まれています。React 19の最新機能（Concurrent Features、startTransition等）を活用し、型安全で再利用可能なロジックを提供します。
+> 🎯 **目的**: React 19.1 カスタムフックアーキテクチャ
+> **対象**: フロントエンド開発者・フック設計者
+> **最終更新**: 2025 年 8 月 30 日
+
+このディレクトリには、佐渡島レストランマップアプリケーションで使用されるすべてのカスタムフックが含まれています。React 19 の最新機能（Concurrent Features、startTransition 等）を活用し、型安全で再利用可能なロジックを提供します。
 
 ## 📁 ディレクトリ構成
 
-```text
+````text
 src/hooks/
 ├── api/                       # API関連フック
 │   ├── useRestaurants.ts     # レストランデータ管理フック
@@ -324,7 +328,7 @@ const RestaurantMapPage = () => {
       <h1>佐渡島レストランマップ</h1>
       <p>レストラン数: {filteredRestaurants.length}</p>
       <p>全ポイント数: {filteredPoints.length}</p>
-      
+
       {selectedRestaurant && (
         <div>
           <h2>{selectedRestaurant.name}</h2>
@@ -422,7 +426,7 @@ interface UseNewHookResult {
 
 export function useNewHook(options: UseNewHookOptions = {}): UseNewHookResult {
   const { initialValue = '', onValueChange } = options;
-  
+
   const [value, setValue] = useState(initialValue);
 
   const handleSetValue = useCallback((newValue: string) => {
@@ -457,25 +461,25 @@ describe('useNewHook', () => {
 
   test('値の更新が正しく動作する', () => {
     const { result } = renderHook(() => useNewHook());
-    
+
     act(() => {
       result.current.setValue('new value');
     });
-    
+
     expect(result.current.value).toBe('new value');
   });
 
   test('リセット機能が正しく動作する', () => {
     const { result } = renderHook(() => useNewHook({ initialValue: 'initial' }));
-    
+
     act(() => {
       result.current.setValue('changed');
     });
-    
+
     act(() => {
       result.current.reset();
     });
-    
+
     expect(result.current.value).toBe('initial');
   });
 });
@@ -550,7 +554,7 @@ import { useRestaurants } from './useRestaurants';
 describe('useRestaurants', () => {
   test('初期状態が正しく設定される', () => {
     const { result } = renderHook(() => useRestaurants());
-    
+
     expect(result.current.restaurants).toEqual([]);
     expect(result.current.asyncState.loading).toBe(true);
     expect(result.current.asyncState.error).toBe(null);
@@ -558,7 +562,7 @@ describe('useRestaurants', () => {
 
   test('フィルター機能が正しく動作する', async () => {
     const { result } = renderHook(() => useRestaurants());
-    
+
     await waitFor(() => {
       expect(result.current.asyncState.loading).toBe(false);
     });
@@ -577,9 +581,9 @@ describe('useRestaurants', () => {
   test('エラーハンドリングが正しく動作する', async () => {
     // モックでエラーを発生させる
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     const { result } = renderHook(() => useRestaurants());
-    
+
     // エラー状態の確認
     await waitFor(() => {
       expect(result.current.asyncState.error).toBeTruthy();
@@ -609,7 +613,7 @@ describe('useRestaurants', () => {
    const fetchData = useCallback(async () => {
      // データ取得処理
    }, []);
-   ```
+````
 
 1. **非同期処理のメモリリーク**
 
@@ -622,8 +626,8 @@ describe('useRestaurants', () => {
    // 解決: クリーンアップ関数の使用
    useEffect(() => {
      let cancelled = false;
-     
-     fetchData().then(data => {
+
+     fetchData().then((data) => {
        if (!cancelled) {
          setData(data);
        }
@@ -643,14 +647,14 @@ describe('useRestaurants', () => {
 
    // 解決: 適切な初期値と型定義
    const [data, setData] = useState<Restaurant[]>([]);
-   
+
    // または: nullableな型定義
    const [data, setData] = useState<Restaurant[] | null>(null);
    ```
 
 ### デバッグ方法
 
-```typescript
+````typescript
 // デバッグ用のログ出力
 const debugHook = (hookName: string, state: any) => {
   if (import.meta.env.DEV) {
@@ -701,3 +705,4 @@ const measureHookPerformance = (hookName: string, fn: () => void) => {
 - [Google Maps API](https://developers.google.com/maps)
 - [Google Sheets API](https://developers.google.com/sheets)
 - [Google Analytics](https://developers.google.com/analytics)
+````

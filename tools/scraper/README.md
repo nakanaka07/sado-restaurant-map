@@ -1,13 +1,22 @@
 # 🔧 Scraper Tools - 佐渡飲食店マップデータ収集システム
 
-> Google Sheets に保存する Clean Architecture ベースのデータ収集システムです
+> 🎯 **目的**: Google Places API から佐渡島の飲食店情報を収集し、Google Sheets に保存
+> **対象**: データ収集・Google APIs 統合を担当する開発者
+> **最終更新**: 2025 年 8 月 30 日
 
-## 🚀 現在の状況
+## ✅ 現在の状況
 
-- ✅ **環境設定完了**: Python 3.13.5 + venv 仮想環境構築済み
-- ✅ **依存関係インストール済み**: 全必要パッケージ導入完了（46 パッケージ）
-- ✅ **API 設定完了**: Google Places API & Sheets API 接続成功
-- ✅ **データ準備完了**: 678 件のクエリ LOG_FILE=logs/debug.log python interface/cli/main.py --config-check
+- **環境設定完了**: Python 3.13.5 + venv 仮想環境構築済み
+- **依存関係インストール済み**: 全必要パッケージ導入完了（46 パッケージ）
+- **API 設定完了**: Google Places API & Sheets API 接続成功
+- **データ準備完了**: 678 件のクエリと Clean Architecture 実装済み
+- **本格運用レディ**: Google Places API v1 対応・完全動作確認済み
+
+## 🚀 クイックスタート
+
+`````bash
+# 環境設定確認
+LOG_FILE=logs/debug.log python interface/cli/main.py --config-check
 
 ### 診断・設定確認ユーティリティ
 
@@ -48,7 +57,7 @@ python tools/testing/test_smart_update.py      # スマート更新システム�
 # 🔧 メンテナンス・修復ツール
 python tools/maintenance/restore_worksheets.py # ワークシート復旧
 python tools/maintenance/smart_update_patch.py # システムパッチ適用
-````
+`````
 
 詳細は [`tools/README.md`](tools/README.md) を参照してください。
 
@@ -146,7 +155,7 @@ graph TD
     STORE --> AUTH
 ```
 
-## 🚀 クイックスタート
+## � 実行手順
 
 ### 1. 環境設定
 
@@ -470,7 +479,6 @@ print(container.list_services())
 ### アーキテクチャ・設計
 
 - [ADR-003: Scraper Architecture Redesign](../../docs/architecture/ADR-003-scraper-architecture-redesign.md)
-- [Clean Architecture Migration Plan](../../docs/planning/SCRAPER_CLEAN_ARCHITECTURE_MIGRATION_PLAN.md)
 
 ### 開発ガイド
 
@@ -480,7 +488,8 @@ print(container.list_services())
 
 ### プロジェクト管理
 
-- [Scraper Migration Executive Summary](../../docs/planning/SCRAPER_MIGRATION_PLAN_EXECUTIVE_SUMMARY.md)
+- [Phase 3 Full Implementation Plan](../../docs/planning/PHASE3_FULL_IMPLEMENTATION_PLAN.md)
+- [Marker Improvement Roadmap](../../docs/planning/MARKER_IMPROVEMENT_ROADMAP.md)
 
 ## 🚨 トラブルシューティング
 

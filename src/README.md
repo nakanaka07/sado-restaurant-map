@@ -1,10 +1,14 @@
 # Sado Restaurant Map - Source Code Architecture
 
+> 🎯 **目的**: React 19.1 + TypeScript 5.7 ソースコードアーキテクチャ
+> **対象**: フロントエンド開発者・アーキテクト・新規参加者
+> **最終更新**: 2025 年 8 月 30 日
+
 佐渡島レストランマップアプリケーションのソースコード全体のアーキテクチャとディレクトリ構成を説明します。
 
 ## 📁 ディレクトリ構成
 
-```text
+````text
 src/
 ├── app/                    # アプリケーションエントリーポイント
 ├── assets/                 # 静的アセット（画像、アイコンなど）
@@ -232,14 +236,14 @@ VITE_DEBUG_MODE=true
 
 各ディレクトリには詳細なREADME.mdファイルがあります：
 
-- [app/README.md](./app/README.md) - アプリケーションコア
+- [app/README.md](README.md) - アプリケーションコア
 - [components/README.md](./components/README.md) - UIコンポーネント
 - [hooks/README.md](./hooks/README.md) - カスタムフック
 - [services/README.md](./services/README.md) - サービス層
-- [styles/README.md](./styles/README.md) - スタイルシステム
+- [styles/README.md](README.md) - スタイルシステム
 - [test/README.md](./test/README.md) - テストインフラ
 - [types/README.md](./types/README.md) - 型定義システム
-- [utils/README.md](./utils/README.md) - ユーティリティ関数
+- [utils/README.md](README.md) - ユーティリティ関数
 
 ## 🏆 ベストプラクティス
 
@@ -270,3 +274,4 @@ VITE_DEBUG_MODE=true
 ---
 
 このアーキテクチャは、保守性、拡張性、パフォーマンス、セキュリティを重視した設計となっています。各レイヤーが明確な責務を持ち、疎結合な設計により将来の変更に柔軟に対応できます。
+````

@@ -1,10 +1,14 @@
 # Config Directory
 
+> 🎯 **目的**: 佐渡島レストランマップの設定値・定数・環境変数の一元管理
+> **対象**: フロントエンド開発者・設定管理者・新規参加者
+> **最終更新**: 2025 年 8 月 31 日
+
 このディレクトリには、佐渡島レストランマップアプリケーションの設定値・定数・環境変数の管理ファイルが含まれています。
 
 ## 📁 ディレクトリ構成
 
-```text
+````text
 src/config/
 ├── constants.ts           # アプリケーション定数
 ├── environment.ts         # 環境変数設定
@@ -125,11 +129,11 @@ const sortSelector = SORT_OPTIONS;
 import { INPUT_LIMITS, API_KEY_PATTERNS } from '@/config';
 
 // 入力値の検証
-const isValidSearchQuery = (query: string) => 
+const isValidSearchQuery = (query: string) =>
   query.length <= INPUT_LIMITS.SEARCH_QUERY;
 
 // APIキーの検証
-const isValidGoogleMapsKey = (key: string) => 
+const isValidGoogleMapsKey = (key: string) =>
   API_KEY_PATTERNS.GOOGLE_MAPS.test(key);
 ```text
 
@@ -284,3 +288,4 @@ console.log('Config values:', {
   themes: THEMES,
 });
 ```text
+````

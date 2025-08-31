@@ -1,10 +1,87 @@
-# Map Components Directory
+# Map Components
 
-このディレクトリには、佐渡島レストランマップアプリケーションの地図機能に関連するすべてのコンポーネントとユーティリティが含まれています。Google Maps APIを使用したインタラクティブな地図表示、マーカー管理、情報ウィンドウの表示を提供します。
+> 🎯 **目的**: Google Maps API を使用した地図表示・マーカー管理・情報ウィンドウ表示
+> **対象**: 地図機能を実装・保守する開発者
+> **最終更新**: 2025 年 8 月 30 日
+
+## 🔧 主要コンポーネント
+
+| コンポーネント    | 用途                                               | 推奨度      |
+| ----------------- | -------------------------------------------------- | ----------- |
+| **MapView**       | 多様なポイントタイプ（レストラン・駐車場・トイレ） | ✅ 推奨     |
+| **RestaurantMap** | レストラン専用表示                                 | 🔶 レガシー |
+
+## 🚀 基本的な使用方法
+
+### MapView (推奨)
+
+```tsx
+import { MapView } from "@/components/map";
+
+const points: MapPoint[] = [
+  {
+    id: "restaurant-1",
+    name: "佐渡の味処",
+    type: "restaurant",
+    coordinates: { lat: 38.0186, lng: 138.3669 },
+    cuisineType: "日本料理",
+    priceRange: "2000-3000円",
+  },
+];
+
+<MapView
+  points={points}
+  center={{ lat: 38.0186, lng: 138.3669 }}
+  loading={false}
+/>;
+```
+
+### RestaurantMap (レガシー)
+
+```tsx
+import { RestaurantMap } from "@/components/map";
+
+<RestaurantMap
+  restaurants={restaurants}
+  center={{ lat: 38.0186, lng: 138.3669 }}
+  loading={false}
+/>;
+```
+
+## 🛠️ ユーティリティ関数
+
+```tsx
+import {
+  getMarkerColorByCuisine,
+  getMarkerSizeByPrice,
+  getMarkerConfig,
+} from "@/components/map/utils";
+
+// 料理ジャンル別の色
+const color = getMarkerColorByCuisine("日本料理"); // "#ef4444"
+
+// 価格帯別のサイズ
+const size = getMarkerSizeByPrice("2000-3000円"); // 40
+```
+
+## 🔍 トラブルシューティング
+
+- **地図が表示されない**: 環境変数 `VITE_GOOGLE_MAPS_MAP_ID`、`VITE_GOOGLE_MAPS_API_KEY` を確認
+- **マーカーが表示されない**: レストランデータの `coordinates` プロパティを確認
+- **情報ウィンドウが開かない**: イベントハンドラーの登録を確認
+
+## 📚 関連ドキュメント
+
+- [Google Maps API ドキュメント](https://developers.google.com/maps/documentation)
+- [React Google Maps ライブラリ](https://visgl.github.io/react-google-maps/)
+
+---
+
+**技術スタック**: React 19.1、@vis.gl/react-google-maps v2.0、TypeScript 5.7
 
 ## 📁 ディレクトリ構成
 
-```text
+````text
 src/components/map/
 ├── MapView/                    # 高度な地図表示コンポーネント群
 │   ├── MapView.tsx            # メイン地図ビューコンポーネント
@@ -32,7 +109,6 @@ src/components/map/
 
 - **用途**: メインアプリケーションでの地図表示
 - **特徴**: 多様なポイントタイプ、アクセシビリティ対応、エラーハンドリング
-- **詳細**: [`MapView/README.md`](./MapView/README.md) を参照
 
 ### 2. **RestaurantMap** (レガシー)
 
@@ -83,7 +159,7 @@ const restaurants: Restaurant[] = [
 
 const MapPage = () => {
   const [loading, setLoading] = useState(false);
-  
+
   return (
     <RestaurantMap
       restaurants={restaurants}
@@ -166,7 +242,7 @@ const size = getMarkerSizeByPrice("2000-3000円"); // 40
 const config = getMarkerConfig(restaurant);
 ```text
 
-詳細は [`utils/README.md`](./utils/README.md) を参照してください。
+詳細は [`utils/README.md`](README.md) を参照してください。
 
 ## 🎨 使用方法
 
@@ -250,7 +326,7 @@ const RestaurantPage = () => {
 };
 ```text
 
-## 🏗️ アーキテクチャ
+## 🏗️ アーキテクチャ原則
 
 ### 設計原則
 
@@ -259,20 +335,15 @@ const RestaurantPage = () => {
    - 再利用可能なコンポーネント設計
    - 単一責任の原則
 
-1. **型安全性**
+2. **型安全性**
    - TypeScriptによる厳密な型定義
    - Props インターフェースの明確化
    - ランタイムエラーの最小化
 
-1. **パフォーマンス**
+3. **パフォーマンス**
    - `useCallback` によるイベントハンドラーの最適化
    - 不要な再レンダリングの防止
    - 効率的な状態管理
-
-1. **アクセシビリティ**
-   - キーボードナビゲーション対応
-   - スクリーンリーダー対応
-   - ARIA属性の適切な使用
 
 ### 依存関係
 
@@ -415,7 +486,7 @@ describe('RestaurantMap', () => {
         loading={false}
       />
     );
-    
+
     expect(screen.getByTitle('テストレストラン')).toBeInTheDocument();
   });
 
@@ -427,7 +498,7 @@ describe('RestaurantMap', () => {
         loading={true}
       />
     );
-    
+
     expect(screen.getByText('🗺️ 地図を読み込み中...')).toBeInTheDocument();
   });
 });
@@ -443,7 +514,7 @@ describe('RestaurantMap', () => {
    // 環境変数の確認
    console.log('Map ID:', import.meta.env.VITE_GOOGLE_MAPS_MAP_ID);
    console.log('API Key:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
-   ```
+````
 
 - Google Maps API キーの設定確認
 - Map ID の設定確認
@@ -453,8 +524,11 @@ describe('RestaurantMap', () => {
 
    ```typescript
    // データの確認
-   console.log('Restaurants:', restaurants);
-   console.log('Coordinates:', restaurants.map(r => r.coordinates));
+   console.log("Restaurants:", restaurants);
+   console.log(
+     "Coordinates:",
+     restaurants.map((r) => r.coordinates)
+   );
    ```
 
    - レストランデータの形式確認
@@ -466,7 +540,7 @@ describe('RestaurantMap', () => {
    ```typescript
    // イベントハンドラーの確認
    const handleMarkerClick = useCallback((restaurant: Restaurant) => {
-     console.log('Marker clicked:', restaurant);
+     console.log("Marker clicked:", restaurant);
      setSelectedRestaurant(restaurant);
    }, []);
    ```
@@ -477,7 +551,7 @@ describe('RestaurantMap', () => {
 
 ### デバッグ方法
 
-```typescript
+````typescript
 // デバッグ用のログ出力
 const debugMapComponent = () => {
   console.log('Map Debug Info:', {
@@ -532,7 +606,8 @@ const handleMarkerClick = useCallback((restaurant: Restaurant) => {
 
 ## 📚 関連ドキュメント
 
-- [MapView詳細ドキュメント](./MapView/README.md)
-- [マーカーユーティリティドキュメント](./utils/README.md)
+- [MapView詳細ドキュメント](README.md)
+- [マーカーユーティリティドキュメント](README.md)
 - [Google Maps API ドキュメント](https://developers.google.com/maps/documentation)
 - [React Google Maps ライブラリ](https://visgl.github.io/react-google-maps/)
+````

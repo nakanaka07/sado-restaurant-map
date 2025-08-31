@@ -1,0 +1,11 @@
+reports/readme-quality-report.md
+reports/automation-result.json
+reports/link-validation-report.md
+reports/weekly/
+.github/workflows/readme-quality-monitor.yml
+_.tmp
+_.cache
+.vscode/
+node_modules/
+dist/
+coverage/

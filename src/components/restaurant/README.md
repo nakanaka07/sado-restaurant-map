@@ -1,10 +1,68 @@
-# Restaurant Components Directory
+# Restaurant Components
 
-このディレクトリには、佐渡島レストランマップアプリケーションのレストラン関連機能を担当するすべてのUIコンポーネントが含まれています。レストラン情報の表示、検索、フィルタリング、ソート機能を提供し、ユーザーが効率的にレストランを発見・選択できるようにします。
+> 🎯 **目的**: レストラン情報の表示・検索・フィルタリング・ソート機能
+> **対象**: レストラン機能を実装・保守する開発者
+> **最終更新**: 2025 年 8 月 30 日
+
+## 🔧 主要コンポーネント
+
+| コンポーネント     | 機能                   | 説明                                               |
+| ------------------ | ---------------------- | -------------------------------------------------- |
+| **FilterPanel**    | 統合フィルターシステム | 検索・料理ジャンル・価格帯・地区・特徴での絞り込み |
+| **SearchFilter**   | 自由検索               | レストラン名・説明文での検索                       |
+| **CuisineFilter**  | 料理ジャンル絞り込み   | 18 種類の料理カテゴリ                              |
+| **PriceFilter**    | 価格帯絞り込み         | 4 段階の価格レンジ                                 |
+| **DistrictFilter** | 地区絞り込み           | 佐渡島 11 地区                                     |
+| **FeatureFilter**  | 特徴絞り込み           | 30 種類以上の設備・サービス                        |
+
+## 🚀 クイックスタート
+
+### 基本的な使用方法
+
+```tsx
+import { FilterPanel } from "@/components/restaurant";
+import type { FilterHandlers } from "@/components/restaurant";
+
+const filterHandlers: FilterHandlers = {
+  onCuisineFilter: (cuisine) => applyFilters({ cuisine }),
+  onPriceFilter: (price) => applyFilters({ price }),
+  onDistrictFilter: (districts) => applyFilters({ districts }),
+  onSearchFilter: (search) => applyFilters({ search }),
+  onFeatureFilter: (features) => applyFilters({ features }),
+  onResetFilters: () => resetAllFilters(),
+};
+
+<FilterPanel
+  {...filterHandlers}
+  loading={loading}
+  resultCount={filteredRestaurants.length}
+/>;
+```
+
+## 🏗️ データフロー
+
+```text
+Parent Component → FilterPanel → Filter Events → State Management → Map/List Components
+```
+
+## 🔍 トラブルシューティング
+
+- **フィルターが動作しない**: `filterHandlers` の実装を確認
+- **パフォーマンス問題**: `useMemo`、`useCallback` でメモ化を実装
+- **状態同期問題**: フィルター状態とレストランデータの整合性を確認
+
+## 📚 関連ドキュメント
+
+- [地図コンポーネント](../map/README.md)
+- [型定義](../../types/README.md)
+
+---
+
+**アーキテクチャ**: 単一責任・型安全性・パフォーマンス最適化・アクセシビリティ対応
 
 ## 📁 ディレクトリ構成
 
-```text
+````text
 src/components/restaurant/
 ├── FilterPanel/               # フィルタリング機能コンポーネント群
 │   ├── FilterPanel.tsx       # メインフィルターパネル
@@ -97,7 +155,7 @@ const RestaurantPage = () => {
 - **FeatureFilter**: 特徴・設備複数選択チェックボックス
 - **MapLegend**: 地図マーカーの凡例表示
 
-詳細は [`FilterPanel/README.md`](./FilterPanel/README.md) を参照してください。
+詳細は [`FilterPanel/README.md`](README.md) を参照してください。
 
 ## 🎨 使用方法
 
@@ -400,11 +458,11 @@ import { RestaurantMapPage } from './RestaurantMapPage';
 describe('Restaurant Components Integration', () => {
   test('filters restaurants by cuisine type', async () => {
     render(<RestaurantMapPage />);
-    
+
     // 料理ジャンルフィルターを選択
     const cuisineFilter = screen.getByLabelText('料理ジャンル');
     fireEvent.change(cuisineFilter, { target: { value: '日本料理' } });
-    
+
     // フィルター結果を確認
     await waitFor(() => {
       expect(screen.getByText(/日本料理のレストランが表示されています/)).toBeInTheDocument();
@@ -413,11 +471,11 @@ describe('Restaurant Components Integration', () => {
 
   test('searches restaurants by name', async () => {
     render(<RestaurantMapPage />);
-    
+
     // 検索フィールドに入力
     const searchInput = screen.getByPlaceholderText('レストラン名で検索...');
     fireEvent.change(searchInput, { target: { value: '寿司' } });
-    
+
     // 検索結果を確認
     await waitFor(() => {
       const results = screen.getAllByText(/寿司/);
@@ -427,15 +485,15 @@ describe('Restaurant Components Integration', () => {
 
   test('resets all filters', () => {
     render(<RestaurantMapPage />);
-    
+
     // フィルターを設定
     fireEvent.change(screen.getByLabelText('料理ジャンル'), {
       target: { value: '日本料理' }
     });
-    
+
     // リセットボタンをクリック
     fireEvent.click(screen.getByText('フィルターをリセット'));
-    
+
     // フィルターがリセットされたことを確認
     expect(screen.getByLabelText('料理ジャンル')).toHaveValue('');
   });
@@ -454,14 +512,14 @@ describe('Restaurant Components Integration', () => {
      console.log('Current filters:', filters);
      console.log('Filtered restaurants count:', filteredRestaurants.length);
    };
-   ```
+````
 
 1. **パフォーマンスの問題**
 
    ```typescript
    // メモ化の確認
    const memoizedRestaurants = useMemo(() => {
-     return restaurants.filter(restaurant => {
+     return restaurants.filter((restaurant) => {
        // フィルタリングロジック
      });
    }, [restaurants, filters]);
@@ -472,17 +530,17 @@ describe('Restaurant Components Integration', () => {
    ```typescript
    // 状態の確認
    useEffect(() => {
-     console.log('Restaurant state updated:', {
+     console.log("Restaurant state updated:", {
        totalRestaurants: restaurants.length,
        filteredRestaurants: filteredRestaurants.length,
-       activeFilters: Object.keys(filters).filter(key => filters[key]),
+       activeFilters: Object.keys(filters).filter((key) => filters[key]),
      });
    }, [restaurants, filteredRestaurants, filters]);
    ```
 
 ### デバッグ方法
 
-```typescript
+````typescript
 // レストランコンポーネントのデバッグ
 const debugRestaurantComponents = () => {
   console.log('Restaurant Components Debug:', {
@@ -545,11 +603,11 @@ const measureRestaurantPerformance = () => {
 import { useRestaurants } from '@/hooks/api/useRestaurants';
 
 const RestaurantPage = () => {
-  const { 
-    restaurants, 
-    loading, 
-    error, 
-    refetch 
+  const {
+    restaurants,
+    loading,
+    error,
+    refetch
   } = useRestaurants();
 
   // コンポーネント実装
@@ -558,10 +616,11 @@ const RestaurantPage = () => {
 
 ## 📚 関連ドキュメント
 
-- [FilterPanel詳細ドキュメント](./FilterPanel/README.md)
+- [FilterPanel詳細ドキュメント](README.md)
 - [地図コンポーネント](../map/README.md)
-- [アクセシビリティコンポーネント](../common/README.md)
+- [アクセシビリティコンポーネント](README.md)
 - [レストランデータ型定義](../../types/restaurant.types.ts)
 - [レストランAPI フック](../../hooks/api/useRestaurants.ts)
 - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
 - [TypeScript](https://www.typescriptlang.org/docs/)
+````

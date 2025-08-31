@@ -1,43 +1,37 @@
 # Sheets Service
 
-## 概要
+> 🎯 **目的**: Google Sheets API 連携・データ取得・型安全な変換処理
+> **対象**: Google API 統合・データ変換を担当する開発者
+> **最終更新**: 2025 年 8 月 30 日
+
+## 🚀 主要機能
+
+| 機能                           | 用途             | データ型                       |
+| ------------------------------ | ---------------- | ------------------------------ |
+| **fetchRestaurantsFromSheets** | 飲食店データ取得 | Restaurant 型（26 フィールド） |
+| **fetchParkingsFromSheets**    | 駐車場データ取得 | Parking 型（21 フィールド）    |
+| **fetchToiletsFromSheets**     | トイレデータ取得 | Toilet 型（20 フィールド）     |
+
+## 🏗️ アーキテクチャ原則
 
 このディレクトリは、**Google Sheets API** を使用して佐渡島レストランマップのデータを取得するサービスを提供します。`places_data_updater.py`で生成されたスプレッドシートからレストラン、駐車場、トイレの情報を取得し、アプリケーション内で使用可能な型安全なデータに変換します。
-
-## ファイル構成
-
-### `sheetsService.ts`
-
-- **メインサービスファイル** - Google Sheets API連携の核となる実装
-- **サイズ**: 41.6KB - 豊富な機能とデータ変換ロジックを含む
-
-### `sheetsService.test.ts`
-
-- **テストファイル** - 包括的な単体テスト
-- **サイズ**: 13.8KB - モック、エラーハンドリング、統合テストを含む
-
-### `index.ts`
-
-- **バレルエクスポート** - 外部からのインポートを簡素化
-
-## 主要機能
 
 ### 1. データ取得機能
 
 #### `fetchRestaurantsFromSheets()`
 
-- **目的**: 飲食店データの取得とRestaurant型への変換
-- **データ構造**: 26フィールドの詳細な店舗情報
+- **目的**: 飲食店データの取得と Restaurant 型への変換
+- **データ構造**: 26 フィールドの詳細な店舗情報
 - **特徴**:
-  - Google Places APIデータの精密な分類
+  - Google Places API データの精密な分類
   - 料理ジャンル自動判定
   - 価格帯マッピング
   - 営業時間パース
 
 #### `fetchParkingsFromSheets()`
 
-- **目的**: 駐車場データの取得とParking型への変換
-- **データ構造**: 21フィールドの駐車場情報
+- **目的**: 駐車場データの取得と Parking 型への変換
+- **データ構造**: 21 フィールドの駐車場情報
 - **特徴**:
   - 料金体系の解析
   - バリアフリー対応情報
@@ -45,8 +39,8 @@
 
 #### `fetchToiletsFromSheets()`
 
-- **目的**: 公衆トイレデータの取得とToilet型への変換
-- **データ構造**: 20フィールドのトイレ施設情報
+- **目的**: 公衆トイレデータの取得と Toilet 型への変換
+- **データ構造**: 20 フィールドのトイレ施設情報
 - **特徴**:
   - 子供連れ対応情報
   - 駐車場併設状況
@@ -55,13 +49,13 @@
 #### `fetchAllMapPoints()`
 
 - **目的**: 全マップポイントの統合取得
-- **機能**: レストラン、駐車場、トイレを統一的なMapPoint型に変換
+- **機能**: レストラン、駐車場、トイレを統一的な MapPoint 型に変換
 
 ### 2. データ変換・分析機能
 
 #### 料理ジャンル分類
 
-```typescript
+````typescript
 mapStoreTypeToCuisineType(storeTypeWithName: string, description: string): CuisineType
 ```text
 
@@ -136,7 +130,7 @@ VITE_SPREADSHEET_ID=your_spreadsheet_id_here
 ```typescript
 const WORKSHEETS = {
   RESTAURANTS: "restaurants",
-  PARKINGS: "parkings", 
+  PARKINGS: "parkings",
   TOILETS: "toilets",
 } as const;
 ```text
@@ -304,3 +298,4 @@ function extractCustomFeatures(data: CustomData): string[] {
 - **データ整合性** - スプレッドシートの列構造変更時の影響
 - **セキュリティ** - API キーの適切な管理
 - **パフォーマンス** - 大量データ処理時のメモリ使用量
+````

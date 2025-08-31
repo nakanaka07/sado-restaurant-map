@@ -1,61 +1,30 @@
 # Types System
 
-## 概要
+> 🎯 **目的**: TypeScript 型システム・型安全性・実行時型チェック
+> **対象**: 型設計・インターフェース設計を担当する開発者
+> **最終更新**: 2025 年 8 月 30 日
 
-このディレクトリは、佐渡島レストランマップアプリケーションの**TypeScript型システム**を構成します。型安全性を重視した設計で、インターフェース分離原則（ISP）に基づく抽象化と、実行時型チェックによる堅牢なアプリケーション基盤を提供します。
+## 🛡️ 型システム構成
 
-## ファイル構成
+| ファイル                | 用途         | サイズ | 特徴                   |
+| ----------------------- | ------------ | ------ | ---------------------- |
+| **core.types.ts**       | 基盤・共通型 | 1.6KB  | アプリケーション基本型 |
+| **restaurant.types.ts** | ドメイン型   | 3.7KB  | ビジネスロジック型     |
+| **interfaces.types.ts** | 抽象化 IF    | 6.9KB  | 依存関係逆転対応       |
+| **type-guards.ts**      | 型ガード     | 5.0KB  | 実行時型チェック       |
+| **api.types.ts**        | API 型       | 3.8KB  | 外部 API 通信型        |
+| **ui.types.ts**         | UI 型        | 5.6KB  | React コンポーネント型 |
+| **map.types.ts**        | 地図型       | 2.3KB  | Google Maps API 型     |
 
-### `index.ts`
+## 🏗️ アーキテクチャ原則
 
-- **バレルエクスポート** - 全型定義への統一アクセスポイント
-- **サイズ**: 3.0KB - Barrel Export Patternによる型の整理
-
-### `core.types.ts`
-
-- **基盤・共通型** - アプリケーション全体で使用される基本型
-- **サイズ**: 1.6KB - 軽量な基盤型定義
-
-### `restaurant.types.ts`
-
-- **飲食店・マップポイント関連型** - ドメイン固有の型定義
-- **サイズ**: 3.7KB - 詳細なビジネスロジック型
-
-### `interfaces.types.ts`
-
-- **インターフェース分離実装** - 依存関係逆転原則対応
-- **サイズ**: 6.9KB - 包括的な抽象化インターフェース
-
-### `type-guards.ts`
-
-- **型ガード関数** - 実行時型チェック機能
-- **サイズ**: 5.0KB - 堅牢な型安全性保証
-
-### `api.types.ts`
-
-- **API関連型** - 外部API通信の型定義
-- **サイズ**: 3.8KB - API契約の型安全性
-
-### `ui.types.ts`
-
-- **UI・コンポーネント型** - フロントエンド固有の型
-- **サイズ**: 5.6KB - React コンポーネントの型定義
-
-### `map.types.ts`
-
-- **地図関連型** - Google Maps API関連の型
-- **サイズ**: 2.3KB - 地図機能の型定義
-
-### `app.types.ts`
-
-- **アプリケーション全体型** - グローバル状態と設定
-- **サイズ**: 5.5KB - アプリケーション設定型
+このディレクトリは、佐渡島レストランマップアプリケーションの**TypeScript 型システム**を構成します。型安全性を重視した設計で、インターフェース分離原則（ISP）に基づく抽象化と、実行時型チェックによる堅牢なアプリケーション基盤を提供します。
 
 ## 型システムアーキテクチャ
 
 ### 階層構造
 
-```text
+````text
 Types Hierarchy
 ├── Core Types (基盤型)
 │   ├── LatLngLiteral
@@ -264,7 +233,7 @@ export interface Restaurant {
 
 ```typescript
 export type MapPointType = "restaurant" | "parking" | "toilet";
-export type AsyncState<T> = 
+export type AsyncState<T> =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "success"; data: T }
@@ -320,7 +289,7 @@ const findNearbyRestaurants = (
 
   return points
     .filter(isRestaurant)
-    .filter(restaurant => 
+    .filter(restaurant =>
       calculateDistance(center, restaurant.coordinates) <= radius
     );
 };
@@ -342,7 +311,7 @@ class RestaurantService implements IDataSource<Restaurant> {
   }
 
   validate(data: Restaurant[]): boolean {
-    return data.every(item => 
+    return data.every(item =>
       this.validator.validate(item).isValid
     );
   }
@@ -494,8 +463,8 @@ export const isHospital = (point: MapPoint): point is Hospital => {
 ```typescript
 // 部分更新型
 export type PartialUpdate<T> = {
-  [K in keyof T]?: T[K] extends readonly (infer U)[] 
-    ? readonly U[] 
+  [K in keyof T]?: T[K] extends readonly (infer U)[]
+    ? readonly U[]
     : T[K];
 };
 
@@ -545,3 +514,4 @@ export namespace Restaurant {
 - **パフォーマンス** - 型計算の複雑さに注意
 - **保守性** - 型定義の変更影響範囲の考慮
 - **ドキュメント** - 複雑な型の適切な説明
+````

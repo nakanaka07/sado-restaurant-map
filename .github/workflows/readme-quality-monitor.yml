@@ -1,0 +1,109 @@
+# README品質監視ワークフロー
+name: README Quality Monitor
+
+on:
+  push:
+    branches: [main]
+    paths: ["**/*.md"]
+  pull_request:
+    branches: [main]
+    paths: ["**/*.md"]
+  schedule:
+    # 毎週月曜日 9:00 JST (00:00 UTC) に実行
+    - cron: "0 0 * * 1"
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run README quality assessment
+        run: pnpm run readme:all
+
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-quality-reports
+          path: reports/
+          retention-days: 30
+
+      - name: Check quality thresholds
+        run: |
+          # JSONレポートから品質指標を抽出
+          TEMPLATE_SCORE=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/automation-result.json')).qualityCheck.averageTemplateScore)")
+          SCRAP_SCORE=$(node -e "console.log(JSON.parse(require('fs').readFileSync('reports/automation-result.json')).qualityCheck.averageSCRAPScore)")
+
+          echo "Template Compliance: ${TEMPLATE_SCORE}%"
+          echo "SCRAP Score: ${SCRAP_SCORE}%"
+
+          # 品質閾値チェック (Template: 75%, SCRAP: 90%)
+          if [ "$TEMPLATE_SCORE" -lt 75 ]; then
+            echo "❌ Template compliance below threshold (75%)"
+            exit 1
+          fi
+
+          if [ "$SCRAP_SCORE" -lt 90 ]; then
+            echo "❌ SCRAP score below threshold (90%)"
+            exit 1
+          fi
+
+          echo "✅ All quality thresholds met"
+
+      - name: Create issue on quality degradation
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `📊 README品質低下検出 - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## 🚨 README品質モニタリング アラート
+
+            **検出日時**: ${new Date().toLocaleString('ja-JP')}
+            **トリガー**: ${context.eventName}
+
+            ### 📊 品質指標
+
+            品質閾値を下回るファイルが検出されました：
+
+            - **テンプレート準拠率**: 目標75%以上
+            - **SCRAP原則準拠率**: 目標90%以上
+
+            ### 🔧 対応手順
+
+            1. \`pnpm run readme:all\` で詳細確認
+            2. \`reports/readme-quality-report.md\` で問題箇所特定
+            3. \`pnpm run readme:fix\` で自動修正試行
+            4. 手動修正が必要な場合は該当ファイル更新
+
+            ### 📋 品質基準
+
+            - **テンプレート準拠**: 🎯目的・対象・最終更新日の明記
+            - **SCRAP原則**: Specific/Concise/Relevant/Actionable/Practical
+
+            **自動生成**: README Quality Monitor Workflow
+            `;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['documentation', 'quality', 'automated']
+            });

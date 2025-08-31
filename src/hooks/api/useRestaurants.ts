@@ -268,7 +268,7 @@ export function useRestaurants(
   }, []);
 
   // データ更新用のヘルパー関数
-  const loadFromCache = useCallback(async (): Promise<Restaurant[] | null> => {
+  const loadFromCache = useCallback((): Restaurant[] | null => {
     const cachedData = localStorage.getItem("restaurantData");
     if (!cachedData) {
       return null;
@@ -304,11 +304,11 @@ export function useRestaurants(
   }, []);
 
   const handleDataError = useCallback(
-    async (errorMessage: string): Promise<readonly Restaurant[]> => {
+    (errorMessage: string): readonly Restaurant[] => {
       console.error("データ取得エラー:", errorMessage);
 
       // フォールバック: キャッシュされたデータを使用
-      const cachedData = await loadFromCache();
+      const cachedData = loadFromCache();
       if (cachedData && cachedData.length > 0) {
         setAsyncState({
           data: cachedData,
@@ -340,7 +340,7 @@ export function useRestaurants(
 
       // キャッシュされたデータがある場合はそれを使用
       if (!needsUpdate) {
-        const cachedData = await loadFromCache();
+        const cachedData = loadFromCache();
         if (cachedData) {
           setRestaurants(cachedData);
           setAsyncState({
@@ -369,7 +369,7 @@ export function useRestaurants(
         errorMessage = error.message;
       }
 
-      const fallbackData = await handleDataError(errorMessage);
+      const fallbackData = handleDataError(errorMessage);
       setRestaurants(fallbackData);
     }
   }, [loadFromCache, loadFromApi, handleDataError]);

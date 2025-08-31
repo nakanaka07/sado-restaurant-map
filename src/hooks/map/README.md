@@ -1,21 +1,16 @@
-# src/hooks/map - 地図関連フック
+# Map Hooks
 
-佐渡島レストランマップアプリケーションの地図機能に特化したカスタムフック群を管理するディレクトリです。地図上のポイント管理、座標計算、地理的データ処理を担当します。
+> 🎯 **目的**: Google Maps API 連携・地図ポイント管理・地理的データ処理
+> **対象**: 地図機能・位置情報を担当する開発者
+> **最終更新**: 2025 年 8 月 30 日
 
-## 📁 ディレクトリ構成
+## � 主要フック
 
-```text
-src/hooks/map/
-├── index.ts                    # バレルエクスポート
-├── useMapPoints.ts            # 地図ポイント統合管理フック
-└── useMapPoints.test.ts       # useMapPointsテストファイル
-```text
+| フック           | 機能                 | 用途                                 |
+| ---------------- | -------------------- | ------------------------------------ |
+| **useMapPoints** | 地図ポイント統合管理 | レストラン・駐車場・トイレの統一管理 |
 
-## 🎯 概要
-
-このディレクトリは、Google Maps APIと連携した地図機能に関するフック群を提供します。レストラン、駐車場、トイレなどの地図上のポイントを統合的に管理し、効率的な地理的データ処理を実現します。
-
-### 主要な責務
+## 🏗️ アーキテクチャ原則
 
 - **地図ポイント統合管理**: レストラン、駐車場、トイレの統一的な管理
 - **地理的データ処理**: 座標計算、距離測定、範囲フィルタリング
@@ -23,15 +18,13 @@ src/hooks/map/
 - **状態管理**: 非同期データの効率的な状態管理
 - **キャッシュ戦略**: 地理的データの効果的なキャッシュ
 
-## 🔧 主要フック
-
 ### useMapPoints
 
 地図上のすべてのポイント（レストラン、駐車場、トイレ）を統合管理するメインフックです。
 
 #### 基本的な使用方法
 
-```typescript
+````typescript
 import { useMapPoints } from '@/hooks/map';
 
 function MapComponent() {
@@ -67,13 +60,13 @@ function FilteredMapView() {
   const { mapPoints, loading, error } = useMapPoints();
 
   // レストランのみフィルタリング
-  const restaurants = useMemo(() => 
+  const restaurants = useMemo(() =>
     mapPoints.filter(point => point.type === 'restaurant'),
     [mapPoints]
   );
 
   // 駐車場のみフィルタリング
-  const parkingLots = useMemo(() => 
+  const parkingLots = useMemo(() =>
     mapPoints.filter(point => point.type === 'parking'),
     [mapPoints]
   );
@@ -84,7 +77,7 @@ function FilteredMapView() {
         <LayerToggle label="レストラン" points={restaurants} />
         <LayerToggle label="駐車場" points={parkingLots} />
       </LayerControls>
-      
+
       <GoogleMap>
         {mapPoints.map(point => (
           <MapMarker key={point.id} point={point} />
@@ -111,7 +104,7 @@ interface MapPoint {
   };
   address?: string;
   lastUpdated: string;
-  
+
   // レストラン固有のプロパティ
   cuisineType?: CuisineType;
   priceRange?: PriceRange;
@@ -119,12 +112,12 @@ interface MapPoint {
   openingHours?: OpeningHours[];
   features?: Feature[];
   rating?: number;
-  
+
   // 駐車場固有のプロパティ
   capacity?: number;
   hourlyRate?: number;
   available24h?: boolean;
-  
+
   // トイレ固有のプロパティ
   accessible?: boolean;
   babyChanging?: boolean;
@@ -188,11 +181,11 @@ export const calculateDistance = (
   const R = 6371; // 地球の半径（km）
   const dLat = toRadians(point2.lat - point1.lat);
   const dLng = toRadians(point2.lng - point1.lng);
-  
+
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(point1.lat)) * Math.cos(toRadians(point2.lat)) *
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
@@ -223,7 +216,7 @@ export const findNearestPoints = (
 describe('useMapPoints - 基本機能', () => {
   it('初期状態が正しく設定される', () => {
     const { result } = renderHook(() => useMapPoints());
-    
+
     expect(result.current.mapPoints).toEqual([]);
     expect(result.current.loading).toBe(true);
     expect(result.current.error).toBeNull();
@@ -254,9 +247,9 @@ describe('地理的計算ユーティリティ', () => {
   it('距離計算が正確に動作する', () => {
     const point1 = { lat: 38.0, lng: 138.0 };
     const point2 = { lat: 38.1, lng: 138.1 };
-    
+
     const distance = calculateDistance(point1, point2);
-    
+
     expect(distance).toBeCloseTo(13.89, 1);
   });
 
@@ -266,9 +259,9 @@ describe('地理的計算ユーティリティ', () => {
       createMockMapPoint('restaurant', { lat: 38.01, lng: 138.01 }),
       createMockMapPoint('parking', { lat: 38.1, lng: 138.1 })
     ];
-    
+
     const nearest = findNearestPoints(target, points, 1);
-    
+
     expect(nearest).toHaveLength(1);
     expect(nearest[0].type).toBe('restaurant');
   });
@@ -342,7 +335,7 @@ export { useMapRegions } from "./useMapRegions";
 // 空間インデックスの活用
 const createSpatialIndex = (points: MapPoint[]) => {
   const index = new Map<string, MapPoint[]>();
-  
+
   points.forEach(point => {
     const gridKey = `${Math.floor(point.coordinates.lat * 100)}_${Math.floor(point.coordinates.lng * 100)}`;
     if (!index.has(gridKey)) {
@@ -350,7 +343,7 @@ const createSpatialIndex = (points: MapPoint[]) => {
     }
     index.get(gridKey)!.push(point);
   });
-  
+
   return index;
 };
 ```text
@@ -361,14 +354,14 @@ const createSpatialIndex = (points: MapPoint[]) => {
 // 計算結果のメモ化
 const memoizedCalculateDistance = useMemo(() => {
   const cache = new Map<string, number>();
-  
+
   return (point1: Coordinates, point2: Coordinates) => {
     const key = `${point1.lat},${point1.lng}-${point2.lat},${point2.lng}`;
-    
+
     if (cache.has(key)) {
       return cache.get(key)!;
     }
-    
+
     const distance = calculateDistance(point1, point2);
     cache.set(key, distance);
     return distance;
@@ -393,7 +386,7 @@ const validateCoordinates = (coords: { lat: number; lng: number }) => {
   return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 };
 
-const validPoints = mapPoints.filter(point => 
+const validPoints = mapPoints.filter(point =>
   validateCoordinates(point.coordinates)
 );
 ```text
@@ -425,11 +418,11 @@ const calculateDistanceAccurate = (point1: Coordinates, point2: Coordinates) => 
   const R = 6371; // 地球の半径（km）
   const dLat = toRadians(point2.lat - point1.lat);
   const dLng = toRadians(point2.lng - point1.lng);
-  
+
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRadians(point1.lat)) * Math.cos(toRadians(point2.lat)) *
     Math.sin(dLng / 2) * Math.sin(dLng / 2);
-  
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
@@ -493,3 +486,4 @@ const useMapPerformance = () => {
 - `src/hooks/ui/README.md` - UI関連フック
 - `src/components/map/README.md` - 地図コンポーネント
 - `src/services/sheets.ts` - Google Sheets API サービス
+````
