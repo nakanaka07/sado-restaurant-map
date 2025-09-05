@@ -1,0 +1,112 @@
+{
+  "channels": {
+    "console": {
+      "type": "console",
+      "config": {},
+      "enabled": true
+    },
+    "github": {
+      "type": "github",
+      "config": {
+        "repository": "auto-detect"
+      },
+      "enabled": true
+    }
+  },
+  "rules": {
+    "quality_degradation": {
+      "id": "quality_degradation",
+      "name": "品質劣化検出",
+      "description": "README品質スコアが閾値を下回った場合",
+      "condition": {
+        "metric": "quality.template_score",
+        "operator": "<",
+        "threshold": 75
+      },
+      "severity": "warning",
+      "channels": [
+        "console",
+        "github"
+      ],
+      "suppressionTime": 60
+    },
+    "quality_critical": {
+      "id": "quality_critical",
+      "name": "品質重大劣化",
+      "description": "README品質スコアが危険レベルに達した場合",
+      "condition": {
+        "metric": "quality.template_score",
+        "operator": "<",
+        "threshold": 60
+      },
+      "severity": "critical",
+      "channels": [
+        "console",
+        "github"
+      ],
+      "escalation": {
+        "enabled": true,
+        "delay": 30,
+        "channels": [
+          "github"
+        ]
+      },
+      "suppressionTime": 30
+    },
+    "link_failures": {
+      "id": "link_failures",
+      "name": "リンク切れ検出",
+      "description": "壊れたリンクが検出された場合",
+      "condition": {
+        "metric": "links.broken_count",
+        "operator": ">",
+        "threshold": 0
+      },
+      "severity": "error",
+      "channels": [
+        "console",
+        "github"
+      ],
+      "suppressionTime": 120
+    },
+    "test_failures": {
+      "id": "test_failures",
+      "name": "テスト失敗検出",
+      "description": "テストが失敗した場合",
+      "condition": {
+        "metric": "test.failed_count",
+        "operator": ">",
+        "threshold": 0
+      },
+      "severity": "error",
+      "channels": [
+        "console",
+        "github"
+      ],
+      "suppressionTime": 30
+    },
+    "security_vulnerabilities": {
+      "id": "security_vulnerabilities",
+      "name": "セキュリティ脆弱性検出",
+      "description": "セキュリティ脆弱性が検出された場合",
+      "condition": {
+        "metric": "security.vulnerability_count",
+        "operator": ">",
+        "threshold": 0
+      },
+      "severity": "critical",
+      "channels": [
+        "console",
+        "github"
+      ],
+      "escalation": {
+        "enabled": true,
+        "delay": 15,
+        "channels": [
+          "github"
+        ]
+      },
+      "suppressionTime": 60
+    }
+  }
+}

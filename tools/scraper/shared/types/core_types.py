@@ -261,3 +261,54 @@ TEXT_SEARCH_FIELDS = [
     'rating',
     'business_status'
 ]
+
+
+# Cache-related types
+@dataclass
+class SearchQuery:
+    """Search query for caching."""
+    text: str
+    location: Optional[str] = None
+    radius: Optional[int] = None
+    type: Optional[str] = None
+
+    def to_cache_key(self) -> str:
+        """Generate cache key from query parameters."""
+        import hashlib
+        search_string = f"{self.text}:{self.location or 'global'}:{self.radius or 'default'}:{self.type or 'all'}"
+        return hashlib.md5(search_string.encode()).hexdigest()
+
+
+class CacheMetrics(TypedDict):
+    """Cache performance metrics."""
+    hit_rate: float
+    miss_rate: float
+    total_requests: int
+    cache_hits: int
+    cache_misses: int
+    memory_usage_mb: float
+    key_count: int
+    expired_keys: int
+    evicted_keys: int
+
+
+class CacheEntry(TypedDict, total=False):
+    """Cache entry metadata."""
+    key: str
+    value_type: str
+    size_bytes: int
+    created_at: datetime
+    last_accessed: datetime
+    access_count: int
+    ttl_seconds: int
+    expires_at: datetime
+
+
+class BatchCacheResult(TypedDict):
+    """Result of batch cache operations."""
+    successful: List[str]  # Successful keys
+    failed: List[str]      # Failed keys
+    total_count: int
+    success_count: int
+    failure_count: int
+    duration_seconds: float

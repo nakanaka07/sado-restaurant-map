@@ -213,6 +213,141 @@ class DependencyError(ScraperError):
             self.details['dependency_chain'] = dependency_chain
 
 
+class CacheError(ScraperError):
+    """Exception raised for cache operation errors."""
+
+    def __init__(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        cache_key: Optional[str] = None,
+        cache_type: Optional[str] = None
+    ):
+        super().__init__(message)
+        self.operation = operation
+        self.cache_key = cache_key
+        self.cache_type = cache_type
+
+        if operation:
+            self.details['operation'] = operation
+        if cache_key:
+            self.details['cache_key'] = cache_key
+        if cache_type:
+            self.details['cache_type'] = cache_type
+
+
+class CacheConnectionError(CacheError):
+    """Exception raised for cache connection errors."""
+
+    def __init__(
+        self,
+        message: str = "Cache connection failed",
+        connection_string: Optional[str] = None,
+        retry_count: Optional[int] = None
+    ):
+        super().__init__(message, operation="connection")
+        self.connection_string = connection_string
+        self.retry_count = retry_count
+
+        if connection_string:
+            self.details['connection_string'] = connection_string
+        if retry_count is not None:
+            self.details['retry_count'] = retry_count
+
+
+class CacheTimeoutError(CacheError):
+    """Exception raised for cache operation timeouts."""
+
+    def __init__(
+        self,
+        message: str = "Cache operation timeout",
+        timeout_seconds: Optional[float] = None
+    ):
+        super().__init__(message, operation="timeout")
+        self.timeout_seconds = timeout_seconds
+
+        if timeout_seconds:
+            self.details['timeout_seconds'] = timeout_seconds
+
+
+class OrchestrationError(ScraperError):
+    """Exception raised for orchestration system errors."""
+
+    def __init__(
+        self,
+        message: str,
+        component: Optional[str] = None,
+        operation: Optional[str] = None,
+        worker_id: Optional[str] = None
+    ):
+        super().__init__(message)
+        self.component = component
+        self.operation = operation
+        self.worker_id = worker_id
+
+        if component:
+            self.details['component'] = component
+        if operation:
+            self.details['operation'] = operation
+        if worker_id:
+            self.details['worker_id'] = worker_id
+
+
+class HealthCheckError(OrchestrationError):
+    """Exception raised for health check failures."""
+
+    def __init__(
+        self,
+        message: str = "Health check failed",
+        component: Optional[str] = None,
+        health_score: Optional[float] = None
+    ):
+        super().__init__(message, component=component, operation="health_check")
+        self.health_score = health_score
+
+        if health_score is not None:
+            self.details['health_score'] = health_score
+
+
+class WorkerFailureError(OrchestrationError):
+    """Exception raised for worker failure scenarios."""
+
+    def __init__(
+        self,
+        message: str,
+        worker_id: str,
+        failure_count: Optional[int] = None,
+        last_error: Optional[str] = None
+    ):
+        super().__init__(message, component="worker", operation="failure", worker_id=worker_id)
+        self.failure_count = failure_count
+        self.last_error = last_error
+
+        if failure_count is not None:
+            self.details['failure_count'] = failure_count
+        if last_error:
+            self.details['last_error'] = last_error
+
+
+class LoadBalancingError(OrchestrationError):
+    """Exception raised for load balancing errors."""
+
+    def __init__(
+        self,
+        message: str,
+        algorithm: Optional[str] = None,
+        available_workers: Optional[int] = None
+    ):
+        super().__init__(message, component="load_balancer", operation="worker_selection")
+        self.algorithm = algorithm
+        self.available_workers = available_workers
+
+        if algorithm:
+            self.details['algorithm'] = algorithm
+        if available_workers is not None:
+            self.details['available_workers'] = available_workers
+
+
 # Error severity levels
 class ErrorSeverity:
     """Constants for error severity levels."""
@@ -249,6 +384,13 @@ def get_error_category(exception: Exception) -> str:
         ProcessingError: ErrorCategory.PROCESSING,
         RateLimitError: ErrorCategory.RATE_LIMIT,
         DependencyError: ErrorCategory.DEPENDENCY,
+        CacheError: "cache",
+        CacheConnectionError: "cache",
+        CacheTimeoutError: "cache",
+        OrchestrationError: "orchestration",
+        HealthCheckError: "orchestration",
+        WorkerFailureError: "orchestration",
+        LoadBalancingError: "orchestration",
     }
 
     return error_mapping.get(type(exception), "unknown")
@@ -260,12 +402,15 @@ def get_error_severity(exception: Exception) -> str:
         ConfigurationError,
         APIAuthenticationError,
         DependencyError,
+        HealthCheckError,
+        WorkerFailureError,
     )
 
     warning_errors = (
         ValidationError,
         RateLimitError,
         APIQuotaExceededError,
+        LoadBalancingError,
     )
 
     if isinstance(exception, critical_errors):

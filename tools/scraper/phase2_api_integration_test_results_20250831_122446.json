@@ -1,0 +1,106 @@
+{
+  "total_tests": 3,
+  "passed_tests": 3,
+  "success_rate": 100.0,
+  "execution_time": 0.130155,
+  "timestamp": "2025-08-31T12:24:46.182480",
+  "api_key_available": false,
+  "test_results": {
+    "mock_integration": true,
+    "distributed_task_with_api": true,
+    "distributed_task_result": {
+      "task_id": "b751e12b-c6c7-4257-865b-ebeb8e80a114",
+      "status": "success",
+      "processed": 4,
+      "total_requested": 4,
+      "cache_hits": 0,
+      "api_calls": 4,
+      "errors": 0,
+      "error_place_ids": [],
+      "results": [
+        {
+          "place_id": "test_place_1",
+          "name": "店舗place_1",
+          "rating": 4.1,
+          "address": "佐渡市test_place_1",
+          "types": [
+            "restaurant",
+            "food",
+            "establishment"
+          ]
+        },
+        {
+          "place_id": "test_place_2",
+          "name": "店舗place_2",
+          "rating": 4.2,
+          "address": "佐渡市test_place_2",
+          "types": [
+            "restaurant",
+            "food",
+            "establishment"
+          ]
+        },
+        {
+          "place_id": "test_place_3",
+          "name": "店舗place_3",
+          "rating": 4.3,
+          "address": "佐渡市test_place_3",
+          "types": [
+            "restaurant",
+            "food",
+            "establishment"
+          ]
+        },
+        {
+          "place_id": "test_place_4",
+          "name": "店舗place_4",
+          "rating": 4.4,
+          "address": "佐渡市test_place_4",
+          "types": [
+            "restaurant",
+            "food",
+            "establishment"
+          ]
+        }
+      ],
+      "api_mode": "mock"
+    },
+    "batch_aggregation": true,
+    "aggregation_result": {
+      "status": "success",
+      "total_processed": 5,
+      "total_requested": 5,
+      "success_rate": 100.0,
+      "cache_hit_rate": 20.0,
+      "cache_hits": 1,
+      "api_calls": 4,
+      "results": [
+        {
+          "place_id": "test_1",
+          "name": "店舗1",
+          "rating": 4.1
+        },
+        {
+          "place_id": "test_2",
+          "name": "店舗2",
+          "rating": 4.2
+        },
+        {
+          "place_id": "test_3",
+          "name": "店舗3",
+          "rating": 4.3
+        },
+        {
+          "place_id": "test_4",
+          "name": "店舗4",
+          "rating": 4.4
+        },
+        {
+          "place_id": "test_5",
+          "name": "店舗5",
+          "rating": 4.5
+        }
+      ]
+    }
+  }
+}

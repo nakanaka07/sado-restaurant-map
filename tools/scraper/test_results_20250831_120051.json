@@ -1,0 +1,41 @@
+{
+  "environment": {
+    "python_version": "3.13.5 (tags/v3.13.5:6cb20a2, Jun 11 2025, 16:15:46) [MSC v.1943 64 bit (AMD64)]",
+    "available_packages": [
+      "redis",
+      "celery",
+      "dataclasses"
+    ],
+    "missing_packages": [],
+    "redis_available": false
+  },
+  "cache_service": {
+    "initialization": true,
+    "basic_operations": false,
+    "error_handling": false,
+    "performance": {}
+  },
+  "ml_engine": {
+    "initialization": true,
+    "quality_analysis": true,
+    "anomaly_detection": true,
+    "recommendations": true,
+    "predictions": true
+  },
+  "celery_config": {
+    "configuration": false,
+    "health_check": false,
+    "error": "'NoneType' object is not iterable"
+  },
+  "distributed_tasks": {
+    "aggregate_results": true,
+    "data_validation": true,
+    "ml_analysis": true
+  },
+  "integration": {
+    "cache_ml_integration": true,
+    "task_pipeline": false,
+    "error_recovery": true
+  },
+  "total_duration": 4.11515212059021
+}

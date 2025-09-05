@@ -1,0 +1,156 @@
+version: '3.8'
+
+# Redis Cluster - 実用的ハイブリッド構成
+# Grokzenアプローチ + カスタム監視・管理機能統合
+
+services:
+  # メインのRedis Cluster（Grokzenベース）
+  redis-cluster:
+    image: grokzen/redis-cluster:latest
+    container_name: sado-redis-cluster-main
+    environment:
+      - IP=0.0.0.0  # Windows/Mac対応の重要設定
+    ports:
+      - "7000-7005:7000-7005"  # Redis Clusterポート
+      - "17000-17005:17000-17005"  # クラスターバスポート
+    networks:
+      - sado-network
+    restart: unless-stopped
+    volumes:
+      - redis-cluster-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-c", "-p", "7000", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Redis Exporter（監視用）
+  redis-exporter-cluster:
+    image: oliver006/redis_exporter:latest
+    container_name: sado-redis-exporter-cluster
+    environment:
+      - REDIS_ADDR=redis://redis-cluster:7000
+      - REDIS_CLUSTER_ENABLED=true
+    ports:
+      - "9121:9121"
+    networks:
+      - sado-network
+    depends_on:
+      - redis-cluster
+    restart: unless-stopped
+
+  # Prometheus（メトリクス収集）
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sado-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - sado-network
+    restart: unless-stopped
+
+  # Grafana（可視化）
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sado-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=sado_admin_2025
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - sado-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # アプリケーションサーバー1（将来用）
+  app-server-1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    container_name: sado-app-1
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_CLUSTER_NODES=redis-cluster:7000,redis-cluster:7001,redis-cluster:7002
+      - REDIS_PASSWORD=
+    networks:
+      - sado-network
+    depends_on:
+      - redis-cluster
+    restart: unless-stopped
+    profiles:
+      - app  # 必要時のみ起動
+
+  # アプリケーションサーバー2（将来用）
+  app-server-2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    container_name: sado-app-2
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=production
+      - REDIS_CLUSTER_NODES=redis-cluster:7000,redis-cluster:7001,redis-cluster:7002
+      - REDIS_PASSWORD=
+    networks:
+      - sado-network
+    depends_on:
+      - redis-cluster
+    restart: unless-stopped
+    profiles:
+      - app  # 必要時のみ起動
+
+  # Nginx ロードバランサー
+  nginx:
+    image: nginx:alpine
+    container_name: sado-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/app.conf:/etc/nginx/conf.d/app.conf
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      - sado-network
+    depends_on:
+      - app-server-1
+      - app-server-2
+    restart: unless-stopped
+    profiles:
+      - app  # 必要時のみ起動
+
+# ネットワーク定義
+networks:
+  sado-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ボリューム定義
+volumes:
+  redis-cluster-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

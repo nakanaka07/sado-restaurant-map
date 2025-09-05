@@ -1,0 +1,36 @@
+# Phase 3-Full統合テスト環境用Grafanaダッシュボード設定
+apiVersion: 1
+
+providers:
+  # 統合テストダッシュボード
+  - name: 'integration-test-dashboards'
+    orgId: 1
+    folder: 'Integration Tests'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/integration
+
+  # パフォーマンステストダッシュボード
+  - name: 'performance-test-dashboards'
+    orgId: 1
+    folder: 'Performance Tests'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/performance
+
+  # セキュリティテストダッシュボード
+  - name: 'security-test-dashboards'
+    orgId: 1
+    folder: 'Security Tests'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/security

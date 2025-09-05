@@ -1,0 +1,88 @@
+{
+  "total_tests": 5,
+  "passed_tests": 5,
+  "success_rate": 100.0,
+  "execution_time": 4.133739,
+  "timestamp": "2025-08-31T12:37:32.489155",
+  "api_key_length": 39,
+  "test_results": {
+    "single_place_real": {
+      "success": true,
+      "place_data": {
+        "place_id": "N/A",
+        "name": "N/A",
+        "address": "N/A",
+        "rating": "N/A"
+      },
+      "processing_time": 0.412372
+    },
+    "batch_places_real": {
+      "success": true,
+      "total_requested": 3,
+      "successful": 2,
+      "errors": 1,
+      "stats": {
+        "total_requested": 3,
+        "cache_hits": 0,
+        "api_calls": 2,
+        "errors": 1,
+        "start_time": "2025-08-31T12:37:28.774455",
+        "end_time": "2025-08-31T12:37:31.100338",
+        "processing_time": 2.325883,
+        "success_rate": 66.66666666666666,
+        "cache_hit_rate": 0.0
+      },
+      "total_time": 2.326428,
+      "avg_time_per_place": 0.7754759999999999
+    },
+    "distributed_task_real": {
+      "success": true,
+      "result": {
+        "task_id": "70729b97-1f0f-40aa-a008-a7c03358057d",
+        "status": "success",
+        "processed": 2,
+        "total_requested": 2,
+        "cache_hits": 0,
+        "api_calls": 2,
+        "errors": 0,
+        "error_place_ids": [],
+        "results": [
+          {
+            "place_id": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+            "name": "店舗ChIJN1t_tDeuEmsRUsoyG83frY4",
+            "rating": 4.0,
+            "address": "佐渡市ChIJN1t_tDeuEmsRUsoyG83frY4",
+            "types": [
+              "restaurant",
+              "food",
+              "establishment"
+            ]
+          },
+          {
+            "place_id": "ChIJrTLr-GyuEmsRBfy61i59si0",
+            "name": "店舗ChIJrTLr-GyuEmsRBfy61i59si0",
+            "rating": 4.0,
+            "address": "佐渡市ChIJrTLr-GyuEmsRBfy61i59si0",
+            "types": [
+              "restaurant",
+              "food",
+              "establishment"
+            ]
+          }
+        ],
+        "api_mode": "mock"
+      },
+      "processing_time": 0.053947
+    },
+    "cache_integration_real": {
+      "success": true,
+      "api_time": 0.202764,
+      "cache_time": 0.973089,
+      "speedup": 0.20837148503374306
+    },
+    "error_handling_real": {
+      "success": true,
+      "result": "handled_gracefully"
+    }
+  }
+}

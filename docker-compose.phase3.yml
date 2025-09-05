@@ -1,24 +1,168 @@
-version: "3.8"
-
 services:
-  # Redis Cluster for distributed caching
-  redis-master:
+  # ===== Redis Cluster Configuration (3 Masters + 3 Replicas) =====
+
+  # Redis Cluster Master Node 1
+  redis-master-1:
     image: redis:7-alpine
-    container_name: sado-redis-master
+    container_name: sado-redis-master-1
     ports:
-      - "6379:6379"
+      - "7001:7001"
+      - "17001:17001"
     volumes:
-      - redis-master-data:/data
+      - redis-master-1-data:/data/redis-master-1
+      - ./config/redis/redis-master-1.conf:/usr/local/etc/redis/redis-master-1.conf
       - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-master-1.conf
     networks:
       - sado-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-p", "7001", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # Redis Cluster Master Node 2
+  redis-master-2:
+    image: redis:7-alpine
+    container_name: sado-redis-master-2
+    ports:
+      - "7002:7002"
+      - "17002:17002"
+    volumes:
+      - redis-master-2-data:/data/redis-master-2
+      - ./config/redis/redis-master-2.conf:/usr/local/etc/redis/redis-master-2.conf
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-master-2.conf
+    networks:
+      - sado-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7002", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cluster Master Node 3
+  redis-master-3:
+    image: redis:7-alpine
+    container_name: sado-redis-master-3
+    ports:
+      - "7003:7003"
+      - "17003:17003"
+    volumes:
+      - redis-master-3-data:/data/redis-master-3
+      - ./config/redis/redis-master-3.conf:/usr/local/etc/redis/redis-master-3.conf
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-master-3.conf
+    networks:
+      - sado-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7003", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cluster Replica Node 1
+  redis-replica-1:
+    image: redis:7-alpine
+    container_name: sado-redis-replica-1
+    ports:
+      - "7004:7004"
+      - "17004:17004"
+    volumes:
+      - redis-replica-1-data:/data/redis-replica-1
+      - ./config/redis/redis-replica-1.conf:/usr/local/etc/redis/redis-replica-1.conf
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-replica-1.conf
+    depends_on:
+      - redis-master-1
+    networks:
+      - sado-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7004", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cluster Replica Node 2
+  redis-replica-2:
+    image: redis:7-alpine
+    container_name: sado-redis-replica-2
+    ports:
+      - "7005:7005"
+      - "17005:17005"
+    volumes:
+      - redis-replica-2-data:/data/redis-replica-2
+      - ./config/redis/redis-replica-2.conf:/usr/local/etc/redis/redis-replica-2.conf
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-replica-2.conf
+    depends_on:
+      - redis-master-2
+    networks:
+      - sado-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7005", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cluster Replica Node 3
+  redis-replica-3:
+    image: redis:7-alpine
+    container_name: sado-redis-replica-3
+    ports:
+      - "7006:7006"
+      - "17006:17006"
+    volumes:
+      - redis-replica-3-data:/data/redis-replica-3
+      - ./config/redis/redis-replica-3.conf:/usr/local/etc/redis/redis-replica-3.conf
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-replica-3.conf
+    depends_on:
+      - redis-master-3
+    networks:
+      - sado-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "7006", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cluster 初期化サービス
+  redis-cluster-init:
+    image: redis:7-alpine
+    container_name: sado-redis-cluster-init
+    depends_on:
+      - redis-master-1
+      - redis-master-2
+      - redis-master-3
+      - redis-replica-1
+      - redis-replica-2
+      - redis-replica-3
+    networks:
+      - sado-network
+    volumes:
+      - ./tools/scripts:/scripts
+    command: >
+      sh -c "
+        sleep 30;
+        echo 'Redis Cluster を初期化中...';
+        redis-cli --cluster create
+        redis-master-1:7001
+        redis-master-2:7002
+        redis-master-3:7003
+        redis-replica-1:7004
+        redis-replica-2:7005
+        redis-replica-3:7006
+        --cluster-replicas 1 --cluster-yes;
+        echo 'Redis Cluster 初期化完了';
+      "
+    restart: "no"
 
   # Celery Worker for distributed processing
   celery-worker:
@@ -27,10 +171,11 @@ services:
       dockerfile: docker/Dockerfile.worker
     container_name: sado-celery-worker
     depends_on:
-      - redis-master
+      - redis-cluster-init
     environment:
-      - CELERY_BROKER_URL=redis://redis-master:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis-master:6379/0
+      - CELERY_BROKER_URL=redis://redis-master-1:7001/0,redis://redis-master-2:7002/0,redis://redis-master-3:7003/0
+      - CELERY_RESULT_BACKEND=redis://redis-master-1:7001/0,redis://redis-master-2:7002/0,redis://redis-master-3:7003/0
+      - REDIS_CLUSTER_NODES=redis-master-1:7001,redis-master-2:7002,redis-master-3:7003,redis-replica-1:7004,redis-replica-2:7005,redis-replica-3:7006
       - PYTHONPATH=/app
     volumes:
       - .:/app
@@ -68,13 +213,14 @@ services:
       - "3001:3000"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=redis://redis-master:6379
+      - REDIS_CLUSTER_NODES=redis-master-1:7001,redis-master-2:7002,redis-master-3:7003,redis-replica-1:7004,redis-replica-2:7005,redis-replica-3:7006
+      - REDIS_PASSWORD=sado_redis_2025
       - SERVER_ID=app-1
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
-      - redis-master
+      - redis-cluster-init
     networks:
       - sado-network
     restart: unless-stopped
@@ -89,13 +235,14 @@ services:
       - "3002:3000"
     environment:
       - NODE_ENV=production
-      - REDIS_URL=redis://redis-master:6379
+      - REDIS_CLUSTER_NODES=redis-master-1:7001,redis-master-2:7002,redis-master-3:7003,redis-replica-1:7004,redis-replica-2:7005,redis-replica-3:7006
+      - REDIS_PASSWORD=sado_redis_2025
       - SERVER_ID=app-2
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
-      - redis-master
+      - redis-cluster-init
     networks:
       - sado-network
     restart: unless-stopped
@@ -138,16 +285,45 @@ services:
       - sado-network
     restart: unless-stopped
 
-  # Redis Exporter for Prometheus
-  redis-exporter:
+  # Redis Exporter for Prometheus (複数ノード監視)
+  redis-exporter-master-1:
     image: oliver006/redis_exporter:latest
-    container_name: sado-redis-exporter
+    container_name: sado-redis-exporter-master-1
     ports:
       - "9121:9121"
     environment:
-      - REDIS_ADDR=redis://redis-master:6379
+      - REDIS_ADDR=redis://redis-master-1:7001
+      - REDIS_PASSWORD=sado_redis_2025
     depends_on:
-      - redis-master
+      - redis-master-1
+    networks:
+      - sado-network
+    restart: unless-stopped
+
+  redis-exporter-master-2:
+    image: oliver006/redis_exporter:latest
+    container_name: sado-redis-exporter-master-2
+    ports:
+      - "9122:9121"
+    environment:
+      - REDIS_ADDR=redis://redis-master-2:7002
+      - REDIS_PASSWORD=sado_redis_2025
+    depends_on:
+      - redis-master-2
+    networks:
+      - sado-network
+    restart: unless-stopped
+
+  redis-exporter-master-3:
+    image: oliver006/redis_exporter:latest
+    container_name: sado-redis-exporter-master-3
+    ports:
+      - "9123:9121"
+    environment:
+      - REDIS_ADDR=redis://redis-master-3:7003
+      - REDIS_PASSWORD=sado_redis_2025
+    depends_on:
+      - redis-master-3
     networks:
       - sado-network
     restart: unless-stopped
@@ -157,6 +333,14 @@ networks:
     driver: bridge
 
 volumes:
-  redis-master-data:
+  # Redis Cluster データボリューム
+  redis-master-1-data:
+  redis-master-2-data:
+  redis-master-3-data:
+  redis-replica-1-data:
+  redis-replica-2-data:
+  redis-replica-3-data:
+
+  # 監視システム データボリューム
   prometheus-data:
   grafana-data:

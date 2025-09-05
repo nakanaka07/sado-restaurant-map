@@ -29,7 +29,6 @@
     "quality:fix": "pnpm run lint:all:fix && pnpm run test:run",
     "env:check": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/check-environment.ps1'\"",
     "env:setup": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/check-environment.ps1' -Fix\"",
-    "integration:test": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/test-integration.ps1'\"",
     "typecheck": "eslint . --config config/eslint.config.js --max-warnings 0",
     "clean": "rimraf dist dev-dist coverage .vite node_modules/.vite",
     "readme:sync": "tsx tools/automation/readme/tech-stack-sync.ts",
@@ -39,7 +38,19 @@
     "readme:fix": "tsx tools/automation/readme/automation-system.ts --fix",
     "readme:all": "tsx tools/automation/readme/automation-system.ts",
     "readme:weekly": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/automation/reports/weekly-quality-report.ps1'\"",
-    "readme:weekly:alert": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/automation/reports/weekly-quality-report.ps1' -SendAlert\""
+    "readme:weekly:alert": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/automation/reports/weekly-quality-report.ps1' -SendAlert\"",
+    "automation:github:issues": "tsx tools/automation/github/issue-creator.ts",
+    "automation:alerts": "tsx tools/automation/alerts/advanced-alert-system.ts",
+    "automation:reports:detailed": "tsx tools/automation/reports/detailed-quality-reporter.ts",
+    "automation:integrated": "tsx tools/automation/integrated-system.ts",
+    "automation:integrated:fix": "tsx tools/automation/integrated-system.ts --auto-fix",
+    "automation:health": "tsx tools/automation/integrated-system.ts --health",
+    "integration:start": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/integration-test-manager.ps1' -Action start\"",
+    "integration:test": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/integration-test-manager.ps1' -Action test -TestType all\"",
+    "integration:stop": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/integration-test-manager.ps1' -Action stop\"",
+    "integration:full": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/integration-test-manager.ps1' -Action full -TestType all\"",
+    "integration:status": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/integration-test-manager.ps1' -Action status\"",
+    "integration:cleanup": "pwsh -NoProfile -ExecutionPolicy Bypass -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; & './tools/testing/integration-test-manager.ps1' -Action cleanup\""
   },
   "dependencies": {
     "@types/google.maps": "^3.58.1",

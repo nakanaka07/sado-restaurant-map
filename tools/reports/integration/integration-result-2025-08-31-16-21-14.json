@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-08-31T16:21:14.242Z",
+  "summary": {
+    "success": true,
+    "totalDuration": 33353,
+    "recommendations": [
+      "壊れたリンクの修正を優先して実施",
+      "テンプレート準拠率の改善を実施"
+    ]
+  },
+  "automation": {
+    "timestamp": "2025-08-31T16:21:14.244Z",
+    "techStackSync": {
+      "executed": true,
+      "filesUpdated": 1,
+      "errors": []
+    },
+    "linkValidation": {
+      "executed": true,
+      "totalLinks": 191,
+      "brokenLinks": 7,
+      "fixedLinks": 0,
+      "errors": []
+    },
+    "qualityCheck": {
+      "executed": true,
+      "filesAssessed": 31,
+      "averageTemplateScore": 71,
+      "averageSCRAPScore": 90,
+      "errors": []
+    }
+  },
+  "reports": {
+    "generated": true,
+    "score": 80,
+    "grade": "B"
+  },
+  "alerts": {
+    "triggered": 0,
+    "notifications": 0
+  },
+  "issues": {
+    "created": 0,
+    "errors": []
+  }
+}

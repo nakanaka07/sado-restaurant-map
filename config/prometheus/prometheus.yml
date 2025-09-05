@@ -1,0 +1,77 @@
+# Phase 3-Full統合テスト環境用Prometheus設定
+# パフォーマンス監視・メトリクス収集・アラート設定
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'integration'
+    cluster: 'sado-restaurant-map'
+
+# アラートルール設定
+rule_files:
+  - "integration.yml"
+
+# Alertmanager設定
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+# スクレイプ設定
+scrape_configs:
+  # Prometheus自体の監視
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Redis Cluster監視
+  - job_name: 'redis-cluster'
+    static_configs:
+      - targets:
+          - 'redis-exporter-master-1:9121'
+          - 'redis-exporter-master-2:9121'
+          - 'redis-exporter-master-3:9121'
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # アプリケーションサーバー監視
+  - job_name: 'sado-app'
+    static_configs:
+      - targets: ['app-server-integration:3000']
+    metrics_path: /health
+    scrape_interval: 10s
+
+  # Celeryワーカー監視
+  - job_name: 'celery-workers'
+    static_configs:
+      - targets:
+          - 'celery-worker-high:8000'
+          - 'celery-worker-background:8000'
+    metrics_path: /metrics
+    scrape_interval: 5s
+
+  # SonarQube監視
+  - job_name: 'sonarqube'
+    static_configs:
+      - targets: ['sonarqube:9000']
+    metrics_path: /api/monitoring/metrics
+    scrape_interval: 30s
+
+  # Elasticsearch監視
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+    metrics_path: /_prometheus/metrics
+    scrape_interval: 15s
+
+  # Node Exporter（システムメトリクス）
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 5s
+
+# 保存設定
+storage:
+  tsdb:
+    retention: '15d'
+    wal_compression: true

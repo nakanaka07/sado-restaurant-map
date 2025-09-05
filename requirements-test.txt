@@ -1,0 +1,87 @@
+# Phase 3-Full統合テスト環境用Pythonパッケージ
+# 分散処理・パフォーマンス・セキュリティテスト対応
+
+# ===== Core Testing Framework =====
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+pytest-xdist>=3.3.0
+pytest-mock>=3.11.0
+pytest-timeout>=2.1.0
+
+# ===== Redis & Celery =====
+redis[hiredis]>=5.0.0
+celery[redis]>=5.3.0
+kombu>=5.3.0
+billiard>=4.1.0
+redis-py-cluster>=2.1.3
+
+# ===== Performance Testing =====
+locust>=2.17.0
+psutil>=5.9.0
+py-spy>=0.3.14
+memory-profiler>=0.61.0
+
+# ===== Security Testing =====
+bandit>=1.7.5
+safety>=2.3.5
+semgrep>=1.45.0
+
+# ===== Network & HTTP =====
+requests>=2.31.0
+aiohttp>=3.8.0
+httpx>=0.25.0
+websockets>=11.0.2
+
+# ===== Data Processing =====
+pandas>=2.1.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# ===== Monitoring & Metrics =====
+prometheus-client>=0.17.0
+statsd>=4.0.1
+structlog>=23.1.0
+
+# ===== Development Tools =====
+ipython>=8.15.0
+rich>=13.5.0
+click>=8.1.0
+pydantic>=2.4.0
+
+# ===== Database & Storage =====
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# ===== API Testing =====
+responses>=0.23.0
+httpretty>=1.1.4
+vcr.py>=5.1.0
+
+# ===== Async Support =====
+asyncio-mqtt>=0.13.0
+aioredis>=2.0.0
+
+# ===== Quality Assurance =====
+black>=23.7.0
+isort>=5.12.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# ===== JSON/XML Processing =====
+jsonschema>=4.19.0
+xmltodict>=0.13.0
+pyyaml>=6.0.1
+
+# ===== Docker & Infrastructure =====
+docker>=6.1.0
+kubernetes>=27.2.0
+
+# ===== Load Testing Extensions =====
+gevent>=23.7.0
+greenlet>=2.0.0
+
+# ===== Reporting =====
+allure-pytest>=2.13.0
+pytest-html>=3.2.0
+coverage[toml]>=7.3.0

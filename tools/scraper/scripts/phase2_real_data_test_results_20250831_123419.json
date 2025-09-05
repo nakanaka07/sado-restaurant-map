@@ -1,0 +1,29 @@
+{
+  "total_tests": 5,
+  "passed_tests": 5,
+  "success_rate": 100.0,
+  "execution_time": 4.325511,
+  "timestamp": "2025-08-31T12:34:19.624570",
+  "api_key_length": 39,
+  "test_results": {
+    "single_place_real": {
+      "success": true,
+      "place_data": {
+        "place_id": "N/A",
+        "name": "N/A",
+        "address": "N/A",
+        "rating": "N/A"
+      },
+      "processing_time": 0.405083
+    },
+    "batch_places_real": {
+      "success": true,
+      "total_requested": 3,
+      "successful": 2,
+      "errors": 1,
+      "stats": {
+        "total_requested": 3,
+        "cache_hits": 0,
+        "api_calls": 2,
+        "errors": 1,
+        "start_time": 
