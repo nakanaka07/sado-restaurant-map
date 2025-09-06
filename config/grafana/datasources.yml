@@ -1,0 +1,51 @@
+# ==========================================
+# Grafana Dashboard Configuration
+# 佐渡飲食店マップ Phase 3-Full 監視ダッシュボード
+# ==========================================
+
+# Grafana データソース設定
+apiVersion: 1
+
+datasources:
+  # Prometheus メトリクス
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      timeInterval: "15s"
+      httpMethod: "POST"
+
+  # Redis メトリクス (Redis Exporter経由)
+  - name: Redis-Metrics
+    type: prometheus
+    access: proxy
+    url: http://redis-exporter:9121
+    jsonData:
+      timeInterval: "30s"
+
+  # Application Logs (Loki)
+  - name: Application-Logs
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    jsonData:
+      derivedFields:
+        - datasourceUid: "prometheus-uid"
+          matcherRegex: "trace_id=(\\w+)"
+          name: "TraceID"
+          url: "http://jaeger:16686/trace/$${__value.raw}"
+
+  # Business Intelligence (InfluxDB)
+  - name: Business-Metrics
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    database: sado_restaurant_metrics
+    user: ${INFLUXDB_USER}
+    secureJsonData:
+      password: ${INFLUXDB_PASSWORD}
+    jsonData:
+      timeInterval: "1m"
+      httpMode: "POST"

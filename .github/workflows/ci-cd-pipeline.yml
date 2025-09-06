@@ -1,0 +1,427 @@
+# ==========================================
+# CI/CD Pipeline Configuration
+# 佐渡飲食店マップ Phase 3-Full 自動化パイプライン
+# ==========================================
+
+name: Phase 3-Full CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "0 2 * * *" # 毎日午前2時に実行
+
+env:
+  NODE_VERSION: "18"
+  PYTHON_VERSION: "3.11"
+  DOCKER_REGISTRY: ghcr.io
+  IMAGE_NAME: sado-restaurant-map
+
+jobs:
+  # ===== Phase 1: Code Quality & Security =====
+  code-quality:
+    name: 🔍 Code Quality & Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          pip install -r requirements-test.txt
+          pip install bandit safety
+
+      - name: Code Linting (ESLint)
+        run: |
+          npm run lint:check
+          npm run lint:security
+
+      - name: Python Security Check (Bandit)
+        run: |
+          bandit -r tools/ -f json -o bandit-report.json
+          bandit -r tools/ -ll -i
+
+      - name: Dependency Vulnerability Scan
+        run: |
+          npm audit --audit-level moderate
+          safety check --json --output safety-report.json
+
+      - name: TypeScript Type Check
+        run: npm run type-check
+
+      - name: Code Formatting Check
+        run: |
+          npm run prettier:check
+          black --check tools/
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+
+  # ===== Phase 2: Unit & Integration Tests =====
+  test:
+    name: 🧪 Testing Suite
+    runs-on: ubuntu-latest
+    needs: code-quality
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          pip install -r requirements-test.txt
+
+      - name: Frontend Unit Tests
+        run: |
+          npm run test:unit -- --coverage --watchAll=false
+          npm run test:integration
+
+      - name: Backend Unit Tests
+        run: |
+          pytest tools/testing/ -v --cov=tools/scraper --cov-report=xml
+
+      - name: Component Integration Tests
+        run: |
+          python -m pytest tools/testing/test_integration.py -v
+
+      - name: Upload Test Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info,./coverage.xml
+          fail_ci_if_error: true
+
+  # ===== Phase 3: Build & Package =====
+  build:
+    name: 🔨 Build & Package
+    runs-on: ubuntu-latest
+    needs: test
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build Frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build and Push Docker Images
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.app
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.worker
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/worker:${{ github.sha }}
+            ${{ env.DOCKER_REGISTRY }}/${{ github.repository }}/worker:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===== Phase 4: Security Scanning =====
+  security-scan:
+    name: 🔒 Security Scanning
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.build.outputs.image-tag }}
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy Results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: OWASP Security Test
+        run: |
+          python tools/testing/security_test_suite.py \
+            --url http://localhost:8000 \
+            --output security-report.json
+
+      - name: Upload Security Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-scan-results
+          path: |
+            trivy-results.sarif
+            security-report.json
+
+  # ===== Phase 5: Deployment to Staging =====
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "v1.28.0"
+
+      - name: Deploy to Staging
+        run: |
+          # Kubernetes deployment
+          envsubst < k8s/staging/deployment.yaml | kubectl apply -f -
+          kubectl set image deployment/sado-app-staging app=${{ needs.build.outputs.image-tag }}
+          kubectl rollout status deployment/sado-app-staging --timeout=300s
+
+      - name: Run Health Checks
+        run: |
+          sleep 60  # Wait for deployment
+          ./scripts/health-check.sh staging.sado-restaurant-map.com
+
+      - name: Run E2E Tests
+        run: |
+          npm run test:e2e -- --baseUrl=https://staging.sado-restaurant-map.com
+
+  # ===== Phase 6: Performance Testing =====
+  performance-test:
+    name: ⚡ Performance Testing
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Load Testing
+        run: |
+          k6 run --out json=performance-results.json tools/testing/performance-test.js
+
+      - name: Analyze Performance Results
+        run: |
+          python tools/testing/analyze-performance.py performance-results.json
+
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: |
+            performance-results.json
+            performance-analysis.html
+
+  # ===== Phase 7: Production Deployment =====
+  deploy-production:
+    name: 🏭 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, performance-test]
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Production Deployment
+        run: |
+          # Setup AWS credentials and EKS
+          aws eks update-kubeconfig --name sado-restaurant-map-prod --region ap-northeast-1
+
+          # Blue-Green deployment with health checks
+          ./scripts/deploy-production.sh ${{ needs.build.outputs.image-tag }}
+
+          # Verify deployment
+          kubectl rollout status deployment/app-deployment --timeout=600s
+          kubectl rollout status deployment/worker-deployment --timeout=600s
+
+      - name: Production Health Check
+        run: |
+          # Wait for services to be ready
+          sleep 60
+
+          # Comprehensive health check
+          python tools/testing/deployment-monitor.py \
+            --url https://sado-restaurant-map.com \
+            --duration 300 \
+            --comprehensive
+
+          # Security validation
+          python tools/testing/security_test_suite.py \
+            --target https://sado-restaurant-map.com \
+            --production-mode
+
+      - name: Update Monitoring & Alerts
+        run: |
+          # Update Grafana annotations (if API key is available)
+          if [ -n "${{ secrets.GRAFANA_API_KEY }}" ]; then
+            curl -X POST \
+              -H "Authorization: Bearer ${{ secrets.GRAFANA_API_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "text": "Production deployment: ${{ github.sha }}",
+                "tags": ["deployment", "production"],
+              "time": '$(date +%s000)'
+            }' \
+            "https://grafana.sado-restaurant-map.com/api/annotations"
+
+          # Update deployment metrics
+          echo "deployment_completed{version=\"${{ github.sha }}\",environment=\"production\"} 1" | \
+            curl -X POST \
+              -H "Content-Type: text/plain" \
+              --data-binary @- \
+              "https://prometheus.sado-restaurant-map.com/metrics/job/github-actions/instance/deployment"
+              "time": "'$(date -u +%s)'000"
+            }' \
+            https://grafana.sado-restaurant-map.com/api/annotations
+
+  # ===== Phase 8: Post-Deployment Verification =====
+  post-deployment:
+    name: ✅ Post-Deployment Verification
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Smoke Tests
+        run: |
+          python tools/testing/smoke_tests.py --url=https://sado-restaurant-map.com
+
+      - name: Performance Baseline Check
+        run: |
+          k6 run --quiet tools/testing/baseline-performance.js
+
+      - name: Monitor for 10 minutes
+        run: |
+          python tools/testing/deployment-monitor.py --duration=600
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "🎉 Production deployment successful!"
+          # Slack/Discord notification here
+
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          echo "❌ Post-deployment verification failed. Initiating rollback..."
+          ./scripts/rollback-production.sh
+
+  # ===== Cleanup Job =====
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-production, post-deployment]
+    if: always()
+
+    steps:
+      - name: Clean Old Images
+        run: |
+          # Remove images older than 30 days
+          echo "Cleaning up old container images..."
+
+      - name: Archive Test Results
+        run: |
+          # Archive test results for compliance
+          echo "Archiving test results..."
