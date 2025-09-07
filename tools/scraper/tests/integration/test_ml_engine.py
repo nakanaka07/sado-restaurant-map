@@ -19,12 +19,12 @@ import tempfile
 import shutil
 
 # プロジェクトルートをパスに追加
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # ローカルモジュールのインポート
 try:
-    from tools.scraper.shared.ml_engine import (
+    from shared.ml_engine import (
         MLEngine, QualityMetrics, MLPrediction, AnomalyReport,
         create_ml_engine
     )

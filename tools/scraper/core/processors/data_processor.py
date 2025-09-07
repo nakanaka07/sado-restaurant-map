@@ -544,7 +544,7 @@ class DataProcessor:
 
         return None
 
-    def format_result(self, place: PlaceData, _query_data: QueryData, method: str) -> Dict[str, Any]:
+    def format_result(self, place: PlaceData, query_data: QueryData, method: str) -> Dict[str, Any]:
         """結果をフォーマット"""
         # 位置情報を取得
         latitude = place.get('location', {}).get('latitude')
@@ -558,33 +558,192 @@ class DataProcessor:
             address=address
         )
 
+        # Google Maps URLを取得（新しいPlace ID形式を優先）
+        place_id = place.get('id', '')
+        maps_url = ''
+
+        # 常に新しいPlace ID形式のURLを生成（最も確実）
+        if place_id:
+            maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
+        # フォールバック: 元のCID URLがある場合
+        elif query_data.get('type') == 'cid_url':
+            maps_url = query_data.get('url', '')
+        elif query_data.get('query', '').startswith('https://maps.google.com/place?cid='):
+            maps_url = query_data.get('query', '')
+
+        # カテゴリとカテゴリ詳細を設定
+        place_types = place.get('types', [])
+        category = self._extract_primary_category(place_types)
+        category_detail = ', '.join(translate_types(place_types))
+
         result = {
-            ProcessorConstants.PLACE_ID_KEY: place.get('id', ''),
+            ProcessorConstants.PLACE_ID_KEY: place_id,
             '店舗名': place.get('displayName', {}).get('text', ''),
+            '施設名': place.get('displayName', {}).get('text', ''),  # トイレ用
+            '駐車場名': place.get('displayName', {}).get('text', ''),  # 駐車場用
             '住所': address,
+            '所在地': self._extract_short_address(address),  # 簡潔な住所形式
             '緯度': latitude or '',
             '経度': longitude or '',
             '評価': place.get('rating', ''),
+            '施設評価': place.get('rating', ''),  # トイレ・駐車場用
             'レビュー数': place.get('userRatingCount', ''),
             '営業状況': translate_business_status(place.get('businessStatus', '')),
             '営業時間': self.format_opening_hours(place.get('regularOpeningHours')),
+            '詳細営業時間': self.format_opening_hours(place.get('regularOpeningHours')),  # トイレ・駐車場用
             '電話番号': place.get('nationalPhoneNumber', ''),
             'ウェブサイト': place.get('websiteUri', ''),
             '価格帯': self.translate_price_level(place.get('priceLevel')),
-            '店舗タイプ': ', '.join(translate_types(place.get('types', []))),
+            '店舗タイプ': category_detail,
+            'カテゴリ': category,  # トイレ・駐車場用
+            'カテゴリ詳細': category_detail,  # トイレ・駐車場用
+            '施設説明': self._generate_facility_description(place, place_types),  # トイレ・駐車場用
+            '完全住所': place.get('formattedAddress', ''),  # トイレ・駐車場用
             'テイクアウト': '可' if place.get('takeout') else '不可',
             'デリバリー': '可' if place.get('delivery') else '不可',
             '店内飲食': '可' if place.get('dineIn') else '不可',
             '朝食提供': '可' if place.get('servesBreakfast') else '不可',
             '昼食提供': '可' if place.get('servesLunch') else '不可',
             '夕食提供': '可' if place.get('servesDinner') else '不可',
+            'バリアフリー対応': '',  # APIから取得困難
+            '子供連れ対応': '',  # APIから取得困難
+            '駐車場併設': '',  # APIから取得困難
+            '支払い方法': '',  # APIから取得困難
+            '料金体系': '',  # APIから取得困難
+            'トイレ設備': '',  # APIから取得困難
             '地区': location_info.district,
+            'location_info': {
+                'district': location_info.district,
+                'is_in_sado': location_info.is_in_sado
+            },
             'is_in_sado': location_info.is_in_sado,
+            'cid_url': maps_url,
             '取得方法': method,
-            '更新日時': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
         return result
+
+    def _extract_primary_category(self, place_types: List[str]) -> str:
+        """場所タイプからプライマリカテゴリを抽出"""
+        if not place_types:
+            return ""
+
+        # 優先度の高いカテゴリ
+        priority_types = {
+            'restaurant': 'レストラン',
+            'food': '飲食店',
+            'parking': '駐車場',
+            'tourist_attraction': '観光地',
+            'establishment': '施設',
+            'point_of_interest': '施設・名所'
+        }
+
+        for place_type in place_types:
+            if place_type in priority_types:
+                return priority_types[place_type]
+
+        # フォールバック：最初のタイプを翻訳
+        translated = translate_types([place_types[0]])
+        return translated[0] if translated else ""
+
+    def _generate_facility_description(self, place: PlaceData, place_types: List[str]) -> str:
+        """施設説明を生成（APIデータとフォールバック組み合わせ）"""
+        # まずAPIから説明を取得
+        editorial_summary = place.get('editorialSummary', {}).get('text', '')
+        if editorial_summary:
+            return editorial_summary
+
+        # フォールバック: 施設タイプに基づく説明を生成
+        address = place.get('formattedAddress', '')
+
+        # 施設タイプ別のデフォルト説明
+        if 'restroom' in place_types or 'toilet' in ' '.join(place_types).lower():
+            return f"公衆トイレ施設。{address}に位置し、24時間利用可能な場合が多い。"
+        elif 'parking' in place_types:
+            return f"駐車場施設。{address}に位置し、車両の駐車が可能。"
+        elif 'tourist_attraction' in place_types:
+            return f"観光スポット。{address}に位置し、観光客に人気の場所。"
+        elif 'establishment' in place_types or 'point_of_interest' in place_types:
+            return f"公共施設・名所。{address}に位置。"
+        else:
+            # その他の施設
+            category = self._extract_primary_category(place_types)
+            if category:
+                return f"{category}施設。{address}に位置。"
+            else:
+                return f"施設。{address}に位置。"
+
+    def _extract_short_address(self, full_address: str) -> str:
+        """完全住所から簡潔な所在地を抽出"""
+        if not full_address:
+            return ''
+
+        # 佐渡市パターンを試行
+        result = self._try_sado_patterns(full_address)
+        if result:
+            return result
+
+        # 一般的なパターンを試行
+        result = self._try_general_patterns(full_address)
+        if result:
+            return result
+
+        # フォールバック処理
+        return self._fallback_address_extraction(full_address)
+
+    def _try_sado_patterns(self, full_address: str) -> str:
+        """佐渡市専用パターンで住所抽出を試行"""
+        import re
+
+        sado_patterns = [
+            # パターン1: 日本、〒郵便番号 新潟県佐渡市[地域名+番地] の形式
+            r'日本、〒\d+\s+新潟県(佐渡市.+)',
+            # パターン2: 新潟県佐渡市[地域名+番地] の形式
+            r'新潟県(佐渡市.+)',
+            # パターン3: 佐渡市[地域名+番地] の形式
+            r'(佐渡市.+)',
+        ]
+
+        for pattern in sado_patterns:
+            match = re.search(pattern, full_address)
+            if match:
+                result = match.group(1).strip()
+                cleaned_result = self._clean_area_name(result)
+                if cleaned_result and cleaned_result.startswith('佐渡市'):
+                    return cleaned_result
+        return ''
+
+    def _try_general_patterns(self, full_address: str) -> str:
+        """一般的なパターンで住所抽出を試行"""
+        import re
+
+        general_pattern = r'[都道府県]([^都道府県\s,、]+[市区町村])([^\d〒\s,、]+)(?:\s*\d+.*)?'
+        match = re.search(general_pattern, full_address)
+
+        if match and len(match.groups()) == 2:
+            city = match.group(1).strip()
+            area = match.group(2).strip()
+            cleaned_area = self._clean_area_name(area)
+            return f"{city}{cleaned_area}" if cleaned_area else city
+        return ''
+
+    def _clean_area_name(self, area_name: str) -> str:
+        """地域名から不要な文字を除去（郵便番号・国名のみ、番地は保持）"""
+        import re
+        # 郵便番号パターンを除去
+        result = re.sub(r'〒\d+\s*', '', area_name)
+        # 行末の不要な記号・空白を除去（ただし数字・ハイフンは保持）
+        result = re.sub(r'[,、]\s*$', '', result)
+        return result.strip()
+
+    def _fallback_address_extraction(self, full_address: str) -> str:
+        """フォールバック処理で住所抽出"""
+        import re
+
+        if re.search(r'佐渡市', full_address):
+            return "佐渡市"
+        return full_address
 
     def format_opening_hours(self, opening_hours: Optional[Dict[str, Any]]) -> str:
         """営業時間をフォーマット"""

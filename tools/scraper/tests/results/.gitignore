@@ -1,0 +1,11 @@
+# テスト結果ファイルを無視
+*.json
+*.html
+*.xml
+*.log
+*_results_*
+*test_results*
+*integration_test*
+
+# ただしREADMEは除外
+!README.md

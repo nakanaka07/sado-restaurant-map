@@ -345,7 +345,7 @@ class SheetsStorageAdapter(DataStorage):
             '店舗名': '店舗名',
             '施設名': '店舗名',  # 店舗名をフォールバック
             '駐車場名': '店舗名',  # 店舗名をフォールバック
-            '所在地': '住所',
+            # '所在地': '住所',  # 削除: 直接フィールドを優先
             '緯度': '緯度',
             '経度': 'longitude',
             '評価': 'rating',
@@ -361,10 +361,27 @@ class SheetsStorageAdapter(DataStorage):
 
         for header in headers:
             value = ''
+
+            # 直接のフィールドチェック
             if header in data_item:
                 value = data_item[header]
+            # フィールドマッピングチェック
             elif header in field_mapping and field_mapping[header] in data_item:
                 value = data_item[field_mapping[header]]
+            # 特別処理が必要なフィールド
+            elif header == '所在地':
+                # 新しい所在地フィールドを優先、フォールバックとして住所を使用
+                value = data_item.get('所在地', data_item.get('住所', ''))
+            elif header == '地区':
+                # location_info.district または既存のdistrictフィールドから取得
+                location_info = data_item.get('location_info', {})
+                value = location_info.get('district', data_item.get('district', '佐渡市内'))
+            elif header == MAPS_URL_HEADER:
+                # cid_url または google_maps_url から取得
+                value = data_item.get('cid_url', data_item.get('google_maps_url', ''))
+            elif header == LAST_UPDATED_HEADER:
+                # timestamp または現在時刻を設定
+                value = data_item.get('timestamp', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
             row_data.append(str(value) if value is not None else '')
 

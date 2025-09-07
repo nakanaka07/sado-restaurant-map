@@ -1,0 +1,81 @@
+# --- 佐渡公衆トイレ 統合クエリファイル ---
+# 公衆トイレ名またはGoogle Maps URL (cid=XXXXX) を記述可能
+# 作成日時: 2025年08月04日 11:31:30
+# 元ファイル: toilets.txt (95件)
+
+# ========================================
+# 高精度検索: Google Maps URL (CID)
+# ========================================
+# これらのURLは直接Place詳細を取得可能（API効率◎）
+
+https://maps.google.com/place?cid=9043873394692063502  # 二ツ亀海水浴場 公衆トイレ
+https://maps.google.com/place?cid=8663781702274093103  # 二ツ亀キャンプ場+公衆トイレ
+https://maps.google.com/place?cid=8040000169106885717  # 願公民館トイレ
+https://maps.google.com/place?cid=8220464912214964562  # 大野亀+公衆トイレ
+https://maps.google.com/place?cid=15761003696205715772  # 北小浦+公衆トイレ
+https://maps.google.com/place?cid=15927704102828705325  # 岩谷口+公衆トイレ
+https://maps.google.com/place?cid=2863265679142962080  # 相川公園公衆トイレ
+https://maps.google.com/place?cid=7824358974363953530  # 北沢浮遊選鉱場トイレ
+https://maps.google.com/place?cid=8004783821188360655  # 公衆トイレ
+https://maps.google.com/place?cid=5753612725218065567  # 千畳敷公衆トイレ
+https://maps.google.com/place?cid=10750576414781197106  # 入崎+公衆トイレ
+https://maps.google.com/place?cid=14913975942686283193  # 北片辺+トイレ
+https://maps.google.com/place?cid=12518147470668547822  # 平根崎+公衆トイレ
+https://maps.google.com/place?cid=11416305937007680479  # 苔梅の郷公園公衆トイレ
+https://maps.google.com/place?cid=7621203273761126558  # 梅津公園公衆トイレ
+https://maps.google.com/place?cid=13555858877208163794  # 舟場町公園+公衆トイレ
+https://maps.google.com/place?cid=9874599896254362454  # あいぽーと佐渡+トイレ
+https://maps.google.com/place?cid=7423252851551875719  # みなと中央公園公衆トイレ
+https://maps.google.com/place?cid=4707017166922047439  # おけさ橋公衆トイレ
+https://maps.google.com/place?cid=12136812393617648993  # みなと公園公衆トイレ
+https://maps.google.com/place?cid=9937947825479274194  # みなと児童公園公衆トイレ
+https://maps.google.com/place?cid=12126192111389485532  # おんでこドーム+公衆トイレ
+https://maps.google.com/place?cid=7244610448739137492  # 平沢海水浴場公衆トイレ
+https://maps.google.com/place?cid=11283056440791779935  # 諏訪神社公衆トイレ
+https://maps.google.com/place?cid=1514381705321702945  # 両津湊トイレ
+https://maps.google.com/place?cid=13300066138159244973  # 湊公衆トイレ
+https://maps.google.com/place?cid=13299695872770078284  # トキの森公園公衆トイレ
+https://maps.google.com/place?cid=9478868085759169884  # ムサシ両津店トイレ
+https://maps.google.com/place?cid=5678077137541814861  # 赤泊港北埠頭公園トイレ
+https://maps.google.com/place?cid=10597378390941212011  # 両津大川公衆トイレ
+https://maps.google.com/place?cid=535513932034850974  # 達者海水浴場+施設（管理棟・トイレ・更衣室・シャワー）
+https://maps.google.com/place?cid=14587428169299174154  # なぎさ公園公衆トイレ
+https://maps.google.com/place?cid=11779261196774713353  # 佐渡金山前+公衆トイレ
+https://maps.google.com/place?cid=2815519395693865292  # 毘沙門堂の公衆トイレ
+https://maps.google.com/place?cid=10219660395552361999  # 佐和田ダム公衆トイレ
+https://maps.google.com/place?cid=6625692676654702466  # 金井運動公園公衆トイレ
+https://maps.google.com/place?cid=5448508601259129985  # 相川バスステーション公衆トイレ
+https://maps.google.com/place?cid=9437719440265299361  # 相川江戸沢町駐車場公衆トイレ
+https://maps.google.com/place?cid=7974505251976158886  # 金井新保公園公衆トイレ
+https://maps.google.com/place?cid=3660483217884339404  # 尾花公園+トイレ
+https://maps.google.com/place?cid=5134179397718543321  # 春日崎公衆トイレ
+https://maps.google.com/place?cid=9609035382499946094  # 藻浦公民館トイレ
+https://maps.google.com/place?cid=10218144829014330171  # 泉公衆トイレ
+https://maps.google.com/place?cid=15896455896906887329  # 城ヶ鼻公園公衆トイレ
+https://maps.google.com/place?cid=13955750320922743827  # 新穂大野根本寺公衆トイレ
+https://maps.google.com/place?cid=22549085921216690  # 松ヶ崎トイレ
+https://maps.google.com/place?cid=11007530938296100964  # 佐和田海水浴場公衆トイレ
+https://maps.google.com/place?cid=15505258155460342736  # 中原公衆トイレ
+https://maps.google.com/place?cid=15677501286954264582  # 公衆トイレ
+https://maps.google.com/place?cid=10119752011631051172  # 新穂ダム公衆トイレ
+https://maps.google.com/place?cid=9843144656973097454  # 小木みなと公園公衆トイレ
+https://maps.google.com/place?cid=11864685058893590394  # サン・スポーツランド畑野公衆トイレ
+https://maps.google.com/place?cid=2584161973071683842  # 長石海水浴場+公衆トイレ
+https://maps.google.com/place?cid=13088347861051514155  # 戦道公衆トイレ
+https://maps.google.com/place?cid=9074655995287197652  # 二見公衆トイレ
+https://maps.google.com/place?cid=4119301857152351539  # 長谷寺参拝者トイレ
+https://maps.google.com/place?cid=17416344248277628572  # 妙宣寺公衆トイレ
+https://maps.google.com/place?cid=10638073122725301071  # 真野漁港多目的広場公衆トイレ
+https://maps.google.com/place?cid=5187319478465598864  # 真野公園公衆トイレ
+https://maps.google.com/place?cid=8693014850174026158  # 真野公園公衆トイレ
+https://maps.google.com/place?cid=5306171920326109485  # 真野新町公衆トイレ
+https://maps.google.com/place?cid=3602232357108522731  # 多田海浜公園公衆トイレ
+https://maps.google.com/place?cid=9770946579509696428  # 城の山公園公衆トイレ
+https://maps.google.com/place?cid=3560721835183476930  # 素浜キャンプ場トイレ
+https://maps.google.com/place?cid=17684811985894661481  # 羽茂亀脇公衆トイレ
+https://maps.google.com/place?cid=8667687045502805854  # ＪＡ佐渡羽茂支店+公衆トイレ
+https://maps.google.com/place?cid=583355866169104469  # 江積公衆トイレ
+https://maps.google.com/place?cid=5642326512132736585  # 蓮華峰寺+公衆トイレ
+https://maps.google.com/place?cid=17084048846901269497  # 大橋緑地公園公衆トイレ
+https://maps.google.com/place?cid=12288212966447297108  # 沢崎大橋パーキング公衆トイレ
+https://maps.google.com/place?cid=12042619573840195286  # 小木強清水+公衆トイレ

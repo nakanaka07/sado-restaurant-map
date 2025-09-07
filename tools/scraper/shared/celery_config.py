@@ -270,6 +270,40 @@ if not celery_app.conf.get('configured'):
     celery_app.conf.configured = True
 
 
+def get_queue_stats() -> Dict[str, Any]:
+    """キュー統計情報取得"""
+    try:
+        inspect = celery_app.control.inspect()
+        active = inspect.active()
+        reserved = inspect.reserved()
+        stats = inspect.stats()
+
+        total_active = sum(len(tasks) for tasks in (active or {}).values())
+        total_reserved = sum(len(tasks) for tasks in (reserved or {}).values())
+
+        return {
+            'active_tasks': total_active,
+            'reserved_tasks': total_reserved,
+            'workers': list((stats or {}).keys()),
+            'worker_count': len(stats or {}),
+            'queue_lengths': {
+                'active': total_active,
+                'reserved': total_reserved,
+                'total': total_active + total_reserved
+            }
+        }
+    except Exception as e:
+        logging.error(f"Failed to get queue stats: {e}")
+        return {
+            'active_tasks': 0,
+            'reserved_tasks': 0,
+            'workers': [],
+            'worker_count': 0,
+            'queue_lengths': {'active': 0, 'reserved': 0, 'total': 0},
+            'error': str(e)
+        }
+
+
 # インポート用エクスポート
 __all__ = [
     'celery_app',
@@ -278,6 +312,7 @@ __all__ = [
     'configure_celery_production',
     'auto_configure_celery',
     'get_celery_config_summary',
+    'get_queue_stats',
     'health_check',
     'get_worker_stats'
 ]

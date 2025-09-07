@@ -95,11 +95,14 @@ class LocationService:
         is_in_sado = self._is_coordinates_in_sado(latitude, longitude)
 
         if is_in_sado:
-            # 住所がある場合は住所ベースでディストリクト分類
+            # 住所がある場合は住所ベースでディストリクト分類を試行
             if address:
                 district = self._classify_district_from_address(address)
+                # 住所ベースで具体的な地区が取得できない場合は座標ベースを使用
+                if district == "佐渡市内":
+                    district = self._classify_district_from_coordinates(latitude, longitude)
             else:
-                # 住所がない場合は座標ベースで大まかな分類
+                # 住所がない場合は座標ベースで分類
                 district = self._classify_district_from_coordinates(latitude, longitude)
         else:
             district = "市外"
@@ -155,15 +158,53 @@ class LocationService:
 
     def _classify_district_from_coordinates(self, latitude: float, longitude: float) -> str:
         """座標から大まかな地区を分類"""
-        # 座標による大まかな地区分類（簡易版）
-        if latitude > 38.0:
+        try:
+            lat = float(latitude)
+            lng = float(longitude)
+
+            # 北部エリア判定
+            if lat >= 38.00:
+                return self._classify_north_district(lat, lng)
+
+            # 南部エリア判定
+            if lat <= 37.90:
+                return self._classify_south_district(lng)
+
+            # 中部エリア判定
+            return self._classify_central_district(lat, lng)
+
+        except (ValueError, TypeError):
+            return "佐渡市内"
+
+    def _classify_north_district(self, lat: float, lng: float) -> str:
+        """北部地区の分類"""
+        if lat >= 38.02 and lng >= 138.35:
             return "両津"
-        elif longitude < 138.0:
+        elif lng <= 138.30:
             return "相川"
-        elif latitude < 37.9:
-            return "小木・羽茂"
         else:
-            return "佐和田・金井"
+            return "両津"  # 北部の中間エリアは両津として分類
+
+    def _classify_south_district(self, lng: float) -> str:
+        """南部地区の分類"""
+        if lng <= 138.30:
+            return "小木"
+        else:
+            return "羽茂"
+
+    def _classify_central_district(self, _lat: float, lng: float) -> str:
+        """中部地区の分類"""
+        if 138.25 <= lng <= 138.45:
+            if lng >= 138.35:
+                return "金井"
+            else:
+                return "佐和田"
+        elif lng >= 138.45:
+            return "新穂"
+        elif lng <= 138.20:
+            return "真野"
+        else:
+            return "畑野"
 
     def validate_coordinates(self, latitude: float, longitude: float) -> bool:
         """座標の妥当性を検証"""

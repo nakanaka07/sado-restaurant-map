@@ -452,4 +452,3 @@ https://maps.google.com/place?cid=17703266157304940483    # フレンズ
 https://maps.google.com/place?cid=11740631794790417120    # スナック エミーレ
 https://maps.google.com/place?cid=1118792376792431412    # スナック京
 https://maps.google.com/place?cid=17521612858367573171  # CHERRY（チェリー）
-https://maps.google.com/place?cid=17525432353623487539  # チェリー コーヒー アンド ラウンジ

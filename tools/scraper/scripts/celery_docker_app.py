@@ -67,7 +67,7 @@ def create_docker_celery_app():
         worker_enable_remote_control=True,
     )
 
-    print(f"🐳 Docker Celery App initialized:")
+    print("🐳 Docker Celery App initialized:")
     print(f"   Broker: {redis_url}")
     print(f"   Backend: {result_backend}")
     print(f"   Concurrency: {app.conf.worker_concurrency}")
