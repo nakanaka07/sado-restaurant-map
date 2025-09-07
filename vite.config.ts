@@ -64,7 +64,9 @@ const createPWAShortcuts = (isProduction: boolean) => [
     name: "近くの店舗",
     short_name: "近くの店",
     description: "現在地周辺の飲食店を検索",
-    url: isProduction ? "/sado-restaurant-map/?filter=nearby" : "/?filter=nearby",
+    url: isProduction
+      ? "/sado-restaurant-map/?filter=nearby"
+      : "/?filter=nearby",
     icons: [
       {
         src: isProduction ? "/sado-restaurant-map/favicon.svg" : "/favicon.svg",
@@ -173,69 +175,97 @@ export default defineConfig(({ mode }) => {
   const shouldEnablePWA = isProduction || enablePWAInDev;
 
   return {
-    base: process.env.VITE_BASE_URL || (isProduction ? "/sado-restaurant-map/" : "/"),
+    base:
+      process.env.VITE_BASE_URL ||
+      (isProduction ? "/sado-restaurant-map/" : "/"),
     plugins: [
       react(),
       ...(shouldEnablePWA ? [VitePWA(createPWAConfig(isProduction))] : []),
     ],
 
-  // パス解決の最適化
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "@components": fileURLToPath(
-        new URL("./src/components", import.meta.url)
-      ),
-      "@hooks": fileURLToPath(new URL("./src/hooks", import.meta.url)),
-      "@types": fileURLToPath(new URL("./src/types", import.meta.url)),
-      "@utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
-      "@data": fileURLToPath(new URL("./src/data", import.meta.url)),
-      "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
-    },
-  },
-
-  // 開発サーバー最適化
-  server: {
-    port: 5173,
-    host: "127.0.0.1", // IPv4 loopbackを明示的に指定
-    open: false,
-    cors: true,
-    // IPv6関連の問題を回避
-    strictPort: true,
-    // 🔧 開発環境でのキャッシュ無効化ヘッダー
-    headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    },
-    // Source map関連の設定
-    sourcemapIgnoreList: (relativeSourcePath) => {
-      return relativeSourcePath.includes('node_modules') ||
-             relativeSourcePath.includes('workbox') ||
-             relativeSourcePath.includes('dev-dist');
-    },
-  },
-
-  // ビルド最適化
-  build: {
-    target: "es2020",
-    // 開発環境では詳細なソースマップ、本番では軽量化
-    sourcemap: !isProduction ? true : "hidden",
-    minify: "terser",
-    cssMinify: true,
-    rollupOptions: {
-      input: "index.html", // 正しいエントリーポイント
-      output: {
-        manualChunks: {
-          "google-maps": ["@vis.gl/react-google-maps"],
-          "react-vendor": ["react", "react-dom"],
-        },
-        // ソースマップファイルの出力先を調整
-        sourcemapExcludeSources: isProduction,
+    // パス解決の最適化
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
+        "@components": fileURLToPath(
+          new URL("./src/components", import.meta.url)
+        ),
+        "@hooks": fileURLToPath(new URL("./src/hooks", import.meta.url)),
+        "@types": fileURLToPath(new URL("./src/types", import.meta.url)),
+        "@utils": fileURLToPath(new URL("./src/utils", import.meta.url)),
+        "@data": fileURLToPath(new URL("./src/data", import.meta.url)),
+        "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
       },
     },
-    chunkSizeWarningLimit: 1000,
-    // ビルド時の警告を抑制
-    emptyOutDir: true,
-  },
-}});
+
+    // 開発サーバー最適化
+    server: {
+      port: 5173,
+      host: "127.0.0.1", // IPv4 loopbackを明示的に指定
+      open: false,
+      cors: true,
+      // IPv6関連の問題を回避
+      strictPort: true,
+      // 🔧 開発環境でのキャッシュ無効化ヘッダー
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+      // Source map関連の設定
+      sourcemapIgnoreList: (relativeSourcePath) => {
+        return (
+          relativeSourcePath.includes("node_modules") ||
+          relativeSourcePath.includes("workbox") ||
+          relativeSourcePath.includes("dev-dist")
+        );
+      },
+    },
+
+    // ビルド最適化（2025年9月最新）
+    build: {
+      target: "es2022",
+      // 開発環境では詳細なソースマップ、本番では軽量化
+      sourcemap: !isProduction ? true : "hidden",
+      minify: "terser",
+      cssMinify: "lightningcss",
+      rollupOptions: {
+        input: "index.html",
+        output: {
+          manualChunks: {
+            "google-maps": ["@vis.gl/react-google-maps"],
+            "react-vendor": ["react", "react-dom"],
+          },
+          // ソースマップファイルの出力先を調整
+          sourcemapExcludeSources: isProduction,
+          // 2025年最適化: ES2022対応
+          format: "es",
+          generatedCode: {
+            preset: "es2015",
+            symbols: true,
+          },
+        },
+        // Tree-shaking最適化
+        treeshake: {
+          preset: "recommended",
+          moduleSideEffects: false,
+        },
+      },
+      chunkSizeWarningLimit: 1000,
+      emptyOutDir: true,
+      // CSS Code Splitting
+      cssCodeSplit: true,
+      // 2025年新機能: CSS Lightning CSS
+      css: {
+        lightningcss: {
+          targets: {
+            chrome: 90,
+            firefox: 90,
+            safari: 14,
+            edge: 90,
+          },
+        },
+      },
+    },
+  };
+});

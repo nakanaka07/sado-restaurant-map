@@ -1,68 +1,54 @@
-# Logs
-logs
+# === 2025年セキュリティ強化版 .gitignore ===
+
+# === ログファイル ===
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+.npm
 
-# Dependencies
-node_modules
+# === 依存関係・パッケージ ===
+node_modules/
+.pnpm-store/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
 
-# Build outputs
-dist
-dist-ssr
-dev-dist
-coverage
+# === ビルド出力 ===
+dist/
+dist-ssr/
+dev-dist/
+build/
+coverage/
+.vite/
+.turbo/
 
-# Environment variables
+# === 環境変数・機密情報 (2025年強化) ===
+# 環境変数ファイル
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+!.env.*.example
+
+# ローカル環境設定
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Python tools specific
-# Python Virtual Environment
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-
-# Python cache in scraper tools
-tools/scraper/__pycache__/
-tools/scraper/*/__pycache__/
-tools/scraper/*/*/__pycache__/
-tools/scraper/*.pyc
-tools/scraper/.env
-
-# Google Cloud Service Account and API Keys
+# API キー・認証情報
 *service-account*.json
 *service_account*.json
 *-key.json
 *_key.json
+*-credentials*.json
+*_credentials*.json
 google-credentials.json
 gcp-credentials.json
-tools/scraper/config/*.json
-tools/scraper/config/*-key.json
-tools/scraper/config/*_key.json
+firebase-adminsdk-*.json
 
-# API Keys and Secrets
+# セキュリティファイル
 *.pem
 *.key
 *.p12
@@ -70,30 +56,132 @@ tools/scraper/config/*_key.json
 *secret*
 *credential*
 *token*
+.secrets/
 
-# OS specific
-Thumbs.db
+# === IDE・エディタ設定 ===
+# VS Code（共有すべき設定は除外）
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# その他のIDE
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# === OS固有ファイル ===
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
-# Temporary files
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# === Python開発環境 ===
+# 仮想環境
+.venv/
+venv/
+.virtualenv/
+.conda/
+
+# Python キャッシュ・コンパイル済み
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Python スクレイパー特有
+tools/scraper/__pycache__/
+tools/scraper/*/__pycache__/
+tools/scraper/*/*/__pycache__/
+tools/scraper/*.pyc
+tools/scraper/.env*
+tools/scraper/config/*.json
+!tools/scraper/config/*.example.json
+
+# === 一時ファイル・キャッシュ ===
 *.tmp
 *.temp
-.cache
+.cache/
+.parcel-cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
-# PWA generated files
+# === PWA・Service Worker ===
 sw.js
 sw.js.map
 workbox-*.js
 workbox-*.js.map
+.workbox/
 
-# Testing
+# === テスト・カバレッジ ===
 coverage/
-.nyc_output
+.nyc_output/
+junit.xml
+test-results/
+playwright-report/
+test-results.xml
 
-# Analysis outputs
+# 一時テスト結果ファイル（Phase 1 対応）
+*test_result*.json
+*_test_result_*.json
+phase*_completion_test_result_*.json
+ml_engine_integration_test_result.json
+tests/results/*.json
+tests/results/*.log
+
+# === 分析・レポート出力 ===
 tools/analysis/output/
+tools/reports/output/
+tools/reports/generated/
+*.report.json
+*.report.html
 
-# Automated reports (temporary/generated files)
-tools/reports/*.json
-tools/reports/*.md
-tools/reports/weekly/
+# === 開発・デバッグファイル ===
+.vscode-test/
+.history/
+*.tsbuildinfo
+
+# === セキュリティスキャン結果 ===
+.snyk
+trivy-results.json
+security-scan-results/
+
+# === Docker・コンテナ ===
+.dockerignore
+docker-compose.override.yml
+
+# === パフォーマンス・メトリクス ===
+.lighthouseci/
+web-vitals-report/
+
+# === 2025年新規追加項目 ===
+# Bun (新しいパッケージマネージャー)
+.bun/
+
+# Deno
+.deno/
+
+# AI・ML関連
+*.model
+*.h5
+*.pkl
+ml-models/
+
+# ブロックチェーン・Web3
+.secret
+*.wallet

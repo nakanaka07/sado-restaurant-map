@@ -2,7 +2,7 @@
 
 > 🎯 **目的**: React+TypeScript+Google Maps プロジェクト向けの統合開発支援
 > **プロジェクト**: 佐渡飲食店マップアプリケーション
-> **技術スタック**: React 19, TypeScript 5.7, Vite 6, Google Maps API, PWA
+> **技術スタック**: React 19, TypeScript 5.7, Vite 7, Google Maps API, PWA
 
 ## 🏗️ プロジェクト概要
 
@@ -10,18 +10,8 @@
 
 ### 主要技術
 
-- **フロントエンド**: React 19.0 + TypeScript 5.7 + Vite 6.0
-- **地図機能**: Go- **実装の優先度を明確に示す**
-- **適切なファイル配置場所**を提案に含める
-- **ドキュメント管理方針**に従った配置提案
-- **README ベストプラクティス**の自動適用（配置基準・品質原則・テンプレート）
-
----
-
-**最終更新**: 2025 年 8 月 30 日
-**連携ファイル**: `ai-prompts.md` (同ディレクトリ)
-**関連ドキュメント**: `README-best-practices.md`, `README-placement-guidelines.md`s JavaScript API + @vis.gl/react-google-maps v1.5
-
+- **フロントエンド**: React 19.1 + TypeScript 5.7 + Vite 7.1
+- **地図機能**: Google Maps JavaScript API + @vis.gl/react-google-maps v1.5
 - **スタイリング**: CSS + レスポンシブデザイン
 - **テスト**: Vitest 3.2 + Testing Library
 - **PWA**: Service Worker + Manifest + vite-plugin-pwa
@@ -104,7 +94,7 @@
 プロジェクトルート/
 ├── 📄 package.json, tsconfig.*.json    # 設定ファイル
 ├── 📄 index.html, vite.config.ts       # ビルド・エントリーポイント
-├──  src/                             # ソースコード
+├── src/                               # ソースコード
 │   ├── components/                     # React コンポーネント
 │   │   ├── common/                     # 汎用UIコンポーネント
 │   │   ├── layout/                     # レイアウトコンポーネント
@@ -121,11 +111,16 @@
 │   └── styles/                         # CSSファイル
 ├── 📁 docs/                            # ドキュメント（プロジェクト全体）
 │   ├── development/                    # 開発支援・環境設定
+│   │   ├── guides/                     # 環境構築・設定ガイド
+│   │   ├── ai-assistant/               # AI開発支援
+│   │   ├── automation/                 # CI/CD・自動化
+│   │   ├── documentation/              # ドキュメント管理
+│   │   └── security/                   # セキュリティ・品質管理
 │   ├── architecture/                   # アーキテクチャ決定記録
 │   ├── analysis/                       # システム分析・技術レポート
 │   ├── planning/                       # ロードマップ・計画
 │   ├── reports/                        # 実装レポート
-│   └── security/                       # セキュリティ・品質管理
+│   └── testing/                        # テスト戦略・統合テスト
 ├── 📁 tools/                           # 開発ツール
 └── 📁 config/, public/                 # 設定・静的ファイル
 ```
@@ -251,7 +246,7 @@
   - 開発ガイド・環境設定 → `docs/development/`
   - 企画・計画・ロードマップ → `docs/planning/`
   - 実装完了レポート → `docs/reports/`
-  - セキュリティ・品質管理 → `docs/security/`
+  - テスト戦略・統合テスト → `docs/testing/`
 
 - **個別ディレクトリ特化ドキュメント** → `[tool]/README.md`
   - スクレイパー操作ガイド → `tools/scraper/README.md`
@@ -374,7 +369,7 @@
 - TypeScript 5.7 ハンドブック
 - Google Maps JavaScript API + Advanced Markers
 - @vis.gl/react-google-maps v1.5
-- Vite 6.0 公式ガイド
+- Vite 7.0 公式ガイド
 - WCAG 2.2 アクセシビリティガイドライン
 - PWA Manifest 仕様
 
@@ -410,5 +405,5 @@
 
 ---
 
-**最終更新**: 2025 年 8 月 30 日
+**最終更新**: 2025 年 9 月 7 日
 **連携ファイル**: `ai-prompts.md` (同ディレクトリ)
