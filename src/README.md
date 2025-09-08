@@ -1,27 +1,60 @@
-# Sado Restaurant Map - Source Code Architecture
+# Sado Restaurant Map - Source Code
 
-> 🎯 **目的**: React 19.1 + TypeScript 5.7 ソースコードアーキテクチャ
-> **対象**: フロントエンド開発者・アーキテクト・新規参加者
-> **最終更新**: 2025 年 8 月 30 日
-
-佐渡島レストランマップアプリケーションのソースコード全体のアーキテクチャとディレクトリ構成を説明します。
+> 🎯 **目的**: React 19.1 + TypeScript 5.7 + Vite 7 フロントエンドアプリケーション
+> **対象**: 佐渡島飲食店マップアプリケーション
 
 ## 📁 ディレクトリ構成
 
-````text
-src/
-├── app/                    # アプリケーションエントリーポイント
-├── assets/                 # 静的アセット（画像、アイコンなど）
-├── components/             # Reactコンポーネント
-├── config/                 # アプリケーション設定
-├── hooks/                  # カスタムReactフック
-├── services/               # 外部サービス統合レイヤー
-├── styles/                 # CSS/スタイル定義
-├── test/                   # テストインフラストラクチャ
-├── types/                  # TypeScript型定義
-├── utils/                  # ユーティリティ関数
-└── vite-env.d.ts          # Vite環境変数型定義
 ```text
+src/
+├── app/            # アプリケーションエントリーポイント
+├── assets/         # 静的アセット（画像、アイコン）
+├── components/     # Reactコンポーネント
+├── config/         # アプリケーション設定
+├── hooks/          # カスタムReactフック
+├── services/       # 外部サービス統合
+├── styles/         # CSS/スタイル定義
+├── test/           # テストインフラ
+├── types/          # TypeScript型定義
+├── utils/          # ユーティリティ関数
+└── vite-env.d.ts   # Vite環境変数型定義
+```
+
+## 🎯 核となる機能
+
+- 🍽️ **Google Maps Advanced Markers**: 飲食店マップ表示
+- 🏪 **店舗詳細情報**: フィルタリング・検索機能
+- 📱 **PWA対応**: オフライン機能・モバイル最適化
+- 🔍 **TypeScript型安全性**: 厳格な型チェック
+
+## 🚀 使用方法
+
+```bash
+# 開発開始
+pnpm run dev
+
+# ビルド
+pnpm run build
+
+# テスト実行
+pnpm run test:run
+```
+
+## 📋 環境変数設定
+
+```bash
+# 必須設定
+VITE_GOOGLE_MAPS_API_KEY=your_maps_api_key
+VITE_GOOGLE_MAPS_MAP_ID=your_map_id
+
+# オプション設定
+VITE_GOOGLE_SHEETS_API_KEY=your_sheets_api_key
+VITE_SPREADSHEET_ID=your_spreadsheet_id
+```
+
+---
+
+**最終更新**: 2025年9月8日
 
 ## 🏗️ アーキテクチャ原則
 
@@ -51,7 +84,7 @@ src/
 - `App.tsx`: メインアプリケーションコンポーネント
 - `App.test.tsx`: アプリケーションレベルのテスト
 
-#### 主な機能:
+#### 主な機能
 
 - Google Maps API統合
 - PWA機能の初期化
@@ -67,7 +100,7 @@ src/
 - `map/`: 地図関連コンポーネント（マップビュー、マーカーなど）
 - `restaurant/`: レストラン機能コンポーネント（フィルター、詳細表示など）
 
-#### 設計原則:
+#### 設計原則
 
 - 単一責任の原則
 - 再利用可能性
@@ -81,7 +114,7 @@ React の状態管理とロジックを抽象化：
 - `map/`: 地図操作フック（マーカー管理、ビューポート制御）
 - `ui/`: UI状態管理フック（モーダル、フィルター状態）
 
-#### 特徴:
+#### 特徴
 
 - 型安全なデータフェッチング
 - エラーハンドリング
@@ -153,7 +186,7 @@ Vitestを使用した包括的テスト環境：
 
 ### **開発開始**
 
-```bash
+````bash
 npm run dev
 ```text
 

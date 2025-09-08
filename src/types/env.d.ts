@@ -75,20 +75,21 @@ export const getEnvConfig = (): EnvConfig => {
 
   return {
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    baseUrl: import.meta.env.VITE_BASE_URL,
-    appName: import.meta.env.VITE_APP_NAME || "佐渡飲食店マップ",
-    appVersion: import.meta.env.VITE_APP_VERSION || "1.0.0",
-    gaTrackingId: import.meta.env.VITE_GA_MEASUREMENT_ID,
+    baseUrl: import.meta.env.VITE_BASE_URL as string,
+    appName: (import.meta.env.VITE_APP_NAME as string) || "佐渡飲食店マップ",
+    appVersion: (import.meta.env.VITE_APP_VERSION as string) || "1.0.0",
+    gaTrackingId: import.meta.env.VITE_GA_MEASUREMENT_ID as string,
     enablePwaInDev: import.meta.env.VITE_ENABLE_PWA_DEV === "true",
-    sheetsApiKey: import.meta.env.VITE_SHEETS_API_KEY,
-    spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID,
+    sheetsApiKey: import.meta.env.VITE_SHEETS_API_KEY as string,
+    spreadsheetId: import.meta.env.VITE_SPREADSHEET_ID as string,
     debugMode: import.meta.env.VITE_DEBUG_MODE === "true",
     mockData: import.meta.env.VITE_MOCK_DATA === "true",
     logLevel:
       (import.meta.env.VITE_LOG_LEVEL as EnvConfig["logLevel"]) || "info",
-    cspNonce: import.meta.env.VITE_CSP_NONCE,
-    allowedOrigins: import.meta.env.VITE_ALLOWED_ORIGINS?.split(",") || [],
-    sentryDsn: import.meta.env.VITE_SENTRY_DSN,
+    cspNonce: import.meta.env.VITE_CSP_NONCE as string,
+    allowedOrigins:
+      (import.meta.env.VITE_ALLOWED_ORIGINS as string)?.split(",") || [],
+    sentryDsn: import.meta.env.VITE_SENTRY_DSN as string,
     performanceMonitoring:
       import.meta.env.VITE_PERFORMANCE_MONITORING === "true",
   };

@@ -163,7 +163,6 @@ const createPWAConfig = (isProduction: boolean) => ({
   },
   devOptions: {
     enabled: false,
-    navigateFallback: undefined,
     suppressWarnings: true,
     type: "module" as const,
   },
@@ -228,7 +227,8 @@ export default defineConfig(({ mode }) => {
       // 開発環境では詳細なソースマップ、本番では軽量化
       sourcemap: !isProduction ? true : "hidden",
       minify: "terser",
-      cssMinify: "lightningcss",
+      // 従来のCSS処理を使用（Lightning CSSの依存関係問題を回避）
+      cssMinify: "esbuild",
       rollupOptions: {
         input: "index.html",
         output: {
@@ -255,17 +255,6 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       // CSS Code Splitting
       cssCodeSplit: true,
-      // 2025年新機能: CSS Lightning CSS
-      css: {
-        lightningcss: {
-          targets: {
-            chrome: 90,
-            firefox: 90,
-            safari: 14,
-            edge: 90,
-          },
-        },
-      },
     },
   };
 });

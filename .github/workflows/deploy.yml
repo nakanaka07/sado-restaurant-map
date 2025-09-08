@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -53,55 +53,15 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: |
-          # デバッグ情報
-          echo " GitHub Actions環境情報:"
-          echo "Runner OS: ${{ runner.os }}"
-          echo "Node version: $(node --version)"
-          echo "pnpm version: $(pnpm --version)"
-          echo "Available memory: $(free -h | grep Mem | awk '{print $2}')"
-
-          # レート制限対策: ミラーレジストリとリトライ設定
-          echo " pnpm設定を最適化中..."
-          pnpm config set registry https://registry.npmmirror.com
-          pnpm config set fetch-retries 5
-          pnpm config set fetch-retry-factor 2
-          pnpm config set fetch-retry-mintimeout 10000
-          pnpm config set fetch-retry-maxtimeout 60000
-          pnpm config set network-concurrency 3
-
-          echo " 依存関係インストール開始..."
-          pnpm install --no-frozen-lockfile || {
-            echo " ミラーレジストリで失敗、npmjs.orgで再試行..."
-            pnpm config set registry https://registry.npmjs.org
-            echo " 30秒待機してからリトライ..."
-            sleep 30
-            pnpm install --no-frozen-lockfile
-          }
-
-          echo " 依存関係インストール完了"
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: pnpm run test
+        run: pnpm run test:run
         env:
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'test-placeholder' }}
           VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID || 'test-placeholder' }}
           VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID || 'test-spreadsheet-id' }}
           VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY || 'test-sheets-api-key' }}
-
-      - name: Debug environment variables
-        run: |
-          echo " Environment Variables Debug:"
-          echo "VITE_BASE_URL=$VITE_BASE_URL"
-          echo "Repository name: ${{ github.event.repository.name }}"
-          echo "Node environment: $NODE_ENV"
-          echo "Environment variables presence check:"
-          echo "VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY != '' }}"
-          echo "VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID != '' }}"
-          echo "VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY != '' }}"
-          echo "VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID != '' }}"
-        env:
-          VITE_BASE_URL: /${{ github.event.repository.name }}/
 
       - name: Build application
         run: pnpm run build

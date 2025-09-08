@@ -1,0 +1,8 @@
+# Prettier ignore
+dist/
+dev-dist/
+node_modules/
+coverage/
+*.min.js
+*.bundle.js
+pnpm-lock.yaml
