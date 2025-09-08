@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
@@ -19,17 +20,17 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
-        node-version: [20]
+        node-version: [22]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
@@ -37,49 +38,65 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 9
 
       - name: Get pnpm store directory
+        id: pnpm-cache
         shell: bash
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "store-path=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
-          path: ~/.local/share/pnpm/store
+          path: ${{ steps.pnpm-cache.outputs.store-path }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Run linting
+        run: pnpm run lint
+        continue-on-error: false
 
       - name: Run tests
         run: pnpm run test:run
         env:
-          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'test-placeholder' }}
-          VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID || 'test-placeholder' }}
-          VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID || 'test-spreadsheet-id' }}
-          VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY || 'test-sheets-api-key' }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ github.event_name == 'pull_request' && 'test-placeholder' || secrets.GOOGLE_MAPS_API_KEY || 'test-placeholder' }}
+          VITE_GOOGLE_MAPS_MAP_ID: ${{ github.event_name == 'pull_request' && 'test-placeholder' || secrets.GOOGLE_MAPS_MAP_ID || 'test-placeholder' }}
+          VITE_SPREADSHEET_ID: ${{ github.event_name == 'pull_request' && 'test-spreadsheet-id' || secrets.SPREADSHEET_ID || 'test-spreadsheet-id' }}
+          VITE_GOOGLE_SHEETS_API_KEY: ${{ github.event_name == 'pull_request' && 'test-sheets-api-key' || secrets.GOOGLE_SHEETS_API_KEY || 'test-sheets-api-key' }}
 
       - name: Build application
         run: pnpm run build
         env:
+          NODE_ENV: production
           VITE_BASE_URL: /${{ github.event.repository.name }}/
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY || 'placeholder-for-build' }}
           VITE_GOOGLE_MAPS_MAP_ID: ${{ secrets.GOOGLE_MAPS_MAP_ID || 'placeholder-for-build' }}
           VITE_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID || '' }}
-          VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-          VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY }}
+          VITE_SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID || 'demo-spreadsheet-id' }}
+          VITE_GOOGLE_SHEETS_API_KEY: ${{ secrets.GOOGLE_SHEETS_API_KEY || 'demo-sheets-api-key' }}
+
+      - name: Optimize build artifacts
+        run: |
+          # ビルドサイズ情報を表示
+          du -sh dist/ || echo "Build size info unavailable"
+          # 不要ファイルの削除
+          find dist/ -name "*.map" -type f -delete || true
+          find dist/ -name "*.LICENSE.txt" -type f -delete || true
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: "./dist"
+          retention-days: 1
 
   deploy:
     environment:
@@ -92,3 +109,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        timeout-minutes: 10

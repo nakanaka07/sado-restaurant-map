@@ -1,46 +1,30 @@
 {
-  // ===== React + TypeScript + Vite 開発最適化設定 =====
-  // プロジェクト: 佐渡飲食店マップアプリケーション
-  // 技術スタック: React 19.0 + TypeScript 5.7 + Vite 6.0 + Google Maps API
+  // === 佐渡飲食店マップ - VS Code 設定 ===
+  // React 19 + TypeScript 5.7 + Vite 7 + Google Maps
 
-  // === TypeScript 5.7 最適化設定 (2025年9月最新) ===
-  "typescript.preferences.renameShorthandProperties": false,
+  // === TypeScript 5.7 最適化 ===
   "typescript.preferences.includePackageJsonAutoImports": "auto",
   "typescript.suggest.autoImports": true,
   "typescript.suggest.paths": true,
-  "typescript.suggest.includeAutomaticOptionalChainCompletions": true,
   "typescript.suggest.completeFunctionCalls": true,
-  "typescript.preferences.useLabelDetailsInCompletionEntries": true,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "typescript.workspaceSymbols.scope": "currentProject",
-
-  // TypeScript 5.7 新機能対応
   "typescript.preferences.includeCompletionsForModuleExports": true,
   "typescript.preferences.allowRenameOfImportPath": true,
   "typescript.surveys.enabled": false,
   "typescript.suggest.objectLiteralMethodSnippets.enabled": true,
 
-  // Inlay Hints 最適化（パフォーマンス考慮）
-  "typescript.inlayHints.enumMemberValues.enabled": false,
-  "typescript.inlayHints.functionLikeReturnTypes.enabled": false,
+  // Inlay Hints（最小限・パフォーマンス重視）
   "typescript.inlayHints.parameterNames.enabled": "literals",
-  "typescript.inlayHints.parameterTypes.enabled": false,
-  "typescript.inlayHints.variableTypes.enabled": false,
-  "typescript.inlayHints.propertyDeclarationTypes.enabled": false,
   "typescript.inlayHints.parameterNames.suppressWhenArgumentMatchesName": true,
 
-  // === React & JSX 設定 ===
+  // === React & ESLint & Prettier ===
   "emmet.includeLanguages": {
     "typescript": "typescriptreact",
     "javascript": "javascriptreact"
   },
   "emmet.triggerExpansionOnTab": true,
-  "emmet.showExpandedAbbreviation": "always",
-
-  // === ESLint & Prettier 統合 ===
   "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
-  "editor.formatOnType": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit",
@@ -52,39 +36,28 @@
     "typescript",
     "typescriptreact"
   ],
-  "eslint.format.enable": true,
 
-  // === ファイル管理 & 自動保存 ===
+  // === ファイル管理 ===
   "files.autoSave": "onFocusChange",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
-  "files.trimFinalNewlines": true,
   "files.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/build": true,
     "**/coverage": true,
-    "**/dev-dist": true,
-    "**/.cache": true,
-    "**/.temp": true,
-    "**/.tmp": true
+    "**/.cache": true
   },
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,
-    "**/build": true,
-    "**/coverage": true,
     "**/pnpm-lock.yaml": true
   },
 
-  // === エディタ体験最適化 (2025年9月最新) ===
+  // === エディタ最適化 ===
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
-  "editor.detectIndentation": false,
   "editor.wordWrap": "on",
-  "editor.lineNumbers": "on",
   "editor.minimap.enabled": true,
-  "editor.suggest.snippetsPreventQuickSuggestions": false,
   "editor.inlineSuggest.enabled": true,
   "editor.bracketPairColorization.enabled": true,
   "editor.guides.bracketPairs": "active",
@@ -92,78 +65,35 @@
   "editor.stickyScroll.maxLineCount": 5,
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.smoothScrolling": true,
-  "editor.suggest.showMethods": true,
-  "editor.suggest.showFunctions": true,
-  "editor.suggest.showConstructors": true,
-  "editor.suggest.showKeywords": true,
-  "editor.suggest.showSnippets": true,
-  "editor.suggest.filterGraceful": true,
-  "editor.suggest.localityBonus": true,
-  "editor.acceptSuggestionOnCommitCharacter": false,
   "editor.acceptSuggestionOnEnter": "smart",
   "editor.parameterHints.enabled": true,
-  "editor.quickSuggestions": {
-    "other": "on",
-    "comments": "on",
-    "strings": "on"
-  },
 
   // 2025年新機能
   "editor.experimental.pasteActions.enabled": true,
   "editor.experimental.asyncTokenization": true,
-  "editor.experimental.asyncTokenizationLogging": false,
 
-  // === Git 統合 ===
+  // === Git・デバッグ・テスト ===
   "git.autofetch": true,
-  "git.confirmSync": false,
   "git.enableSmartCommit": true,
-  "git.suggestSmartCommit": true,
-  "gitlens.defaultDateFormat": "YYYY/MM/DD HH:mm",
-  "gitlens.defaultDateShortFormat": "MM/DD",
-
-  // === Web 開発 ===
-  "html.format.indentInnerHtml": true,
-  "html.format.wrapLineLength": 100,
-  "css.validate": true,
-  "css.lint.unknownAtRules": "ignore",
-
-  // === デバッグ & テスト最適化 ===
   "debug.inlineValues": "auto",
-  "debug.showBreakpointsInOverviewRuler": true,
   "debug.terminal.clearBeforeReusing": true,
-  "debug.console.acceptSuggestionOnEnter": "off",
   "debug.toolBarLocation": "floating",
   "testing.automaticallyOpenPeekView": "never",
   "testing.defaultGutterClickAction": "run",
-  "testing.followRunningTest": true,
-  "testing.openTesting": "neverOpen",
-
-  // Jest/Vitest特化設定
   "vitest.enable": true,
   "vitest.commandLine": "pnpm test",
 
-  // === パフォーマンス最適化 ===
-  "workbench.editor.enablePreview": false,
-  "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.startupEditor": "newUntitledFile",
-
-  // === GitHub Copilot 2025年最適化設定 ===
+  // === GitHub Copilot 2025最適化 ===
   "github.copilot.chat.instructions": "docs/development/ai-assistant/copilot-instructions.md",
-
-  // Copilot基本設定（パフォーマンス重視）
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,
     "markdown": true,
-    "scminput": false,
     "yaml": true,
     "json": true,
     "jsonc": true
   },
   "github.copilot.editor.enableAutoCompletions": true,
-  "github.copilot.editor.iterativeMode": false,
-
-  // 高度設定（React/TypeScript特化）
   "github.copilot.advanced": {
     "inlineSuggestEnable": true,
     "length": 800,
@@ -171,20 +101,8 @@
     "top_p": 1,
     "listCount": 3
   },
-
-  // Copilot Chat最適化
   "github.copilot.chat.followups": "onDemand",
   "github.copilot.chat.localeOverride": "ja",
-  "github.copilot.chat.welcomeMessage": "never",
-
-  // === セキュリティ ===
-  "security.workspace.trust.untrustedFiles": "prompt",
-  "git.openRepositoryInParentFolders": "never",
-
-  // === 統合ターミナル ===
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "terminal.integrated.fontSize": 14,
-  "terminal.integrated.scrollback": 10000,
 
   // === ファイル形式別設定 ===
   "[typescript]": {
@@ -203,9 +121,7 @@
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.quickSuggestions": {
-      "strings": true
-    }
+    "editor.quickSuggestions": { "strings": true }
   },
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -218,27 +134,18 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.wordWrap": "on",
-    "editor.quickSuggestions": {
-      "comments": "on",
-      "strings": "on",
-      "other": "on"
-    }
+    "editor.wordWrap": "on"
   },
 
-  // === Markdownlint 設定 ===
+  // === その他設定 ===
   "markdownlint.config": {
-    "MD046": {
-      "style": "fenced"
-    },
+    "MD046": { "style": "fenced" },
     "MD040": false,
     "MD024": false,
-    "MD013": {
-      "line_length": 120
-    },
+    "MD013": { "line_length": 120 },
     "MD001": false
   },
-
-  "python-envs.pythonProjects": [],
-  "testing.automaticallyOpenTestResults": "neverOpen"
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "workbench.editor.enablePreview": false,
+  "security.workspace.trust.untrustedFiles": "prompt"
 }

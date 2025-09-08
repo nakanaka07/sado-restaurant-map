@@ -3,7 +3,7 @@
   "configurations": [
     {
       "type": "msedge",
-      "name": "Launch Sado Restaurant Map",
+      "name": "🍽️ Sado Restaurant Map (Edge)",
       "request": "launch",
       "url": "http://localhost:5173/",
       "webRoot": "${workspaceFolder}/src",
@@ -16,12 +16,21 @@
     },
     {
       "type": "chrome",
-      "name": "Launch Chrome",
+      "name": "🍽️ Sado Restaurant Map (Chrome)",
       "request": "launch",
       "url": "http://localhost:5173/",
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
-      "userDataDir": false
+      "userDataDir": false,
+      "runtimeArgs": ["--disable-web-security"]
+    },
+    {
+      "type": "firefox",
+      "name": "🍽️ Sado Restaurant Map (Firefox)",
+      "request": "launch",
+      "url": "http://localhost:5173/",
+      "webRoot": "${workspaceFolder}/src",
+      "firefoxExecutable": "firefox"
     }
   ]
 }

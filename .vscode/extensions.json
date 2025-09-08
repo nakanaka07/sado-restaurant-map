@@ -1,50 +1,45 @@
 {
   "recommendations": [
-    // React & TypeScript 開発必須
+    // === Core Development ===
     "ms-vscode.vscode-typescript-next",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "ms-vscode.vscode-json",
 
-    // React 特化
+    // === React & Frontend ===
     "dsznajder.es7-react-js-snippets",
     "formulahendry.auto-rename-tag",
+    "ms-vscode.vscode-css-peek",
 
-    // API 開発・デバッグ
-    "humao.rest-client",
+    // === Testing & Quality ===
+    "ms-playwright.playwright",
+    "sonarsource.sonarlint-vscode",
+    "streetsidesoftware.code-spell-checker",
 
-    // Git & GitHub
+    // === Git & GitHub ===
     "eamodio.gitlens",
     "github.vscode-pull-request-github",
     "github.copilot",
     "github.copilot-chat",
 
-    // テスト
-    "ms-playwright.playwright",
-
-    // コード品質
-    "sonarsource.sonarlint-vscode",
-    "streetsidesoftware.code-spell-checker",
-
-    // CSS サポート
-    "ms-vscode.vscode-css-peek",
-
-    // ユーティリティ
+    // === Development Tools ===
+    "humao.rest-client",
     "gruntfuggly.todo-tree",
     "aaron-bond.better-comments",
     "pkief.material-icon-theme",
 
-    // 日本語開発支援
+    // === Japanese Support ===
     "ms-ceintl.vscode-language-pack-ja",
     "streetsidesoftware.code-spell-checker-japanese"
   ],
   "unwantedRecommendations": [
-    // 非推奨・競合拡張機能
+    // 廃止予定・競合拡張機能
     "ms-vscode.vscode-typescript",
     "hookyqr.beautify",
     "vscode-icons-team.vscode-icons",
     "ms-python.python",
     "ms-toolsai.jupyter",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "ritwickdey.liveserver"
   ]
 }
