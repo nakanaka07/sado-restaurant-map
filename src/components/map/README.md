@@ -77,7 +77,7 @@ const size = getMarkerSizeByPrice("2000-3000円"); // 40
 
 ---
 
-**技術スタック**: React 19.1、@vis.gl/react-google-maps v2.0、TypeScript 5.7
+**技術スタック**: React 19.1、@vis.gl/react-google-maps v1.5、TypeScript 5.7
 
 ## 📁 ディレクトリ構成
 
@@ -527,7 +527,7 @@ describe('RestaurantMap', () => {
    console.log("Restaurants:", restaurants);
    console.log(
      "Coordinates:",
-     restaurants.map((r) => r.coordinates)
+     restaurants.map(r => r.coordinates)
    );
    ```
 

@@ -25,22 +25,32 @@ const createPWAManifest = (isProduction: boolean) => ({
       src: "pwa-64x64.png",
       sizes: "64x64",
       type: "image/png",
+      purpose: "any",
     },
     {
       src: "pwa-192x192.png",
       sizes: "192x192",
       type: "image/png",
+      purpose: "any",
     },
     {
       src: "pwa-512x512.png",
       sizes: "512x512",
       type: "image/png",
+      purpose: "any",
     },
     {
       src: "maskable-icon-512x512.png",
       sizes: "512x512",
       type: "image/png",
-      purpose: "maskable" as const,
+      purpose: "maskable",
+    },
+    // 🎯 Apple Touch Icon への参照追加（iOS PWA対応強化）
+    {
+      src: "apple-touch-icon.png",
+      sizes: "180x180",
+      type: "image/png",
+      purpose: "any",
     },
   ],
   shortcuts: createPWAShortcuts(isProduction),
@@ -88,6 +98,12 @@ const createRuntimeCaching = () => [
         maxEntries: 100,
         maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
       },
+      cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+        // API キーを除外してキャッシュキーを生成
+        const url = new URL(request.url);
+        url.searchParams.delete("key");
+        return url.toString();
+      },
     },
   },
   // Google Sheets API キャッシュ戦略
@@ -111,26 +127,45 @@ const createRuntimeCaching = () => [
     urlPattern: /^https:\/\/www\.googletagmanager\.com\/.*/i,
     handler: "NetworkOnly" as const,
   },
-  // 静的アセット（アイコン、画像）のキャッシュ戦略
+  // 🎯 静的アセット（アイコン、画像）のキャッシュ戦略 - WebP対応追加
   {
-    urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+    urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/i,
     handler: "CacheFirst" as const,
     options: {
       cacheName: "images-cache",
       expiration: {
-        maxEntries: 100,
+        maxEntries: 200, // エントリ数を増加
+        maxAgeSeconds: 60 * 60 * 24 * 90, // 90日（長期キャッシュ）
+      },
+      cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+        // クエリパラメータを除外してキャッシュキーを生成
+        const url = new URL(request.url);
+        url.search = "";
+        return url.toString();
+      },
+    },
+  },
+  // 🎯 Webマニフェスト・Favicon・PWAアセット
+  {
+    urlPattern:
+      /\/(?:manifest\.webmanifest|favicon\.(ico|svg)|apple-touch-icon\.png|pwa-.*\.png|maskable-.*\.png|og-image\.png)$/,
+    handler: "CacheFirst" as const,
+    options: {
+      cacheName: "pwa-assets-cache",
+      expiration: {
+        maxEntries: 20,
         maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
       },
     },
   },
-  // WebマニフェストとFavicon
+  // 🎯 CSS・JSファイルのキャッシング強化
   {
-    urlPattern: /\/(?:manifest\.webmanifest|favicon\.(ico|svg))$/,
-    handler: "CacheFirst" as const,
+    urlPattern: /\.(?:css|js)$/i,
+    handler: "StaleWhileRevalidate" as const,
     options: {
-      cacheName: "manifest-cache",
+      cacheName: "static-resources-cache",
       expiration: {
-        maxEntries: 10,
+        maxEntries: 100,
         maxAgeSeconds: 60 * 60 * 24 * 7, // 7日
       },
     },
@@ -212,7 +247,7 @@ export default defineConfig(({ mode }) => {
         Expires: "0",
       },
       // Source map関連の設定
-      sourcemapIgnoreList: (relativeSourcePath) => {
+      sourcemapIgnoreList: relativeSourcePath => {
         return (
           relativeSourcePath.includes("node_modules") ||
           relativeSourcePath.includes("workbox") ||
@@ -236,6 +271,17 @@ export default defineConfig(({ mode }) => {
             "google-maps": ["@vis.gl/react-google-maps"],
             "react-vendor": ["react", "react-dom"],
           },
+          // 🎯 アセットファイル名にハッシュ追加（キャッシング最適化）
+          assetFileNames: assetInfo => {
+            const fileName = assetInfo.names?.[0] || "unknown";
+            if (/\.(png|jpe?g|svg|gif|webp|avif|ico)$/i.test(fileName)) {
+              return `assets/images/[name]-[hash][extname]`;
+            }
+            if (/\.(css)$/i.test(fileName)) {
+              return `assets/css/[name]-[hash][extname]`;
+            }
+            return `assets/[name]-[hash][extname]`;
+          },
           // ソースマップファイルの出力先を調整
           sourcemapExcludeSources: isProduction,
           // 2025年最適化: ES2022対応
@@ -255,6 +301,8 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
       // CSS Code Splitting
       cssCodeSplit: true,
+      // 🎯 アセット最適化設定
+      assetsInlineLimit: 4096, // 4KB未満はインライン化
     },
   };
 });

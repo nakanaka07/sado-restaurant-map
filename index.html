@@ -2,44 +2,134 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <!-- Favicon Settings -->
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#4285f4">
+    <!-- 🎯 Favicon Settings - Critical Resource として優先読み込み -->
+    <link
+      rel="icon"
+      href="/favicon.ico"
+      sizes="16x16 32x32"
+      type="image/x-icon"
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+
+    <!-- 🎯 Critical Viewport・Theme Settings -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="theme-color"
+      content="#2563eb"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#1d4ed8"
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <!-- 🎯 PWA・モバイル最適化 -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="佐渡グルメ" />
 
     <!-- SEO Basic Tags -->
     <title>佐渡飲食店マップ | 佐渡島の美味しいお店を探そう！</title>
-    <meta name="description" content="佐渡島の飲食店を地図から簡単に見つけられるウェブアプリ。寿司、海鮮、カフェなど、気分に合わせてお店を探せます。観光客にも地元の方にもおすすめです。" />
-    <meta name="keywords" content="佐渡, 飲食店, マップ, グルメ, レストラン, 寿司, 海鮮, カフェ, 観光" />
+    <meta
+      name="description"
+      content="佐渡島の飲食店を地図から簡単に見つけられるウェブアプリ。寿司、海鮮、カフェなど、気分に合わせてお店を探せます。観光客にも地元の方にもおすすめです。"
+    />
+    <meta
+      name="keywords"
+      content="佐渡, 飲食店, マップ, グルメ, レストラン, 寿司, 海鮮, カフェ, 観光"
+    />
+
+    <!-- 🎯 SEO・構造化データ追加 -->
+    <meta name="author" content="佐渡飲食店マップ" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link
+      rel="canonical"
+      href="https://nakanaka07.github.io/sado-restaurant-map/"
+    />
 
     <!-- Open Graph / Facebook / LINE -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://nakanaka07.github.io/sado-restaurant-map/" />
-    <meta property="og:title" content="佐渡飲食店マップ | 佐渡島の美味しいお店を探そう！" />
-    <meta property="og:description" content="佐渡島の飲食店を地図から簡単に見つけられるウェブアプリ。寿司、海鮮、カフェなど、気分に合わせてお店を探せます。" />
-    <meta property="og:image" content="https://nakanaka07.github.io/sado-restaurant-map/og-image.png" />
+    <meta
+      property="og:url"
+      content="https://nakanaka07.github.io/sado-restaurant-map/"
+    />
+    <meta
+      property="og:title"
+      content="佐渡飲食店マップ | 佐渡島の美味しいお店を探そう！"
+    />
+    <meta
+      property="og:description"
+      content="佐渡島の飲食店を地図から簡単に見つけられるウェブアプリ。寿司、海鮮、カフェなど、気分に合わせてお店を探せます。"
+    />
+    <meta
+      property="og:image"
+      content="https://nakanaka07.github.io/sado-restaurant-map/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="佐渡飲食店マップ - 佐渡島のグルメ情報を地図で表示"
+    />
     <meta property="og:site_name" content="佐渡飲食店マップ" />
+    <meta property="og:locale" content="ja_JP" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://nakanaka07.github.io/sado-restaurant-map/" />
-    <meta property="twitter:title" content="佐渡飲食店マップ - 佐渡島の美味しいお店を探そう" />
-    <meta property="twitter:description" content="佐渡島の寿司、海鮮、カフェなどの飲食店を地図から簡単に探せるインタラクティブマップ。" />
-    <meta property="twitter:image" content="https://nakanaka07.github.io/sado-restaurant-map/og-image.png" />
+    <meta
+      property="twitter:url"
+      content="https://nakanaka07.github.io/sado-restaurant-map/"
+    />
+    <meta
+      property="twitter:title"
+      content="佐渡飲食店マップ - 佐渡島の美味しいお店を探そう"
+    />
+    <meta
+      property="twitter:description"
+      content="佐渡島の寿司、海鮮、カフェなどの飲食店を地図から簡単に探せるインタラクティブマップ。"
+    />
+    <meta
+      property="twitter:image"
+      content="https://nakanaka07.github.io/sado-restaurant-map/og-image.png"
+    />
+    <meta
+      property="twitter:image:alt"
+      content="佐渡飲食店マップ - 佐渡島のグルメ情報"
+    />
+
+    <!-- 🎯 Performance・Accessibility 最適化 -->
+    <meta name="color-scheme" content="light dark" />
+    <link rel="preconnect" href="https://maps.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-      const gaId = '%VITE_GA_MEASUREMENT_ID%';
-      if (gaId && !gaId.startsWith('%VITE_')) {
-        gtag('config', gaId);
+      const gaId = "%VITE_GA_MEASUREMENT_ID%";
+      if (gaId && !gaId.startsWith("%VITE_")) {
+        gtag("config", gaId, {
+          // 🎯 プライバシー配慮・パフォーマンス最適化
+          anonymize_ip: true,
+          cookie_flags: "SameSite=Strict;Secure",
+          send_page_view: false,
+        });
       }
     </script>
   </head>

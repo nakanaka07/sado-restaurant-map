@@ -85,7 +85,7 @@
 - **public/静的ファイル**: PWA manifest・アイコン等の配置状況
 - **設定ファイル**: vite.config.ts・tsconfig.json 等の最適化状況
 - **GitHub Pages 対応**: デプロイ設定・静的ファイル最適化
-- **data-platform/**: データ収集・管理システム（独立モジュールとして配置済み）
+- **data-platform/**: データ収集・管理システム（独立モジュール）
 
 ### プロジェクト構造
 
@@ -118,7 +118,7 @@
 │   ├── *.png, *.ico, *.svg             # PWAアイコン・ファビコン各種
 │   └── README.md                       # 静的ファイル説明
 ├── 📁 docs/                            # プロジェクトドキュメント
-├── 📁 data-platform/                   # データ収集・管理システム（独立）
+├── 📁 data-platform/                   # データ収集・管理システム
 ├── 📁 scripts/                         # デプロイ・メンテナンススクリプト
 ├── 📁 tests/                           # 統合テスト・E2Eテスト（空・将来用）
 └── .github/workflows/                  # GitHub Actions（最小限）

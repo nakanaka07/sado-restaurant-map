@@ -134,7 +134,9 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.formatOnSave": true,
+    "editor.rulers": [120]
   },
 
   // === その他設定 ===

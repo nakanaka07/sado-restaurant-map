@@ -22,11 +22,11 @@ Never trust documentation progress percentages without verification:
 4. Validate progress claims against codebase reality
 ```
 
-### 3. **Phase 3 実装の正確な調査手順**
+### 3. **データ収集システム実装の正確な調査手順**
 
 ```text
-For Phase 3-Full implementation analysis:
-1. First check: tools/scraper/shared/ directory contents
+For data collection system implementation analysis:
+1. First check: data-platform/ directory contents
 2. Verify existence of: cache_service.py, celery_config.py, smart_orchestrator.py, ml_engine.py
 3. Read file headers and class definitions
 4. Count actual implementation lines vs comments/docs
