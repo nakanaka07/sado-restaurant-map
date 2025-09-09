@@ -100,13 +100,14 @@ const createRuntimeCaching = () => [
       },
       plugins: [
         {
-          cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+          cacheKeyWillBeUsed: ({ request }: { request: Request }): string => {
             // API キーを除外してキャッシュキーを生成
             const url = new URL(request.url);
             url.searchParams.delete("key");
             return url.toString();
           },
-        },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
       ],
     },
   },
@@ -143,13 +144,14 @@ const createRuntimeCaching = () => [
       },
       plugins: [
         {
-          cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+          cacheKeyWillBeUsed: ({ request }: { request: Request }): string => {
             // クエリパラメータを除外してキャッシュキーを生成
             const url = new URL(request.url);
             url.search = "";
             return url.toString();
           },
-        },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any,
       ],
     },
   },
