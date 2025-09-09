@@ -98,12 +98,16 @@ const createRuntimeCaching = () => [
         maxEntries: 100,
         maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
       },
-      cacheKeyWillBeUsed: ({ request }: { request: Request }) => {
-        // API キーを除外してキャッシュキーを生成
-        const url = new URL(request.url);
-        url.searchParams.delete("key");
-        return url.toString();
-      },
+      plugins: [
+        {
+          cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+            // API キーを除外してキャッシュキーを生成
+            const url = new URL(request.url);
+            url.searchParams.delete("key");
+            return url.toString();
+          },
+        },
+      ],
     },
   },
   // Google Sheets API キャッシュ戦略
@@ -137,12 +141,16 @@ const createRuntimeCaching = () => [
         maxEntries: 200, // エントリ数を増加
         maxAgeSeconds: 60 * 60 * 24 * 90, // 90日（長期キャッシュ）
       },
-      cacheKeyWillBeUsed: ({ request }: { request: Request }) => {
-        // クエリパラメータを除外してキャッシュキーを生成
-        const url = new URL(request.url);
-        url.search = "";
-        return url.toString();
-      },
+      plugins: [
+        {
+          cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+            // クエリパラメータを除外してキャッシュキーを生成
+            const url = new URL(request.url);
+            url.search = "";
+            return url.toString();
+          },
+        },
+      ],
     },
   },
   // 🎯 Webマニフェスト・Favicon・PWAアセット
