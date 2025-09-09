@@ -278,9 +278,10 @@ class TestLoggingPerformance:
     @pytest.mark.performance
     def test_logging_overhead(self):
         """Test logging performance overhead."""
-        from shared.logger import StructuredLogger
+        from shared.logger import ContextualLogger, LoggingConfig
 
-        logger = StructuredLogger("performance_test")
+        config = LoggingConfig()
+        logger = ContextualLogger("performance_test", config)
 
         # Test without logging
         start_time = time.perf_counter()
@@ -298,7 +299,7 @@ class TestLoggingPerformance:
         for iteration in range(1000):
             # Simulate work with logging
             data = {"iteration": iteration, "value": iteration * 2}
-            logger.debug(f"Processing iteration {iteration}", extra_data=data)
+            logger.debug(f"Processing iteration {iteration}")
             _ = data["value"] + 1  # Use result to avoid unused variable
 
         with_logging_time = time.perf_counter() - start_time

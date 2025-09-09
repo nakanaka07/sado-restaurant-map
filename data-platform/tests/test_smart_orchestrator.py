@@ -15,9 +15,9 @@ import sys
 import os
 
 # パス設定
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from tools.scraper.shared.smart_orchestrator import (
+from shared.smart_orchestrator import (
     SmartOrchestrator,
     SystemState,
     WorkerState,
@@ -26,9 +26,9 @@ from tools.scraper.shared.smart_orchestrator import (
     LoadBalancingConfig,
     FailoverConfig
 )
-from tools.scraper.shared.cache_service import CacheService, CacheStats
-from tools.scraper.shared.performance_monitor import PerformanceMonitor
-from tools.scraper.shared.exceptions import OrchestrationError, HealthCheckError, WorkerFailureError
+from shared.cache_service import CacheService, CacheStats
+from shared.performance_monitor import PerformanceMonitor
+from shared.exceptions import OrchestrationError, HealthCheckError, WorkerFailureError
 
 
 @pytest.fixture
@@ -160,7 +160,7 @@ class TestSmartOrchestratorBasic:
     @pytest.mark.asyncio
     async def test_worker_discovery(self, orchestrator):
         """ワーカー検出テスト"""
-        with patch('tools.scraper.shared.smart_orchestrator.celery_app.control.inspect') as mock_inspect:
+        with patch('shared.smart_orchestrator.celery_app.control.inspect') as mock_inspect:
             # モックのinspector設定
             mock_inspector = MagicMock()
             mock_inspector.active.return_value = {

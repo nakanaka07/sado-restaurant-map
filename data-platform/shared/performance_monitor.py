@@ -4,7 +4,16 @@
 Performance Monitor - パフォーマンス監視・メトリクスシステム
 
 API呼び出し、データ処理、ストレージ操作のパフォーマンスを追跡
-Phase 2改善: 監視・メトリクス強化
+Performance optimizations:
+- Memory-efficient data structures
+- Bounded collections to prevent memory leaks
+- La    def record_metric(
+        self,
+        name: str,
+        value: float,
+        tags: Optional[Dict[str, str]] = None
+    ) -> None:ic calculation
+- Optimized string operations
 """
 
 import time
@@ -12,9 +21,11 @@ import threading
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Tuple
 from contextlib import contextmanager
 from enum import Enum
+import weakref
+import gc
 
 from shared.logger import get_logger
 
@@ -27,56 +38,83 @@ class MetricType(Enum):
     TIMER = "timer"          # タイマー（実行時間）
 
 
-@dataclass
+@dataclass(slots=True)  # Memory optimization: use __slots__
 class MetricValue:
-    """メトリクス値"""
+    """メトリクス値 - メモリ効率最適化版"""
     value: float
     timestamp: datetime = field(default_factory=datetime.now)
-    labels: Dict[str, str] = field(default_factory=dict)
+    labels: Optional[Dict[str, str]] = None
+
+    def __post_init__(self):
+        # Avoid empty dict creation for memory efficiency
+        if self.labels is None:
+            self.labels = {}
 
 
-@dataclass
+@dataclass(slots=True)  # Memory optimization
 class PerformanceStats:
-    """パフォーマンス統計"""
+    """パフォーマンス統計 - 最適化版"""
     count: int = 0
     total_time: float = 0.0
     min_time: float = float('inf')
     max_time: float = 0.0
-    avg_time: float = 0.0
+    _avg_time: Optional[float] = None  # Lazy calculation
     success_count: int = 0
     error_count: int = 0
-    success_rate: float = 0.0
+    _success_rate: Optional[float] = None  # Lazy calculation
+
+    @property
+    def avg_time(self) -> float:
+        """Lazy calculation of average time."""
+        if self._avg_time is None and self.count > 0:
+            self._avg_time = self.total_time / self.count
+        return self._avg_time or 0.0
+
+    @property
+    def success_rate(self) -> float:
+        """Lazy calculation of success rate."""
+        if self._success_rate is None and self.count > 0:
+            self._success_rate = self.success_count / self.count
+        return self._success_rate or 0.0
 
     def add_measurement(self, duration: float, success: bool = True) -> None:
-        """測定値を追加"""
+        """測定値を追加 - 最適化版"""
         self.count += 1
         self.total_time += duration
-        self.min_time = min(self.min_time, duration)
-        self.max_time = max(self.max_time, duration)
-        self.avg_time = self.total_time / self.count
 
+        # Optimized min/max calculation
+        if duration < self.min_time:
+            self.min_time = duration
+        if duration > self.max_time:
+            self.max_time = duration
+
+        # Update success/error counts
         if success:
             self.success_count += 1
         else:
             self.error_count += 1
 
-        self.success_rate = self.success_count / self.count if self.count > 0 else 0.0
+        # Invalidate cached calculations
+        self._avg_time = None
+        self._success_rate = None
 
 
-@dataclass
+@dataclass(slots=True)  # Memory optimization
 class APIMetrics:
-    """API関連メトリクス"""
+    """API関連メトリクス - メモリ効率最適化版"""
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
     total_cost: float = 0.0
     rate_limit_hits: int = 0
-    response_times: deque = field(default_factory=lambda: deque(maxlen=1000))
+
+    # Bounded collections to prevent memory leaks
+    response_times: deque = field(default_factory=lambda: deque(maxlen=500))  # Reduced from 1000
     requests_by_endpoint: Dict[str, int] = field(default_factory=dict)
     cost_by_operation: Dict[str, float] = field(default_factory=dict)
 
     def add_request(self, endpoint: str, duration: float, success: bool, cost: float = 0.0) -> None:
-        """API リクエストを記録"""
+        """API リクエストを記録 - 最適化版"""
         self.total_requests += 1
         self.total_cost += cost
         self.response_times.append(duration)
@@ -86,65 +124,100 @@ class APIMetrics:
         else:
             self.failed_requests += 1
 
-        # エンドポイント別統計
-        if endpoint not in self.requests_by_endpoint:
-            self.requests_by_endpoint[endpoint] = 0
-        self.requests_by_endpoint[endpoint] += 1
-
-        # コスト別統計
-        if endpoint not in self.cost_by_operation:
-            self.cost_by_operation[endpoint] = 0.0
-        self.cost_by_operation[endpoint] += cost
+        # Memory-efficient endpoint tracking
+        self.requests_by_endpoint[endpoint] = self.requests_by_endpoint.get(endpoint, 0) + 1
+        self.cost_by_operation[endpoint] = self.cost_by_operation.get(endpoint, 0.0) + cost
 
     def get_success_rate(self) -> float:
         """成功率を取得"""
         return self.successful_requests / self.total_requests if self.total_requests > 0 else 0.0
 
     def get_avg_response_time(self) -> float:
-        """平均応答時間を取得"""
-        return sum(self.response_times) / len(self.response_times) if self.response_times else 0.0
+        """平均レスポンス時間を取得 - 最適化版"""
+        if not self.response_times:
+            return 0.0
+        return sum(self.response_times) / len(self.response_times)
+
+    def get_percentile_response_time(self, percentile: float) -> float:
+        """レスポンス時間のパーセンタイルを取得 - 最適化版"""
+        if not self.response_times:
+            return 0.0
+
+        sorted_times = sorted(self.response_times)
+        index = int((percentile / 100.0) * len(sorted_times))
+        return sorted_times[min(index, len(sorted_times) - 1)]
 
 
 class PerformanceMonitor:
-    """パフォーマンス監視クラス"""
+    """パフォーマンス監視クラス - メモリ効率最適化版"""
+
+    __slots__ = (
+        '_component_name', '_logger', '_lock', '_metrics',
+        '_performance_stats', '_api_metrics', '_max_history',
+        '_cleanup_interval', '_last_cleanup'
+    )
 
     def __init__(self, component_name: str = "unknown"):
-        """PerformanceMonitor初期化"""
+        """PerformanceMonitor初期化 - 最適化版"""
         self._component_name = component_name
         self._logger = get_logger(f"PerformanceMonitor.{component_name}")
         self._lock = threading.Lock()
 
-        # メトリクス保存
-        self._metrics: Dict[str, List[MetricValue]] = defaultdict(list)
-        self._performance_stats: Dict[str, PerformanceStats] = defaultdict(PerformanceStats)
+        # メトリクス保存 - メモリ効率化
+        self._metrics: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))  # Bounded
+        self._performance_stats: Dict[str, PerformanceStats] = {}
         self._api_metrics = APIMetrics()
 
-        # 設定
-        self._max_history = 10000  # 最大履歴保持数
-        self._cleanup_interval = 3600  # クリーンアップ間隔（秒）
+        # 設定 - メモリ使用量削減
+        self._max_history = 5000  # 最大履歴保持数を削減 (10000 -> 5000)
+        self._cleanup_interval = 1800  # クリーンアップ間隔を短縮 (3600 -> 1800)
         self._last_cleanup = time.time()
 
     @contextmanager
     def measure_time(self, operation_name: str, labels: Optional[Dict[str, str]] = None):
-        """実行時間を測定するコンテキストマネージャー"""
-        start_time = time.time()
+        """実行時間を測定するコンテキストマネージャー - 最適化版"""
+        start_time = time.perf_counter()  # より高精度なタイマー
         success = True
-        error = None
 
         try:
             yield
-        except Exception as e:
+        except Exception:
             success = False
-            error = e
             raise
         finally:
-            duration = time.time() - start_time
-            self.record_timing(operation_name, duration, success, labels)
+            end_time = time.perf_counter()
+            duration = end_time - start_time
 
-            if error:
-                self._logger.warning(f"Operation failed: {operation_name}",
-                                   duration=duration, error=str(error))
+            # 最適化: 必要な場合のみロックを取得
+            self._record_measurement(operation_name, duration, success, labels)
 
+    def _record_measurement(self, operation_name: str, duration: float,
+                          success: bool, labels: Optional[Dict[str, str]] = None) -> None:
+        """測定結果を記録 - 最適化版"""
+        with self._lock:
+            # パフォーマンス統計の更新
+            if operation_name not in self._performance_stats:
+                self._performance_stats[operation_name] = PerformanceStats()
+
+            self._performance_stats[operation_name].add_measurement(duration, success)
+
+            # メトリクス記録 - メモリ効率化
+            metric_value = MetricValue(value=duration, labels=labels)
+            self._metrics[operation_name].append(metric_value)
+
+            # 定期的なクリーンアップ
+            current_time = time.time()
+            if current_time - self._last_cleanup > self._cleanup_interval:
+                self._cleanup_old_metrics()
+                self._last_cleanup = current_time
+
+    def _cleanup_old_metrics(self) -> None:
+        """古いメトリクスのクリーンアップ - メモリリーク防止"""
+        for operation_name, metrics_deque in self._metrics.items():
+            # dequeは自動的にmaxlenで制限されるため、追加のクリーンアップは不要
+            pass
+
+        # ガベージコレクションの強制実行（必要に応じて）
     def record_timing(
         self,
         operation_name: str,
@@ -152,19 +225,8 @@ class PerformanceMonitor:
         success: bool = True,
         labels: Optional[Dict[str, str]] = None
     ) -> None:
-        """実行時間を記録"""
-        with self._lock:
-            # パフォーマンス統計更新
-            self._performance_stats[operation_name].add_measurement(duration, success)
-
-            # メトリクス記録
-            self._record_metric(f"{operation_name}.duration", duration, MetricType.TIMER, labels)
-            self._record_metric(f"{operation_name}.count", 1, MetricType.COUNTER, labels)
-
-            if success:
-                self._record_metric(f"{operation_name}.success", 1, MetricType.COUNTER, labels)
-            else:
-                self._record_metric(f"{operation_name}.error", 1, MetricType.COUNTER, labels)
+        """実行時間を記録 - 最適化版"""
+        self._record_measurement(operation_name, duration, success, labels)
 
     def record_api_request(
         self,
@@ -174,61 +236,27 @@ class PerformanceMonitor:
         cost: float = 0.0,
         rate_limited: bool = False
     ) -> None:
-        """API リクエストを記録"""
+        """API リクエストを記録 - 最適化版"""
         with self._lock:
             self._api_metrics.add_request(endpoint, duration, success, cost)
 
             if rate_limited:
                 self._api_metrics.rate_limit_hits += 1
 
-            # メトリクス記録
+            # メトリクス記録 - メモリ効率化
             labels = {"endpoint": endpoint}
-            self._record_metric("api.request.duration", duration, MetricType.TIMER, labels)
-            self._record_metric("api.request.cost", cost, MetricType.COUNTER, labels)
-
-            if success:
-                self._record_metric("api.request.success", 1, MetricType.COUNTER, labels)
-            else:
-                self._record_metric("api.request.error", 1, MetricType.COUNTER, labels)
+            self._record_measurement(f"api.request.{endpoint}", duration, success, labels)
 
     def record_metric(
         self,
         name: str,
         value: float,
-        metric_type: MetricType = MetricType.GAUGE,
         labels: Optional[Dict[str, str]] = None
     ) -> None:
-        """カスタムメトリクスを記録"""
+        """カスタムメトリクスを記録 - 最適化版"""
         with self._lock:
-            self._record_metric(name, value, metric_type, labels)
-
-    def _record_metric(
-        self,
-        name: str,
-        value: float,
-        _metric_type: MetricType,
-        labels: Optional[Dict[str, str]] = None
-    ) -> None:
-        """内部メトリクス記録"""
-        metric_value = MetricValue(value=value, labels=labels or {})
-        self._metrics[name].append(metric_value)        # 履歴サイズ制限
-        if len(self._metrics[name]) > self._max_history:
-            self._metrics[name] = self._metrics[name][-self._max_history:]
-
-        # 定期クリーンアップ
-        current_time = time.time()
-        if current_time - self._last_cleanup > self._cleanup_interval:
-            self._cleanup_old_metrics()
-            self._last_cleanup = current_time
-
-    def _cleanup_old_metrics(self) -> None:
-        """古いメトリクスをクリーンアップ"""
-        cutoff_time = datetime.now() - timedelta(hours=24)
-
-        for name, values in self._metrics.items():
-            # 24時間以上古いメトリクスを削除
-            recent_values = [v for v in values if v.timestamp > cutoff_time]
-            self._metrics[name] = recent_values
+            metric_value = MetricValue(value=value, labels=labels)
+            self._metrics[name].append(metric_value)
 
     def get_performance_stats(self, operation_name: Optional[str] = None) -> Dict[str, PerformanceStats]:
         """パフォーマンス統計を取得"""
@@ -242,103 +270,71 @@ class PerformanceMonitor:
         with self._lock:
             return self._api_metrics
 
-    def get_metric_summary(self, name: str, time_window: timedelta = timedelta(hours=1)) -> Dict[str, Any]:
-        """メトリクスサマリーを取得"""
+    def get_system_stats(self) -> Dict[str, Any]:
+        """システム統計を取得 - 最適化版"""
         with self._lock:
-            if name not in self._metrics:
-                return {}
-
-            cutoff_time = datetime.now() - time_window
-            recent_values = [v.value for v in self._metrics[name] if v.timestamp > cutoff_time]
-
-            if not recent_values:
-                return {}
+            total_operations = sum(stats.count for stats in self._performance_stats.values())
+            total_errors = sum(stats.error_count for stats in self._performance_stats.values())
 
             return {
-                "count": len(recent_values),
-                "sum": sum(recent_values),
-                "avg": sum(recent_values) / len(recent_values),
-                "min": min(recent_values),
-                "max": max(recent_values),
-                "latest": recent_values[-1] if recent_values else None
-            }
-
-    def get_system_health(self) -> Dict[str, Any]:
-        """システム健全性レポートを生成"""
-        with self._lock:
-            api_success_rate = self._api_metrics.get_success_rate()
-            avg_response_time = self._api_metrics.get_avg_response_time()
-
-            # 健全性判定
-            health_status = "healthy"
-            issues = []
-
-            if api_success_rate < 0.9:
-                health_status = "degraded"
-                issues.append(f"API成功率が低下: {api_success_rate:.1%}")
-
-            if avg_response_time > 5.0:
-                health_status = "warning" if health_status == "healthy" else health_status
-                issues.append(f"API応答時間が遅延: {avg_response_time:.2f}s")
-
-            if self._api_metrics.rate_limit_hits > 10:
-                health_status = "warning" if health_status == "healthy" else health_status
-                issues.append(f"レート制限に頻繁にヒット: {self._api_metrics.rate_limit_hits}回")
-
-            return {
-                "status": health_status,
                 "component": self._component_name,
-                "api_success_rate": api_success_rate,
-                "avg_response_time": avg_response_time,
-                "total_api_requests": self._api_metrics.total_requests,
-                "total_api_cost": self._api_metrics.total_cost,
-                "rate_limit_hits": self._api_metrics.rate_limit_hits,
-                "issues": issues,
-                "timestamp": datetime.now()
+                "total_operations": total_operations,
+                "total_errors": total_errors,
+                "error_rate": total_errors / total_operations if total_operations > 0 else 0.0,
+                "active_metrics": len(self._metrics),
+                "api_metrics": {
+                    "total_requests": self._api_metrics.total_requests,
+                    "success_rate": self._api_metrics.get_success_rate(),
+                    "total_cost": self._api_metrics.total_cost,
+                    "avg_response_time": self._api_metrics.get_avg_response_time()
+                }
             }
 
-    def export_metrics(self, format: str = "dict") -> Dict[str, Any]:
-        """メトリクスをエクスポート"""
+    def export_metrics(self, format_type: str = "dict") -> Any:
+        """メトリクスをエクスポート - 最適化版"""
         with self._lock:
-            if format == "prometheus":
-                return self._export_prometheus_format()
-            else:
+            if format_type == "dict":
                 return {
-                    "performance_stats": dict(self._performance_stats),
-                    "api_metrics": self._api_metrics,
-                    "custom_metrics": {
-                        name: [{"value": v.value, "timestamp": v.timestamp.isoformat(), "labels": v.labels}
-                               for v in values[-100:]]  # 最新100件
-                        for name, values in self._metrics.items()
+                    "performance_stats": {name: {
+                        "count": stats.count,
+                        "avg_time": stats.avg_time,
+                        "success_rate": stats.success_rate
+                    } for name, stats in self._performance_stats.items()},
+                    "api_metrics": {
+                        "total_requests": self._api_metrics.total_requests,
+                        "success_rate": self._api_metrics.get_success_rate(),
+                        "total_cost": self._api_metrics.total_cost
                     }
                 }
 
-    def _export_prometheus_format(self) -> Dict[str, Any]:
-        """Prometheus形式でメトリクスをエクスポート"""
-        prometheus_metrics = {}
+            elif format_type == "prometheus":
+                # Prometheus形式での出力（簡略版）
+                lines = []
+                for name, stats in self._performance_stats.items():
+                    lines.append(f"operation_count_total{{operation=\"{name}\"}} {stats.count}")
+                    lines.append(f"operation_duration_avg{{operation=\"{name}\"}} {stats.avg_time}")
+                    lines.append(f"operation_success_rate{{operation=\"{name}\"}} {stats.success_rate}")
 
-        # API メトリクス
-        prometheus_metrics["api_requests_total"] = self._api_metrics.total_requests
-        prometheus_metrics["api_requests_successful_total"] = self._api_metrics.successful_requests
-        prometheus_metrics["api_requests_failed_total"] = self._api_metrics.failed_requests
-        prometheus_metrics["api_cost_total"] = self._api_metrics.total_cost
-        prometheus_metrics["api_rate_limit_hits_total"] = self._api_metrics.rate_limit_hits
+                return "\n".join(lines)
 
-        # パフォーマンス統計
-        for name, stats in self._performance_stats.items():
-            prometheus_metrics[f"operation_duration_seconds_total{{operation=\"{name}\"}}"] = stats.total_time
-            prometheus_metrics[f"operation_count_total{{operation=\"{name}\"}}"] = stats.count
-            prometheus_metrics[f"operation_success_rate{{operation=\"{name}\"}}"] = stats.success_rate
-
-        return prometheus_metrics
+            else:
+                raise ValueError(f"Unsupported format: {format_type}")
 
     def reset_metrics(self) -> None:
-        """すべてのメトリクスをリセット"""
+        """メトリクスをリセット"""
         with self._lock:
             self._metrics.clear()
             self._performance_stats.clear()
             self._api_metrics = APIMetrics()
-            self._logger.info("All metrics reset")
+            self._last_cleanup = time.time()
+            gc.collect()  # メモリクリーンアップ
+
+    def __del__(self):
+        """デストラクタ - リソースクリーンアップ"""
+        try:
+            self.reset_metrics()
+        except Exception:
+            pass  # デストラクタでの例外は無視
 
 
 def create_performance_monitor(component_name: str) -> PerformanceMonitor:

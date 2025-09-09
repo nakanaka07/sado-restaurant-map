@@ -11,19 +11,16 @@ Phase 3-Full分散処理の中核制御システム
 """
 
 import asyncio
-import threading
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Set, Tuple
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Set
 from enum import Enum
 from contextlib import asynccontextmanager
-import json
-import logging
 
-from .cache_service import CacheService, CacheStats
-from .celery_config import celery_app, get_queue_stats
+from .cache_service import CacheService
+from .celery_config import celery_app
 from .performance_monitor import PerformanceMonitor, MetricType
 from .exceptions import OrchestrationError, HealthCheckError
 from .logger import get_logger

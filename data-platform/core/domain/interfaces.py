@@ -6,7 +6,7 @@ These abstractions enable dependency inversion and make the system more testable
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any, Union, Callable
 from dataclasses import dataclass
 
 
@@ -28,12 +28,12 @@ class DataStorage(ABC):
     """Abstract interface for data storage operations."""
 
     @abstractmethod
-    def save(self, data: Dict[str, Any], category: str) -> bool:
+    def save(self, data: List[Dict[str, Any]], category: str) -> bool:
         """
         Save data to storage.
 
         Args:
-            data: The data to save
+            data: The data to save (list of items)
             category: The category/type of data
 
         Returns:
@@ -265,7 +265,7 @@ class EventBus(ABC):
         pass
 
     @abstractmethod
-    def subscribe(self, event_type: str, handler: callable) -> None:
+    def subscribe(self, event_type: str, handler: Callable) -> None:
         """
         Subscribe to an event type.
 
@@ -276,7 +276,7 @@ class EventBus(ABC):
         pass
 
     @abstractmethod
-    def unsubscribe(self, event_type: str, handler: callable) -> None:
+    def unsubscribe(self, event_type: str, handler: Callable) -> None:
         """
         Unsubscribe from an event type.
 

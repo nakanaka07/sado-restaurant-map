@@ -28,7 +28,7 @@ from shared.utils.translators import translate_business_status, translate_types
 # Phase 2改善: 新しい共有コンポーネント
 from shared.error_handler import ErrorHandler, ErrorSeverity, ErrorCategory
 from shared.performance_monitor import PerformanceMonitor
-from shared.async_processor import AsyncProcessor, BatchConfig, ProcessingResult as AsyncProcessingResult
+from shared.async_processor import OptimizedAsyncProcessor, OptimizedBatchConfig, ProcessingResult as AsyncProcessingResult
 
 
 # 定数定義
@@ -66,13 +66,13 @@ class DataProcessor:
         self._enable_async = enable_async
         self._async_processor = None
         if enable_async:
-            batch_config = BatchConfig(
+            batch_config = OptimizedBatchConfig(
                 batch_size=config.processing.batch_size if hasattr(config.processing, 'batch_size') else 10,
-                max_concurrent=config.processing.max_concurrent if hasattr(config.processing, 'max_concurrent') else 5,
+                max_concurrent=config.processing.max_workers if hasattr(config.processing, 'max_workers') else 5,
                 retry_attempts=3,
                 timeout=30.0
             )
-            self._async_processor = AsyncProcessor("DataProcessor", batch_config)
+            self._async_processor = OptimizedAsyncProcessor("DataProcessor", batch_config)
 
         self.results: List[Dict[str, Any]] = []
         self.failed_queries: List[QueryData] = []
@@ -195,12 +195,13 @@ class DataProcessor:
 
             try:
                 result = None
+                query_type = query_data.get('type', 'store_name')  # デフォルトはstore_name
 
-                if query_data['type'] == 'cid_url':
+                if query_type == 'cid_url':
                     result = self.process_cid_url(query_data)
-                elif query_data['type'] == 'maps_url':
+                elif query_type == 'maps_url':
                     result = self.process_maps_url(query_data)
-                elif query_data['type'] == 'store_name':
+                elif query_type == 'store_name':
                     result = self.process_store_name(query_data)
 
                 if result:
@@ -276,8 +277,11 @@ class DataProcessor:
 
     async def _execute_async_batch_processing(self, filtered_queries: List[QueryData]) -> Any:
         """非同期バッチ処理の実行"""
+        if self._async_processor is None:
+            raise ValueError("Async processor is not initialized")
+
         async with self._async_processor:
-            return await self._async_processor.process_batch_async(
+            return await self._async_processor.process_batch_optimized(
                 filtered_queries,
                 self._process_single_query_async
             )
@@ -295,8 +299,12 @@ class DataProcessor:
         if result.error:
             self._error_handler.handle_error(
                 result.error,
-                ErrorSeverity.MEDIUM,
-                ErrorCategory.PROCESSING
+                "process_failed_result",
+                {
+                    "severity": ErrorSeverity.MEDIUM.value,
+                    "category": ErrorCategory.PROCESSING.value,
+                    "query_data": result.metadata.get('query_data') if result.metadata else None
+                }
             )
 
         # クエリデータを復元して失敗リストに追加
@@ -335,7 +343,11 @@ class DataProcessor:
 
     def _handle_async_processing_error(self, error: Exception, queries: List[QueryData], mode: str, _duration: float) -> ProcessingResult:
         """非同期処理エラーのハンドリング"""
-        self._error_handler.handle_error(error, ErrorSeverity.HIGH, ErrorCategory.PROCESSING)
+        self._error_handler.handle_error(
+            error,
+            operation="critical_processing_error",
+            context_data={"severity": "high", "category": "processing"}
+        )
 
         # フォールバック処理
         self._logger.warning(f"非同期処理でエラー発生。同期処理にフォールバック: {str(error)}")
@@ -344,14 +356,16 @@ class DataProcessor:
     async def _process_single_query_async(self, query_data: QueryData) -> Optional[Dict[str, Any]]:
         """単一クエリの非同期処理"""
         try:
-            with self._performance_monitor.measure_time(f"process_query.{query_data['type']}"):
+            query_type = query_data.get('type', 'unknown')
+            query_type = query_data.get('type', 'store_name')  # デフォルトはstore_name
+            with self._performance_monitor.measure_time(f"process_query.{query_type}"):
                 result = None
 
-                if query_data['type'] == 'cid_url':
+                if query_type == 'cid_url':
                     result = await self._process_cid_url_async(query_data)
-                elif query_data['type'] == 'maps_url':
+                elif query_type == 'maps_url':
                     result = await self._process_maps_url_async(query_data)
-                elif query_data['type'] == 'store_name':
+                elif query_type == 'store_name':
                     result = await self._process_store_name_async(query_data)
 
                 if result:
@@ -378,16 +392,26 @@ class DataProcessor:
                 loop = asyncio.get_event_loop()
                 place_data = await loop.run_in_executor(
                     None,
-                    self._api_client.get_place_details_by_cid,
+                    self._api_client.fetch_place_details,
                     cid
                 )
 
                 if place_data:
-                    # 同期版と同じフォーマット処理
-                    return self.format_result(place_data, query_data, store_name)
+                    # 同期版と同じフォーマット処理 (型キャストでPlaceDataとして扱う)
+                    from typing import cast
+                    place_data_typed = cast(PlaceData, place_data)
+                    return self.format_result(place_data_typed, query_data, store_name)
 
             except Exception as e:
-                self._error_handler.handle_error(e, ErrorSeverity.MEDIUM, ErrorCategory.API)
+                self._error_handler.handle_error(
+                    e,
+                    "process_cid_url_async",
+                    {
+                        "severity": ErrorSeverity.MEDIUM.value,
+                        "category": ErrorCategory.API.value,
+                        "query_data": query_data
+                    }
+                )
 
         return None
 
@@ -412,12 +436,23 @@ class DataProcessor:
                 )
 
                 if search_results:
-                    # 最初の結果を使用
+                    # 最初の結果を使用（型キャストでPlaceDataとして扱う）
                     place_data = search_results[0]
-                    return self.format_result(place_data, query_data, store_name)
+                    from typing import cast
+                    place_data_typed = cast(PlaceData, place_data)
+                    return self.format_result(place_data_typed, query_data, store_name)
 
             except Exception as e:
-                self._error_handler.handle_error(e, ErrorSeverity.MEDIUM, ErrorCategory.API)
+                self._error_handler.handle_error(
+                    e,
+                    "process_store_name_async",
+                    {
+                        "severity": ErrorSeverity.MEDIUM.value,
+                        "category": ErrorCategory.API.value,
+                        "query_data": query_data,
+                        "store_name": query_data.get('store_name')
+                    }
+                )
 
         return None
 
@@ -430,8 +465,8 @@ class DataProcessor:
                 "success_rate": len(self.results) / (len(self.results) + len(self.failed_queries)) if (len(self.results) + len(self.failed_queries)) > 0 else 0
             },
             "performance_stats": self._performance_monitor.get_performance_stats(),
-            "error_stats": self._error_handler.get_error_stats(),
-            "system_health": self._performance_monitor.get_system_health()
+            "error_stats": self._error_handler.get_metrics(),
+            "system_health": self._performance_monitor.get_system_stats()
         }
 
         if self._async_processor:
@@ -462,11 +497,13 @@ class DataProcessor:
         if cid:
             try:
                 # CIDから直接Place詳細を取得
-                place_data = self._api_client.fetch_place_by_cid(cid)
+                place_data = self._api_client.fetch_place_details(cid)
                 if place_data:
-                    # 生データを保存
-                    self.raw_places_data.append(place_data)
-                    return self.format_result(place_data, query_data, 'CID直接取得')
+                    # 生データを保存 (型キャストでPlaceDataとして扱う)
+                    from typing import cast
+                    place_data_typed = cast(PlaceData, place_data)
+                    self.raw_places_data.append(place_data_typed)
+                    return self.format_result(place_data_typed, query_data, 'CID直接取得')
             except Exception as e:
                 self._logger.warning("CID直接取得失敗", cid=cid, error=str(e))
 
@@ -505,12 +542,15 @@ class DataProcessor:
                 places = self._api_client.search_places(query)
 
                 if places:
-                    # 最も関連性の高い結果を選択
-                    best_place = self.select_best_match(places, store_name)
+                    # 最も関連性の高い結果を選択 (型キャストでPlaceDataリストとして扱う)
+                    from typing import cast
+                    places_typed = cast(List[PlaceData], places)
+                    best_place = self.select_best_match(places_typed, store_name)
                     if best_place:
                         # 生データを保存
-                        self.raw_places_data.append(best_place)
-                        return self.format_result(best_place, query_data, method)
+                        best_place_typed = cast(PlaceData, best_place)
+                        self.raw_places_data.append(best_place_typed)
+                        return self.format_result(best_place_typed, query_data, method)
 
                 time.sleep(self._config.processing.api_delay)
 
@@ -531,7 +571,7 @@ class DataProcessor:
 
         for place in places:
             address = place.get('formattedAddress', '')
-            if '佐渡' in address:
+            if address and '佐渡' in address:
                 sado_places.append(place)
             else:
                 other_places.append(place)
@@ -546,59 +586,87 @@ class DataProcessor:
 
     def format_result(self, place: PlaceData, query_data: QueryData, method: str) -> Dict[str, Any]:
         """結果をフォーマット"""
-        # 位置情報を取得
-        latitude = place.get('location', {}).get('latitude')
-        longitude = place.get('location', {}).get('longitude')
+        # 基本情報を取得
+        basic_info = self._extract_basic_info(place)
+        location_info = self._get_location_info(place)
+        maps_url = self._generate_maps_url(place, query_data)
+        category_info = self._get_category_info(place)
+        service_info = self._get_service_info(place)
+
+        # 結果辞書を組み立て
+        result = {
+            ProcessorConstants.PLACE_ID_KEY: basic_info['place_id'],
+            **self._create_name_fields(basic_info['name']),
+            **self._create_location_fields(basic_info['address'], location_info),
+            **self._create_rating_fields(place),
+            **self._create_business_fields(place),
+            **self._create_category_fields(category_info, place),
+            **service_info,
+            **self._create_metadata_fields(maps_url, method)
+        }
+
+        return result
+
+    def _extract_basic_info(self, place: PlaceData) -> Dict[str, str]:
+        """基本情報を抽出"""
+        place_id = place.get('id', '') or ''
+        address = place.get('formattedAddress', '') or ''
+
+        # 店舗名・施設名の安全な取得
+        display_name_data = place.get('displayName') or {}
+        name_text = display_name_data.get('text', '') if isinstance(display_name_data, dict) else ''
+
+        return {
+            'place_id': place_id,
+            'name': name_text,
+            'address': address
+        }
+
+    def _get_location_info(self, place: PlaceData):
+        """位置情報を取得"""
+        # 位置情報を安全に取得
+        location_data = place.get('location') or {}
+        latitude = location_data.get('latitude') if isinstance(location_data, dict) else None
+        longitude = location_data.get('longitude') if isinstance(location_data, dict) else None
         address = place.get('formattedAddress', '')
 
         # LocationServiceで統一的に位置分析
-        location_info = self._location_service.analyze_location(
+        return self._location_service.analyze_location(
             latitude=latitude,
             longitude=longitude,
             address=address
         )
 
-        # Google Maps URLを取得（新しいPlace ID形式を優先）
+    def _generate_maps_url(self, place: PlaceData, query_data: QueryData) -> str:
+        """マップURLを生成"""
         place_id = place.get('id', '')
-        maps_url = ''
 
         # 常に新しいPlace ID形式のURLを生成（最も確実）
         if place_id:
-            maps_url = f"https://www.google.com/maps/place/?q=place_id:{place_id}"
+            return f"https://www.google.com/maps/place/?q=place_id:{place_id}"
         # フォールバック: 元のCID URLがある場合
         elif query_data.get('type') == 'cid_url':
-            maps_url = query_data.get('url', '')
+            return query_data.get('url', '') or ''
         elif query_data.get('query', '').startswith('https://maps.google.com/place?cid='):
-            maps_url = query_data.get('query', '')
+            return query_data.get('query', '') or ''
 
-        # カテゴリとカテゴリ詳細を設定
+        return ''
+
+    def _get_category_info(self, place: PlaceData) -> Dict[str, Any]:
+        """カテゴリ情報を取得"""
         place_types = place.get('types', [])
         category = self._extract_primary_category(place_types)
         category_detail = ', '.join(translate_types(place_types))
 
-        result = {
-            ProcessorConstants.PLACE_ID_KEY: place_id,
-            '店舗名': place.get('displayName', {}).get('text', ''),
-            '施設名': place.get('displayName', {}).get('text', ''),  # トイレ用
-            '駐車場名': place.get('displayName', {}).get('text', ''),  # 駐車場用
-            '住所': address,
-            '所在地': self._extract_short_address(address),  # 簡潔な住所形式
-            '緯度': latitude or '',
-            '経度': longitude or '',
-            '評価': place.get('rating', ''),
-            '施設評価': place.get('rating', ''),  # トイレ・駐車場用
-            'レビュー数': place.get('userRatingCount', ''),
-            '営業状況': translate_business_status(place.get('businessStatus', '')),
-            '営業時間': self.format_opening_hours(place.get('regularOpeningHours')),
-            '詳細営業時間': self.format_opening_hours(place.get('regularOpeningHours')),  # トイレ・駐車場用
-            '電話番号': place.get('nationalPhoneNumber', ''),
-            'ウェブサイト': place.get('websiteUri', ''),
-            '価格帯': self.translate_price_level(place.get('priceLevel')),
-            '店舗タイプ': category_detail,
-            'カテゴリ': category,  # トイレ・駐車場用
-            'カテゴリ詳細': category_detail,  # トイレ・駐車場用
-            '施設説明': self._generate_facility_description(place, place_types),  # トイレ・駐車場用
-            '完全住所': place.get('formattedAddress', ''),  # トイレ・駐車場用
+        return {
+            'category': category,
+            'category_detail': category_detail,
+            'types': place_types
+        }
+
+    def _get_service_info(self, place: PlaceData) -> Dict[str, str]:
+        """サービス情報を取得"""
+        return {
             'テイクアウト': '可' if place.get('takeout') else '不可',
             'デリバリー': '可' if place.get('delivery') else '不可',
             '店内飲食': '可' if place.get('dineIn') else '不可',
@@ -610,19 +678,70 @@ class DataProcessor:
             '駐車場併設': '',  # APIから取得困難
             '支払い方法': '',  # APIから取得困難
             '料金体系': '',  # APIから取得困難
-            'トイレ設備': '',  # APIから取得困難
+            'トイレ設備': ''   # APIから取得困難
+        }
+
+    def _create_name_fields(self, name: str) -> Dict[str, str]:
+        """名前関連フィールドを作成"""
+        return {
+            '店舗名': name,
+            '施設名': name,  # トイレ用
+            '駐車場名': name   # 駐車場用
+        }
+
+    def _create_location_fields(self, address: str, location_info) -> Dict[str, Any]:
+        """位置関連フィールドを作成"""
+        return {
+            '住所': address,
+            '所在地': self._extract_short_address(address or ''),
+            '緯度': location_info.latitude or '',
+            '経度': location_info.longitude or '',
             '地区': location_info.district,
             'location_info': {
                 'district': location_info.district,
                 'is_in_sado': location_info.is_in_sado
             },
-            'is_in_sado': location_info.is_in_sado,
+            'is_in_sado': location_info.is_in_sado
+        }
+
+    def _create_rating_fields(self, place: PlaceData) -> Dict[str, Any]:
+        """評価関連フィールドを作成"""
+        rating = place.get('rating', '')
+        return {
+            '評価': rating,
+            '施設評価': rating,  # トイレ・駐車場用
+            'レビュー数': place.get('userRatingCount', '')
+        }
+
+    def _create_business_fields(self, place: PlaceData) -> Dict[str, str]:
+        """営業関連フィールドを作成"""
+        opening_hours = self.format_opening_hours(place.get('regularOpeningHours'))
+        return {
+            '営業状況': translate_business_status(place.get('businessStatus', '') or ''),
+            '営業時間': opening_hours,
+            '詳細営業時間': opening_hours,  # トイレ・駐車場用
+            '電話番号': place.get('nationalPhoneNumber', '') or '',
+            'ウェブサイト': place.get('websiteUri', '') or '',
+            '価格帯': self.translate_price_level(place.get('priceLevel'))
+        }
+
+    def _create_category_fields(self, category_info: Dict[str, Any], place: PlaceData) -> Dict[str, str]:
+        """カテゴリ関連フィールドを作成"""
+        return {
+            '店舗タイプ': category_info['category_detail'],
+            'カテゴリ': category_info['category'],  # トイレ・駐車場用
+            'カテゴリ詳細': category_info['category_detail'],  # トイレ・駐車場用
+            '施設説明': self._generate_facility_description(place, category_info['types']),  # トイレ・駐車場用
+            '完全住所': place.get('formattedAddress', '') or ''  # トイレ・駐車場用
+        }
+
+    def _create_metadata_fields(self, maps_url: str, method: str) -> Dict[str, Any]:
+        """メタデータ関連フィールドを作成"""
+        return {
             'cid_url': maps_url,
             '取得方法': method,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
-
-        return result
 
     def _extract_primary_category(self, place_types: List[str]) -> str:
         """場所タイプからプライマリカテゴリを抽出"""
@@ -882,7 +1001,7 @@ class DataProcessor:
 
         try:
             # データ検証の実行
-            validation_results = self._validate_data_for_save(data, sheet_name)
+            validation_results = self._validate_data_for_save(data)
 
             # 有効なデータがない場合の処理
             if not validation_results:
@@ -896,14 +1015,14 @@ class DataProcessor:
             self._logger.error("データ保存処理エラー", error=str(e), sheet=sheet_name)
             return False
 
-    def _validate_data_for_save(self, data: List[Dict[str, Any]], sheet_name: str) -> List[Any]:
+    def _validate_data_for_save(self, data: List[Dict[str, Any]]) -> List[Any]:
         """保存用データの検証を実行"""
         # 検証用データの準備（生データがあれば優先使用）
         data_to_validate = self.raw_places_data if self.raw_places_data else data
 
         validation_results = []
         for i, item in enumerate(data_to_validate):
-            validated_item = self._validate_single_item(item, i, sheet_name)
+            validated_item = self._validate_single_item(item, i)
             if validated_item:
                 validation_results.append(validated_item)
 
@@ -913,7 +1032,7 @@ class DataProcessor:
 
         return validation_results
 
-    def _validate_single_item(self, item: Any, index: int, sheet_name: str) -> Optional[Any]:
+    def _validate_single_item(self, item: Any, index: int) -> Optional[Any]:
         """単一アイテムの検証"""
         try:
             # 型安全性を確保：辞書形式の確認
@@ -923,7 +1042,7 @@ class DataProcessor:
                                    type=type(item).__name__)
                 return None
 
-            result = self._validator.validate(item, sheet_name)
+            result = self._validator.validate(item)
             if result and getattr(result, 'is_valid', True):
                 return result
 

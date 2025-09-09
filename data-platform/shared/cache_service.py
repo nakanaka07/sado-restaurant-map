@@ -5,15 +5,15 @@ High-performance distributed caching system for Google Places API data
 with intelligent TTL management and cache optimization.
 """
 
-from typing import Optional, Any, Dict, List, Union
+from typing import Optional, Any, Dict, List
 import redis.asyncio as redis
 import json
 import pickle
 import hashlib
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, asdict
-from .exceptions import CacheError, CacheConnectionError
+from .exceptions import CacheConnectionError
 from .types.core_types import PlaceData, SearchQuery
 
 

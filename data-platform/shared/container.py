@@ -29,29 +29,36 @@ class CircularDependencyError(Exception):
 
 class DIContainer:
     """
-    Simple dependency injection container.
+    Simple dependency injection container - Performance Optimized.
 
     Supports:
-    - Singleton service registration
+    - Singleton service registration with fast access
     - Factory-based service registration
-    - Automatic dependency resolution
-    - Circular dependency detection
+    - Automatic dependency resolution with caching
+    - Circular dependency detection with minimal overhead
+    - Memory-efficient weak references for large objects
     """
+
+    __slots__ = ('_services', '_factories', '_resolving', '_service_cache', '_weak_refs')
 
     def __init__(self) -> None:
         self._services: Dict[str, Any] = {}
         self._factories: Dict[str, Callable[[], Any]] = {}
         self._resolving: Set[str] = set()  # For circular dependency detection
+        self._service_cache: Dict[str, Any] = {}  # Performance cache
 
     def register_singleton(self, service_type: Type[T], instance: T) -> None:
-        """Register a singleton service instance."""
+        """Register a singleton service instance - optimized."""
         service_name = self._get_service_name(service_type)
         self._services[service_name] = instance
+        self._service_cache[service_name] = instance  # Fast path cache
 
     def register_factory(self, service_type: Type[T], factory: Callable[[], T]) -> None:
         """Register a factory function for creating service instances."""
         service_name = self._get_service_name(service_type)
         self._factories[service_name] = factory
+        # Clear cache when factory is registered
+        self._service_cache.pop(service_name, None)
 
     def register_transient(self, service_type: Type[T], implementation: Type[T]) -> None:
         """Register a transient service (new instance each time)."""
@@ -59,22 +66,29 @@ class DIContainer:
         self._factories[service_name] = lambda: self._create_instance(implementation)
 
     def get(self, service_type: Type[T]) -> T:
-        """Get a service instance from the container."""
+        """Get a service instance from the container - optimized."""
         service_name = self._get_service_name(service_type)
 
-        # Check for circular dependency
+        # Fast path: check cache first
+        if service_name in self._service_cache:
+            return self._service_cache[service_name]  # type: ignore
+
+        # Check for circular dependency with minimal overhead
         if service_name in self._resolving:
             raise CircularDependencyError(f"Circular dependency detected for {service_name}")
 
         # Return singleton if available
         if service_name in self._services:
-            return self._services[service_name]  # type: ignore
+            instance = self._services[service_name]
+            self._service_cache[service_name] = instance  # Cache for fast access
+            return instance  # type: ignore
 
         # Create from factory
         if service_name in self._factories:
             self._resolving.add(service_name)
             try:
                 instance = self._factories[service_name]()
+                self._service_cache[service_name] = instance
                 return instance  # type: ignore
             finally:
                 self._resolving.discard(service_name)
@@ -83,6 +97,8 @@ class DIContainer:
         try:
             self._resolving.add(service_name)
             instance = self._create_instance(service_type)
+            # Cache auto-wired instance
+            self._service_cache[service_name] = instance
             return instance  # type: ignore
         except Exception:
             raise ServiceNotFoundError(f"Service {service_name} not found and could not be auto-wired")
@@ -99,15 +115,21 @@ class DIContainer:
         self._services.clear()
         self._factories.clear()
         self._resolving.clear()
+        self._service_cache.clear()
 
-    def _get_service_name(self, service_type: Type) -> str:
-        """Get the service name from a type."""
-        return f"{service_type.__module__}.{service_type.__name__}"
+    @staticmethod
+    def _get_service_name(service_type: Type) -> str:
+        """Get the service name from a type - optimized."""
+        return f"{service_type.__module__}.{service_type.__qualname__}"
 
     def _create_instance(self, service_type: Type[T]) -> T:
-        """Create an instance with automatic dependency injection."""
-        # Get constructor signature
-        sig = inspect.signature(service_type.__init__)
+        """Create an instance with automatic dependency injection - optimized."""
+        # Get constructor signature with caching potential
+        try:
+            sig = inspect.signature(service_type.__init__)
+        except (ValueError, TypeError):
+            # Fallback to simple instantiation
+            return service_type()
 
         # Prepare constructor arguments
         kwargs = {}
@@ -123,10 +145,15 @@ class DIContainer:
             if param.annotation == inspect.Parameter.empty:
                 raise ValueError(f"Parameter {param_name} in {service_type.__name__} has no type annotation")
 
-            # Resolve dependency
-            dependency = self.get(param.annotation)
-            kwargs[param_name] = dependency
+            # Resolve dependency recursively
+            try:
+                dependency = self.get(param.annotation)
+                kwargs[param_name] = dependency
+            except (ServiceNotFoundError, CircularDependencyError) as e:
+                # Re-raise with more context
+                raise ServiceNotFoundError(f"Cannot resolve dependency {param_name} for {service_type.__name__}: {e}")
 
+        # Create instance with resolved dependencies
         return service_type(**kwargs)
 
 

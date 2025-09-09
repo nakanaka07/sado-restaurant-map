@@ -8,6 +8,7 @@ Phase 2改善: エラーハンドリングの統一
 """
 
 import traceback
+import uuid
 from enum import Enum
 from typing import Dict, Any, Optional, List, Union
 from dataclasses import dataclass, field
@@ -46,7 +47,7 @@ class ErrorCategory(Enum):
 
 @dataclass
 class ErrorContext:
-    """エラーの詳細情報"""
+    """エラーの詳細情報 - 強化版"""
     timestamp: datetime = field(default_factory=datetime.now)
     category: ErrorCategory = ErrorCategory.UNKNOWN
     severity: ErrorSeverity = ErrorSeverity.MEDIUM
@@ -58,6 +59,8 @@ class ErrorContext:
     user_message: str = ""
     technical_message: str = ""
     suggestions: List[str] = field(default_factory=list)
+    error_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    correlation_id: Optional[str] = None
 
 
 @dataclass
@@ -261,7 +264,10 @@ class ErrorHandler:
         return suggestions.get(category, ["ログを確認して詳細情報を確認してください"])
 
     def _log_error(self, error: Exception, context: ErrorContext) -> None:
-        """エラーをログに記録"""
+        """エラーをログに記録 - セキュリティ強化版"""
+        # センシティブ情報のマスキング
+        sanitized_details = self._sanitize_log_data(context.details)
+
         log_data = {
             "error_type": type(error).__name__,
             "category": context.category.value,
@@ -269,19 +275,53 @@ class ErrorHandler:
             "operation": context.operation,
             "retry_count": context.retry_count,
             "component": context.component,
-            **context.details
+            "error_id": context.error_id,
+            "correlation_id": context.correlation_id,
+            "timestamp_iso": context.timestamp.isoformat(),
+            **sanitized_details
         }
 
-        # 重要度別ログレベル
+        # 構造化ログ出力
         if context.severity == ErrorSeverity.CRITICAL:
-            self._logger.critical(context.technical_message, **log_data,
-                                stack_trace=traceback.format_exc())
+            self._logger.critical(
+                f"CRITICAL ERROR [{context.error_id}]: {context.technical_message}",
+                extra={"structured_data": log_data, "stack_trace": traceback.format_exc()}
+            )
         elif context.severity == ErrorSeverity.HIGH:
-            self._logger.error(context.technical_message, **log_data)
+            self._logger.error(
+                f"HIGH ERROR [{context.error_id}]: {context.technical_message}",
+                extra={"structured_data": log_data}
+            )
         elif context.severity == ErrorSeverity.MEDIUM:
-            self._logger.warning(context.technical_message, **log_data)
+            self._logger.warning(
+                f"MEDIUM WARNING [{context.error_id}]: {context.technical_message}",
+                extra={"structured_data": log_data}
+            )
         else:
-            self._logger.info(context.technical_message, **log_data)
+            self._logger.info(
+                f"LOW INFO [{context.error_id}]: {context.technical_message}",
+                extra={"structured_data": log_data}
+            )
+
+    def _sanitize_log_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """ログデータからセンシティブ情報を除去"""
+        sensitive_keys = {
+            'password', 'secret', 'token', 'key', 'credential',
+            'auth', 'authorization', 'cookie', 'session'
+        }
+
+        sanitized = {}
+        for key, value in data.items():
+            key_lower = key.lower()
+            if any(sensitive in key_lower for sensitive in sensitive_keys):
+                sanitized[key] = "***REDACTED***"
+            elif isinstance(value, str) and len(value) > 100:
+                # 長い文字列は切り詰め
+                sanitized[key] = value[:100] + "..."
+            else:
+                sanitized[key] = value
+
+        return sanitized
 
     def get_metrics(self) -> ErrorMetrics:
         """エラー統計を取得"""
