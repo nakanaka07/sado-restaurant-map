@@ -98,7 +98,7 @@ const createRuntimeCaching = () => [
         maxEntries: 100,
         maxAgeSeconds: 60 * 60 * 24 * 30, // 30日
       },
-      cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+      cacheKeyWillBeUsed: ({ request }: { request: Request }) => {
         // API キーを除外してキャッシュキーを生成
         const url = new URL(request.url);
         url.searchParams.delete("key");
@@ -137,7 +137,7 @@ const createRuntimeCaching = () => [
         maxEntries: 200, // エントリ数を増加
         maxAgeSeconds: 60 * 60 * 24 * 90, // 90日（長期キャッシュ）
       },
-      cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+      cacheKeyWillBeUsed: ({ request }: { request: Request }) => {
         // クエリパラメータを除外してキャッシュキーを生成
         const url = new URL(request.url);
         url.search = "";
