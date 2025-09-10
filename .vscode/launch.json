@@ -8,13 +8,30 @@
       "url": "http://127.0.0.1:5173/",
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
-      "userDataDir": false,
+      "runtimeExecutable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "userDataDir": "${workspaceFolder}/.vscode/edge-user-data",
       "runtimeArgs": [
-        "--disable-web-security",
+        "--remote-debugging-port=9223",
         "--disable-features=VizDisplayCompositor",
-        "--disable-dev-shm-usage",
-        "--no-sandbox"
+        "--disable-background-timer-throttling",
+        "--disable-renderer-backgrounding",
+        "--disable-backgrounding-occluded-windows"
       ],
+      "env": {
+        "VITE_DEBUG": "true"
+      },
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "type": "msedge",
+      "name": "🍽️ Sado Restaurant Map (Edge - Safe Mode)",
+      "request": "launch",
+      "url": "http://127.0.0.1:5173/",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true,
+      "runtimeExecutable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "userDataDir": "${workspaceFolder}/.vscode/edge-user-data-safe",
+      "runtimeArgs": ["--remote-debugging-port=9224"],
       "env": {
         "VITE_DEBUG": "true"
       },
@@ -27,12 +44,13 @@
       "url": "http://127.0.0.1:5173/",
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
-      "userDataDir": false,
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-user-data",
       "runtimeArgs": [
         "--disable-web-security",
         "--disable-dev-shm-usage",
         "--no-sandbox",
-        "--remote-debugging-port=9222"
+        "--remote-debugging-port=9222",
+        "--disable-extensions"
       ],
       "env": {
         "VITE_DEBUG": "true"
@@ -45,7 +63,6 @@
       "request": "launch",
       "url": "http://127.0.0.1:5173/",
       "webRoot": "${workspaceFolder}/src",
-      "firefoxExecutable": "firefox",
       "profile": "default",
       "preferences": {
         "devtools.debugger.remote-enabled": true,
