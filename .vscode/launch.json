@@ -3,34 +3,69 @@
   "configurations": [
     {
       "type": "msedge",
-      "name": "🍽️ Sado Restaurant Map (Edge)",
+      "name": "🍽️ Sado Restaurant Map (Edge) - Vite 7.1.4",
       "request": "launch",
-      "url": "http://localhost:5173/",
+      "url": "http://127.0.0.1:5173/",
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
       "userDataDir": false,
       "runtimeArgs": [
         "--disable-web-security",
-        "--disable-features=VizDisplayCompositor"
-      ]
+        "--disable-features=VizDisplayCompositor",
+        "--disable-dev-shm-usage",
+        "--no-sandbox"
+      ],
+      "env": {
+        "VITE_DEBUG": "true"
+      },
+      "internalConsoleOptions": "openOnSessionStart"
     },
     {
       "type": "chrome",
-      "name": "🍽️ Sado Restaurant Map (Chrome)",
+      "name": "🍽️ Sado Restaurant Map (Chrome) - Vite 7.1.4",
       "request": "launch",
-      "url": "http://localhost:5173/",
+      "url": "http://127.0.0.1:5173/",
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
       "userDataDir": false,
-      "runtimeArgs": ["--disable-web-security"]
+      "runtimeArgs": [
+        "--disable-web-security",
+        "--disable-dev-shm-usage",
+        "--no-sandbox",
+        "--remote-debugging-port=9222"
+      ],
+      "env": {
+        "VITE_DEBUG": "true"
+      },
+      "internalConsoleOptions": "openOnSessionStart"
     },
     {
       "type": "firefox",
-      "name": "🍽️ Sado Restaurant Map (Firefox)",
+      "name": "🍽️ Sado Restaurant Map (Firefox) - Vite 7.1.4",
       "request": "launch",
-      "url": "http://localhost:5173/",
+      "url": "http://127.0.0.1:5173/",
       "webRoot": "${workspaceFolder}/src",
-      "firefoxExecutable": "firefox"
+      "firefoxExecutable": "firefox",
+      "profile": "default",
+      "preferences": {
+        "devtools.debugger.remote-enabled": true,
+        "devtools.chrome.enabled": true,
+        "devtools.debugger.workers": true
+      }
+    },
+    {
+      "type": "node",
+      "name": "🔧 Vite Development Server Debug",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/vite",
+      "args": ["--host", "127.0.0.1", "--port", "5173"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "vite:*"
+      },
+      "outputCapture": "std",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
