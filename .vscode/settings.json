@@ -149,5 +149,7 @@
   },
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "workbench.editor.enablePreview": false,
-  "security.workspace.trust.untrustedFiles": "prompt"
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python-envs.pythonProjects": []
 }
