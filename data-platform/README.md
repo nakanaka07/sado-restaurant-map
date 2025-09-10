@@ -34,28 +34,54 @@ Google Places API から佐渡島の飲食店情報を収集し、Google Sheets 
 **総実装規模**: 7,957 行（実測値・企業レベルの本格実装）
 **完成度**: 96-100%（全コンポーネント本番対応済み）
 
-## クイックスタート
+## 🚀 クイックスタート
+
+### 1. 環境設定
 
 ```bash
-# 仮想環境有効化
-.venv\Scripts\Activate.ps1
+# 1. 環境変数ファイルを作成
+cp .env.example .env
 
-# 小規模テスト実行
-python interface/cli/main.py --target toilets --mode standard
+# 2. .env ファイルを編集して実際のAPIキーを設定
+# - PLACES_API_KEY (Google Places API キー)
+# - GOOGLE_SERVICE_ACCOUNT_PATH (サービスアカウントファイルパス)
+# - SPREADSHEET_ID (Google Sheets ID)
+```
 
-# 全データ収集実行
+### 2. 依存関係インストール
+
+```bash
+# Python仮想環境作成・有効化 (推奨)
+python -m venv .venv
+.venv\Scripts\Activate.ps1  # Windows
+# source .venv/bin/activate  # Linux/Mac
+
+# 依存関係インストール
+pip install -r config/requirements.txt
+```
+
+### 3. 動作テスト
+
+```bash
+# 設定確認（ドライラン）
+python interface/cli/main.py --dry-run
+
+# 小規模テスト実行（トイレデータ 2件）
+python interface/cli/main.py --target toilets --mode quick
+
+# 標準実行（全データ）
 python interface/cli/main.py --target all --mode standard
 ```
 
-## 環境設定
+## ⚙️ 環境設定詳細
 
 ### 必須環境変数
 
-```env
-PLACES_API_KEY=your_places_api_key_here
-GOOGLE_SERVICE_ACCOUNT_PATH=config/your-service-account.json
-SPREADSHEET_ID=your_spreadsheet_id_here
-```
+| 変数名                        | 説明                           | 取得方法                                                                                                |
+| ----------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `PLACES_API_KEY`              | Google Places API キー         | [Google Cloud Console](https://developers.google.com/maps/documentation/places/web-service/get-api-key) |
+| `GOOGLE_SERVICE_ACCOUNT_PATH` | サービスアカウントJSONファイル | [Google Cloud Console](https://cloud.google.com/iam/docs/creating-managing-service-account-keys)        |
+| `SPREADSHEET_ID`              | Google Sheets ID               | スプレッドシートURLから抽出                                                                             |
 
 ### オプション設定
 

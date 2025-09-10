@@ -2625,14 +2625,19 @@ def _update_model_parameters(self, optimized_params: Dict):
         iso_params = optimized_params.get('isolation_forest', {})
         if iso_params:
             from sklearn.ensemble import IsolationForest
-            self.isolation_forest = IsolationForest(**iso_params)
+            self.isolation_forest = IsolationForest(random_state=42, **iso_params)
 
     # RandomForest パラメータ更新
     if hasattr(self, 'random_forest'):
         rf_params = optimized_params.get('random_forest', {})
         if rf_params:
             from sklearn.ensemble import RandomForestClassifier
-            self.random_forest = RandomForestClassifier(**rf_params)
+            self.random_forest = RandomForestClassifier(
+                random_state=42,
+                min_samples_leaf=1,
+                max_features='sqrt',
+                **rf_params
+            )
 
 
 # MLEngine クラスへの拡張
