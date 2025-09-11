@@ -65,6 +65,14 @@ firebase-adminsdk-*.json
 !.vscode/settings.json
 !.vscode/launch.json
 !.vscode/tasks.json
+!.vscode/launch.template.json
+!.vscode/DEBUG_SYNC_GUIDE.md
+
+# VS Code デバッグ用一時ファイル
+.vscode/edge-user-data/
+.vscode/edge-user-data-safe/
+.vscode/chrome-user-data/
+.vscode/launch.local.json
 
 # その他のIDE
 .idea/
