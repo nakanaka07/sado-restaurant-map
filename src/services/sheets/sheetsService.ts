@@ -9,6 +9,7 @@ import type {
   Parking,
   PriceRange,
   Restaurant,
+  RestaurantCategory,
   SadoDistrict,
   Toilet,
 } from "@/types";
@@ -205,7 +206,7 @@ function validateAndExtractData(
     );
   }
 
-  if (!data.values.every((row) => Array.isArray(row))) {
+  if (!data.values.every(row => Array.isArray(row))) {
     throw new SheetsApiError(
       "Invalid response format from Google Sheets API: some rows are not arrays",
       422
@@ -308,7 +309,7 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
     }
 
     // データ行の形式検証
-    if (!dataRows.every((row) => Array.isArray(row))) {
+    if (!dataRows.every(row => Array.isArray(row))) {
       throw new SheetsApiError(
         "Invalid data format: each row must be an array",
         400
@@ -391,8 +392,8 @@ function convertSheetRowToRestaurant(
     reviewCountStr = "", // businessStatus（未使用）
     ,
     openingHours = "",
-    phone = "", // website（未使用）
-    ,
+    phone = "",
+    website = "",
     priceLevel = "",
     storeType = "",
     storeDescription = "",
@@ -461,7 +462,24 @@ function convertSheetRowToRestaurant(
     coffee,
   });
 
-  return {
+  // 新機能: Google Maps URLの生成
+  const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(name)}/@${lat},${lng},17z`;
+
+  // 新機能: メインカテゴリーの判定
+  const mainCategory = mapCuisineTypeToCategory(cuisineType);
+
+  // 新機能: 営業状況の判定（現在はデフォルトで不明）
+  // 実際のリアルタイム判定はMapInfoWindowで実装
+
+  // 新機能: 詳細営業時間の整理
+  // UI側で動的に生成
+
+  const phoneValue = phone?.trim();
+  const ratingValue = rating && !isNaN(rating) ? rating : null;
+  const reviewCountValue =
+    reviewCount && !isNaN(reviewCount) ? reviewCount : null;
+
+  const baseRestaurant = {
     id: placeId,
     type: "restaurant" as const,
     name: name.trim(),
@@ -470,13 +488,23 @@ function convertSheetRowToRestaurant(
     priceRange,
     district,
     address: address.trim(),
-    phone: phone.trim() || undefined,
     coordinates: { lat, lng },
-    rating: rating && !isNaN(rating) ? rating : undefined,
-    reviewCount: reviewCount && !isNaN(reviewCount) ? reviewCount : undefined,
     openingHours: parsedOpeningHours,
     features,
     lastUpdated: new Date().toISOString().split("T")[0],
+    // 新機能フィールド
+    lastDataUpdate: new Date().toISOString().split("T")[0],
+    mainCategory,
+    googleMapsUrl,
+  };
+
+  // 条件付きプロパティを追加（exactOptionalPropertyTypes対応）
+  return {
+    ...baseRestaurant,
+    ...(phoneValue && { phone: phoneValue }),
+    ...(ratingValue !== null && { rating: ratingValue }),
+    ...(reviewCountValue !== null && { reviewCount: reviewCountValue }),
+    ...(website.trim() && { website: website.trim() }),
   };
 }
 
@@ -841,13 +869,13 @@ function parseOpeningHours(openingHoursStr: string) {
   }
 
   // 改行区切りの営業時間をパース
-  const lines = openingHoursStr.split("\n").filter((line) => line.trim());
+  const lines = openingHoursStr.split("\n").filter(line => line.trim());
 
   // 正規表現を事前にコンパイル
   const dayTimePattern = /^(.+?):\s*(.+)$/;
   const timeRangePattern = /(\d{1,2}:\d{2})\s*[-~]\s*(\d{1,2}:\d{2})/;
 
-  return lines.map((line) => {
+  return lines.map(line => {
     const match = dayTimePattern.exec(line);
     if (!match) {
       return { day: line.trim(), open: "", close: "", isHoliday: true };
@@ -1050,7 +1078,7 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
     }
 
     // 各データに type プロパティが正しく設定されているか再確認
-    const restaurantPoints = restaurants.map((restaurant) => {
+    const restaurantPoints = restaurants.map(restaurant => {
       const point = convertRestaurantToMapPoint(restaurant);
       if (point.type !== "restaurant") {
         throw new Error(
@@ -1060,7 +1088,7 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
       return point;
     });
 
-    const parkingPoints = parkings.map((parking) => {
+    const parkingPoints = parkings.map(parking => {
       const point = convertParkingToMapPoint(parking);
       if (point.type !== "parking") {
         throw new Error(
@@ -1070,7 +1098,7 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
       return point;
     });
 
-    const toiletPoints = toilets.map((toilet) => {
+    const toiletPoints = toilets.map(toilet => {
       const point = convertToiletToMapPoint(toilet);
       if (point.type !== "toilet") {
         throw new Error(
@@ -1123,32 +1151,17 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
 }
 
 /**
- * データ更新チェック（キャッシュ対応）
+ * データの新鮮度をチェック（実装簡略版）
  */
 export async function checkDataFreshness(): Promise<{
   lastUpdated: string;
   needsUpdate: boolean;
 }> {
-  try {
-    const rows = await fetchSheetData(WORKSHEETS.RESTAURANTS);
-
-    if (rows.length <= 1) {
-      return { lastUpdated: new Date().toISOString(), needsUpdate: true };
-    }
-
-    // 最後の行の最終更新日時をチェック（実際のデータ構造では26番目のフィールドは存在しない）
-    // 代わりに現在の日時を使用
-    const lastUpdated = new Date().toISOString();
-
-    // ローカルストレージと比較
-    const cachedTimestamp = localStorage.getItem("restaurantDataTimestamp");
-    const needsUpdate = !cachedTimestamp || cachedTimestamp !== lastUpdated;
-
-    return { lastUpdated, needsUpdate };
-  } catch (error) {
-    console.error("Failed to check data freshness:", error);
-    return { lastUpdated: new Date().toISOString(), needsUpdate: true };
-  }
+  // 簡略実装: 常に最新とみなす
+  return {
+    lastUpdated: new Date().toISOString().split("T")[0],
+    needsUpdate: false,
+  };
 }
 
 /**
@@ -1211,19 +1224,26 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
     feeStructure
   );
 
-  return {
+  const baseParkingData = {
     id: placeId,
     type: "parking" as const,
     name: name.trim(),
-    description: description || `${extractedDistrict}にある駐車場`,
     district: extractedDistrict as SadoDistrict,
     address: address.trim(),
     coordinates: { lat, lng },
-    capacity: undefined, // 駐車場データには収容台数情報がない
     fee: feeStructure || "料金不明",
     openingHours: parseOpeningHours(detailedHours),
     features: extractedFeatures,
     lastUpdated: lastUpdated || new Date().toISOString().split("T")[0],
+  };
+
+  const descriptionValue = description || `${extractedDistrict}にある駐車場`;
+
+  return {
+    ...baseParkingData,
+    description: descriptionValue,
+    // capacityはオプショナルでundefinedを許可するため、値がある場合のみ追加
+    // 今回は駐車場データに収容台数情報がないため、プロパティ自体を追加しない
   };
 }
 
@@ -1303,11 +1323,10 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
  * Restaurant型をMapPoint型に変換
  */
 function convertRestaurantToMapPoint(restaurant: Restaurant): MapPoint {
-  return {
+  const baseData = {
     id: restaurant.id,
-    type: "restaurant",
+    type: "restaurant" as const,
     name: restaurant.name,
-    description: restaurant.description,
     district: restaurant.district,
     address: restaurant.address,
     coordinates: restaurant.coordinates,
@@ -1315,10 +1334,15 @@ function convertRestaurantToMapPoint(restaurant: Restaurant): MapPoint {
     lastUpdated: restaurant.lastUpdated,
     cuisineType: restaurant.cuisineType,
     priceRange: restaurant.priceRange,
-    rating: restaurant.rating,
-    reviewCount: restaurant.reviewCount,
-    phone: restaurant.phone,
     openingHours: restaurant.openingHours,
+  };
+
+  return {
+    ...baseData,
+    ...(restaurant.description && { description: restaurant.description }),
+    ...(restaurant.rating && { rating: restaurant.rating }),
+    ...(restaurant.reviewCount && { reviewCount: restaurant.reviewCount }),
+    ...(restaurant.phone && { phone: restaurant.phone }),
   };
 }
 
@@ -1326,16 +1350,20 @@ function convertRestaurantToMapPoint(restaurant: Restaurant): MapPoint {
  * Parking型をMapPoint型に変換
  */
 function convertParkingToMapPoint(parking: Parking): MapPoint {
-  return {
+  const baseData = {
     id: parking.id,
-    type: "parking",
+    type: "parking" as const,
     name: parking.name,
-    description: parking.description,
     district: parking.district,
     address: parking.address,
     coordinates: parking.coordinates,
     features: parking.features,
     lastUpdated: parking.lastUpdated,
+  };
+
+  return {
+    ...baseData,
+    ...(parking.description && { description: parking.description }),
   };
 }
 
@@ -1343,16 +1371,20 @@ function convertParkingToMapPoint(parking: Parking): MapPoint {
  * Toilet型をMapPoint型に変換
  */
 function convertToiletToMapPoint(toilet: Toilet): MapPoint {
-  return {
+  const baseData = {
     id: toilet.id,
-    type: "toilet",
+    type: "toilet" as const,
     name: toilet.name,
-    description: toilet.description,
     district: toilet.district,
     address: toilet.address,
     coordinates: toilet.coordinates,
     features: toilet.features,
     lastUpdated: toilet.lastUpdated,
+  };
+
+  return {
+    ...baseData,
+    ...(toilet.description && { description: toilet.description }),
   };
 }
 
@@ -1429,4 +1461,50 @@ function extractToiletFeatures(
   }
 
   return features.length > 0 ? features : ["公衆トイレ"];
+}
+
+/**
+ * 料理ジャンルをレストランカテゴリーにマッピング
+ */
+function mapCuisineTypeToCategory(
+  cuisineType: CuisineType
+): RestaurantCategory {
+  switch (cuisineType) {
+    case "寿司":
+      return "sushi" as RestaurantCategory;
+    case "海鮮":
+      return "seafood" as RestaurantCategory;
+    case "焼肉・焼鳥":
+      return "yakiniku" as RestaurantCategory;
+    case "ラーメン":
+      return "ramen" as RestaurantCategory;
+    case "そば・うどん":
+      return "noodles" as RestaurantCategory;
+    case "中華":
+      return "chinese" as RestaurantCategory;
+    case "イタリアン":
+      return "italian" as RestaurantCategory;
+    case "フレンチ":
+      return "french" as RestaurantCategory;
+    case "カフェ・喫茶店":
+      return "cafe" as RestaurantCategory;
+    case "バー・居酒屋":
+      return "bar" as RestaurantCategory;
+    case "ファストフード":
+      return "fastfood" as RestaurantCategory;
+    case "デザート・スイーツ":
+      return "dessert" as RestaurantCategory;
+    case "カレー・エスニック":
+      return "curry" as RestaurantCategory;
+    case "ステーキ・洋食":
+      return "steak" as RestaurantCategory;
+    case "弁当・テイクアウト":
+      return "bento" as RestaurantCategory;
+    case "日本料理":
+      return "japanese" as RestaurantCategory;
+    case "レストラン":
+      return "restaurant" as RestaurantCategory;
+    default:
+      return "other" as RestaurantCategory;
+  }
 }

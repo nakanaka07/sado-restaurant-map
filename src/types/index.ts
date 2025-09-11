@@ -7,35 +7,35 @@
 // 基盤・共通型
 // ==============================
 export type {
-  LatLngLiteral,
-  MapPointType,
-  SadoDistrict,
-  OpeningHours,
   AsyncState,
   GeolocationState,
+  LatLngLiteral,
+  MapPointType,
+  OpeningHours,
   PromiseState,
+  SadoDistrict,
 } from "./core.types";
 
 // ==============================
 // インターフェース分離 (Phase C2)
 // ==============================
 export type {
-  IDataSource,
-  IRestaurantDataSource,
-  IMapPointProvider,
-  IFilterStateManager,
-  IMapStateManager,
   IAnalyticsEvent,
   IAnalyticsProvider,
-  IValidationResult,
-  IValidator,
-  IRestaurantValidator,
-  IErrorHandler,
   ICacheProvider,
-  IMapPointFactory,
   IConfigProvider,
+  IDataSource,
+  IErrorHandler,
+  IFilterStateManager,
+  IMapPointFactory,
+  IMapPointProvider,
+  IMapStateManager,
+  IRestaurantDataSource,
+  IRestaurantValidator,
   ITypeGuard,
   IUtility,
+  IValidationResult,
+  IValidator,
 } from "./interfaces.types";
 
 // ==============================
@@ -43,87 +43,91 @@ export type {
 // ==============================
 export type {
   CuisineType,
+  DetailedOpeningHours,
+  ExtendedMapFilters,
+  MapPoint,
+  Parking,
   PriceRange,
   Restaurant,
-  Parking,
+  TimeRange,
   Toilet,
-  MapPoint,
-  ExtendedMapFilters,
 } from "./restaurant.types";
+
+export { BusinessStatus, RestaurantCategory } from "./restaurant.types";
 
 // ==============================
 // Google Maps関連型
 // ==============================
 export type {
-  MarkerState,
-  CustomMarkerProps,
-  MapSettings,
   AdvancedMarkerConfig,
-  MapControlOptions,
-  MapStyleConfig,
-  WebGLOverlayOptions,
+  CustomMarkerProps,
   Map3DSettings,
+  MapControlOptions,
+  MapSettings,
+  MapStyleConfig,
+  MarkerState,
+  WebGLOverlayOptions,
 } from "./map.types";
 
 // ==============================
 // API・サービス関連型
 // ==============================
 export type {
-  SheetsApiResponse,
-  SheetsApiError,
-  SheetsApiConfig,
   ApiError,
   ApiRequestOptions,
   ApiResponse,
+  BatchConfig,
   CacheConfig,
   DataSourceConfig,
-  BatchConfig,
   PlacesApiConfig,
-  PlacesSearchRequest,
   PlacesApiResponse,
+  PlacesSearchRequest,
+  SheetsApiConfig,
+  SheetsApiError,
+  SheetsApiResponse,
 } from "./api.types";
 
 // ==============================
 // UI・コンポーネント関連型
 // ==============================
 export type {
-  Theme,
-  ViewMode,
-  SortOrder,
-  UIState,
-  MapFilters,
-  SearchResultConfig,
-  BaseComponentProps,
-  ButtonProps,
-  ModalProps,
-  FormFieldProps,
   AccessibilityConfig,
-  FocusManagementConfig,
-  KeyboardNavConfig,
   AnimationConfig,
-  TransitionConfig,
-  ViewTransitionConfig,
+  BaseComponentProps,
   BreakpointConfig,
-  ResponsiveConfig,
-  NotificationType,
+  ButtonProps,
+  FocusManagementConfig,
+  FormFieldProps,
+  KeyboardNavConfig,
+  MapFilters,
+  ModalProps,
   NotificationConfig,
+  NotificationType,
+  ResponsiveConfig,
+  SearchResultConfig,
+  SortOrder,
+  Theme,
+  TransitionConfig,
+  UIState,
+  ViewMode,
+  ViewTransitionConfig,
 } from "./ui.types";
 
 // ==============================
 // アプリケーション状態関連型
 // ==============================
 export type {
-  AppState,
-  InitialAppState,
   AppAction,
-  AppDispatch,
   AppContextValue,
-  PersistedSettings,
-  ErrorType,
-  StructuredError,
-  ErrorState,
-  AsyncOperationType,
+  AppDispatch,
+  AppState,
   AsyncOperationState,
+  AsyncOperationType,
+  ErrorState,
+  ErrorType,
+  InitialAppState,
+  PersistedSettings,
+  StructuredError,
   UserPreferences,
 } from "./app.types";
 

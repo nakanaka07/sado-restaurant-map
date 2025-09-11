@@ -9,13 +9,8 @@ import {
   fetchRestaurantsFromSheets,
   SheetsApiError,
 } from "@/services";
-import type {
-  AsyncState,
-  MapFilters,
-  OpeningHours,
-  Restaurant,
-  SortOrder,
-} from "@/types";
+import type { AsyncState, MapFilters, Restaurant, SortOrder } from "@/types";
+import { calculateBusinessStatus } from "@/utils";
 import {
   startTransition,
   useCallback,
@@ -149,31 +144,29 @@ export function useRestaurants(
 
     // 料理ジャンルフィルター
     if (filters.cuisineTypes.length > 0) {
-      filtered = filtered.filter((restaurant) =>
+      filtered = filtered.filter(restaurant =>
         filters.cuisineTypes.includes(restaurant.cuisineType)
       );
     }
 
     // 価格帯フィルター
     if (filters.priceRanges.length > 0) {
-      filtered = filtered.filter((restaurant) =>
+      filtered = filtered.filter(restaurant =>
         filters.priceRanges.includes(restaurant.priceRange)
       );
     }
 
     // 地区フィルター
     if (filters.districts.length > 0) {
-      filtered = filtered.filter((restaurant) =>
+      filtered = filtered.filter(restaurant =>
         filters.districts.includes(restaurant.district)
       );
     }
 
     // 特徴フィルター
     if (filters.features.length > 0) {
-      filtered = filtered.filter((restaurant) =>
-        filters.features.some((feature) =>
-          restaurant.features.includes(feature)
-        )
+      filtered = filtered.filter(restaurant =>
+        filters.features.some(feature => restaurant.features.includes(feature))
       );
     }
 
@@ -181,7 +174,7 @@ export function useRestaurants(
     if (filters.searchQuery?.trim()) {
       const query = filters.searchQuery.toLowerCase().trim();
       filtered = filtered.filter(
-        (restaurant) =>
+        restaurant =>
           restaurant.name?.toLowerCase().includes(query) ||
           restaurant.description?.toLowerCase().includes(query) ||
           restaurant.address?.toLowerCase().includes(query) ||
@@ -192,7 +185,7 @@ export function useRestaurants(
 
     // 評価フィルター
     if (filters.minRating) {
-      filtered = filtered.filter((restaurant) => {
+      filtered = filtered.filter(restaurant => {
         return (
           restaurant.rating &&
           filters.minRating !== undefined &&
@@ -203,46 +196,19 @@ export function useRestaurants(
 
     // 営業中フィルター
     if (filters.openNow) {
-      const now = new Date();
-      const currentDay = ["日", "月", "火", "水", "木", "金", "土"][
-        now.getDay()
-      ];
-      const currentTime = now.getHours() * 60 + now.getMinutes();
-
-      filtered = filtered.filter((restaurant) => {
-        // openingHours が存在するかチェック
-        if (
-          !restaurant.openingHours ||
-          !Array.isArray(restaurant.openingHours)
-        ) {
+      filtered = filtered.filter(restaurant => {
+        if (!restaurant.openingHours || restaurant.openingHours.length === 0) {
           return false;
         }
 
-        return restaurant.openingHours.some((hours: OpeningHours) => {
-          if (hours.isHoliday || !hours.day?.includes(currentDay)) {
-            return false;
-          }
-
-          const openTime = parseTimeToMinutes(hours.open);
-          const closeTime = parseTimeToMinutes(hours.close);
-
-          if (openTime && closeTime) {
-            // 営業時間が日をまたぐ場合の処理
-            if (closeTime < openTime) {
-              return currentTime >= openTime || currentTime <= closeTime;
-            } else {
-              return currentTime >= openTime && currentTime <= closeTime;
-            }
-          }
-
-          return false;
-        });
+        const businessStatus = calculateBusinessStatus(restaurant.openingHours);
+        return businessStatus === "営業中";
       });
     }
 
     // 距離フィルター（現在地が設定されている場合）
     if (filters.currentLocation && filters.radius) {
-      filtered = filtered.filter((restaurant) => {
+      filtered = filtered.filter(restaurant => {
         const distance = calculateDistance(
           filters.currentLocation as { lat: number; lng: number },
           restaurant.coordinates
@@ -258,7 +224,7 @@ export function useRestaurants(
   // フィルター更新（React 19 startTransition使用）
   const updateFilters = useCallback((newFilters: Partial<MapFilters>) => {
     startTransition(() => {
-      setFilters((prev) => ({ ...prev, ...newFilters }));
+      setFilters(prev => ({ ...prev, ...newFilters }));
     });
   }, []);
 
@@ -332,7 +298,7 @@ export function useRestaurants(
 
   // データ更新（Google Sheets API連携）
   const refreshData = useCallback(async () => {
-    setAsyncState((prev) => ({ ...prev, loading: true, error: null }));
+    setAsyncState(prev => ({ ...prev, loading: true, error: null }));
 
     try {
       // データ更新チェック
@@ -419,30 +385,6 @@ function calculateDistance(
 
 function toRadians(degrees: number): number {
   return degrees * (Math.PI / 180);
-}
-
-/**
- * 時間文字列（HH:MM）を分単位に変換
- */
-function parseTimeToMinutes(timeStr: string): number | null {
-  if (!timeStr || typeof timeStr !== "string") {
-    return null;
-  }
-
-  const timeRegex = /^(\d{1,2}):(\d{2})$/;
-  const match = timeRegex.exec(timeStr);
-  if (!match) {
-    return null;
-  }
-
-  const hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
-
-  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-    return null;
-  }
-
-  return hours * 60 + minutes;
 }
 
 /**

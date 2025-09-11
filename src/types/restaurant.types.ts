@@ -5,14 +5,61 @@
 
 import type {
   LatLngLiteral,
+  MapPointType,
   OpeningHours,
   SadoDistrict,
-  MapPointType,
 } from "./core.types";
 
 // ==============================
 // 飲食店関連の型定義
 // ==============================
+
+/** 営業状況 */
+export enum BusinessStatus {
+  OPEN = "営業中",
+  CLOSED = "閉店中",
+  UNKNOWN = "不明",
+}
+
+/** 詳細営業時間 */
+export interface DetailedOpeningHours {
+  readonly monday?: TimeRange;
+  readonly tuesday?: TimeRange;
+  readonly wednesday?: TimeRange;
+  readonly thursday?: TimeRange;
+  readonly friday?: TimeRange;
+  readonly saturday?: TimeRange;
+  readonly sunday?: TimeRange;
+}
+
+/** 時間範囲 */
+export interface TimeRange {
+  readonly open: string; // "09:00"
+  readonly close: string; // "21:00"
+  readonly isClosed?: boolean;
+}
+
+/** レストランカテゴリー */
+export enum RestaurantCategory {
+  JAPANESE = "japanese",
+  SUSHI = "sushi",
+  SEAFOOD = "seafood",
+  YAKINIKU = "yakiniku",
+  RAMEN = "ramen",
+  NOODLES = "noodles",
+  CHINESE = "chinese",
+  ITALIAN = "italian",
+  FRENCH = "french",
+  CAFE = "cafe",
+  BAR = "bar",
+  FAST_FOOD = "fastfood",
+  DESSERT = "dessert",
+  CURRY = "curry",
+  STEAK = "steak",
+  BENTO = "bento",
+  RESTAURANT = "restaurant",
+  OTHER = "other",
+}
 
 /** 料理ジャンル */
 export type CuisineType =
@@ -61,6 +108,12 @@ export interface Restaurant {
   readonly features: readonly string[];
   readonly images?: readonly string[];
   readonly lastUpdated: string;
+  // 新機能追加フィールド
+  readonly businessStatus?: BusinessStatus;
+  readonly detailedOpeningHours?: DetailedOpeningHours;
+  readonly lastDataUpdate?: string; // データ更新日
+  readonly mainCategory?: RestaurantCategory;
+  readonly googleMapsUrl?: string;
 }
 
 // ==============================

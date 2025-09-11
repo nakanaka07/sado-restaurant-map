@@ -5,23 +5,23 @@
 
 // Sheets Service
 export {
-  fetchRestaurantsFromSheets,
-  fetchParkingsFromSheets,
-  fetchToiletsFromSheets,
-  fetchAllMapPoints,
-  checkDataFreshness,
   SheetsApiError,
+  checkDataFreshness,
+  fetchAllMapPoints,
+  fetchParkingsFromSheets,
+  fetchRestaurantsFromSheets,
+  fetchToiletsFromSheets,
   type SheetRestaurantData,
 } from "./sheets/sheetsService";
 
 // Abstract Services (Phase C2: Dependency Inversion)
 export {
   AbstractDataService,
-  RestaurantService,
-  ParkingService,
-  ToiletService,
-  ServiceFactory,
   MapDataService,
+  ParkingService,
+  RestaurantService,
+  ServiceFactory,
+  ToiletService,
 } from "./abstractions/AbstractDataService";
 
 // Re-export types for convenience

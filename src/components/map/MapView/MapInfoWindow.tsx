@@ -3,55 +3,79 @@
  * 地図のInfoWindowコンテンツコンポーネント
  */
 
+import {
+  BusinessStatusBadge,
+  DetailedBusinessHours,
+  GoogleMapsLinkButton,
+  LastUpdatedDisplay,
+  RestaurantCategoryChip,
+} from "@/components/common";
 import type { MapPoint } from "@/types";
 import { isRestaurant } from "@/types/type-guards";
-import { getMarkerIcon } from "../utils";
+import {
+  calculateBusinessStatus,
+  formatBusinessHoursForDisplay,
+} from "@/utils";
 
 interface MapInfoWindowProps {
   readonly point: MapPoint;
 }
 
 export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
-  const { background } = getMarkerIcon(point);
-
   return (
     <div style={{ padding: "16px", minWidth: "300px", maxWidth: "400px" }}>
       {/* ヘッダー */}
       <div style={{ marginBottom: "12px" }}>
-        <h3
+        <div
           style={{
-            margin: "0 0 4px 0",
-            color: "#1f2937",
-            fontSize: "18px",
-            fontWeight: "bold",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            marginBottom: "8px",
           }}
         >
-          {point.name}
-        </h3>
+          <h3
+            style={{
+              margin: "0 0 4px 0",
+              color: "#1f2937",
+              fontSize: "18px",
+              fontWeight: "bold",
+              flex: "1",
+            }}
+          >
+            {point.name}
+          </h3>
+
+          {/* 営業状況バッジ（飲食店のみ） */}
+          {point.type === "restaurant" &&
+            isRestaurant(point) &&
+            point.openingHours && (
+              <BusinessStatusBadge
+                status={calculateBusinessStatus(point.openingHours)}
+                size="medium"
+                showIcon={true}
+              />
+            )}
+        </div>
+
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: "8px",
             marginBottom: "8px",
+            flexWrap: "wrap",
           }}
         >
-          <span
-            style={{
-              backgroundColor: background,
-              color: "white",
-              padding: "2px 8px",
-              borderRadius: "12px",
-              fontSize: "12px",
-              fontWeight: "500",
-            }}
-          >
-            {point.type === "restaurant" &&
-              isRestaurant(point) &&
-              point.cuisineType}
-            {point.type === "parking" && "駐車場"}
-            {point.type === "toilet" && "公衆トイレ"}
-          </span>
+          {/* カテゴリーチップ */}
+          <RestaurantCategoryChip
+            category={getCategoryDisplay(point)}
+            size="medium"
+            showIcon={true}
+            variant="filled"
+          />
+
+          {/* 価格帯（飲食店のみ） */}
           {point.type === "restaurant" && isRestaurant(point) && (
             <span
               style={{
@@ -155,32 +179,26 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
           </div>
         )}
 
-        {/* 営業時間（駐車場・トイレ） */}
-        {(point.type === "parking" || point.type === "toilet") &&
-          point.openingHours &&
-          point.openingHours.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                margin: "6px 0",
-                fontSize: "14px",
-                color: "#374151",
-              }}
-            >
-              <span style={{ marginRight: "8px" }}>🕐</span>
-              <span>
-                {point.openingHours
-                  .map(
-                    (hours) =>
-                      `${hours.day}: ${
-                        hours.isHoliday
-                          ? "休業"
-                          : `${hours.open}-${hours.close}`
-                      }`
-                  )
-                  .join(", ")}
-              </span>
+        {/* 営業時間（飲食店のみ） */}
+        {point.type === "restaurant" &&
+          isRestaurant(point) &&
+          point.openingHours && (
+            <div style={{ margin: "8px 0" }}>
+              <div
+                style={{
+                  fontSize: "13px",
+                  color: "#374151",
+                  marginBottom: "4px",
+                }}
+              >
+                🕐 今日: {formatBusinessHoursForDisplay(point.openingHours)}
+              </div>
+              <DetailedBusinessHours
+                openingHours={point.openingHours}
+                compact={true}
+                highlightToday={false}
+                showLabel={false}
+              />
             </div>
           )}
       </div>
@@ -219,7 +237,7 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
               gap: "4px",
             }}
           >
-            {point.features.map((feature) => (
+            {point.features.map(feature => (
               <span
                 key={`feature-${feature}`}
                 style={{
@@ -237,6 +255,32 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
         </div>
       )}
 
+      {/* メタ情報・最終更新日 */}
+      {point.type === "restaurant" && isRestaurant(point) && (
+        <div
+          style={{
+            marginTop: "12px",
+            paddingTop: "8px",
+            borderTop: "1px solid #e5e7eb",
+            fontSize: "11px",
+            color: "#6b7280",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <LastUpdatedDisplay
+            lastUpdated={point.lastDataUpdate || point.lastUpdated}
+            format="relative"
+            size="small"
+            showFreshnessIndicator={true}
+          />
+          {point.mainCategory && (
+            <span style={{ fontSize: "10px" }}>🏷️ {point.mainCategory}</span>
+          )}
+        </div>
+      )}
+
       {/* アクションボタン */}
       <div
         style={{
@@ -244,63 +288,80 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
           display: "flex",
           gap: "8px",
           justifyContent: "space-between",
+          flexWrap: "wrap",
         }}
       >
-        <button
-          onClick={() =>
-            window.open(
-              `https://www.google.com/maps/dir/?api=1&destination=${point.coordinates.lat},${point.coordinates.lng}`,
-              "_blank"
-            )
-          }
-          style={{
-            background: "#1f2937",
-            color: "white",
-            border: "none",
-            padding: "8px 12px",
-            borderRadius: "6px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "#111827";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "#1f2937";
-          }}
-        >
-          🗺️ ルート案内
-        </button>
+        {/* Google Maps ルート案内 */}
+        <GoogleMapsLinkButton
+          name={point.name}
+          coordinates={point.coordinates}
+          {...(point.type === "restaurant" &&
+            isRestaurant(point) && { placeId: point.id })}
+          mode="directions"
+          variant="primary"
+          size="medium"
+          showIcon={true}
+        />
 
-        {point.type === "restaurant" && point.website && (
-          <button
-            onClick={() => window.open(point.website, "_blank")}
-            style={{
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              fontSize: "12px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#1d4ed8";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#2563eb";
-            }}
-          >
-            🌐 ウェブサイト
-          </button>
-        )}
+        {/* Google Maps 表示 */}
+        <GoogleMapsLinkButton
+          name={point.name}
+          coordinates={point.coordinates}
+          {...(point.type === "restaurant" &&
+            isRestaurant(point) && { placeId: point.id })}
+          mode="search"
+          variant="secondary"
+          size="medium"
+          showIcon={true}
+        />
+
+        {/* ウェブサイトボタン（飲食店のみ） */}
+        {point.type === "restaurant" &&
+          isRestaurant(point) &&
+          point.website && (
+            <button
+              type="button"
+              onClick={() =>
+                window.open(point.website, "_blank", "noopener,noreferrer")
+              }
+              style={{
+                background: "#10b981",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                fontSize: "14px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                fontWeight: "500",
+                transition: "background-color 0.2s ease",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.backgroundColor = "#059669";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.backgroundColor = "#10b981";
+              }}
+            >
+              🌐 ウェブサイト
+            </button>
+          )}
       </div>
     </div>
   );
+}
+
+/**
+ * カテゴリー表示のヘルパー関数（複雑な三項演算子を単純化）
+ */
+function getCategoryDisplay(point: MapPoint): string {
+  if (point.type === "restaurant" && isRestaurant(point)) {
+    return point.cuisineType;
+  }
+  if (point.type === "parking") {
+    return "駐車場";
+  }
+  return "公衆トイレ";
 }
