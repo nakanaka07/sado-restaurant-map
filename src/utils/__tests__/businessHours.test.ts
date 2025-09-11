@@ -6,23 +6,18 @@ import {
   formatBusinessHoursForDisplay,
 } from "../businessHours";
 
-// モックの現在時刻を設定（月曜日 12:30 - 日本時間で確実に12:30になるよう調整）
-// UTC 03:30 = JST 12:30 （UTC+9）
-const mockNow = new Date("2024-01-15T03:30:00.000Z");
-
 describe("businessHours", () => {
-  beforeEach(() => {
-    vi.setSystemTime(mockNow);
-  });
-
   afterEach(() => {
     vi.useRealTimers();
   });
 
   describe("calculateBusinessStatus", () => {
     it("営業中の場合、営業中を返す", () => {
+      // 確実に月曜日12:30として認識される日時を作成
+      const mondayDate = new Date(2024, 0, 15, 12, 30); // 年, 月(0ベース), 日, 時, 分
+
       const openingHours: readonly OpeningHours[] = [
-        { day: "月曜日", open: "11:00", close: "15:00", isHoliday: false }, // 営業時間を延長
+        { day: "月曜日", open: "11:00", close: "15:00", isHoliday: false },
         { day: "火曜日", open: "11:00", close: "15:00", isHoliday: false },
         { day: "水曜日", open: "11:00", close: "15:00", isHoliday: false },
         { day: "木曜日", open: "11:00", close: "15:00", isHoliday: false },
@@ -31,12 +26,14 @@ describe("businessHours", () => {
         { day: "日曜日", open: "11:00", close: "15:00", isHoliday: false },
       ];
 
-      // 現在時刻を明示的に渡してテスト
-      const status = calculateBusinessStatus(openingHours, mockNow);
+      const status = calculateBusinessStatus(openingHours, mondayDate);
       expect(status).toBe(BusinessStatus.OPEN);
     });
 
     it("営業時間外の場合、閉店中を返す", () => {
+      // 確実に月曜日12:30として認識される日時を作成
+      const mondayDate = new Date(2024, 0, 15, 12, 30);
+
       const openingHours: readonly OpeningHours[] = [
         { day: "月曜日", open: "18:00", close: "22:00", isHoliday: false },
         { day: "火曜日", open: "18:00", close: "22:00", isHoliday: false },
@@ -47,17 +44,20 @@ describe("businessHours", () => {
         { day: "日曜日", open: "18:00", close: "22:00", isHoliday: false },
       ];
 
-      const status = calculateBusinessStatus(openingHours, mockNow);
+      const status = calculateBusinessStatus(openingHours, mondayDate);
       expect(status).toBe(BusinessStatus.CLOSED);
     });
 
     it("定休日の場合、閉店中を返す", () => {
+      // 確実に月曜日12:30として認識される日時を作成
+      const mondayDate = new Date(2024, 0, 15, 12, 30);
+
       const openingHours: readonly OpeningHours[] = [
         { day: "月曜日", open: "", close: "", isHoliday: true }, // 定休日
         { day: "火曜日", open: "11:00", close: "14:00", isHoliday: false },
       ];
 
-      const status = calculateBusinessStatus(openingHours, mockNow);
+      const status = calculateBusinessStatus(openingHours, mondayDate);
       expect(status).toBe(BusinessStatus.CLOSED);
     });
 
@@ -68,6 +68,10 @@ describe("businessHours", () => {
   });
 
   describe("formatBusinessHoursForDisplay", () => {
+    beforeEach(() => {
+      vi.setSystemTime(new Date(2024, 0, 15, 12, 30)); // 月曜日 12:30
+    });
+
     it("通常の営業時間をフォーマット", () => {
       const openingHours: readonly OpeningHours[] = [
         { day: "月曜日", open: "11:00", close: "14:00", isHoliday: false },
@@ -75,6 +79,7 @@ describe("businessHours", () => {
       ];
 
       const formatted = formatBusinessHoursForDisplay(openingHours);
+      // 関数は「本日 11:00-14:00」の形式で返すため
       expect(formatted).toContain("11:00");
       expect(formatted).toContain("14:00");
     });
