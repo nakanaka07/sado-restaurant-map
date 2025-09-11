@@ -150,7 +150,7 @@
 .filter-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1300;
+  z-index: 1300; /* Google Mapsコントロール（z-index: 1000-1100）より上 */
 
   /* モダンな半透明背景 */
   background: color-mix(in srgb, black 60%, transparent);
@@ -160,10 +160,12 @@
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* フレックスレイアウト */
+  /* フレックスレイアウト - センター上寄り配置（Google Mapsコントロールを避ける） */
   display: flex;
-  align-items: flex-end;
-  padding: 0;
+  align-items: flex-start;
+  justify-content: center;
+  /* Google Mapsコントロール（通常60px程度）を避けて配置 - 対称的な余白 */
+  padding: 80px 40px 40px 40px;
 }
 
 .filter-modal-overlay[open] {
@@ -175,29 +177,33 @@
    ============================================== */
 
 .filter-modal-content {
-  /* 基本レイアウト */
-  width: 100%;
-  max-height: 60vh; /* 計画書の40%マップ視認性確保 */
+  /* 基本レイアウト - センター上寄り配置用 */
+  width: 380px;
+  max-width: calc(100vw - 80px);
+  max-height: calc(100vh - 160px);
+  min-height: 500px;
 
-  /* 外観 */
+  /* 外観 - 左上配置用に角丸を全体に */
   background: color-mix(in srgb, white 98%, transparent);
-  border-radius: 16px 16px 0 0;
+  border-radius: 16px;
   box-shadow:
-    0 -4px 24px color-mix(in srgb, black 15%, transparent),
-    0 -2px 8px color-mix(in srgb, black 8%, transparent);
+    0 8px 32px color-mix(in srgb, black 20%, transparent),
+    0 2px 16px color-mix(in srgb, black 8%, transparent);
 
   /* オーバーフロー処理 */
   overflow: hidden;
   display: flex;
   flex-direction: column;
 
-  /* アニメーション */
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* アニメーション - センターからfade-in + gentle scale */
+  transform: translateY(-10px) scale(0.98);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .filter-modal-overlay[open] .filter-modal-content {
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 /* ==============================================
@@ -209,21 +215,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px 16px;
+  padding: 16px 20px;
   border-bottom: 1px solid color-mix(in srgb, #e5e7eb 100%, transparent);
   background: color-mix(in srgb, white 100%, #f8fafc 5%);
+  border-radius: 16px 16px 0 0;
 }
 
-/* スワイプハンドル（モバイル用インジケータ） */
+/* スワイプハンドル（左上配置では非表示） */
 .filter-modal-handle {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 32px;
-  height: 4px;
-  background: color-mix(in srgb, #d1d5db 100%, transparent);
-  border-radius: 2px;
+  display: none;
 }
 
 /* モーダルタイトル */
@@ -303,7 +303,9 @@
 /* 小画面（～480px） */
 @container modal-filter (max-width: 480px) {
   .filter-modal-content {
-    max-height: 70vh; /* 小画面では少し高く */
+    width: calc(100vw - 40px);
+    max-height: calc(100vh - 120px);
+    min-height: 450px;
   }
 
   .filter-trigger-btn {
@@ -313,7 +315,7 @@
   }
 
   .filter-modal-header {
-    padding: 16px 20px 12px;
+    padding: 12px 16px;
   }
 
   .filter-modal-title {
@@ -324,9 +326,13 @@
 /* 中画面（481px～768px） */
 @container modal-filter (min-width: 481px) and (max-width: 768px) {
   .filter-modal-content {
-    max-height: 55vh; /* 中画面では最適な高さ */
-    margin: 0 16px;
-    border-radius: 16px;
+    width: 400px;
+    max-height: calc(100vh - 100px);
+    min-height: 480px;
+  }
+
+  .filter-modal-overlay {
+    padding: 60px 30px 30px 30px;
   }
 
   .filter-trigger-btn {
@@ -338,21 +344,16 @@
 /* 大画面（769px～） */
 @container modal-filter (min-width: 769px) {
   .filter-modal-overlay {
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding: 80px 50px 50px 50px;
   }
 
   .filter-modal-content {
-    width: 100%;
-    max-width: 480px;
-    max-height: 600px;
-    border-radius: 16px;
-    margin: 32px;
-    transform: scale(0.9);
-  }
-
-  .filter-modal-overlay[open] .filter-modal-content {
-    transform: scale(1);
+    width: 420px;
+    max-height: calc(100vh - 160px);
+    min-height: 520px;
+    /* scaleアニメーションは既に設定済み */
   }
 
   .filter-trigger-btn {
@@ -450,7 +451,9 @@
 
   @media (max-width: 480px) {
     .filter-modal-content {
-      max-height: 70vh;
+      width: calc(100vw - 40px);
+      max-height: calc(100vh - 120px);
+      min-height: 450px;
     }
 
     .filter-trigger-btn {
@@ -458,28 +461,35 @@
       font-size: 13px;
       border-radius: 20px;
     }
+
+    .filter-modal-overlay {
+      padding: 60px 20px 20px 20px;
+    }
   }
 
   @media (min-width: 481px) and (max-width: 768px) {
     .filter-modal-content {
-      max-height: 55vh;
-      margin: 0 16px;
-      border-radius: 16px;
+      width: 400px;
+      max-height: calc(100vh - 100px);
+      min-height: 480px;
+    }
+
+    .filter-modal-overlay {
+      padding: 60px 30px 30px 30px;
     }
   }
 
   @media (min-width: 769px) {
     .filter-modal-overlay {
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
+      padding: 80px 50px 50px 50px;
     }
 
     .filter-modal-content {
-      width: 100%;
-      max-width: 480px;
-      max-height: 600px;
-      border-radius: 16px;
-      margin: 32px;
+      width: 420px;
+      max-height: calc(100vh - 160px);
+      min-height: 520px;
     }
   }
 }

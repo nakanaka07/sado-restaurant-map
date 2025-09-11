@@ -182,28 +182,43 @@
 
 ### 6. 📈 包括改善プロンプト
 
-**使用場面**: 総合的な品質向上
+**使用場面**: 総合的な品質向上・プロダクションレディ化
 
 ```text
 このコードを包括的に改善してください：
 
-【ユーザー体験】
-- ユーザビリティ・UXの向上
-- アクセシビリティ対応（WCAG 2.2 AA）
-- レスポンシブ・モバイル対応
-- パフォーマンス最適化
+【ユーザー体験・UX最適化】
+- 佐渡飲食店マップ特有のUX向上（観光客・地元ユーザー双方への配慮）
+- アクセシビリティ対応（WCAG 2.2 AA準拠・スクリーンリーダー対応）
+- レスポンシブ・モバイルファースト設計（PWA機能活用）
+- Google Maps Advanced Markers を活用した直感的な地図操作
+- 位置情報・検索・フィルタリングのユーザビリティ向上
+- Core Web Vitals 最適化（LCP・FID・CLS・INP改善）
 
-【開発者体験】
-- コード品質・保守性向上
-- テストカバレッジの充実
-- ドキュメント・コメント整備
-- 開発効率の改善
+【React 19・TypeScript 5.7 現代化】
+- Actions API（useActionState・useOptimistic）でフォーム・状態管理改善
+- use() hook による Promise・Context 処理の効率化
+- ref as prop パターン適用（forwardRef不要化）
+- Document Metadata 直接レンダリング（title・meta・link）
+- TypeScript enum 安全性パターン（文字列リテラル → enum値）
+- 厳格な型ガード・ユーザー定義型ガード実装
+- Concurrent Features（startTransition・useDeferredValue）活用
 
-【技術品質】
-- セキュリティ強化
-- 型安全性向上
-- エラーハンドリング改善
-- 最新ベストプラクティス採用
+【開発者体験・保守性】
+- コード品質・可読性・保守性の総合向上
+- テストカバレッジ充実（Vitest 3.2・Testing Library）
+- TypeScript 5.7 型システム最大活用（Generic・Union Types）
+- ESLint 9・Prettier 最新設定による品質保証
+- 開発効率向上（Vite 7 Environment API・Hot Reload）
+- デバッグ・トラブルシューティング機能強化
+
+【技術品質・プロダクション対応】
+- セキュリティ強化（XSS・CSRF対策・API キー管理）
+- エラーハンドリング・ユーザーフレンドリーなエラー表示
+- PWA機能最適化（Service Worker・オフライン対応・App Shortcuts）
+- GitHub Pages デプロイ最適化（静的ファイル・CDN・キャッシュ戦略）
+- Google Maps API 使用量最適化・パフォーマンス改善
+- 長期運用・スケーラビリティ・技術的負債の解消
 ```
 
 ## 📁 ディレクトリレベルプロンプト
