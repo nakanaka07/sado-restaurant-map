@@ -10,6 +10,7 @@ import {
   SheetsApiError,
 } from "@/services";
 import type { AsyncState, MapFilters, Restaurant, SortOrder } from "@/types";
+import { BusinessStatus } from "@/types";
 import { calculateBusinessStatus } from "@/utils";
 import {
   startTransition,
@@ -202,7 +203,7 @@ export function useRestaurants(
         }
 
         const businessStatus = calculateBusinessStatus(restaurant.openingHours);
-        return businessStatus === "営業中";
+        return businessStatus === BusinessStatus.OPEN;
       });
     }
 
@@ -302,7 +303,7 @@ export function useRestaurants(
 
     try {
       // データ更新チェック
-      const { needsUpdate } = await checkDataFreshness();
+      const { needsUpdate } = checkDataFreshness();
 
       // キャッシュされたデータがある場合はそれを使用
       if (!needsUpdate) {

@@ -7,7 +7,7 @@ import type { CuisineType, RestaurantCategory } from "@/types";
 import React from "react";
 
 interface RestaurantCategoryChipProps {
-  readonly category: CuisineType | RestaurantCategory | string;
+  readonly category: CuisineType | RestaurantCategory;
   readonly size?: "small" | "medium";
   readonly showIcon?: boolean;
   readonly variant?: "filled" | "outlined";
@@ -60,9 +60,7 @@ RestaurantCategoryChip.displayName = "RestaurantCategoryChip";
 /**
  * カテゴリに応じた設定を取得
  */
-function getCategoryConfig(
-  category: CuisineType | RestaurantCategory | string
-) {
+function getCategoryConfig(category: CuisineType | RestaurantCategory) {
   // category is already a string type in all cases, so we use it directly
   const categoryStr = String(category);
 

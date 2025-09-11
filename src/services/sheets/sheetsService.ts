@@ -1153,10 +1153,10 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
 /**
  * データの新鮮度をチェック（実装簡略版）
  */
-export async function checkDataFreshness(): Promise<{
+export function checkDataFreshness(): {
   lastUpdated: string;
   needsUpdate: boolean;
-}> {
+} {
   // 簡略実装: 常に最新とみなす
   return {
     lastUpdated: new Date().toISOString().split("T")[0],

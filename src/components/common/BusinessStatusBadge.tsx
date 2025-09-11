@@ -3,7 +3,7 @@
  * 営業中/閉店中/不明の状態を視覚的に表示
  */
 
-import type { BusinessStatus } from "@/types";
+import { BusinessStatus } from "@/types";
 import React from "react";
 
 interface BusinessStatusBadgeProps {
@@ -55,7 +55,7 @@ BusinessStatusBadge.displayName = "BusinessStatusBadge";
  */
 function getStatusConfig(status: BusinessStatus) {
   switch (status) {
-    case "営業中":
+    case BusinessStatus.OPEN:
       return {
         text: "営業中",
         icon: "🟢",
@@ -64,7 +64,7 @@ function getStatusConfig(status: BusinessStatus) {
         border: "#86efac", // green-300
       };
 
-    case "閉店中":
+    case BusinessStatus.CLOSED:
       return {
         text: "閉店中",
         icon: "🔴",
@@ -73,7 +73,7 @@ function getStatusConfig(status: BusinessStatus) {
         border: "#fca5a5", // red-300
       };
 
-    case "不明":
+    case BusinessStatus.UNKNOWN:
     default:
       return {
         text: "営業時間不明",
