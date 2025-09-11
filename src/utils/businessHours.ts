@@ -52,8 +52,8 @@ export function calculateBusinessStatus(
     if (currentMinutes >= openTime || currentMinutes <= closeTime) {
       return BusinessStatus.OPEN;
     }
-  } else if (currentMinutes >= openTime && currentMinutes <= closeTime) {
-    // 通常営業時間の判定（else if に変更）
+  } else if (currentMinutes >= openTime && currentMinutes < closeTime) {
+    // 営業時間内の判定（closeTimeは含まない）
     return BusinessStatus.OPEN;
   }
 
@@ -131,6 +131,13 @@ function findTodayHours(
   openingHours: readonly OpeningHours[],
   dayName: string
 ): OpeningHours | null {
+  // 完全一致を優先
+  const exactMatch = openingHours.find(hours => hours.day === dayName);
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  // 部分一致での検索（フォールバック）
   return (
     openingHours.find(
       hours =>
