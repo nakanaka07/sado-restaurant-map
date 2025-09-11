@@ -3,11 +3,11 @@
  * 営業状況判定、営業時間の表示フォーマットなどを担当
  */
 
-import type {
+import {
   BusinessStatus,
-  DetailedOpeningHours,
-  OpeningHours,
-  TimeRange,
+  type DetailedOpeningHours,
+  type OpeningHours,
+  type TimeRange,
 } from "@/types";
 
 /**
@@ -18,7 +18,7 @@ export function calculateBusinessStatus(
   currentTime: Date = new Date()
 ): BusinessStatus {
   if (!openingHours || openingHours.length === 0) {
-    return "不明" as BusinessStatus;
+    return BusinessStatus.UNKNOWN;
   }
 
   const currentDay = getCurrentDay(currentTime);
@@ -28,36 +28,36 @@ export function calculateBusinessStatus(
   const todayHours = findTodayHours(openingHours, currentDay);
 
   if (!todayHours) {
-    return "不明" as BusinessStatus;
+    return BusinessStatus.UNKNOWN;
   }
 
   if (todayHours.isHoliday) {
-    return "閉店中" as BusinessStatus;
+    return BusinessStatus.CLOSED;
   }
 
   const openTime = parseTimeToMinutes(todayHours.open);
   const closeTime = parseTimeToMinutes(todayHours.close);
 
   if (!openTime || !closeTime) {
-    return "不明" as BusinessStatus;
+    return BusinessStatus.UNKNOWN;
   }
 
   // 24時間営業の判定
   if (openTime === 0 && closeTime === 1440) {
-    return "営業中" as BusinessStatus;
+    return BusinessStatus.OPEN;
   }
 
   // 深夜営業（日をまたぐ）の判定
   if (closeTime < openTime) {
     if (currentMinutes >= openTime || currentMinutes <= closeTime) {
-      return "営業中" as BusinessStatus;
+      return BusinessStatus.OPEN;
     }
   } else if (currentMinutes >= openTime && currentMinutes <= closeTime) {
     // 通常営業時間の判定（else if に変更）
-    return "営業中" as BusinessStatus;
+    return BusinessStatus.OPEN;
   }
 
-  return "閉店中" as BusinessStatus;
+  return BusinessStatus.CLOSED;
 }
 
 /**

@@ -1,4 +1,5 @@
-import type { BusinessStatus, OpeningHours } from "@/types";
+import type { OpeningHours } from "@/types";
+import { BusinessStatus } from "@/types";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   calculateBusinessStatus,
@@ -30,7 +31,7 @@ describe("businessHours", () => {
       ];
 
       const status = calculateBusinessStatus(openingHours);
-      expect(status).toBe("営業中" as BusinessStatus);
+      expect(status).toBe(BusinessStatus.OPEN);
     });
 
     it("営業時間外の場合、閉店中を返す", () => {
@@ -45,7 +46,7 @@ describe("businessHours", () => {
       ];
 
       const status = calculateBusinessStatus(openingHours);
-      expect(status).toBe("閉店中" as BusinessStatus);
+      expect(status).toBe(BusinessStatus.CLOSED);
     });
 
     it("定休日の場合、閉店中を返す", () => {
@@ -55,12 +56,12 @@ describe("businessHours", () => {
       ];
 
       const status = calculateBusinessStatus(openingHours);
-      expect(status).toBe("閉店中" as BusinessStatus);
+      expect(status).toBe(BusinessStatus.CLOSED);
     });
 
     it("営業時間情報がない場合、不明を返す", () => {
       const status = calculateBusinessStatus([]);
-      expect(status).toBe("不明" as BusinessStatus);
+      expect(status).toBe(BusinessStatus.UNKNOWN);
     });
   });
 
