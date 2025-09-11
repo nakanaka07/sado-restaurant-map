@@ -6,8 +6,9 @@ import {
   formatBusinessHoursForDisplay,
 } from "../businessHours";
 
-// モックの現在時刻を設定（月曜日 12:30 JST）
-const mockNow = new Date("2024-01-15T12:30:00+09:00");
+// モックの現在時刻を設定（月曜日 12:30 - 日本時間で確実に12:30になるよう調整）
+// UTC 03:30 = JST 12:30 （UTC+9）
+const mockNow = new Date("2024-01-15T03:30:00.000Z");
 
 describe("businessHours", () => {
   beforeEach(() => {
@@ -30,7 +31,8 @@ describe("businessHours", () => {
         { day: "日曜日", open: "11:00", close: "15:00", isHoliday: false },
       ];
 
-      const status = calculateBusinessStatus(openingHours);
+      // 現在時刻を明示的に渡してテスト
+      const status = calculateBusinessStatus(openingHours, mockNow);
       expect(status).toBe(BusinessStatus.OPEN);
     });
 
@@ -45,7 +47,7 @@ describe("businessHours", () => {
         { day: "日曜日", open: "18:00", close: "22:00", isHoliday: false },
       ];
 
-      const status = calculateBusinessStatus(openingHours);
+      const status = calculateBusinessStatus(openingHours, mockNow);
       expect(status).toBe(BusinessStatus.CLOSED);
     });
 
@@ -55,7 +57,7 @@ describe("businessHours", () => {
         { day: "火曜日", open: "11:00", close: "14:00", isHoliday: false },
       ];
 
-      const status = calculateBusinessStatus(openingHours);
+      const status = calculateBusinessStatus(openingHours, mockNow);
       expect(status).toBe(BusinessStatus.CLOSED);
     });
 
