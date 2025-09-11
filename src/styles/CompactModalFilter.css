@@ -180,8 +180,8 @@
   /* 基本レイアウト - センター上寄り配置用 */
   width: 380px;
   max-width: calc(100vw - 80px);
-  max-height: calc(100vh - 160px);
-  min-height: 500px;
+  max-height: calc(100vh - 100px);
+  min-height: 700px;
 
   /* 外観 - 左上配置用に角丸を全体に */
   background: color-mix(in srgb, white 98%, transparent);
@@ -272,7 +272,9 @@
 .filter-modal-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
+  max-height: none;
 
   /* スクロールバースタイル */
   scrollbar-width: thin;
@@ -297,6 +299,67 @@
 }
 
 /* ==============================================
+   FilterPanel モーダル内表示の最適化
+   ============================================== */
+
+/* FilterPanelをモーダル内で表示する際の調整 */
+.filter-modal-body .filter-panel,
+.filter-modal-body > div[style*="position: fixed"] {
+  /* FilterPanelの固定配置を無効化してモーダル内に収める */
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+
+  /* モーダル外枠のスタイルを無効化 */
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+  z-index: auto !important;
+
+  /* オーバーフローをモーダルに委ねる */
+  overflow-y: visible !important;
+  overflow-x: visible !important;
+}
+
+/* FilterPanel内のコンテンツ領域の調整 */
+.filter-modal-body .filter-panel > div[style*="padding"],
+.filter-modal-body > div[style*="position: fixed"] > div[style*="padding"] {
+  /* パディングを最適化してモーダル内により多くのコンテンツを表示 */
+  padding: 16px !important;
+}
+
+/* FilterPanel内の展開可能セクション（地域・特徴フィルター）のスクロール最適化 */
+.filter-modal-body .filter-section div[style*="maxHeight"] {
+  /* 個別セクションの高さ制限を緩和 */
+  max-height: 300px !important;
+}
+
+/* FilterPanel内の特徴フィルターのスクロール調整 */
+.filter-modal-body #feature-options {
+  max-height: 250px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, #d1d5db 100%, transparent) transparent;
+}
+
+.filter-modal-body #feature-options::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filter-modal-body #feature-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-modal-body #feature-options::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, #d1d5db 100%, transparent);
+  border-radius: 2px;
+}
+
+/* ==============================================
    Container Queries - レスポンシブ調整
    ============================================== */
 
@@ -304,8 +367,8 @@
 @container modal-filter (max-width: 480px) {
   .filter-modal-content {
     width: calc(100vw - 40px);
-    max-height: calc(100vh - 120px);
-    min-height: 450px;
+    max-height: calc(100vh - 80px);
+    min-height: 600px;
   }
 
   .filter-trigger-btn {
@@ -327,8 +390,8 @@
 @container modal-filter (min-width: 481px) and (max-width: 768px) {
   .filter-modal-content {
     width: 400px;
-    max-height: calc(100vh - 100px);
-    min-height: 480px;
+    max-height: calc(100vh - 80px);
+    min-height: 650px;
   }
 
   .filter-modal-overlay {
@@ -346,13 +409,13 @@
   .filter-modal-overlay {
     align-items: flex-start;
     justify-content: center;
-    padding: 80px 50px 50px 50px;
+    padding: 60px 40px 40px 40px;
   }
 
   .filter-modal-content {
     width: 420px;
-    max-height: calc(100vh - 160px);
-    min-height: 520px;
+    max-height: calc(100vh - 120px);
+    min-height: 750px;
     /* scaleアニメーションは既に設定済み */
   }
 
@@ -452,8 +515,8 @@
   @media (max-width: 480px) {
     .filter-modal-content {
       width: calc(100vw - 40px);
-      max-height: calc(100vh - 120px);
-      min-height: 450px;
+      max-height: calc(100vh - 80px);
+      min-height: 600px;
     }
 
     .filter-trigger-btn {
@@ -463,15 +526,15 @@
     }
 
     .filter-modal-overlay {
-      padding: 60px 20px 20px 20px;
+      padding: 40px 20px 20px 20px;
     }
   }
 
   @media (min-width: 481px) and (max-width: 768px) {
     .filter-modal-content {
       width: 400px;
-      max-height: calc(100vh - 100px);
-      min-height: 480px;
+      max-height: calc(100vh - 80px);
+      min-height: 650px;
     }
 
     .filter-modal-overlay {
@@ -483,13 +546,13 @@
     .filter-modal-overlay {
       align-items: flex-start;
       justify-content: center;
-      padding: 80px 50px 50px 50px;
+      padding: 60px 40px 40px 40px;
     }
 
     .filter-modal-content {
       width: 420px;
-      max-height: calc(100vh - 160px);
-      min-height: 520px;
+      max-height: calc(100vh - 120px);
+      min-height: 750px;
     }
   }
 }
