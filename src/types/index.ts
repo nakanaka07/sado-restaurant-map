@@ -114,6 +114,29 @@ export type {
 } from "./ui.types";
 
 // ==============================
+// モーダルフィルター関連型 (新規)
+// ==============================
+export type {
+  CompactModalFilterProps,
+  FilterAction,
+  FilterModalProps,
+  FilterTriggerButtonProps,
+  ModalFilterState,
+  UseModalFilterResult,
+} from "./modalFilter.types";
+
+export {
+  FilterActionType,
+  FilterDisplayMode,
+  INITIAL_MODAL_FILTER_STATE,
+  ModalState,
+  countActiveFilters,
+  isValidFilterAction,
+  isValidFilterState,
+  isValidModalState,
+} from "./modalFilter.types";
+
+// ==============================
 // アプリケーション状態関連型
 // ==============================
 export type {

@@ -6,15 +6,44 @@ import type {
   PriceRange,
   SadoDistrict,
 } from "@/types";
-import { checkGAStatus, initGA, initializeDevLogging, sanitizeInput } from "@/utils";
-import { logUnknownAddressStats, testDistrictAccuracy } from "@/utils/districtUtils";
+import {
+  checkGAStatus,
+  initGA,
+  initializeDevLogging,
+  sanitizeInput,
+} from "@/utils";
+import {
+  logUnknownAddressStats,
+  testDistrictAccuracy,
+} from "@/utils/districtUtils";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import PWABadge from "../components/layout/PWABadge";
 import { MapView } from "../components/map";
 import { FilterPanel } from "../components/restaurant";
+import { CompactModalFilter } from "../components/ui"; // NEW: CompactModalFilter 追加
 import { validateApiKey } from "../utils/securityUtils";
+
+// モバイル検出用のカスタムフック
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.matchMedia("(max-width: 768px)").matches;
+      setIsMobile(mobile);
+    };
+
+    checkMobile();
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    mediaQuery.addEventListener("change", checkMobile);
+
+    return () => mediaQuery.removeEventListener("change", checkMobile);
+  }, []);
+
+  return isMobile;
+}
 // App.cssは main.tsx で読み込み済み
 
 // 佐渡島の中心座標（設定ファイルから取得）
@@ -34,15 +63,21 @@ const ErrorDisplay = ({
 );
 
 function App() {
-  const { mapPoints, loading, error, updateFilters, updateSortOrder, stats } =
-    useMapPoints();
+  const {
+    mapPoints,
+    loading,
+    error,
+    filters,
+    updateFilters,
+    updateSortOrder,
+    stats,
+  } = useMapPoints();
 
   const filteredMapPoints = mapPoints; // フィルタリング済みのマップポイント
+  const isMobile = useIsMobile(); // モバイル検出
 
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-
-
 
   // セキュリティ強化: APIキーのバリデーション
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -81,6 +116,11 @@ function App() {
     };
 
     void initializeApp();
+
+    // cleanup function (optional)
+    return () => {
+      // No cleanup needed for this effect
+    };
   }, [apiKey]);
 
   // データロード完了時の統計表示（開発環境のみ）
@@ -113,6 +153,11 @@ function App() {
 
       return () => clearTimeout(timer);
     }
+
+    // この条件分岐でもreturnが必要
+    return () => {
+      // No cleanup needed when condition is false
+    };
   }, [loading, mapPoints.length]);
 
   // セキュリティ強化: 入力サニタイズ付きフィルター関数
@@ -161,15 +206,22 @@ function App() {
   const handleRatingFilter = useCallback(
     (minRating: number | undefined) => {
       try {
-        updateFilters({
-          minRating,
-        });
+        if (typeof minRating === "number") {
+          updateFilters({
+            ...filters,
+            minRating,
+          });
+        } else {
+          // minRatingを除外したフィルターでリセット
+          const { minRating: _, ...filtersWithoutRating } = filters;
+          updateFilters(filtersWithoutRating);
+        }
       } catch (error) {
         console.error("評価フィルターエラー:", error);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [filters, updateFilters]
   );
 
   const handleOpenNowFilter = useCallback(
@@ -206,7 +258,7 @@ function App() {
     (features: string[]) => {
       try {
         // セキュリティ: 特徴フィルターの検証
-        const sanitizedFeatures = features.map((feature) =>
+        const sanitizedFeatures = features.map(feature =>
           sanitizeInput(feature)
         );
         updateFilters({
@@ -236,16 +288,18 @@ function App() {
 
   const handleResetFilters = useCallback(() => {
     try {
-      updateFilters({
-        cuisineTypes: [],
-        priceRanges: [],
-        districts: [],
-        features: [],
+      // minRatingをundefinedで渡すとexactOptionalPropertyTypesエラーになるため除外
+      const resetFilters = {
+        cuisineTypes: [] as never[],
+        priceRanges: [] as never[],
+        districts: [] as never[],
+        features: [] as never[],
         searchQuery: "",
-        minRating: undefined,
         openNow: false,
-        pointTypes: ["restaurant", "parking", "toilet"],
-      });
+        pointTypes: ["restaurant", "parking", "toilet"] as const,
+      };
+
+      updateFilters(resetFilters);
       // エラー状態もリセット
       setAppError(null);
     } catch (error) {
@@ -289,23 +343,40 @@ function App() {
             libraries={["maps", "marker", "geometry"]}
           >
             <div className="app-content">
-
-              {/* Floating Filter Panel */}
-              <FilterPanel
-                loading={loading}
-                resultCount={filteredMapPoints.length}
-                stats={stats}
-                onCuisineFilter={handleCuisineFilter}
-                onPriceFilter={handlePriceFilter}
-                onDistrictFilter={handleDistrictFilter}
-                onRatingFilter={handleRatingFilter}
-                onOpenNowFilter={handleOpenNowFilter}
-                onSearchFilter={handleSearchFilter}
-                onSortChange={updateSortOrder}
-                onFeatureFilter={handleFeatureFilter}
-                onPointTypeFilter={handlePointTypeFilter}
-                onResetFilters={handleResetFilters}
-              />
+              {/* Floating Filter Panel - Desktop or Compact Modal for Mobile */}
+              {isMobile ? (
+                <CompactModalFilter
+                  loading={loading}
+                  resultCount={filteredMapPoints.length}
+                  stats={stats}
+                  onCuisineFilter={handleCuisineFilter}
+                  onPriceFilter={handlePriceFilter}
+                  onDistrictFilter={handleDistrictFilter}
+                  onRatingFilter={handleRatingFilter}
+                  onOpenNowFilter={handleOpenNowFilter}
+                  onSearchFilter={handleSearchFilter}
+                  onSortChange={updateSortOrder}
+                  onFeatureFilter={handleFeatureFilter}
+                  onPointTypeFilter={handlePointTypeFilter}
+                  onResetFilters={handleResetFilters}
+                />
+              ) : (
+                <FilterPanel
+                  loading={loading}
+                  resultCount={filteredMapPoints.length}
+                  stats={stats}
+                  onCuisineFilter={handleCuisineFilter}
+                  onPriceFilter={handlePriceFilter}
+                  onDistrictFilter={handleDistrictFilter}
+                  onRatingFilter={handleRatingFilter}
+                  onOpenNowFilter={handleOpenNowFilter}
+                  onSearchFilter={handleSearchFilter}
+                  onSortChange={updateSortOrder}
+                  onFeatureFilter={handleFeatureFilter}
+                  onPointTypeFilter={handlePointTypeFilter}
+                  onResetFilters={handleResetFilters}
+                />
+              )}
 
               {/* Fullscreen Map */}
               <MapView

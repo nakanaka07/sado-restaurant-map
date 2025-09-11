@@ -12,3 +12,4 @@ export { useMapPoints } from "./map/useMapPoints";
 // UI Hooks
 export { useAnalytics } from "./ui/useAnalytics";
 export { useErrorHandler } from "./ui/useErrorHandler";
+export { useModalFilter, useModalFilterDebug } from "./ui/useModalFilter";
