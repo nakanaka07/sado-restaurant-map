@@ -21,13 +21,13 @@ describe("businessHours", () => {
   describe("calculateBusinessStatus", () => {
     it("営業中の場合、営業中を返す", () => {
       const openingHours: readonly OpeningHours[] = [
-        { day: "月", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "火", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "水", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "木", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "金", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "土", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "月曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "火曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "水曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "木曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "金曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "土曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "日曜日", open: "11:00", close: "14:00", isHoliday: false },
       ];
 
       const status = calculateBusinessStatus(openingHours);
@@ -36,13 +36,13 @@ describe("businessHours", () => {
 
     it("営業時間外の場合、閉店中を返す", () => {
       const openingHours: readonly OpeningHours[] = [
-        { day: "月", open: "18:00", close: "22:00", isHoliday: false },
-        { day: "火", open: "18:00", close: "22:00", isHoliday: false },
-        { day: "水", open: "18:00", close: "22:00", isHoliday: false },
-        { day: "木", open: "18:00", close: "22:00", isHoliday: false },
-        { day: "金", open: "18:00", close: "22:00", isHoliday: false },
-        { day: "土", open: "18:00", close: "22:00", isHoliday: false },
-        { day: "日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "月曜日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "火曜日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "水曜日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "木曜日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "金曜日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "土曜日", open: "18:00", close: "22:00", isHoliday: false },
+        { day: "日曜日", open: "18:00", close: "22:00", isHoliday: false },
       ];
 
       const status = calculateBusinessStatus(openingHours);
@@ -51,8 +51,8 @@ describe("businessHours", () => {
 
     it("定休日の場合、閉店中を返す", () => {
       const openingHours: readonly OpeningHours[] = [
-        { day: "月", open: "", close: "", isHoliday: true }, // 定休日
-        { day: "火", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "月曜日", open: "", close: "", isHoliday: true }, // 定休日
+        { day: "火曜日", open: "11:00", close: "14:00", isHoliday: false },
       ];
 
       const status = calculateBusinessStatus(openingHours);
@@ -68,8 +68,8 @@ describe("businessHours", () => {
   describe("formatBusinessHoursForDisplay", () => {
     it("通常の営業時間をフォーマット", () => {
       const openingHours: readonly OpeningHours[] = [
-        { day: "月", open: "11:00", close: "14:00", isHoliday: false },
-        { day: "水", open: "", close: "", isHoliday: true }, // 定休日
+        { day: "月曜日", open: "11:00", close: "14:00", isHoliday: false },
+        { day: "水曜日", open: "", close: "", isHoliday: true }, // 定休日
       ];
 
       const formatted = formatBusinessHoursForDisplay(openingHours);

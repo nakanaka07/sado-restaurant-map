@@ -35,8 +35,11 @@
 
 - 厳格な型定義を必須とする
 - `any`の使用を避け、適切な型を定義
+- **enum一貫使用**: enum定義後は文字列リテラルでなく enum値を使用
+- **テスト同期**: 実装変更時は対応するテスト期待値も同期更新
 - Generics、Union Types を積極活用
 - 型ガードとユーザー定義型ガード関数を使用
+- ESLint strictルール準拠（@typescript-eslint/no-unsafe-enum-comparison）
 
 ### 2. React 19 現代的パターン
 

@@ -44,13 +44,18 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
-      // TypeScript最適化 - 重複削除
+      // TypeScript型安全性強化 - enum一貫使用パターン対応
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/no-unsafe-enum-comparison": "error",
+      "@typescript-eslint/no-redundant-type-constituents": "error",
+      "@typescript-eslint/require-await": "error",
+      "@typescript-eslint/prefer-enum-initializers": "warn",
+      "@typescript-eslint/prefer-literal-enum-member": "error",
       // React 19対応
       "react-hooks/exhaustive-deps": "warn",
       // パフォーマンス（JavaScriptビルトイン使用）

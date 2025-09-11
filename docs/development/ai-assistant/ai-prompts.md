@@ -2,7 +2,7 @@
 
 > 🎯 **目的**: React 19 + TypeScript 5.7 + Vite 7 + PWA 開発での効率的なコード改善
 > **プロジェクト**: 佐渡飲食店マップ（個人開発・GitHub Pages）
-> **最終更新**: 2025 年 9 月 8 日 | **バージョン**: 9.0 - **実用性重視リニューアル**
+> **最終更新**: 2025 年 9 月 12 日 | **バージョン**: 9.1 - **TypeScript enum安全性パターン追加**
 
 ## 🎯 目的・特徴
 
@@ -80,13 +80,26 @@
 
 ```text
 このコードを修正・強化してください：
+
+【TypeScript型安全性】
 - TypeScript型エラーの解決
+- enum値の一貫した使用（文字列リテラル → enum値）
+- 型ガード・ユーザー定義型ガードの実装
+- Generic・Union Typesの適切な活用
+- strictモード対応・any型の排除
+
+【実行時品質】
 - 実行時エラー・バグの修正
 - セキュリティ脆弱性の対応
 - エラーハンドリングの追加
 - バリデーション強化
 - アクセシビリティ問題の修正
 - 安全性・信頼性の向上
+
+【テスト・実装同期】
+- テストと実装の一貫性確保
+- enum変更時のテスト期待値同期
+- 型変更の影響範囲検証
 ```
 
 ### 2. 🧹 整理・清掃プロンプト
@@ -154,8 +167,11 @@
 
 【TypeScript 5.7】
 - 最新型機能の活用
-- 型安全性の向上
+- 型安全性の向上（enum一貫使用パターン）
 - 推論の改善
+- 厳格な型チェック（@typescript-eslint/no-unsafe-enum-comparison）
+- enum vs 文字列リテラルの適切な使い分け
+- 型ガード関数による実行時安全性
 
 【Modern Web Standards】
 - Web Vitals 2025基準対応
@@ -678,31 +694,63 @@
 - **継続的改善**: 一度に全てではなく段階的に実施
 - **成果測定**: 改善効果を定量的に測定・評価
 
-## 📊 技術リファレンス
+### 📊 技術リファレンス
 
 ### 🎯 プロジェクト技術スタック（2025 年 9 月現在）
 
 - **React 19.1.1** - Actions、useActionState、useOptimistic、use() hook
-- **TypeScript 5.7.3** - 最新型システム・推論改善
+- **TypeScript 5.7.3** - 最新型システム・推論改善・enum安全性
 - **Vite 7.1.4** - 高速ビルド・開発サーバー
 - **@vis.gl/react-google-maps 1.5.5** - React Google Maps 統合
 - **PWA** - Service Worker、Manifest v3 対応
 - **GitHub Pages** - 静的サイトホスティング
+- **ESLint strict rules** - enum安全性・型安全性チェック
 
 ### 🚀 重要なベストプラクティス
+
+#### TypeScript 5.7 Enum 安全性パターン
+
+```typescript
+// ✅ 推奨：enum値の一貫した使用
+export enum BusinessStatus {
+  OPEN = "営業中",
+  CLOSED = "閉店中",
+  UNKNOWN = "不明",
+}
+
+// ✅ 正しいパターン
+if (status === BusinessStatus.OPEN) {
+  return "営業中です";
+}
+
+// ❌ 避けるべきパターン
+if (status === "営業中") {
+  // 文字列リテラル使用
+  return "営業中です";
+}
+
+// ✅ テスト実装の同期
+expect(calculateBusinessStatus(hours)).toBe(BusinessStatus.OPEN);
+```
+
+#### ESLint Enum 安全性ルール
+
+```javascript
+// eslint.config.js - enum安全性ルール
+"@typescript-eslint/no-unsafe-enum-comparison": "error",
+"@typescript-eslint/prefer-literal-enum-member": "error",
+"@typescript-eslint/prefer-enum-initializers": "warn",
+```
 
 #### React 19 Actions パターン
 
 ```typescript
 // useActionState でフォーム処理
-const [error, submitAction, isPending] = useActionState(
-  async (previousState, formData) => {
-    const result = await updateData(formData);
-    if (result.error) return result.error;
-    return null;
-  },
-  null
-);
+const [error, submitAction, isPending] = useActionState(async (previousState, formData) => {
+  const result = await updateData(formData);
+  if (result.error) return result.error;
+  return null;
+}, null);
 
 // useOptimistic で楽観的更新
 const [optimisticData, setOptimisticData] = useOptimistic(data);
@@ -742,13 +790,7 @@ interface Restaurant {
 
 // 型ガード関数
 function isValidRestaurant(data: unknown): data is Restaurant {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "id" in data &&
-    "name" in data &&
-    "position" in data
-  );
+  return typeof data === "object" && data !== null && "id" in data && "name" in data && "position" in data;
 }
 ```
 
@@ -786,9 +828,13 @@ VitePWA({
 
 ---
 
-**更新履歴**: 2025 年 9 月 8 日 - ディレクトリレベル・プロジェクトレベルプロンプトを追加、3 段階構造に拡張
+**更新履歴**:
+
+- 2025 年 9 月 12 日 - TypeScript enum安全性パターン・ESLint設定強化を追加
+- 2025 年 9 月 8 日 - ディレクトリレベル・プロジェクトレベルプロンプトを追加、3 段階構造に拡張
+
 **連携**: `copilot-instructions.md` (自動)
 
 ---
 
-> 💡 **使い方のコツ**: まずは #1-#3 のファイルレベル改善から始め、慣れてから #D1-#D6 ディレクトリレベル、#P1-#P6 プロジェクトレベルを活用することをおすすめします。
+> 💡 **使い方のコツ**: まずは #1-#3 のファイルレベル改善から始め、慣れてから #D1-#D6 ディレクトリレベル、#P1-#P6 プロジェクトレベルを活用することをおすすめします。TypeScript enum使用時は一貫性を重視し、テストとの同期を忘れずに。
