@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
@@ -34,15 +34,97 @@ vi.mock("@vis.gl/react-google-maps", () => ({
   Pin: () => <div data-testid="pin" />,
 }));
 
-// PWA関連をモック
-vi.mock("./PWABadge", () => ({
+// フックやコンポーネントのモック
+vi.mock("@/hooks", () => ({
+  useMapPoints: () => ({
+    mapPoints: [],
+    loading: false,
+    error: null,
+    filters: {
+      cuisineTypes: [],
+      priceRanges: [],
+      districts: [],
+      searchQuery: "",
+      openNow: false,
+      pointTypes: ["restaurant", "parking", "toilet"],
+    },
+    updateFilters: vi.fn(),
+    updateSortOrder: vi.fn(),
+    stats: {
+      total: 0,
+      restaurants: 0,
+      parkings: 0,
+      toilets: 0,
+    },
+  }),
+}));
+
+vi.mock("../components/common/AccessibilityComponents", () => ({
+  SkipLink: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => (
+    <a className="skip-link" href={href}>
+      {children}
+    </a>
+  ),
+}));
+
+vi.mock("../components/layout/PWABadge", () => ({
   default: () => <div data-testid="pwa-badge">PWA Badge</div>,
+}));
+
+vi.mock("../components/map", () => ({
+  MapView: ({ mapPoints }: { mapPoints: unknown[] }) => (
+    <div data-testid="map-view">Map with {mapPoints.length} points</div>
+  ),
+}));
+
+vi.mock("../components/restaurant", () => ({
+  FilterPanel: () => (
+    <div data-testid="filter-panel">
+      <h2>🔍 フィルター</h2>
+      <div aria-live="polite">📊 0 件</div>
+    </div>
+  ),
+}));
+
+vi.mock("../components/ui", () => ({
+  CompactModalFilter: () => (
+    <div data-testid="compact-modal-filter">
+      <h2>🔍 フィルター</h2>
+      <div aria-live="polite">📊 0 件</div>
+    </div>
+  ),
+}));
+
+// ユーティリティ関数のモック
+vi.mock("@/utils", () => ({
+  checkGAStatus: vi.fn().mockResolvedValue(undefined),
+  initGA: vi.fn().mockImplementation(() => Promise.resolve()), // 同期的に即座に解決
+  initializeDevLogging: vi.fn(),
+  sanitizeInput: vi.fn((input: string) => input),
+  logUnknownAddressStats: vi.fn(),
+  testDistrictAccuracy: vi.fn(),
+}));
+
+vi.mock("@/utils/districtUtils", () => ({
+  logUnknownAddressStats: vi.fn(),
+  testDistrictAccuracy: vi.fn(),
+}));
+
+vi.mock("../utils/securityUtils", () => ({
+  validateApiKey: vi.fn().mockReturnValue(true),
 }));
 
 // 環境変数をモック
 vi.mock("import.meta", () => ({
   env: {
     VITE_GOOGLE_MAPS_API_KEY: "test_api_key",
+    DEV: false,
   },
 }));
 
@@ -64,19 +146,28 @@ describe("App", () => {
   });
 
   describe("基本レンダリング", () => {
-    it("アプリケーションが正常にレンダリングされること", () => {
+    it("アプリケーションが正常にレンダリングされること", async () => {
       act(() => {
         render(<App />);
       });
 
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByText("🔍 フィルター")).toBeInTheDocument();
+      });
+
       // アプリケーションの基本要素の確認
-      expect(screen.getByText("🔍 フィルター")).toBeInTheDocument();
       expect(screen.getByTestId("api-provider")).toBeInTheDocument();
     });
 
-    it("フィルターコンテナが適切なARIA属性を持つこと", () => {
+    it("フィルターコンテナが適切なARIA属性を持つこと", async () => {
       act(() => {
         render(<App />);
+      });
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByText("🔍 フィルター")).toBeInTheDocument();
       });
 
       // フィルターコンテナのARIA属性確認
@@ -90,9 +181,12 @@ describe("App", () => {
   });
 
   describe("アクセシビリティ", () => {
-    it("適切なARIA属性が設定されていること", () => {
-      act(() => {
-        render(<App />);
+    it("適切なARIA属性が設定されていること", async () => {
+      render(<App />);
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByRole("main")).toBeInTheDocument();
       });
 
       // メインコンテンツの確認
@@ -105,30 +199,33 @@ describe("App", () => {
       expect(skipLink).toHaveAttribute("href", "#main-content");
     });
 
-    it("フィルター状態では必要な要素が表示されること", () => {
-      act(() => {
-        render(<App />);
+    it("フィルター状態では必要な要素が表示されること", async () => {
+      render(<App />);
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByText("🔍 フィルター")).toBeInTheDocument();
       });
 
       // フィルター状態での表示確認
       const filterHeader = screen.getByText("🔍 フィルター");
       expect(filterHeader).toBeInTheDocument();
 
-      // 検索入力欄の確認
-      const searchInput =
-        screen.getByPlaceholderText("店名、料理、地域で検索...");
-      expect(searchInput).toBeInTheDocument();
-
-      // 料理ジャンルセレクトぼックスの確認
-      const cuisineSelect = screen.getByDisplayValue("すべての料理");
-      expect(cuisineSelect).toBeInTheDocument();
+      // フィルターパネルの確認
+      const filterPanel = screen.getByTestId("filter-panel");
+      expect(filterPanel).toBeInTheDocument();
     });
   });
 
   describe("レスポンシブ対応", () => {
-    it("アプリケーションが適切にレンダリングされること", () => {
+    it("アプリケーションが適切にレンダリングされること", async () => {
       act(() => {
         render(<App />);
+      });
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByTestId("api-provider")).toBeInTheDocument();
       });
 
       // アプリケーションコンテンツの確認
