@@ -31,15 +31,27 @@ function useIsMobile() {
 
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.matchMedia("(max-width: 768px)").matches;
-      setIsMobile(mobile);
+      // テスト環境ではmatchMediaがundefinedの可能性があるためフォールバックを追加
+      if (typeof window !== "undefined" && window.matchMedia) {
+        const mobile = window.matchMedia("(max-width: 768px)").matches;
+        setIsMobile(mobile);
+      } else {
+        // テスト環境等でmatchMediaが利用できない場合のデフォルト値
+        setIsMobile(false);
+      }
     };
 
     checkMobile();
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    mediaQuery.addEventListener("change", checkMobile);
 
-    return () => mediaQuery.removeEventListener("change", checkMobile);
+    // matchMediaが利用可能な場合のみリスナーを設定
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(max-width: 768px)");
+      mediaQuery.addEventListener("change", checkMobile);
+      return () => mediaQuery.removeEventListener("change", checkMobile);
+    }
+
+    // matchMediaが利用できない場合は何もしない
+    return undefined;
   }, []);
 
   return isMobile;
