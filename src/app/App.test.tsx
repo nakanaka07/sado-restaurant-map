@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 
@@ -104,7 +104,7 @@ vi.mock("../components/ui", () => ({
 // ユーティリティ関数のモック
 vi.mock("@/utils", () => ({
   checkGAStatus: vi.fn().mockResolvedValue(undefined),
-  initGA: vi.fn().mockImplementation(() => Promise.resolve()), // 同期的に即座に解決
+  initGA: vi.fn(() => Promise.resolve()), // 即座に解決されるPromise
   initializeDevLogging: vi.fn(),
   sanitizeInput: vi.fn((input: string) => input),
   logUnknownAddressStats: vi.fn(),
@@ -147,9 +147,7 @@ describe("App", () => {
 
   describe("基本レンダリング", () => {
     it("アプリケーションが正常にレンダリングされること", async () => {
-      act(() => {
-        render(<App />);
-      });
+      render(<App />);
 
       // 初期化完了を待つ
       await waitFor(() => {
@@ -161,9 +159,7 @@ describe("App", () => {
     });
 
     it("フィルターコンテナが適切なARIA属性を持つこと", async () => {
-      act(() => {
-        render(<App />);
-      });
+      render(<App />);
 
       // 初期化完了を待つ
       await waitFor(() => {
@@ -219,9 +215,7 @@ describe("App", () => {
 
   describe("レスポンシブ対応", () => {
     it("アプリケーションが適切にレンダリングされること", async () => {
-      act(() => {
-        render(<App />);
-      });
+      render(<App />);
 
       // 初期化完了を待つ
       await waitFor(() => {
