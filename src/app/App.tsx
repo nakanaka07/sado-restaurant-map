@@ -34,9 +34,15 @@ function useIsMobile() {
       // テスト環境ではmatchMediaがundefinedの可能性があるためフォールバックを追加
       if (typeof window !== "undefined" && window.matchMedia) {
         const mobile = window.matchMedia("(max-width: 768px)").matches;
+        console.log("🔍 Mobile Detection Debug:", {
+          windowWidth: window.innerWidth,
+          mediaQueryMatches: mobile,
+          isMobile: mobile,
+        });
         setIsMobile(mobile);
       } else {
         // テスト環境等でmatchMediaが利用できない場合のデフォルト値
+        console.log("⚠️ matchMedia not available, defaulting to desktop");
         setIsMobile(false);
       }
     };

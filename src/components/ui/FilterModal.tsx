@@ -27,47 +27,74 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
     const overlayRef = useRef<HTMLDialogElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
 
-    // モーダル開閉時のフォーカス管理 - メモリリーク防止とエラーハンドリング強化
+    // フォーカス管理ユーティリティ関数 - Cognitive Complexity減少
+    const setInitialFocus = useCallback((modalElement: HTMLElement) => {
+      try {
+        const firstFocusable = modalElement.querySelector<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (firstFocusable && typeof firstFocusable.focus === "function") {
+          firstFocusable.focus();
+        }
+      } catch (error) {
+        console.warn(
+          "Focus management error:",
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }, []);
+
+    const restorePreviousFocus = useCallback(() => {
+      try {
+        const previousElement = previousFocusRef.current;
+        if (
+          previousElement &&
+          typeof previousElement.focus === "function" &&
+          document.body.contains(previousElement)
+        ) {
+          previousElement.focus();
+        }
+      } catch (error) {
+        console.warn(
+          "Focus restoration error:",
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    }, []);
+
+    // モーダル開閉時のフォーカス管理 - Cognitive Complexity簡素化
     useEffect(() => {
-      if (!modalRef.current) return undefined;
+      const modalElement = modalRef.current;
+      if (!modalElement) return undefined;
 
       if (isOpen) {
-        // 現在のフォーカス要素を記憶
-        previousFocusRef.current = document.activeElement as HTMLElement;
-
-        // モーダル内の最初のフォーカス可能要素にフォーカス
-        try {
-          const firstFocusable = modalRef.current.querySelector<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-          firstFocusable?.focus();
-        } catch (error) {
-          console.warn("Focus management error:", error);
+        // 現在のフォーカス要素を安全に記憶
+        const currentActiveElement = document.activeElement;
+        if (
+          currentActiveElement &&
+          currentActiveElement instanceof HTMLElement
+        ) {
+          previousFocusRef.current = currentActiveElement;
         }
 
-        // bodyのスクロールを無効化
-        const originalOverflow = document.body.style.overflow;
+        // 初期フォーカス設定
+        setInitialFocus(modalElement);
+
+        // bodyのスクロール無効化
+        const originalOverflow = document.body.style.overflow || "";
         document.body.style.overflow = "hidden";
 
         return () => {
           document.body.style.overflow = originalOverflow;
         };
       } else {
-        // 以前フォーカスされていた要素に戻す
-        try {
-          if (previousFocusRef.current?.focus) {
-            previousFocusRef.current.focus();
-          }
-        } catch (error) {
-          console.warn("Focus restoration error:", error);
-        }
-
-        // bodyのスクロールを有効化
+        // 以前のフォーカス復元
+        restorePreviousFocus();
         document.body.style.overflow = "";
       }
 
       return undefined;
-    }, [isOpen]);
+    }, [isOpen, setInitialFocus, restorePreviousFocus]);
 
     // ESCキーでモーダルを閉じる
     useEffect(() => {
@@ -85,16 +112,6 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
 
       return undefined;
     }, [isOpen, onClose]);
-
-    // オーバーレイクリックでモーダルを閉じる
-    const handleOverlayClick = useCallback(
-      (event: React.MouseEvent) => {
-        if (event.target === overlayRef.current) {
-          onClose();
-        }
-      },
-      [onClose]
-    );
 
     // タッチジェスチャー対応
     const handleTouchStart = useCallback((event: React.TouchEvent) => {
@@ -127,32 +144,71 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
       [onClose]
     );
 
-    // フォーカストラップ
-    const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-      if (event.key === "Tab") {
-        const focusableElements =
-          modalRef.current?.querySelectorAll<HTMLElement>(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-
-        if (!focusableElements?.length) return;
-
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (event.shiftKey) {
-          // Shift+Tab: 最初の要素で逆順移動した場合、最後の要素へ
-          if (document.activeElement === firstElement) {
-            event.preventDefault();
-            lastElement.focus();
-          }
-        } else if (document.activeElement === lastElement) {
-          // Tab: 最後の要素で順序移動した場合、最初の要素へ
-          event.preventDefault();
-          firstElement.focus();
+    // フォーカストラップユーティリティ関数 - Cognitive Complexity減少
+    const handleTabNavigation = useCallback(
+      (event: React.KeyboardEvent<HTMLDialogElement>) => {
+        const modalElement = modalRef.current;
+        if (!modalElement) {
+          console.warn("Modal element not found during focus trap");
+          return;
         }
-      }
-    }, []);
+
+        const focusableElements = modalElement.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href]:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+
+        if (!focusableElements || focusableElements.length === 0) {
+          console.warn("No focusable elements found in modal");
+          return;
+        }
+
+        const focusableArray = Array.from(focusableElements);
+        const firstElement = focusableArray[0];
+        const lastElement = focusableArray[focusableArray.length - 1];
+        const currentActiveElement = document.activeElement;
+
+        if (!firstElement || !lastElement) {
+          console.warn("Invalid focusable elements in modal");
+          return;
+        }
+
+        try {
+          if (event.shiftKey && currentActiveElement === firstElement) {
+            event.preventDefault();
+            if (typeof lastElement.focus === "function") {
+              lastElement.focus();
+            }
+          } else if (!event.shiftKey && currentActiveElement === lastElement) {
+            event.preventDefault();
+            if (typeof firstElement.focus === "function") {
+              firstElement.focus();
+            }
+          }
+        } catch (error) {
+          console.error(
+            "Focus trap error:",
+            error instanceof Error ? error.message : String(error)
+          );
+        }
+      },
+      []
+    );
+
+    // フォーカストラップ - Tab/Shift+Tab のキー処理
+    useEffect(() => {
+      if (!isOpen) return undefined;
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Tab") {
+          handleTabNavigation(
+            event as unknown as React.KeyboardEvent<HTMLDialogElement>
+          );
+        }
+      };
+
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, handleTabNavigation]);
 
     // モーダルが閉じている場合は何もレンダリングしない
     if (!isOpen) {
@@ -181,13 +237,23 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
         aria-labelledby="filter-modal-title"
         aria-describedby="filter-modal-description"
       >
-        {/* オーバーレイクリック用の対話的要素 */}
+        {/* オーバーレイクリック用の適切な対話的要素 - WCAG 2.2準拠 */}
         <button
           type="button"
           className="filter-modal-backdrop"
-          onClick={handleOverlayClick}
-          onKeyDown={handleKeyDown}
+          onClick={e => {
+            console.log("🎯 Backdrop clicked!", e.target);
+            onClose();
+          }}
+          onKeyDown={e => {
+            if (e.key === "Enter" || e.key === " ") {
+              console.log("⌨️ Backdrop keyboard activated:", e.key);
+              e.preventDefault();
+              onClose();
+            }
+          }}
           aria-label="モーダルを閉じる"
+          data-testid="filter-modal-backdrop"
         />
         {/* WCAG 2.2準拠: メインコンテンツ領域を適切にHTML要素でマークアップ */}
         <main
@@ -204,7 +270,7 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
 
             {/* タイトル */}
             <h2 id="filter-modal-title" className="filter-modal-title">
-              🔍 フィルター設定
+              🍣 佐渡グルメ検索
             </h2>
 
             {/* 閉じるボタン */}
