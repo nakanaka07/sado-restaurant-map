@@ -187,7 +187,7 @@ export function useModalFilter(
   }, [dispatch]);
 
   const updateFilters = useCallback(
-    async (filters: Partial<ExtendedMapFilters>) => {
+    (filters: Partial<ExtendedMapFilters>) => {
       // 楽観的更新を適用
       addOptimisticUpdate(filters);
 

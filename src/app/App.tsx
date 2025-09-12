@@ -213,7 +213,8 @@ function App() {
           });
         } else {
           // minRatingを除外したフィルターでリセット
-          const { minRating: _, ...filtersWithoutRating } = filters;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { minRating, ...filtersWithoutRating } = filters;
           updateFilters(filtersWithoutRating);
         }
       } catch (error) {

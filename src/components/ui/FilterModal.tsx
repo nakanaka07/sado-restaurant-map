@@ -172,25 +172,30 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
 
     // Portalでbodyに直接レンダリング - HTML5 dialog要素使用
     return createPortal(
-      /* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */
       <dialog
         ref={ref || overlayRef}
         className={`filter-modal-overlay ${className}`}
         open={isOpen}
-        onClick={handleOverlayClick}
         data-display-mode={displayMode}
         data-testid="filter-modal-overlay"
         aria-labelledby="filter-modal-title"
         aria-describedby="filter-modal-description"
       >
+        {/* オーバーレイクリック用の対話的要素 */}
+        <button
+          type="button"
+          className="filter-modal-backdrop"
+          onClick={handleOverlayClick}
+          onKeyDown={handleKeyDown}
+          aria-label="モーダルを閉じる"
+        />
         {/* WCAG 2.2準拠: メインコンテンツ領域を適切にHTML要素でマークアップ */}
         <main
           className="filter-modal-content"
-          onKeyDown={handleKeyDown}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
           data-testid="filter-modal-content"
           aria-live="polite"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {/* ヘッダー部分 */}
           <header className="filter-modal-header">

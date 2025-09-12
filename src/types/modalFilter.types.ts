@@ -94,9 +94,7 @@ export interface UseModalFilterResult {
   readonly toggleModal: () => void;
   readonly openModal: () => void;
   readonly closeModal: () => void;
-  readonly updateFilters: (
-    filters: Partial<ExtendedMapFilters>
-  ) => Promise<void>;
+  readonly updateFilters: (filters: Partial<ExtendedMapFilters>) => void;
   readonly resetFilters: () => void;
   readonly setDisplayMode: (mode: FilterDisplayMode) => void;
 }
