@@ -444,6 +444,17 @@
     border-radius: 20px;
   }
 
+  /* フルスクリーン時のモバイル調整 */
+  :fullscreen .filter-trigger-btn,
+  :-webkit-full-screen .filter-trigger-btn,
+  :-moz-full-screen .filter-trigger-btn {
+    /* モバイルフルスクリーン時は少し上に配置 */
+    bottom: calc(env(safe-area-inset-bottom) + 30px) !important;
+    left: 15px !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+  }
+
   .filter-modal-header {
     padding: 12px 16px;
   }
@@ -570,6 +581,37 @@
   .filter-modal-close {
     border: 1px solid color-mix(in srgb, #6b7280 100%, transparent);
   }
+}
+
+/* ==============================================
+   フルスクリーン対応 - フィルターボタン表示確保
+   ============================================== */
+
+/* フルスクリーン時のフィルターボタン表示確保 */
+:fullscreen .filter-trigger-btn,
+:-webkit-full-screen .filter-trigger-btn,
+:-moz-full-screen .filter-trigger-btn {
+  /* フルスクリーン要素内に適切に配置 */
+  position: absolute !important; /* fixed では表示されないため absolute に変更 */
+  z-index: 2147483647 !important; /* 最高のz-index値で確実に表示 */
+  bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+  left: 20px !important;
+}
+
+/* フルスクリーン時のモーダルオーバーレイも同様に調整 */
+:fullscreen .filter-modal-overlay,
+:-webkit-full-screen .filter-modal-overlay,
+:-moz-full-screen .filter-modal-overlay {
+  position: absolute !important;
+  z-index: 2147483646 !important; /* ボタンより1つ下に配置 */
+}
+
+/* フルスクリーン親要素（通常は地図コンテナ）の設定 */
+:fullscreen,
+:-webkit-full-screen,
+:-moz-full-screen {
+  /* フルスクリーン要素内での相対配置を有効にする */
+  position: relative !important;
 }
 
 /* ==============================================
