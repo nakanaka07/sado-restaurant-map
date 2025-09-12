@@ -97,87 +97,136 @@ function App() {
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // フルスクリーン要素の検出を関数化して複雑度を削減
+  const getFullscreenElement = () => {
+    return (
+      document.fullscreenElement ||
+      (document as Document & { webkitFullscreenElement?: Element })
+        .webkitFullscreenElement ||
+      (document as Document & { mozFullScreenElement?: Element })
+        .mozFullScreenElement ||
+      (document as Document & { msFullscreenElement?: Element })
+        .msFullscreenElement
+    );
+  };
+
   // フルスクリーン状態の検出とクラス付与（Level 2: 改良版DOM操作対応）
   useEffect(() => {
     const handleFullscreenChange = () => {
-      // 🆕 最新仕様：Document.fullscreenElementを最優先
-      const fullscreenElement =
-        document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement ||
-        (document as any).msFullscreenElement;
+      const fullscreenElement = getFullscreenElement();
 
       const isFullscreen = !!fullscreenElement;
-      const filterBtn = document.querySelector(
-        ".filter-trigger-btn"
-      ) as HTMLElement;
+      const filterBtn = document.querySelector(".filter-trigger-btn");
 
-      if (isFullscreen && filterBtn && fullscreenElement) {
-        // ✅ 改善：元の位置を保存
-        if (!filterBtn.dataset.originalParent) {
-          filterBtn.dataset.originalParent =
-            filterBtn.parentElement?.tagName || "BODY";
-          filterBtn.dataset.originalPosition =
-            getComputedStyle(filterBtn).position;
-          filterBtn.dataset.originalZIndex = getComputedStyle(filterBtn).zIndex;
-          console.log("🔧 フィルターボタンの元位置を保存しました", {
-            parent: filterBtn.dataset.originalParent,
-            position: filterBtn.dataset.originalPosition,
-            zIndex: filterBtn.dataset.originalZIndex,
-          });
-        }
+      // フィルターボタンの存在チェック（統合）
+      if (!filterBtn || !(filterBtn instanceof HTMLElement)) {
+        document.documentElement.classList.toggle(
+          "fullscreen-active",
+          isFullscreen
+        );
+        return;
+      }
 
-        // フルスクリーン要素直下に移動
-        if (!fullscreenElement.contains(filterBtn)) {
-          try {
-            fullscreenElement.appendChild(filterBtn);
-            filterBtn.style.position = "absolute";
-            filterBtn.style.zIndex = "999999";
-            filterBtn.style.inset = "auto auto 20px 20px";
-            console.log("🎯 フルスクリーン要素直下にボタンを移動しました");
-          } catch (error) {
-            console.warn("⚠️ DOM移動に失敗しました:", error);
-            // フォールバック：強制的にfixed配置
-            filterBtn.style.position = "fixed";
-            filterBtn.style.zIndex = "2147483647";
-          }
-        }
-      } else if (!isFullscreen && filterBtn?.dataset.originalParent) {
-        // 🔄 フルスクリーン終了時：元の場所に復元
+      // フルスクリーンモード時の処理
+      if (isFullscreen && fullscreenElement) {
+        moveToFullscreenContainer(filterBtn, fullscreenElement);
+      } else if (!isFullscreen && filterBtn.dataset?.originalParent) {
+        // 🔄 フルスクリーン終了時：元の場所に復元（型安全性強化）
         try {
-          const originalParent =
-            document.querySelector(
-              filterBtn.dataset.originalParent.toLowerCase()
-            ) || document.body;
+          const originalParentTag =
+            filterBtn.dataset.originalParent.toLowerCase();
+          const originalParent = document.querySelector(originalParentTag);
+
+          // 型ガード：復元先の親要素の存在確認
+          if (!originalParent || !(originalParent instanceof HTMLElement)) {
+            throw new Error(
+              `復元先の親要素が見つかりません: ${originalParentTag}`
+            );
+          }
+
           originalParent.appendChild(filterBtn);
-          filterBtn.style.position = filterBtn.dataset.originalPosition || "";
-          filterBtn.style.zIndex = filterBtn.dataset.originalZIndex || "";
-          filterBtn.style.inset = "";
 
-          // データ属性をクリーンアップ
-          delete filterBtn.dataset.originalParent;
-          delete filterBtn.dataset.originalPosition;
-          delete filterBtn.dataset.originalZIndex;
+          // スタイル復元（型安全性確保）
+          const originalPosition = filterBtn.dataset.originalPosition || "";
+          const originalZIndex = filterBtn.dataset.originalZIndex || "";
 
-          console.log("� フィルターボタンを元の場所に復元しました");
+          Object.assign(filterBtn.style, {
+            position: originalPosition,
+            zIndex: originalZIndex,
+            inset: "",
+          } as const);
+
+          // データ属性をクリーンアップ（型安全性確保）
+          if (filterBtn.dataset) {
+            delete filterBtn.dataset.originalParent;
+            delete filterBtn.dataset.originalPosition;
+            delete filterBtn.dataset.originalZIndex;
+          }
+
+          console.log("🔄 フィルターボタンを元の場所に復元しました");
         } catch (error) {
           console.warn("⚠️ ボタン復元に失敗しました:", error);
         }
       }
 
-      // CSS classの管理（既存コードとの互換性維持）
+      // CSS classの管理
       document.documentElement.classList.toggle(
         "fullscreen-active",
         isFullscreen
       );
+    };
 
-      if (isFullscreen) {
-        console.log("🔍 フルスクリーンが有効になりました", {
-          fullscreenElement: fullscreenElement?.tagName,
-          filterBtnMoved: fullscreenElement?.contains(filterBtn),
-        });
-      } else {
-        console.log("🔍 フルスクリーンが解除されました");
+    // フルスクリーンモード時の移動処理（型安全性強化）
+    const moveToFullscreenContainer = (
+      filterBtn: HTMLElement,
+      fullscreenElement: Element
+    ): void => {
+      // 型ガード：データ属性の存在確認
+      if (!filterBtn.dataset) {
+        console.warn("DOMDataset が利用できません");
+        return;
+      }
+
+      // 元位置情報を保存（初回のみ）
+      if (!filterBtn.dataset.originalParent) {
+        const parentElement = filterBtn.parentElement;
+        filterBtn.dataset.originalParent = parentElement?.tagName || "BODY";
+
+        const computedStyle = window.getComputedStyle(filterBtn);
+        filterBtn.dataset.originalPosition = computedStyle.position;
+        filterBtn.dataset.originalZIndex = computedStyle.zIndex;
+      }
+
+      // フルスクリーン要素への移動と配置（型安全性強化）
+      if (!fullscreenElement.contains(filterBtn)) {
+        try {
+          // 型ガード：フルスクリーン要素が HTMLElement であることを確認
+          if (!(fullscreenElement instanceof HTMLElement)) {
+            throw new Error("フルスクリーン要素が HTMLElement ではありません");
+          }
+
+          fullscreenElement.appendChild(filterBtn);
+          Object.assign(filterBtn.style, {
+            position: "absolute",
+            zIndex: "999999",
+            inset: "auto auto 20px 20px",
+          } as const);
+
+          console.log("🎯 フィルターボタンをフルスクリーン要素に移動しました");
+        } catch (error) {
+          // フォールバック: DOM操作失敗時は固定配置（エラーハンドリング強化）
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          console.warn(
+            `DOM移動失敗、固定配置にフォールバック: ${errorMessage}`
+          );
+
+          Object.assign(filterBtn.style, {
+            position: "fixed",
+            zIndex: "2147483647",
+            inset: "auto auto 20px 20px",
+          } as const);
+        }
       }
     };
 
@@ -289,11 +338,19 @@ function App() {
   const handleCuisineFilter = useCallback(
     (cuisine: CuisineType | "") => {
       try {
+        // 型ガード：料理タイプのバリデーション
+        if (cuisine !== "" && typeof cuisine !== "string") {
+          console.warn("無効な料理タイプが指定されました");
+          return;
+        }
+
         updateFilters({
           cuisineTypes: cuisine ? [cuisine] : [],
         });
       } catch (error) {
-        console.error("料理タイプフィルターエラー:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error(`料理タイプフィルターエラー: ${errorMessage}`);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
@@ -303,11 +360,19 @@ function App() {
   const handlePriceFilter = useCallback(
     (price: PriceRange | "") => {
       try {
+        // 型ガード：価格範囲のバリデーション
+        if (price !== "" && typeof price !== "string") {
+          console.warn("無効な価格範囲が指定されました");
+          return;
+        }
+
         updateFilters({
           priceRanges: price ? [price] : [],
         });
       } catch (error) {
-        console.error("価格フィルターエラー:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error(`価格フィルターエラー: ${errorMessage}`);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
@@ -317,11 +382,26 @@ function App() {
   const handleDistrictFilter = useCallback(
     (districts: SadoDistrict[]) => {
       try {
+        // 型ガード：地区配列のバリデーション
+        if (!Array.isArray(districts)) {
+          console.warn("地区フィルターは配列である必要があります");
+          return;
+        }
+
+        // 地区数の制限チェック
+        if (districts.length > 10) {
+          console.warn("選択できる地区数が多すぎます");
+          setAppError("地区は10個以下で選択してください");
+          return;
+        }
+
         updateFilters({
           districts,
         });
       } catch (error) {
-        console.error("地区フィルターエラー:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error(`地区フィルターエラー: ${errorMessage}`);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
@@ -367,13 +447,29 @@ function App() {
   const handleSearchFilter = useCallback(
     (search: string) => {
       try {
-        // セキュリティ: 検索クエリのサニタイズ
+        // 型ガード：検索クエリのバリデーション（型安全性強化）
+        if (typeof search !== "string") {
+          console.warn("検索クエリは文字列である必要があります");
+          return;
+        }
+
+        // セキュリティ: 検索クエリのサニタイズ・バリデーション
         const sanitizedSearch = sanitizeInput(search);
+
+        // 不適切なクエリの検出
+        if (sanitizedSearch.length > 100) {
+          console.warn("検索クエリが長すぎます");
+          setAppError("検索クエリは100文字以下で入力してください");
+          return;
+        }
+
         updateFilters({
           searchQuery: sanitizedSearch,
         });
       } catch (error) {
-        console.error("検索フィルターエラー:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error(`検索フィルターエラー: ${errorMessage}`);
         setAppError("検索中にエラーが発生しました");
       }
     },
@@ -383,15 +479,39 @@ function App() {
   const handleFeatureFilter = useCallback(
     (features: string[]) => {
       try {
-        // セキュリティ: 特徴フィルターの検証
-        const sanitizedFeatures = features.map(feature =>
-          sanitizeInput(feature)
-        );
+        // 型ガード：特徴配列のバリデーション（型安全性強化）
+        if (!Array.isArray(features)) {
+          console.warn("特徴フィルターは配列である必要があります");
+          return;
+        }
+
+        // セキュリティ: 特徴フィルターの検証・サニタイズ
+        const sanitizedFeatures = features
+          .filter((feature): feature is string => typeof feature === "string")
+          .map(feature => {
+            const sanitized = sanitizeInput(feature);
+            if (sanitized.length > 50) {
+              console.warn(`特徴アイテムが長すぎます: ${feature}`);
+              return sanitized.slice(0, 50);
+            }
+            return sanitized;
+          })
+          .filter(feature => feature.length > 0);
+
+        // 特徴数の制限チェック
+        if (sanitizedFeatures.length > 20) {
+          console.warn("特徴フィルターの数が多すぎます");
+          setAppError("特徴フィルターは20個以下で選択してください");
+          return;
+        }
+
         updateFilters({
           features: sanitizedFeatures,
         });
       } catch (error) {
-        console.error("特徴フィルターエラー:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error(`特徴フィルターエラー: ${errorMessage}`);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
