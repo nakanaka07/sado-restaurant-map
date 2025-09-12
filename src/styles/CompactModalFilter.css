@@ -444,17 +444,6 @@
     border-radius: 20px;
   }
 
-  /* フルスクリーン時のモバイル調整 */
-  :fullscreen .filter-trigger-btn,
-  :-webkit-full-screen .filter-trigger-btn,
-  :-moz-full-screen .filter-trigger-btn {
-    /* モバイルフルスクリーン時は少し上に配置 */
-    bottom: calc(env(safe-area-inset-bottom) + 30px) !important;
-    left: 15px !important;
-    font-size: 12px !important;
-    padding: 8px 12px !important;
-  }
-
   .filter-modal-header {
     padding: 12px 16px;
   }
@@ -584,34 +573,174 @@
 }
 
 /* ==============================================
-   フルスクリーン対応 - フィルターボタン表示確保
+   フルスクリーン対応 - Level 1: CSS強化修正（🆕最新仕様対応）
    ============================================== */
 
-/* フルスクリーン時のフィルターボタン表示確保 */
+/* 🎯 Level 1: 最新Fullscreen API仕様対応 - より強力なセレクター */
 :fullscreen .filter-trigger-btn,
 :-webkit-full-screen .filter-trigger-btn,
-:-moz-full-screen .filter-trigger-btn {
-  /* フルスクリーン要素内に適切に配置 */
-  position: absolute !important; /* fixed では表示されないため absolute に変更 */
-  z-index: 2147483647 !important; /* 最高のz-index値で確実に表示 */
-  bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
-  left: 20px !important;
+:-moz-full-screen .filter-trigger-btn,
+:fullscreen .compact-modal-filter .filter-trigger-btn,
+:-webkit-full-screen .compact-modal-filter .filter-trigger-btn,
+:-moz-full-screen .compact-modal-filter .filter-trigger-btn {
+  position: fixed !important;
+  z-index: 2147483647 !important; /* 最大値 */
+  inset: auto auto 20px 20px !important; /* 現代的なinset記法 */
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  /* フルスクリーン時の強化スタイル */
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(12px) !important;
 }
 
-/* フルスクリーン時のモーダルオーバーレイも同様に調整 */
+/* 🔧 フルスクリーン要素の直接子要素として配置（追加対策） */
+:fullscreen > .filter-trigger-btn,
+:-webkit-full-screen > .filter-trigger-btn,
+:-moz-full-screen > .filter-trigger-btn,
+:fullscreen > * > .filter-trigger-btn,
+:-webkit-full-screen > * > .filter-trigger-btn,
+:-moz-full-screen > * > .filter-trigger-btn {
+  position: absolute !important;
+  z-index: 999999 !important;
+  inset: auto auto 20px 20px !important;
+}
+
+/* 🎯 Google Maps特有の調整（z-index競合回避） */
+.gm-fullscreen-control + .filter-trigger-btn,
+[data-testid="map"] > .filter-trigger-btn,
+.gm-style-cc + .filter-trigger-btn,
+[role="application"] > .filter-trigger-btn {
+  z-index: 1000000 !important;
+}
+
+/* 🌐 Google Maps コンテナ特定の調整 */
+[style*="position: relative"] > [style*="overflow: hidden"] .filter-trigger-btn,
+.gm-style + .filter-trigger-btn {
+  z-index: 2147483647 !important;
+  position: fixed !important;
+}
+
+/* 方法2: フルスクリーン後にボディ直下に配置（フォールバック強化） */
+body:has(:fullscreen) .filter-trigger-btn,
+body:has(:-webkit-full-screen) .filter-trigger-btn,
+body:has(:-moz-full-screen) .filter-trigger-btn {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 方法3: フルスクリーン要素が存在する場合の外部ボタン */
+html:has(:fullscreen) .filter-trigger-btn,
+html:has(:-webkit-full-screen) .filter-trigger-btn,
+html:has(:-moz-full-screen) .filter-trigger-btn {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* フルスクリーン時のモーダル対応 */
 :fullscreen .filter-modal-overlay,
 :-webkit-full-screen .filter-modal-overlay,
-:-moz-full-screen .filter-modal-overlay {
-  position: absolute !important;
-  z-index: 2147483646 !important; /* ボタンより1つ下に配置 */
+:-moz-full-screen .filter-modal-overlay,
+body:has(:fullscreen) .filter-modal-overlay,
+body:has(:-webkit-full-screen) .filter-modal-overlay,
+body:has(:-moz-full-screen) .filter-modal-overlay {
+  position: fixed !important;
+  z-index: 2147483646 !important;
+  inset: 0 !important;
 }
 
-/* フルスクリーン親要素（通常は地図コンテナ）の設定 */
+/* フルスクリーン親要素の調整 */
 :fullscreen,
 :-webkit-full-screen,
 :-moz-full-screen {
-  /* フルスクリーン要素内での相対配置を有効にする */
   position: relative !important;
+}
+
+/* 古いブラウザ対応: :has() セレクター未対応時のフォールバック */
+@supports not (selector(:has(*))) {
+  /* Fullscreen API検出用のJavaScriptクラス */
+  .fullscreen-active .filter-trigger-btn {
+    position: fixed !important;
+    z-index: 2147483647 !important;
+    bottom: 20px !important;
+    left: 20px !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
+  .fullscreen-active .filter-modal-overlay {
+    position: fixed !important;
+    z-index: 2147483646 !important;
+    inset: 0 !important;
+  }
+}
+
+/* 🔄 JavaScript検出によるフルスクリーン対応（従来方式強化・全ブラウザ対応） */
+.fullscreen-active .filter-trigger-btn,
+html.fullscreen-active .filter-trigger-btn,
+html.fullscreen-active body .filter-trigger-btn,
+body.fullscreen-active .filter-trigger-btn {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  inset: auto auto 20px 20px !important; /* 現代的なinset記法 */
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+  /* フルスクリーン時の特別なスタイル強化 */
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) saturate(1.8) !important;
+  border-radius: 28px !important; /* より丸みを帯びたデザイン */
+}
+
+/* 🆕 フルスクリーン時のホバー効果も強化 */
+.fullscreen-active .filter-trigger-btn:hover,
+html.fullscreen-active .filter-trigger-btn:hover {
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.4),
+    0 6px 16px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+
+.fullscreen-active .filter-modal-overlay,
+html.fullscreen-active .filter-modal-overlay {
+  position: fixed !important;
+  z-index: 2147483646 !important;
+  inset: 0 !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* モバイルフルスクリーン時の調整 */
+@media (max-width: 768px) {
+  .fullscreen-active .filter-trigger-btn,
+  html.fullscreen-active .filter-trigger-btn {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 15px) !important;
+    left: 15px !important;
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
 }
 
 /* ==============================================

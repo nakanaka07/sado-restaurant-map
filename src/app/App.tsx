@@ -97,6 +97,113 @@ function App() {
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // フルスクリーン状態の検出とクラス付与（Level 2: 改良版DOM操作対応）
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      // 🆕 最新仕様：Document.fullscreenElementを最優先
+      const fullscreenElement =
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement;
+
+      const isFullscreen = !!fullscreenElement;
+      const filterBtn = document.querySelector(
+        ".filter-trigger-btn"
+      ) as HTMLElement;
+
+      if (isFullscreen && filterBtn && fullscreenElement) {
+        // ✅ 改善：元の位置を保存
+        if (!filterBtn.dataset.originalParent) {
+          filterBtn.dataset.originalParent =
+            filterBtn.parentElement?.tagName || "BODY";
+          filterBtn.dataset.originalPosition =
+            getComputedStyle(filterBtn).position;
+          filterBtn.dataset.originalZIndex = getComputedStyle(filterBtn).zIndex;
+          console.log("🔧 フィルターボタンの元位置を保存しました", {
+            parent: filterBtn.dataset.originalParent,
+            position: filterBtn.dataset.originalPosition,
+            zIndex: filterBtn.dataset.originalZIndex,
+          });
+        }
+
+        // フルスクリーン要素直下に移動
+        if (!fullscreenElement.contains(filterBtn)) {
+          try {
+            fullscreenElement.appendChild(filterBtn);
+            filterBtn.style.position = "absolute";
+            filterBtn.style.zIndex = "999999";
+            filterBtn.style.inset = "auto auto 20px 20px";
+            console.log("🎯 フルスクリーン要素直下にボタンを移動しました");
+          } catch (error) {
+            console.warn("⚠️ DOM移動に失敗しました:", error);
+            // フォールバック：強制的にfixed配置
+            filterBtn.style.position = "fixed";
+            filterBtn.style.zIndex = "2147483647";
+          }
+        }
+      } else if (!isFullscreen && filterBtn?.dataset.originalParent) {
+        // 🔄 フルスクリーン終了時：元の場所に復元
+        try {
+          const originalParent =
+            document.querySelector(
+              filterBtn.dataset.originalParent.toLowerCase()
+            ) || document.body;
+          originalParent.appendChild(filterBtn);
+          filterBtn.style.position = filterBtn.dataset.originalPosition || "";
+          filterBtn.style.zIndex = filterBtn.dataset.originalZIndex || "";
+          filterBtn.style.inset = "";
+
+          // データ属性をクリーンアップ
+          delete filterBtn.dataset.originalParent;
+          delete filterBtn.dataset.originalPosition;
+          delete filterBtn.dataset.originalZIndex;
+
+          console.log("� フィルターボタンを元の場所に復元しました");
+        } catch (error) {
+          console.warn("⚠️ ボタン復元に失敗しました:", error);
+        }
+      }
+
+      // CSS classの管理（既存コードとの互換性維持）
+      document.documentElement.classList.toggle(
+        "fullscreen-active",
+        isFullscreen
+      );
+
+      if (isFullscreen) {
+        console.log("🔍 フルスクリーンが有効になりました", {
+          fullscreenElement: fullscreenElement?.tagName,
+          filterBtnMoved: fullscreenElement?.contains(filterBtn),
+        });
+      } else {
+        console.log("🔍 フルスクリーンが解除されました");
+      }
+    };
+
+    // フルスクリーン変更イベントの監視
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+
+    // 初回実行
+    handleFullscreenChange();
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "mozfullscreenchange",
+        handleFullscreenChange
+      );
+      // クリーンアップ時にクラスも削除
+      document.documentElement.classList.remove("fullscreen-active");
+    };
+  }, []);
+
   // セキュリティ強化: APIキーのバリデーション
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
