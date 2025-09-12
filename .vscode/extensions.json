@@ -14,9 +14,6 @@
     // === Testing & Quality ===
     "ms-playwright.playwright",
     "sonarsource.sonarlint-vscode",
-    "streetsidesoftware.code-spell-checker",
-
-    // === Git & GitHub ===
     "eamodio.gitlens",
     "github.vscode-pull-request-github",
     "github.copilot",
