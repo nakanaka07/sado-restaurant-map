@@ -5,7 +5,7 @@ import App from "./App";
 // window.matchMediaのモックを追加
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query: string) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -64,8 +64,8 @@ describe("App", () => {
   });
 
   describe("基本レンダリング", () => {
-    it("アプリケーションが正常にレンダリングされること", async () => {
-      await act(async () => {
+    it("アプリケーションが正常にレンダリングされること", () => {
+      act(() => {
         render(<App />);
       });
 
@@ -74,8 +74,8 @@ describe("App", () => {
       expect(screen.getByTestId("api-provider")).toBeInTheDocument();
     });
 
-    it("フィルターコンテナが適切なARIA属性を持つこと", async () => {
-      await act(async () => {
+    it("フィルターコンテナが適切なARIA属性を持つこと", () => {
+      act(() => {
         render(<App />);
       });
 
@@ -90,8 +90,8 @@ describe("App", () => {
   });
 
   describe("アクセシビリティ", () => {
-    it("適切なARIA属性が設定されていること", async () => {
-      await act(async () => {
+    it("適切なARIA属性が設定されていること", () => {
+      act(() => {
         render(<App />);
       });
 
@@ -105,8 +105,8 @@ describe("App", () => {
       expect(skipLink).toHaveAttribute("href", "#main-content");
     });
 
-    it("フィルター状態では必要な要素が表示されること", async () => {
-      await act(async () => {
+    it("フィルター状態では必要な要素が表示されること", () => {
+      act(() => {
         render(<App />);
       });
 
@@ -126,8 +126,8 @@ describe("App", () => {
   });
 
   describe("レスポンシブ対応", () => {
-    it("アプリケーションが適切にレンダリングされること", async () => {
-      await act(async () => {
+    it("アプリケーションが適切にレンダリングされること", () => {
+      act(() => {
         render(<App />);
       });
 
