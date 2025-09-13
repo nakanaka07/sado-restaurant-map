@@ -110,123 +110,24 @@ function App() {
     );
   };
 
-  // フルスクリーン状態の検出とクラス付与（Level 2: 改良版DOM操作対応）
+  // フルスクリーン状態の検出とクラス付与（Level 2: CSS配置による非侵入的対応）
   useEffect(() => {
     const handleFullscreenChange = () => {
       const fullscreenElement = getFullscreenElement();
-
       const isFullscreen = !!fullscreenElement;
-      const filterBtn = document.querySelector(".filter-trigger-btn");
 
-      // フィルターボタンの存在チェック（統合）
-      if (!filterBtn || !(filterBtn instanceof HTMLElement)) {
-        document.documentElement.classList.toggle(
-          "fullscreen-active",
-          isFullscreen
-        );
-        return;
-      }
-
-      // フルスクリーンモード時の処理
-      if (isFullscreen && fullscreenElement) {
-        moveToFullscreenContainer(filterBtn, fullscreenElement);
-      } else if (!isFullscreen && filterBtn.dataset?.originalParent) {
-        // 🔄 フルスクリーン終了時：元の場所に復元（型安全性強化）
-        try {
-          const originalParentTag =
-            filterBtn.dataset.originalParent.toLowerCase();
-          const originalParent = document.querySelector(originalParentTag);
-
-          // 型ガード：復元先の親要素の存在確認
-          if (!originalParent || !(originalParent instanceof HTMLElement)) {
-            throw new Error(
-              `復元先の親要素が見つかりません: ${originalParentTag}`
-            );
-          }
-
-          originalParent.appendChild(filterBtn);
-
-          // スタイル復元（型安全性確保）
-          const originalPosition = filterBtn.dataset.originalPosition || "";
-          const originalZIndex = filterBtn.dataset.originalZIndex || "";
-
-          Object.assign(filterBtn.style, {
-            position: originalPosition,
-            zIndex: originalZIndex,
-            inset: "",
-          } as const);
-
-          // データ属性をクリーンアップ（型安全性確保）
-          if (filterBtn.dataset) {
-            delete filterBtn.dataset.originalParent;
-            delete filterBtn.dataset.originalPosition;
-            delete filterBtn.dataset.originalZIndex;
-          }
-
-          console.log("🔄 フィルターボタンを元の場所に復元しました");
-        } catch (error) {
-          console.warn("⚠️ ボタン復元に失敗しました:", error);
-        }
-      }
-
-      // CSS classの管理
+      // CSS classによる配置制御（DOM移動なし）
       document.documentElement.classList.toggle(
         "fullscreen-active",
         isFullscreen
       );
-    };
 
-    // フルスクリーンモード時の移動処理（型安全性強化）
-    const moveToFullscreenContainer = (
-      filterBtn: HTMLElement,
-      fullscreenElement: Element
-    ): void => {
-      // 型ガード：データ属性の存在確認
-      if (!filterBtn.dataset) {
-        console.warn("DOMDataset が利用できません");
-        return;
-      }
-
-      // 元位置情報を保存（初回のみ）
-      if (!filterBtn.dataset.originalParent) {
-        const parentElement = filterBtn.parentElement;
-        filterBtn.dataset.originalParent = parentElement?.tagName || "BODY";
-
-        const computedStyle = window.getComputedStyle(filterBtn);
-        filterBtn.dataset.originalPosition = computedStyle.position;
-        filterBtn.dataset.originalZIndex = computedStyle.zIndex;
-      }
-
-      // フルスクリーン要素への移動と配置（型安全性強化）
-      if (!fullscreenElement.contains(filterBtn)) {
-        try {
-          // 型ガード：フルスクリーン要素が HTMLElement であることを確認
-          if (!(fullscreenElement instanceof HTMLElement)) {
-            throw new Error("フルスクリーン要素が HTMLElement ではありません");
-          }
-
-          fullscreenElement.appendChild(filterBtn);
-          Object.assign(filterBtn.style, {
-            position: "absolute",
-            zIndex: "999999",
-            inset: "auto auto 20px 20px",
-          } as const);
-
-          console.log("🎯 フィルターボタンをフルスクリーン要素に移動しました");
-        } catch (error) {
-          // フォールバック: DOM操作失敗時は固定配置（エラーハンドリング強化）
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          console.warn(
-            `DOM移動失敗、固定配置にフォールバック: ${errorMessage}`
-          );
-
-          Object.assign(filterBtn.style, {
-            position: "fixed",
-            zIndex: "2147483647",
-            inset: "auto auto 20px 20px",
-          } as const);
-        }
+      if (isFullscreen) {
+        console.log(
+          "🎯 フルスクリーンモードが有効になりました - CSS配置に切り替え"
+        );
+      } else {
+        console.log("🔄 通常モードに戻りました");
       }
     };
 
