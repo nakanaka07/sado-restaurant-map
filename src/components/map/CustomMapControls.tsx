@@ -61,10 +61,18 @@ export const CustomMapControls = memo<CustomMapControlsProps>(
           }
         }
 
-        // React Root を unmount
+        // React Root を非同期でアンマウント（レースコンディション回避）
         if (reactRootRef.current) {
-          reactRootRef.current.unmount();
+          const rootToUnmount = reactRootRef.current;
           reactRootRef.current = null;
+          // 次のフレームでアンマウント実行
+          setTimeout(() => {
+            try {
+              rootToUnmount.unmount();
+            } catch (error) {
+              console.warn("React root unmount warning:", error);
+            }
+          }, 0);
         }
       };
     }, [map, position, filterProps]);

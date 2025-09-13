@@ -10,7 +10,8 @@ import {
   LastUpdatedDisplay,
   RestaurantCategoryChip,
 } from "@/components/common";
-import type { MapPoint } from "@/types";
+import type { CuisineType, MapPoint } from "@/types";
+import { RestaurantCategory } from "@/types";
 import { isRestaurant } from "@/types/type-guards";
 import {
   calculateBusinessStatus,
@@ -119,12 +120,29 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
             }}
           >
             <span style={{ marginRight: "8px" }}>📞</span>
-            <a
-              href={`tel:${point.phone}`}
-              style={{ color: "#2563eb", textDecoration: "none" }}
+            <span
+              role="link"
+              tabIndex={0}
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+                textDecoration: "none",
+              }}
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(`tel:${point.phone}`, "_self");
+              }}
+              onKeyDown={e => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(`tel:${point.phone}`, "_self");
+                }
+              }}
             >
               {point.phone}
-            </a>
+            </span>
           </div>
         )}
 
@@ -356,12 +374,14 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
 /**
  * カテゴリー表示のヘルパー関数（複雑な三項演算子を単純化）
  */
-function getCategoryDisplay(point: MapPoint): string {
+function getCategoryDisplay(point: MapPoint): CuisineType | RestaurantCategory {
   if (point.type === "restaurant" && isRestaurant(point)) {
     return point.cuisineType;
   }
   if (point.type === "parking") {
-    return "駐車場";
+    // 駐車場の場合はOTHERカテゴリーを使用
+    return RestaurantCategory.OTHER;
   }
-  return "公衆トイレ";
+  // トイレの場合もOTHERカテゴリーを使用
+  return RestaurantCategory.OTHER;
 }

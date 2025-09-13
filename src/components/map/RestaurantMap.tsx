@@ -1,13 +1,12 @@
+import { useMapDebugging } from "@/hooks/map/useMapDebugging";
+import { useSimpleMarkerOptimization } from "@/hooks/map/useMarkerOptimization";
 import type { Restaurant } from "@/types";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
-import {
-  AdvancedMarker,
-  InfoWindow,
-  Map,
-  Pin,
-} from "@vis.gl/react-google-maps";
-import { useCallback, useState } from "react";
-import { getMarkerColorByCuisine, getMarkerSizeByPrice } from "./utils";
+import { Map } from "@vis.gl/react-google-maps";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { MapErrorBoundary } from "./MapErrorBoundary";
+import { OptimizedInfoWindow } from "./OptimizedInfoWindow";
+import { OptimizedRestaurantMarker } from "./OptimizedRestaurantMarker";
 
 interface RestaurantMapProps {
   readonly restaurants: readonly Restaurant[];
@@ -24,21 +23,69 @@ export default function RestaurantMap({
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
 
-  // レストランマーカークリック時の処理
-  const handleMarkerClick = useCallback((restaurant: Restaurant) => {
-    setSelectedRestaurant(restaurant);
+  // 🚀 高速化: 最適化されたマーカー表示
+  const optimizedRestaurants = useSimpleMarkerOptimization(restaurants, 200);
 
-    // Analytics: レストランクリック追跡
-    trackRestaurantClick({
-      id: restaurant.id,
-      name: restaurant.name,
-      category: restaurant.cuisineType,
-      priceRange: restaurant.priceRange,
-    });
+  // 🔧 デバッグ: 開発者体験向上
+  const debugging = useMapDebugging(restaurants, {
+    trackPerformance: true,
+    trackMemory: true,
+  });
 
-    // Analytics: 地図操作追跡
-    trackMapInteraction("marker_click");
-  }, []);
+  // 🧠 メモ化: アナリティクス関数を最適化
+  const trackingFunctions = useMemo(
+    () => ({
+      trackRestaurantClick: (restaurant: Restaurant) => {
+        trackRestaurantClick({
+          id: restaurant.id,
+          name: restaurant.name,
+          category: restaurant.cuisineType,
+          priceRange: restaurant.priceRange,
+        });
+      },
+      trackMapInteraction: () => {
+        trackMapInteraction("marker_click");
+      },
+    }),
+    []
+  );
+
+  // レストランマーカークリック時の処理（メモ化）
+  const handleMarkerClick = useCallback(
+    (restaurant: Restaurant) => {
+      debugging.startPerformanceTimer("marker_click");
+
+      setSelectedRestaurant(restaurant);
+      trackingFunctions.trackRestaurantClick(restaurant);
+      trackingFunctions.trackMapInteraction();
+
+      debugging.endPerformanceTimer("marker_click", {
+        restaurantId: restaurant.id,
+        restaurantName: restaurant.name,
+      });
+
+      debugging.logEvent("marker_click", {
+        restaurant: restaurant.name,
+        cuisine: restaurant.cuisineType,
+      });
+    },
+    [trackingFunctions, debugging]
+  );
+
+  // InfoWindow閉じるハンドラー（メモ化）
+  const handleCloseInfoWindow = useCallback(() => {
+    setSelectedRestaurant(null);
+    debugging.logEvent("marker_click", { action: "close_info_window" });
+  }, [debugging]);
+
+  // パフォーマンス統計の更新
+  useEffect(() => {
+    debugging.updateDebugStats(
+      optimizedRestaurants.length,
+      optimizedRestaurants.length,
+      0 // レンダリング時間は別途測定
+    );
+  }, [optimizedRestaurants.length, debugging]);
 
   if (loading) {
     return (
@@ -70,205 +117,79 @@ export default function RestaurantMap({
   }
 
   return (
-    <div className="map-container">
-      <Map
-        defaultCenter={center}
-        defaultZoom={11}
-        mapId={mapId}
-        style={{ width: "100%", height: "100%" }}
-        gestureHandling="greedy"
-        disableDefaultUI={false}
-        mapTypeControl={true}
-        fullscreenControl={true}
-        streetViewControl={true}
-        zoomControl={true}
-      >
-        {restaurants.map((restaurant, index) => (
-          <AdvancedMarker
-            key={`${restaurant.id}-${index}`} // 重複防止のためインデックスを追加
-            position={restaurant.coordinates}
-            title={restaurant.name}
-            onClick={() => handleMarkerClick(restaurant)}
+    <MapErrorBoundary
+      onError={errorInfo => {
+        debugging.logError(
+          errorInfo.originalError || new Error(errorInfo.message),
+          "RestaurantMap"
+        );
+      }}
+    >
+      <div className="map-container">
+        {/* 🎯 デバッグ情報表示（開発環境のみ） */}
+        {process.env.NODE_ENV === "development" && (
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              zIndex: 1000,
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontFamily: "monospace",
+              border: "1px solid #ddd",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+            }}
           >
-            <Pin
-              background={getMarkerColorByCuisine(restaurant.cuisineType)}
-              borderColor="#fff"
-              glyphColor="#fff"
-              scale={getMarkerSizeByPrice(restaurant.priceRange)}
-            />
-          </AdvancedMarker>
-        ))}
-
-        {selectedRestaurant && (
-          <InfoWindow
-            position={selectedRestaurant.coordinates}
-            onCloseClick={() => setSelectedRestaurant(null)}
-          >
-            <div
-              style={{ padding: "16px", minWidth: "300px", maxWidth: "400px" }}
-            >
-              {/* ヘッダー */}
-              <div style={{ marginBottom: "12px" }}>
-                <h3
-                  style={{
-                    margin: "0 0 4px 0",
-                    color: "#1f2937",
-                    fontSize: "18px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {selectedRestaurant.name}
-                </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <span
-                    style={{
-                      backgroundColor: getMarkerColorByCuisine(
-                        selectedRestaurant.cuisineType
-                      ),
-                      color: "white",
-                      padding: "2px 8px",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {selectedRestaurant.cuisineType}
-                  </span>
-                  <span
-                    style={{
-                      backgroundColor: "#f3f4f6",
-                      color: "#374151",
-                      padding: "2px 8px",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                    }}
-                  >
-                    {selectedRestaurant.priceRange}
-                  </span>
-                </div>
-              </div>
-
-              {/* 基本情報 */}
-              <div style={{ marginBottom: "12px" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    margin: "6px 0",
-                    fontSize: "14px",
-                    color: "#374151",
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>📍</span>
-                  <span>{selectedRestaurant.address}</span>
-                </div>
-
-                {selectedRestaurant.phone && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      margin: "6px 0",
-                      fontSize: "14px",
-                      color: "#374151",
-                    }}
-                  >
-                    <span style={{ marginRight: "8px" }}>📞</span>
-                    <a
-                      href={`tel:${selectedRestaurant.phone}`}
-                      style={{ color: "#2563eb", textDecoration: "none" }}
-                    >
-                      {selectedRestaurant.phone}
-                    </a>
-                  </div>
-                )}
-
-                {selectedRestaurant.rating && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      margin: "6px 0",
-                      fontSize: "14px",
-                      color: "#374151",
-                    }}
-                  >
-                    <span style={{ marginRight: "8px" }}>⭐</span>
-                    <span>
-                      {selectedRestaurant.rating.toFixed(1)}
-                      {selectedRestaurant.reviewCount &&
-                        ` (${selectedRestaurant.reviewCount}件)`}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* 説明 */}
-              {selectedRestaurant.description && (
-                <p
-                  style={{
-                    margin: "8px 0",
-                    color: "#6b7280",
-                    fontSize: "13px",
-                    lineHeight: "1.4",
-                  }}
-                >
-                  {selectedRestaurant.description}
-                </p>
-              )}
-
-              {/* 特徴 */}
-              {selectedRestaurant.features &&
-                selectedRestaurant.features.length > 0 && (
-                  <div style={{ marginTop: "12px" }}>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: "600",
-                        color: "#374151",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      特徴:
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "4px",
-                      }}
-                    >
-                      {selectedRestaurant.features
-                        .slice(0, 6)
-                        .map((feature) => (
-                          <span
-                            key={feature}
-                            style={{
-                              backgroundColor: "#e5e7eb",
-                              color: "#374151",
-                              padding: "2px 6px",
-                              borderRadius: "8px",
-                              fontSize: "11px",
-                            }}
-                          >
-                            {feature}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
-                )}
+            <div>
+              📊 表示中: {optimizedRestaurants.length}/{restaurants.length}
             </div>
-          </InfoWindow>
+            <div>
+              ⏱️ レンダリング: {debugging.debugStats.renderTime.toFixed(1)}ms
+            </div>
+            {debugging.debugStats.memoryUsage && (
+              <div>
+                💾 メモリ: {debugging.debugStats.memoryUsage.toFixed(1)}MB
+              </div>
+            )}
+            <div style={{ marginTop: "4px", fontSize: "10px", color: "#666" }}>
+              Console: window.mapDebug.showConsole()
+            </div>
+          </div>
         )}
-      </Map>
-    </div>
+
+        <Map
+          defaultCenter={center}
+          defaultZoom={11}
+          mapId={mapId}
+          style={{ width: "100%", height: "100%" }}
+          gestureHandling="greedy"
+          disableDefaultUI={false}
+          mapTypeControl={true}
+          fullscreenControl={true}
+          streetViewControl={true}
+          zoomControl={true}
+        >
+          {/* 🎯 最適化されたマーカー表示 */}
+          {optimizedRestaurants.map(restaurant => (
+            <OptimizedRestaurantMarker
+              key={restaurant.id}
+              restaurant={restaurant}
+              onClick={handleMarkerClick}
+            />
+          ))}
+
+          {selectedRestaurant && (
+            <OptimizedInfoWindow
+              restaurant={selectedRestaurant}
+              onClose={handleCloseInfoWindow}
+            />
+          )}
+        </Map>
+      </div>
+    </MapErrorBoundary>
   );
 }
 
