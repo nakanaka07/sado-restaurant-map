@@ -84,7 +84,7 @@
   "vitest.commandLine": "pnpm test",
 
   // === GitHub Copilot 2025最適化 ===
-  "github.copilot.chat.instructions": "docs/development/ai-assistant/copilot-instructions.md",
+  "github.copilot.chat.instructions": "docs/ai-assistant/copilot-instructions.md",
   "github.copilot.enable": {
     "*": true,
     "plaintext": false,

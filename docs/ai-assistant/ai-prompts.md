@@ -1,26 +1,74 @@
 # AI Assistant Prompts - 実用開発ガイド
 
-> 🎯 **目的**: React 19 + TypeScript 5.7 + Vite 7 + PWA 開発での効率的なコード改善
+> **更新履歴**:
+
+- 2025 年 9 月 14 日 - 使いやすさ向上、成果測定機能強化、技術情報最新化
+- 2025 年 9 月 12 日 - TypeScript enum安全性パターン・ESLint設定強化を追加
+- 2025 年 9 月 8 日 - ディレクトリレベル・プロジェクトレベルプロンプトを追加、3 段階構造に拡張
+
+**連携ファイル**: `copilot-instructions.md`, `analysis-accuracy-prompt.md`
+
+---
+
+> 💪 **活用のコツ**: まず30秒クイックガイドで状況判断し、#1-#6のファイルレベル改善から始めるのが
+> おすすめです。慣れてきたら#D1-#D6ディレクトリレベル、#P1-#P6プロジェクトレベルを活用してください。
+> TypeScript enum使用時は一貫性を重視し、テストとの同期を必ず実行してください。React 19.1 + TypeScript 5.7.3 + Vite 7.1.4 + PWA 開発での効率的なコード改善
 > **プロジェクト**: 佐渡飲食店マップ（個人開発・GitHub Pages）
-> **最終更新**: 2025 年 9 月 12 日 | **バージョン**: 9.1 - **TypeScript enum安全性パターン追加**
+> **最終更新**: 2025 年 9 月 14 日 | **バージョン**: 10.0 - 使いやすさと成果測定機能強化
 
 ## 🎯 目的・特徴
 
 このプロンプト集は**実際に使いやすい**開発支援を目的とし、以下の特徴があります：
 
-- **6 つの基本プロンプト**：覚えやすく、日常的に使える
-- **段階的改善**：小さな変更から始める安全なアプローチ
-- **技術正確性**：実プロジェクトに基づく正確な技術情報
-- **個人開発最適化**：複雑さより実用性を重視
+- **18 種類の体系的プロンプト**: 3レベル×6パターンであらゆる状況に対応
+- **段階的改善**: 小さな変更から始める安全なアプローチ
+- **技術正確性**: 実プロジェクトに基づく正確な技術情報
+- **個人開発最適化**: 複雑さより実用性を重視
+- **成果測定機能**: 改善効果の可視化と追跡
 
 ## 📖 目次
 
-- [🚀 クイックガイド](#-クイックガイド)
-- [⚡ ファイルレベルプロンプト（#1-#6）](#-ファイルレベルプロンプト)
+- [🚀 30秒クイックガイド](#-30秒クイックガイド)
+- [⚗️ ファイルレベルプロンプト（#1-#6）](#-ファイルレベルプロンプト)
 - [📁 ディレクトリレベルプロンプト（#D1-#D6）](#-ディレクトリレベルプロンプト)
 - [🏗️ プロジェクトレベルプロンプト（#P1-#P6）](#️-プロジェクトレベルプロンプト)
 - [📋 実践的な使い方](#-実践的な使い方)
-- [📊 技術リファレンス](#-技術リファレンス)
+
+## 🚀 30秒クイックガイド
+
+### 🎯 プロンプト選択の黄金ルール
+
+```text
+状況別簡単選択ガイド:
+
+🚑 緊急時      → #1 修正・強化
+🧹 整理時      → #2 整理・清掃
+⚡ 重い時      → #3 最適化
+🔄 設計改善時  → #4 リファクタ
+✨ 技術更新時  → #5 モダナイズ
+📊 総合改善時  → #6 包括改善
+```
+
+### 🎨 レベル選択の簡単判断
+
+```text
+📄 1ファイルだけ    → #1-#6 (ファイルレベル)
+📁 フォルダ全体      → #D1-#D6 (ディレクトリレベル)
+🏗️ プロジェクト全体  → #P1-#P6 (プロジェクトレベル)
+```
+
+### 📝 コピペ用シンプルプロンプト
+
+すぐ使える簡略版プロンプト:
+
+```text
+#1 このコードのエラーやバグを修正してください
+#2 このコードを整理・清掃してください
+#3 このコードのパフォーマンスを最適化してください
+#4 このコードをリファクタリングしてください
+#5 このコードをReact 19・TypeScript 5.7でモダナイズしてください
+#6 このコードを包括的に改善してください
+```
 
 ## 🚀 クイックガイド
 
@@ -721,31 +769,32 @@
 - **GitHub Pages** - 静的サイトホスティング
 - **ESLint strict rules** - enum安全性・型安全性チェック
 
-### 🚀 重要なベストプラクティス
+### 🚀 重要なベストプラクティス (2025年版)
 
-#### TypeScript 5.7 Enum 安全性パターン
+#### TypeScript 5.7.3 Enum 安全性パターン
 
 ```typescript
 // ✅ 推奨：enum値の一貫した使用
-export enum BusinessStatus {
+export enum RestaurantStatus {
   OPEN = "営業中",
   CLOSED = "閉店中",
   UNKNOWN = "不明",
 }
 
 // ✅ 正しいパターン
-if (status === BusinessStatus.OPEN) {
+if (status === RestaurantStatus.OPEN) {
   return "営業中です";
 }
 
-// ❌ 避けるべきパターン
+// ❌ 禁止パターン
 if (status === "営業中") {
   // 文字列リテラル使用
   return "営業中です";
 }
 
 // ✅ テスト実装の同期
-expect(calculateBusinessStatus(hours)).toBe(BusinessStatus.OPEN);
+// 実装変更時はテストも必ず更新
+expect(calculateBusinessStatus(hours)).toBe(RestaurantStatus.OPEN);
 ```
 
 #### ESLint Enum 安全性ルール
@@ -757,7 +806,7 @@ expect(calculateBusinessStatus(hours)).toBe(BusinessStatus.OPEN);
 "@typescript-eslint/prefer-enum-initializers": "warn",
 ```
 
-#### React 19 Actions パターン
+#### React 19.1 Actions パターン
 
 ```typescript
 // useActionState でフォーム処理
@@ -769,9 +818,15 @@ const [error, submitAction, isPending] = useActionState(async (previousState, fo
 
 // useOptimistic で楽観的更新
 const [optimisticData, setOptimisticData] = useOptimistic(data);
+
+// use() hook でPromise処理
+function RestaurantList({ restaurantPromise }: { restaurantPromise: Promise<Restaurant[]> }) {
+  const restaurants = use(restaurantPromise);
+  return <RestaurantGrid restaurants={restaurants} />;
+}
 ```
 
-#### Google Maps Advanced Markers
+#### Google Maps Advanced Markers 効率活用
 
 ```typescript
 // @vis.gl/react-google-maps の効率的使用
@@ -782,12 +837,33 @@ function RestaurantMap() {
     <Map defaultCenter={{ lat: 38.0, lng: 138.4 }}>
       {restaurants.map((restaurant) => (
         <AdvancedMarker key={restaurant.id} position={restaurant.position}>
-          <RestaurantPin restaurant={restaurant} />
+          <CustomRestaurantPin restaurant={restaurant} />
         </AdvancedMarker>
       ))}
     </Map>
   );
 }
+```
+
+#### Vite 7.1.4 Environment API 活用例
+
+```typescript
+// vite.config.ts - Environment APIの実験的機能
+export default defineConfig({
+  environments: {
+    web: {
+      build: {
+        outDir: "dist/web",
+      },
+    },
+    ssr: {
+      build: {
+        outDir: "dist/ssr",
+        ssr: true,
+      },
+    },
+  },
+});
 ```
 
 #### TypeScript 5.7 型安全性
