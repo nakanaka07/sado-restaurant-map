@@ -18,6 +18,9 @@ export const SADO_CENTER: LatLngLiteral = {
 /** デフォルトの地図ズームレベル */
 export const DEFAULT_ZOOM = 10;
 
+/** デフォルトのマップタイプ */
+export const DEFAULT_MAP_TYPE = "hybrid" as const; // roadmap, satellite, hybrid, terrain から選択
+
 /** マーカークラスタリングの最小ズームレベル */
 export const MIN_CLUSTER_ZOOM = 8;
 

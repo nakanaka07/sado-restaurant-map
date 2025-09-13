@@ -3,6 +3,7 @@
  * 地図コンテナコンポーネント
  */
 
+import { DEFAULT_MAP_TYPE } from "@/config";
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
 import { useCallback } from "react";
@@ -27,13 +28,16 @@ export function MapContainer({
   onCloseInfoWindow,
 }: MapContainerProps) {
   // エラー防止のためのクリックハンドラーをメモ化
-  const handleMarkerClick = useCallback((point: MapPoint) => {
-    try {
-      onMarkerClick(point);
-    } catch (error) {
-      console.error("マーカークリック時エラー:", error);
-    }
-  }, [onMarkerClick]);
+  const handleMarkerClick = useCallback(
+    (point: MapPoint) => {
+      try {
+        onMarkerClick(point);
+      } catch (error) {
+        console.error("マーカークリック時エラー:", error);
+      }
+    },
+    [onMarkerClick]
+  );
 
   const handleInfoWindowClose = useCallback(() => {
     try {
@@ -48,7 +52,7 @@ export function MapContainer({
       <Map
         defaultCenter={center}
         defaultZoom={11}
-        mapTypeId="terrain" // 🗻 初期表示を地形図（TERRAIN）に設定
+        mapTypeId={DEFAULT_MAP_TYPE} // 🗻 設定ファイルから読み込み
         mapId={mapId}
         style={{ width: "100%", height: "100%" }}
         gestureHandling="greedy"
@@ -60,16 +64,16 @@ export function MapContainer({
         // コントロールの位置を調整してフィルターパネルとの重複を回避
         mapTypeControlOptions={{
           position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1,
-          style: window.google?.maps?.MapTypeControlStyle?.DROPDOWN_MENU || 1 // 🎯 プルダウンメニュー形式に変更
+          style: window.google?.maps?.MapTypeControlStyle?.DROPDOWN_MENU || 1, // 🎯 プルダウンメニュー形式に変更
         }}
         zoomControlOptions={{
-          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6
+          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6,
         }}
         fullscreenControlOptions={{
-          position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1
+          position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1,
         }}
         streetViewControlOptions={{
-          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6
+          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6,
         }}
       >
         {/* マーカー表示 */}
