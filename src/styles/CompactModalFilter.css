@@ -712,6 +712,17 @@ body.fullscreen-active .filter-trigger-btn {
   border-radius: 28px !important; /* より丸みを帯びたデザイン */
 }
 
+/* 🆕 Google Maps カスタムコントロール内でのフィルターボタン表示強化 */
+.gm-control-active .filter-trigger-btn,
+[aria-label*="Map"] .filter-trigger-btn,
+.gm-style .filter-trigger-btn {
+  position: relative !important;
+  z-index: 1 !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
 /* 🆕 フルスクリーン時のホバー効果も強化 */
 .fullscreen-active .filter-trigger-btn:hover,
 html.fullscreen-active .filter-trigger-btn:hover {

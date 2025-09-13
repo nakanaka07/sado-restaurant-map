@@ -5,7 +5,7 @@
 
 import type { MapPoint } from "@/types";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
-import { useCallback, useState } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import { MapContainer } from "./MapContainer";
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MapErrorFallback } from "./MapErrorFallback";
@@ -15,9 +15,16 @@ interface MapViewProps {
   readonly center: { lat: number; lng: number };
   readonly loading: boolean;
   readonly error?: string | null;
+  readonly customControls?: ReactNode; // CustomMapControlsを渡すためのプロパティ
 }
 
-export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
+export function MapView({
+  mapPoints,
+  center,
+  loading,
+  error,
+  customControls,
+}: MapViewProps) {
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
 
@@ -58,7 +65,7 @@ export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
 
   // エラー状態またはMap ID未設定
   if (error || !mapId) {
-    return <MapErrorFallback mapId={mapId} error={error} />;
+    return <MapErrorFallback mapId={mapId} error={error || null} />;
   }
 
   return (
@@ -70,6 +77,7 @@ export function MapView({ mapPoints, center, loading, error }: MapViewProps) {
         selectedPoint={selectedPoint}
         onMarkerClick={handleMarkerClick}
         onCloseInfoWindow={handleCloseInfoWindow}
+        customControls={customControls}
       />
     </MapErrorBoundary>
   );

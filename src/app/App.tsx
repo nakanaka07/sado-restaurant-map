@@ -21,8 +21,8 @@ import { useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import PWABadge from "../components/layout/PWABadge";
 import { MapView } from "../components/map";
+import { CustomMapControls } from "../components/map/CustomMapControls"; // NEW: CustomMapControls 追加
 import { FilterPanel } from "../components/restaurant";
-import { CompactModalFilter } from "../components/ui"; // NEW: CompactModalFilter 追加
 import { validateApiKey } from "../utils/securityUtils";
 
 // モバイル検出用のカスタムフック
@@ -121,11 +121,29 @@ function App() {
         "fullscreen-active",
         isFullscreen
       );
+      document.body.classList.toggle("fullscreen-active", isFullscreen);
 
       if (isFullscreen) {
         console.log(
-          "🎯 フルスクリーンモードが有効になりました - CSS配置に切り替え"
+          "🎯 フルスクリーンモードが有効になりました - カスタムコントロール配置"
         );
+
+        // より確実な表示確保（補強策）
+        setTimeout(() => {
+          const filterBtn = document.querySelector(
+            ".filter-trigger-btn"
+          ) as HTMLElement;
+          if (filterBtn && filterBtn.style.display === "none") {
+            filterBtn.style.position = "fixed";
+            filterBtn.style.zIndex = "2147483647";
+            filterBtn.style.bottom = "20px";
+            filterBtn.style.left = "20px";
+            filterBtn.style.display = "flex";
+            filterBtn.style.visibility = "visible";
+            filterBtn.style.opacity = "1";
+            console.log("🔧 フィルターボタンの強制表示を適用しました");
+          }
+        }, 100);
       } else {
         console.log("🔄 通常モードに戻りました");
       }
@@ -490,24 +508,8 @@ function App() {
             libraries={["maps", "marker", "geometry"]}
           >
             <div className="app-content">
-              {/* Floating Filter Panel - Desktop or Compact Modal for Mobile */}
-              {isMobile ? (
-                <CompactModalFilter
-                  loading={loading}
-                  resultCount={filteredMapPoints.length}
-                  stats={stats}
-                  onCuisineFilter={handleCuisineFilter}
-                  onPriceFilter={handlePriceFilter}
-                  onDistrictFilter={handleDistrictFilter}
-                  onRatingFilter={handleRatingFilter}
-                  onOpenNowFilter={handleOpenNowFilter}
-                  onSearchFilter={handleSearchFilter}
-                  onSortChange={updateSortOrder}
-                  onFeatureFilter={handleFeatureFilter}
-                  onPointTypeFilter={handlePointTypeFilter}
-                  onResetFilters={handleResetFilters}
-                />
-              ) : (
+              {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター */}
+              {!isMobile && (
                 <FilterPanel
                   loading={loading}
                   resultCount={filteredMapPoints.length}
@@ -525,12 +527,34 @@ function App() {
                 />
               )}
 
-              {/* Fullscreen Map */}
+              {/* Fullscreen Map with Custom Controls */}
               <MapView
                 mapPoints={filteredMapPoints}
                 center={SADO_CENTER}
                 loading={loading}
                 error={error}
+                customControls={
+                  isMobile ? (
+                    <CustomMapControls
+                      loading={loading}
+                      resultCount={filteredMapPoints.length}
+                      stats={stats}
+                      onCuisineFilter={handleCuisineFilter}
+                      onPriceFilter={handlePriceFilter}
+                      onDistrictFilter={handleDistrictFilter}
+                      onRatingFilter={handleRatingFilter}
+                      onOpenNowFilter={handleOpenNowFilter}
+                      onSearchFilter={handleSearchFilter}
+                      onSortChange={updateSortOrder}
+                      onFeatureFilter={handleFeatureFilter}
+                      onPointTypeFilter={handlePointTypeFilter}
+                      onResetFilters={handleResetFilters}
+                      position={
+                        window.google?.maps?.ControlPosition?.BOTTOM_LEFT || 10
+                      }
+                    />
+                  ) : null
+                }
               />
             </div>
           </APIProvider>

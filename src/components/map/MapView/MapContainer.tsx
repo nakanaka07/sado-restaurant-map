@@ -6,7 +6,7 @@
 import { DEFAULT_MAP_TYPE } from "@/config";
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 import { EnhancedPNGMarker } from "./EnhancedPNGMarker";
 import { MapInfoWindow } from "./MapInfoWindow";
 
@@ -17,6 +17,7 @@ interface MapContainerProps {
   readonly selectedPoint: MapPoint | null;
   readonly onMarkerClick: (point: MapPoint) => void;
   readonly onCloseInfoWindow: () => void;
+  readonly customControls?: ReactNode; // CustomMapControlsを受け取るプロパティ
 }
 
 export function MapContainer({
@@ -26,6 +27,7 @@ export function MapContainer({
   selectedPoint,
   onMarkerClick,
   onCloseInfoWindow,
+  customControls,
 }: MapContainerProps) {
   // エラー防止のためのクリックハンドラーをメモ化
   const handleMarkerClick = useCallback(
@@ -95,6 +97,9 @@ export function MapContainer({
             <MapInfoWindow point={selectedPoint} />
           </InfoWindow>
         )}
+
+        {/* カスタムコントロール（フィルターボタンなど）*/}
+        {customControls}
       </Map>
     </div>
   );
