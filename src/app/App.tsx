@@ -96,6 +96,7 @@ function App() {
 
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false); // フルスクリーン状態管理
 
   // フルスクリーン要素の検出を関数化して複雑度を削減
   const getFullscreenElement = () => {
@@ -114,16 +115,19 @@ function App() {
   useEffect(() => {
     const handleFullscreenChange = () => {
       const fullscreenElement = getFullscreenElement();
-      const isFullscreen = !!fullscreenElement;
+      const isFullscreenActive = !!fullscreenElement;
+
+      // React state更新
+      setIsFullscreen(isFullscreenActive);
 
       // CSS classによる配置制御（DOM移動なし）
       document.documentElement.classList.toggle(
         "fullscreen-active",
-        isFullscreen
+        isFullscreenActive
       );
-      document.body.classList.toggle("fullscreen-active", isFullscreen);
+      document.body.classList.toggle("fullscreen-active", isFullscreenActive);
 
-      if (isFullscreen) {
+      if (isFullscreenActive) {
         console.log(
           "🎯 フルスクリーンモードが有効になりました - カスタムコントロール配置"
         );
@@ -508,8 +512,8 @@ function App() {
             libraries={["maps", "marker", "geometry"]}
           >
             <div className="app-content">
-              {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター */}
-              {!isMobile && (
+              {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
+              {!isMobile && !isFullscreen && (
                 <FilterPanel
                   loading={loading}
                   resultCount={filteredMapPoints.length}
@@ -534,7 +538,7 @@ function App() {
                 loading={loading}
                 error={error}
                 customControls={
-                  isMobile ? (
+                  isMobile || isFullscreen ? (
                     <CustomMapControls
                       loading={loading}
                       resultCount={filteredMapPoints.length}
