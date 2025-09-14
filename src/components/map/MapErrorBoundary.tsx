@@ -3,6 +3,8 @@
  * Google Maps API エラーの堅牢な処理と回復機能
  */
 
+/* eslint-disable react-refresh/only-export-components */
+
 import React, { Component, ReactNode } from "react";
 
 /**
@@ -40,7 +42,7 @@ interface MapErrorBoundaryState {
 /**
  * Error Boundary の Props
  */
-interface MapErrorBoundaryProps {
+export interface MapErrorBoundaryProps {
   readonly children: ReactNode;
   readonly onError?: (errorInfo: MapErrorInfo) => void;
   readonly maxRetryCount?: number;
@@ -277,7 +279,7 @@ export class MapErrorBoundary extends Component<
   /**
    * エラーからの回復処理
    */
-  private handleRetry = () => {
+  private readonly handleRetry = () => {
     const { retryCount } = this.state;
 
     if (retryCount < this.maxRetryCount) {
@@ -305,22 +307,4 @@ export class MapErrorBoundary extends Component<
 
     return this.props.children;
   }
-}
-
-/**
- * HOC: マップコンポーネントをError Boundaryで包む
- */
-export function withMapErrorBoundary<T extends object>(
-  WrappedComponent: React.ComponentType<T>,
-  errorBoundaryProps?: Omit<MapErrorBoundaryProps, "children">
-) {
-  const WrappedWithErrorBoundary = (props: T) => (
-    <MapErrorBoundary {...errorBoundaryProps}>
-      <WrappedComponent {...props} />
-    </MapErrorBoundary>
-  );
-
-  WrappedWithErrorBoundary.displayName = `withMapErrorBoundary(${WrappedComponent.displayName || WrappedComponent.name})`;
-
-  return WrappedWithErrorBoundary;
 }

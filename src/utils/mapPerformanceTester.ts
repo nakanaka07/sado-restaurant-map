@@ -78,14 +78,27 @@ export class MapPerformanceTester {
                 vitals.lcp = entry.startTime;
                 checkComplete();
                 break;
-              case "layout-shift":
-                if (!(entry as any).hadRecentInput) {
-                  vitals.cls = (vitals.cls || 0) + (entry as any).value;
+              case "layout-shift": {
+                // 型安全なLayoutShiftEntryアクセス
+                interface LayoutShiftEntry extends PerformanceEntry {
+                  hadRecentInput?: boolean;
+                  value: number;
+                }
+                const layoutEntry = entry as LayoutShiftEntry;
+                if (!layoutEntry.hadRecentInput) {
+                  vitals.cls = (vitals.cls || 0) + layoutEntry.value;
                 }
                 break;
-              case "first-input":
-                vitals.fid = (entry as any).processingStart - entry.startTime;
+              }
+              case "first-input": {
+                // 型安全なFirstInputEntryアクセス
+                interface FirstInputEntry extends PerformanceEntry {
+                  processingStart: number;
+                }
+                const inputEntry = entry as FirstInputEntry;
+                vitals.fid = inputEntry.processingStart - entry.startTime;
                 break;
+              }
               case "navigation": {
                 const navEntry = entry as PerformanceNavigationTiming;
                 vitals.ttfb = navEntry.responseStart - navEntry.fetchStart;
@@ -128,10 +141,17 @@ export class MapPerformanceTester {
    * メモリ使用量を取得
    */
   private getMemoryUsage(): number {
-    // @ts-expect-error - performance.memory is available in Chrome
-    if (performance.memory) {
-      // @ts-expect-error - performance.memory is available in Chrome
-      return performance.memory.usedJSHeapSize / (1024 * 1024); // MB
+    // 型安全なperformance.memoryアクセス
+    interface PerformanceWithMemory extends Performance {
+      memory?: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+    }
+    const perfWithMemory = performance as PerformanceWithMemory;
+    if (perfWithMemory.memory?.usedJSHeapSize) {
+      return perfWithMemory.memory.usedJSHeapSize / (1024 * 1024); // MB
     }
     return 0;
   }
@@ -140,10 +160,17 @@ export class MapPerformanceTester {
    * JS Heap サイズを取得
    */
   private getJSHeapSize(): number | undefined {
-    // @ts-expect-error - performance.memory is available in Chrome
-    if (performance.memory) {
-      // @ts-expect-error - performance.memory is available in Chrome
-      return performance.memory.totalJSHeapSize / (1024 * 1024); // MB
+    // 型安全なperformance.memoryアクセス
+    interface PerformanceWithMemory extends Performance {
+      memory?: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+    }
+    const perfWithMemory = performance as PerformanceWithMemory;
+    if (perfWithMemory.memory?.totalJSHeapSize) {
+      return perfWithMemory.memory.totalJSHeapSize / (1024 * 1024); // MB
     }
     return undefined;
   }
@@ -167,8 +194,12 @@ export class MapPerformanceTester {
     console.log(`🚀 Starting performance test: ${testName}`);
 
     // GC実行（可能であれば）
-    if ("gc" in window && typeof (window as any).gc === "function") {
-      (window as any).gc();
+    interface WindowWithGC extends Window {
+      gc?: () => void;
+    }
+    const windowWithGC = window as WindowWithGC;
+    if (windowWithGC.gc && typeof windowWithGC.gc === "function") {
+      windowWithGC.gc();
     }
 
     const startTime = performance.now();
@@ -213,7 +244,7 @@ export class MapPerformanceTester {
         markerCount,
         domNodes: this.getDOMNodeCount(),
         ...(this.getJSHeapSize() !== undefined && {
-          jsHeapSize: this.getJSHeapSize()!,
+          jsHeapSize: this.getJSHeapSize() ?? 0,
         }),
       },
       webVitals: webVitals as WebVitalsMeasurement,

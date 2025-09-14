@@ -62,15 +62,16 @@ export const useMarkerOptimization = (
   viewportBounds?: ViewportBounds,
   config: Partial<MarkerOptimizationConfig> = {}
 ) => {
-  // デフォルト設定
-  const defaultConfig: MarkerOptimizationConfig = {
-    maxVisibleMarkers: 500,
-    clusteringDistance: 50,
-    virtualizationThreshold: 1000,
-    debugMode: process.env.NODE_ENV === "development",
-  };
-
-  const finalConfig = { ...defaultConfig, ...config };
+  // finalConfigをuseMemo化して依存関係を安定化
+  const finalConfig = useMemo(() => {
+    const defaultConfig: MarkerOptimizationConfig = {
+      maxVisibleMarkers: 500,
+      clusteringDistance: 50,
+      virtualizationThreshold: 1000,
+      debugMode: process.env.NODE_ENV === "development",
+    };
+    return { ...defaultConfig, ...config };
+  }, [config]);
 
   // パフォーマンス統計
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats>({

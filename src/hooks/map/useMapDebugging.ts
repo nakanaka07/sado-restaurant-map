@@ -4,7 +4,7 @@
  */
 
 import type { Restaurant } from "@/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * デバッグ統計情報
@@ -68,15 +68,17 @@ export const useMapDebugging = (
   restaurants: readonly Restaurant[],
   config: Partial<MapDebugConfig> = {}
 ) => {
-  const defaultConfig: MapDebugConfig = {
-    enabled: process.env.NODE_ENV === "development",
-    logLevel: "normal",
-    trackPerformance: true,
-    trackMemory: false,
-    maxEventHistory: 100,
-  };
-
-  const finalConfig = { ...defaultConfig, ...config };
+  // finalConfigをuseMemo化して依存関係を安定化
+  const finalConfig = useMemo(() => {
+    const defaultConfig: MapDebugConfig = {
+      enabled: process.env.NODE_ENV === "development",
+      logLevel: "normal",
+      trackPerformance: true,
+      trackMemory: false,
+      maxEventHistory: 100,
+    };
+    return { ...defaultConfig, ...config };
+  }, [config]);
 
   // デバッグ状態
   const [debugStats, setDebugStats] = useState<DebugStats>({
@@ -191,10 +193,18 @@ export const useMapDebugging = (
   const getMemoryUsage = useCallback((): number | undefined => {
     if (!finalConfig.enabled || !finalConfig.trackMemory) return undefined;
 
-    // @ts-expect-error - performance.memory is available in Chrome
-    if (performance.memory) {
-      // @ts-expect-error - performance.memory is available in Chrome
-      return performance.memory.usedJSHeapSize / (1024 * 1024); // MB
+    // 型安全なperformance.memory アクセス
+    interface PerformanceWithMemory extends Performance {
+      memory?: {
+        usedJSHeapSize: number;
+        totalJSHeapSize: number;
+        jsHeapSizeLimit: number;
+      };
+    }
+
+    const perfWithMemory = performance as PerformanceWithMemory;
+    if (perfWithMemory.memory?.usedJSHeapSize) {
+      return perfWithMemory.memory.usedJSHeapSize / (1024 * 1024); // MB
     }
 
     return undefined;
@@ -284,13 +294,7 @@ export const useMapDebugging = (
     console.log("⚙️ Configuration:", finalConfig);
     console.log("💾 Full Debug Data:", debugData);
     console.groupEnd();
-  }, [
-    finalConfig.enabled,
-    exportDebugData,
-    debugStats,
-    eventHistory,
-    finalConfig,
-  ]);
+  }, [exportDebugData, debugStats, eventHistory, finalConfig]);
 
   // レストランデータの変更を監視
   useEffect(() => {
@@ -320,7 +324,7 @@ export const useMapDebugging = (
     }
     return undefined;
   }, [
-    finalConfig.enabled,
+    finalConfig,
     showDebugConsole,
     exportDebugData,
     debugStats,

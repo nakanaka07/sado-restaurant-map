@@ -34,11 +34,25 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
     useEffect(() => {
       const updatePortalContainer = () => {
         // フルスクリーン要素を取得（ブラウザ互換性考慮）
+        const standardFullscreen = document.fullscreenElement;
+
+        // 型安全なフルスクリーン検出のためのinterface拡張
+        interface DocumentWithWebkitFullscreen extends Document {
+          webkitFullscreenElement?: Element;
+          mozFullScreenElement?: Element;
+          msFullscreenElement?: Element;
+        }
+
+        const docWithFullscreen = document as DocumentWithWebkitFullscreen;
+        const webkitFullscreen = docWithFullscreen.webkitFullscreenElement;
+        const mozFullscreen = docWithFullscreen.mozFullScreenElement;
+        const msFullscreen = docWithFullscreen.msFullscreenElement;
+
         const fullscreenElement =
-          document.fullscreenElement ||
-          (document as any).webkitFullscreenElement ||
-          (document as any).mozFullScreenElement ||
-          (document as any).msFullscreenElement;
+          standardFullscreen ||
+          webkitFullscreen ||
+          mozFullscreen ||
+          msFullscreen;
 
         if (fullscreenElement) {
           // フルスクリーン時はフルスクリーン要素内にPortalを作成
