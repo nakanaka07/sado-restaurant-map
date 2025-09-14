@@ -231,13 +231,29 @@ export const useMarkerOptimization = (
     }));
 
     if (finalConfig.debugMode) {
-      console.log("🎯 Marker Optimization Stats:", {
+      const isNearLimit = optimized.length >= 40; // API制限50の80%
+      const warningStyle = isNearLimit ? "⚠️" : "🎯";
+
+      console.log(`${warningStyle} Marker Optimization Stats:`, {
         total: restaurants.length,
         valid: validRestaurants.length,
         inViewport: viewportRestaurants.length,
         displayed: optimized.length,
         renderTime: `${renderTime.toFixed(2)}ms`,
+        ...(isNearLimit && {
+          warning: "⚠️ Google Maps API制限(50個)に近づいています",
+          apiLimit: "開発環境では1日50個までです",
+        }),
       });
+
+      // API制限警告
+      if (restaurants.length > 50) {
+        console.warn(
+          "🚨 Google Maps API制限警告:",
+          `全データ${restaurants.length}件中、開発環境では${optimized.length}件のみ表示しています。`,
+          "本番環境では全件表示されます。"
+        );
+      }
     }
 
     return optimized;

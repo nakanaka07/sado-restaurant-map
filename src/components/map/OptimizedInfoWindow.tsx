@@ -3,6 +3,7 @@
  * メモリ効率とレンダリング最適化を重視
  */
 
+import { LastUpdatedDisplay } from "@/components/common/LastUpdatedDisplay";
 import type { Restaurant } from "@/types";
 import { InfoWindow } from "@vis.gl/react-google-maps";
 import { memo, useCallback } from "react";
@@ -17,6 +18,14 @@ interface OptimizedInfoWindowProps {
  * メモ化されたInfoWindow内容
  */
 const InfoWindowContent = memo<{ restaurant: Restaurant }>(({ restaurant }) => {
+  // デバッグ: lastUpdated値を確認
+  console.log("🔍 RestaurantデータのlastUpdated確認:", {
+    name: restaurant.name,
+    lastUpdated: restaurant.lastUpdated,
+    hasLastUpdated: !!restaurant.lastUpdated,
+    lastUpdatedType: typeof restaurant.lastUpdated,
+  });
+
   // 電話クリックハンドラー
   const handlePhoneClick = useCallback(
     (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -197,6 +206,27 @@ const InfoWindowContent = memo<{ restaurant: Restaurant }>(({ restaurant }) => {
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* 最終更新日 */}
+      {restaurant.lastUpdated && (
+        <div
+          style={{
+            marginTop: "8px",
+            paddingTop: "6px",
+            borderTop: "1px solid #f3f4f6",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
+        >
+          <LastUpdatedDisplay
+            lastUpdated={restaurant.lastUpdated}
+            format="relative"
+            size="small"
+            showIcon={false}
+            showFreshnessIndicator={true}
+          />
         </div>
       )}
     </div>

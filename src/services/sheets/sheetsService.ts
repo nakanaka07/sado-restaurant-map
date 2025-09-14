@@ -302,6 +302,20 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
     // ヘッダー行をスキップ
     const dataRows = rows.slice(1);
 
+    // スプレッドシート構造の確認用ログ（最初の3行のみ）
+    console.log("📊 スプレッドシートデータ構造確認:");
+    if (rows.length > 0) {
+      console.log("ヘッダー行:", rows[0]);
+      console.log("サンプルデータ行（最大3行）:");
+      dataRows.slice(0, 3).forEach((row, index) => {
+        console.log(`行${index + 2}:`, {
+          columns: row.length,
+          last5Columns: row.slice(-5), // 最後の5列
+          column41_AO: row[40], // 41列目（AO列）
+        });
+      });
+    }
+
     // 空データの場合は空配列を返す
     if (dataRows.length === 0) {
       console.warn("No restaurant data rows found after header");
@@ -368,8 +382,8 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
 /**
  * シートの行データをRestaurant型に変換
  *
- * 実際のデータベース構造（26フィールド）に対応:
- * Place ID, 店舗名, 所在地, 緯度, 経度, 評価, レビュー数, 営業状況, 営業時間, 電話番号, ウェブサイト, 価格帯, 店舗タイプ, 店舗説明, テイクアウト, デリバリー, 店内飲食, カーブサイドピックアップ, 予約可能, 朝食提供, 昼食提供, 夕食提供, ビール提供, ワイン提供, カクテル提供, コーヒー提供
+ * 実際のデータベース構造（41フィールド）に対応:
+ * Place ID, 店舗名, 所在地, 緯度, 経度, 評価, レビュー数, 営業状況, 営業時間, 電話番号, ウェブサイト, 価格帯, 店舗タイプ, 店舗説明, テイクアウト, デリバリー, 店内飲食, カーブサイドピックアップ, 予約可能, 朝食提供, 昼食提供, 夕食提供, ビール提供, ワイン提供, カクテル提供, コーヒー提供, ...(27-40列目は空), 最終更新日（AO列）
  */
 function convertSheetRowToRestaurant(
   row: string[],
@@ -409,6 +423,22 @@ function convertSheetRowToRestaurant(
     wine = "",
     cocktails = "",
     coffee = "",
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    // 空のカラム（27-40列目）をスキップ
+    lastUpdatedFromSheet = "", // 41列目（AO列）: 実際の最終更新日
   ] = row;
 
   // 必須フィールドの検証
@@ -479,6 +509,21 @@ function convertSheetRowToRestaurant(
   const reviewCountValue =
     reviewCount && !isNaN(reviewCount) ? reviewCount : null;
 
+  // 更新日の設定（スプレッドシートの更新日データまたは現在日時）
+  const actualLastUpdated =
+    lastUpdatedFromSheet?.trim() || new Date().toISOString().split("T")[0];
+
+  // デバッグ: lastUpdated設定の確認
+  console.log("🗓️ lastUpdated設定デバッグ:", {
+    restaurantName: name.trim(),
+    lastUpdatedFromSheet,
+    lastUpdatedFromSheetTrimmed: lastUpdatedFromSheet?.trim(),
+    hasLastUpdatedFromSheet: !!lastUpdatedFromSheet?.trim(),
+    actualLastUpdated,
+    rowLength: row.length,
+    columnIndex41_AO: row[40], // 41列目（AO列、0ベースで40）
+  });
+
   const baseRestaurant = {
     id: placeId,
     type: "restaurant" as const,
@@ -491,9 +536,9 @@ function convertSheetRowToRestaurant(
     coordinates: { lat, lng },
     openingHours: parsedOpeningHours,
     features,
-    lastUpdated: new Date().toISOString().split("T")[0],
+    lastUpdated: actualLastUpdated,
     // 新機能フィールド
-    lastDataUpdate: new Date().toISOString().split("T")[0],
+    lastDataUpdate: new Date().toISOString().split("T")[0], // データ処理日は別途記録
     mainCategory,
     googleMapsUrl,
   };
@@ -1198,7 +1243,7 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
     district = "", // googleMapsUrl（未使用） // acquisitionMethod（未使用）
     ,
     ,
-    lastUpdated = "",
+    lastUpdatedFromSheet = "",
   ] = row;
 
   if (!placeId || !name || !address) {
@@ -1224,6 +1269,10 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
     feeStructure
   );
 
+  // 更新日の設定（スプレッドシートの更新日データまたは現在日時）
+  const actualLastUpdated =
+    lastUpdatedFromSheet?.trim() || new Date().toISOString().split("T")[0];
+
   const baseParkingData = {
     id: placeId,
     type: "parking" as const,
@@ -1234,7 +1283,7 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
     fee: feeStructure || "料金不明",
     openingHours: parseOpeningHours(detailedHours),
     features: extractedFeatures,
-    lastUpdated: lastUpdated || new Date().toISOString().split("T")[0],
+    lastUpdated: actualLastUpdated,
   };
 
   const descriptionValue = description || `${extractedDistrict}にある駐車場`;
@@ -1280,7 +1329,7 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
     district = "", // googleMapsUrl（未使用） // acquisitionMethod（未使用）
     ,
     ,
-    lastUpdated = "",
+    lastUpdatedFromSheet = "",
   ] = row;
 
   if (!placeId || !name || !address) {
@@ -1305,6 +1354,10 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
     description
   );
 
+  // 更新日の設定（スプレッドシートの更新日データまたは現在日時）
+  const actualLastUpdated =
+    lastUpdatedFromSheet?.trim() || new Date().toISOString().split("T")[0];
+
   return {
     id: placeId,
     type: "toilet" as const,
@@ -1315,7 +1368,7 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
     coordinates: { lat, lng },
     openingHours: parseOpeningHours(detailedHours),
     features: extractedFeatures,
-    lastUpdated: lastUpdated || new Date().toISOString().split("T")[0],
+    lastUpdated: actualLastUpdated,
   };
 }
 

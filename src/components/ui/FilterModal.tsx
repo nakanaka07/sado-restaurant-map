@@ -5,7 +5,7 @@
 
 import type { FilterModalProps } from "@/types";
 import { FilterDisplayMode } from "@/types";
-import { forwardRef, useCallback, useEffect, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 /**
@@ -26,6 +26,61 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
     const modalRef = useRef<HTMLDialogElement>(null);
     const overlayRef = useRef<HTMLDialogElement>(null);
     const previousFocusRef = useRef<HTMLElement | null>(null);
+    const [portalContainer, setPortalContainer] = useState<Element>(
+      () => document.body
+    );
+
+    // フルスクリーン状態の検出とPortal先の動的変更
+    useEffect(() => {
+      const updatePortalContainer = () => {
+        // フルスクリーン要素を取得（ブラウザ互換性考慮）
+        const fullscreenElement =
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).mozFullScreenElement ||
+          (document as any).msFullscreenElement;
+
+        if (fullscreenElement) {
+          // フルスクリーン時はフルスクリーン要素内にPortalを作成
+          console.log(
+            "🔧 フルスクリーンモード検出: モーダルPortalをフルスクリーン要素内に移動"
+          );
+          setPortalContainer(fullscreenElement);
+        } else {
+          // 通常時はbodyに戻す
+          console.log("🔄 通常モードに戻しました: モーダルPortalをbodyに配置");
+          setPortalContainer(document.body);
+        }
+      };
+
+      // フルスクリーン変更イベントの監視
+      document.addEventListener("fullscreenchange", updatePortalContainer);
+      document.addEventListener(
+        "webkitfullscreenchange",
+        updatePortalContainer
+      );
+      document.addEventListener("mozfullscreenchange", updatePortalContainer);
+      document.addEventListener("msfullscreenchange", updatePortalContainer);
+
+      // 初回実行
+      updatePortalContainer();
+
+      return () => {
+        document.removeEventListener("fullscreenchange", updatePortalContainer);
+        document.removeEventListener(
+          "webkitfullscreenchange",
+          updatePortalContainer
+        );
+        document.removeEventListener(
+          "mozfullscreenchange",
+          updatePortalContainer
+        );
+        document.removeEventListener(
+          "msfullscreenchange",
+          updatePortalContainer
+        );
+      };
+    }, []);
 
     // フォーカス管理ユーティリティ関数 - Cognitive Complexity減少
     const setInitialFocus = useCallback((modalElement: HTMLElement) => {
@@ -226,7 +281,7 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
       return null;
     }
 
-    // Portalでbodyに直接レンダリング - HTML5 dialog要素使用
+    // Portalで動的なコンテナにレンダリング - HTML5 dialog要素使用
     return createPortal(
       <dialog
         ref={ref || overlayRef}
@@ -295,7 +350,7 @@ export const FilterModal = forwardRef<HTMLDialogElement, FilterModalProps>(
           <section className="filter-modal-body">{children}</section>
         </main>
       </dialog>,
-      document.body
+      portalContainer
     );
   }
 );

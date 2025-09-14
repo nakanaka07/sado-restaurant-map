@@ -663,6 +663,17 @@ body:has(:-moz-full-screen) .filter-modal-overlay {
   inset: 0 !important;
 }
 
+/* フルスクリーン要素内のモーダルの場合のスタイル調整 */
+:fullscreen > .filter-modal-overlay,
+:-webkit-full-screen > .filter-modal-overlay,
+:-moz-full-screen > .filter-modal-overlay {
+  position: absolute !important;
+  z-index: 999999 !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* フルスクリーン親要素の調整 */
 :fullscreen,
 :-webkit-full-screen,
@@ -739,6 +750,16 @@ html.fullscreen-active .filter-modal-overlay {
   z-index: 2147483646 !important;
   inset: 0 !important;
   backdrop-filter: blur(8px) !important;
+}
+
+/* フルスクリーン要素内に配置されたモーダルの場合 */
+.fullscreen-active > .filter-modal-overlay,
+html.fullscreen-active > .filter-modal-overlay {
+  position: absolute !important;
+  z-index: 999999 !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* モバイルフルスクリーン時の調整 */
