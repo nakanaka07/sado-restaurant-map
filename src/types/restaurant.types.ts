@@ -134,6 +134,7 @@ export interface Parking {
   readonly openingHours?: readonly OpeningHours[];
   readonly features: readonly string[]; // "大型車対応", "障害者用", "24時間利用可" など
   readonly lastUpdated: string;
+  readonly lastDataUpdate?: string; // データ更新日
 }
 
 /** 公衆トイレの基本情報 */
@@ -148,6 +149,7 @@ export interface Toilet {
   readonly openingHours?: readonly OpeningHours[];
   readonly features: readonly string[]; // "多目的トイレ", "おむつ交換台", "車椅子対応" など
   readonly lastUpdated: string;
+  readonly lastDataUpdate?: string; // データ更新日
 }
 
 /** 統合マップポイント（飲食店・駐車場・トイレを統合） */

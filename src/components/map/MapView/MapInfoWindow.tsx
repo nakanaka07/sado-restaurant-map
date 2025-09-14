@@ -299,6 +299,32 @@ export function MapInfoWindow({ point }: Readonly<MapInfoWindowProps>) {
         </div>
       )}
 
+      {/* メタ情報・最終更新日（駐車場・トイレ用） */}
+      {(point.type === "parking" || point.type === "toilet") && (
+        <div
+          style={{
+            marginTop: "12px",
+            paddingTop: "8px",
+            borderTop: "1px solid #e5e7eb",
+            fontSize: "11px",
+            color: "#6b7280",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <LastUpdatedDisplay
+            lastUpdated={point.lastDataUpdate || point.lastUpdated}
+            format="relative"
+            size="small"
+            showFreshnessIndicator={true}
+          />
+          <span style={{ fontSize: "10px" }}>
+            {point.type === "parking" ? "🅿️ 駐車場" : "🚻 トイレ"}
+          </span>
+        </div>
+      )}
+
       {/* アクションボタン */}
       <div
         style={{

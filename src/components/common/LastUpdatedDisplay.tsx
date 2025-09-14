@@ -49,17 +49,6 @@ export const LastUpdatedDisplay = React.memo<LastUpdatedDisplayProps>(
     size = "medium",
     className = "",
   }) => {
-    // デバッグ: 受信したpropsを確認
-    console.log("📅 LastUpdatedDisplayデバッグ:", {
-      lastUpdated,
-      hasValue: !!lastUpdated,
-      valueType: typeof lastUpdated,
-      format,
-      showIcon,
-      showFreshnessIndicator,
-      size,
-    });
-
     if (!lastUpdated) {
       return (
         <div className={`last-updated-display ${className}`}>

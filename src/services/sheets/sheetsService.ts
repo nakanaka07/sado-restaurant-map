@@ -14,7 +14,6 @@ import type {
   Toilet,
 } from "@/types";
 import { getDistrictFromAddress } from "@/utils";
-import { maskApiKey } from "@/utils/securityUtils";
 
 // 環境変数から設定値を取得
 const SPREADSHEET_ID = import.meta.env.VITE_SPREADSHEET_ID;
@@ -81,7 +80,6 @@ async function fetchSheetData(worksheetName: string): Promise<string[][]> {
   validateApiConfiguration();
 
   const url = buildSheetsApiUrl(worksheetName);
-  logApiRequest(url);
 
   const response = await makeApiRequest(url);
   const data = await handleApiResponse(response, worksheetName);
@@ -105,17 +103,9 @@ function validateApiConfiguration(): void {
  * Sheets API URLの構築
  */
 function buildSheetsApiUrl(worksheetName: string): string {
-  const range = `${worksheetName}!A:Z`;
+  // AQ列（43列目）まで取得するため範囲を拡張
+  const range = `${worksheetName}!A:AZ`;
   return `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}`;
-}
-
-/**
- * APIリクエストのログ出力（機密情報マスキング済み）
- */
-function logApiRequest(url: string): void {
-  const apiKey = API_KEY || "undefined";
-  const maskedUrl = url.replace(/key=[^&]+/, `key=${maskApiKey(apiKey)}`);
-  console.log(`📡 Google Sheets APIリクエスト: ${maskedUrl}`);
 }
 
 /**
@@ -302,19 +292,7 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
     // ヘッダー行をスキップ
     const dataRows = rows.slice(1);
 
-    // スプレッドシート構造の確認用ログ（最初の3行のみ）
-    console.log("📊 スプレッドシートデータ構造確認:");
-    if (rows.length > 0) {
-      console.log("ヘッダー行:", rows[0]);
-      console.log("サンプルデータ行（最大3行）:");
-      dataRows.slice(0, 3).forEach((row, index) => {
-        console.log(`行${index + 2}:`, {
-          columns: row.length,
-          last5Columns: row.slice(-5), // 最後の5列
-          column41_AO: row[40], // 41列目（AO列）
-        });
-      });
-    }
+    // スプレッドシート構造の確認（本番環境では詳細ログを出力しない）
 
     // 空データの場合は空配列を返す
     if (dataRows.length === 0) {
@@ -358,9 +336,7 @@ export async function fetchRestaurantsFromSheets(): Promise<Restaurant[]> {
       throw new SheetsApiError("No valid restaurant data could be parsed", 422);
     }
 
-    console.log(
-      `✅ ${validRestaurants.length}/${dataRows.length} 件の有効な飲食店データを変換しました`
-    );
+    // 飲食店データ変換完了
     return validRestaurants;
   } catch (error) {
     console.error("Failed to fetch restaurants from sheets:", error);
@@ -396,50 +372,29 @@ function convertSheetRowToRestaurant(
     );
   }
 
-  const [
-    placeId = "",
-    name = "",
-    address = "",
-    latStr = "",
-    lngStr = "",
-    ratingStr = "",
-    reviewCountStr = "", // businessStatus（未使用）
-    ,
-    openingHours = "",
-    phone = "",
-    website = "",
-    priceLevel = "",
-    storeType = "",
-    storeDescription = "",
-    takeout = "",
-    delivery = "",
-    dineIn = "",
-    curbsidePickup = "",
-    reservable = "",
-    breakfast = "",
-    lunch = "",
-    dinner = "",
-    beer = "",
-    wine = "",
-    cocktails = "",
-    coffee = "",
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    ,
-    // 空のカラム（27-40列目）をスキップ
-    lastUpdatedFromSheet = "", // 41列目（AO列）: 実際の最終更新日
-  ] = row;
+  // Google Sheets データから必要なフィールドを抽出
+  // 分割代入の代わりに配列アクセスを使用して明確にする
+  const placeId = row[0] || "";
+  const name = row[1] || "";
+  const address = row[2] || "";
+  const latStr = row[3] || "";
+  const lngStr = row[4] || "";
+  const ratingStr = row[5] || "";
+  const reviewCountStr = row[6] || "";
+  // row[7] は未使用（businessStatus）
+  const openingHours = row[8] || "";
+  const phone = row[9] || "";
+  const website = row[10] || "";
+  const priceLevel = row[11] || "";
+  const storeType = row[12] || "";
+  const storeDescription = row[13] || "";
+  const takeout = row[14] || "";
+  const delivery = row[15] || "";
+  const dineIn = row[16] || "";
+  const curbsidePickup = row[17] || "";
+  const reservable = row[18] || "";
+  const breakfast = row[19] || "";
+  const lastUpdatedFromSheet = row[42] || ""; // AQ列（43列目、0ベースで42番目）: 実際の最終更新日 - restaurants用
 
   // 必須フィールドの検証
   if (!placeId || !name || !address) {
@@ -484,12 +439,12 @@ function convertSheetRowToRestaurant(
     curbsidePickup,
     reservable,
     breakfast,
-    lunch,
-    dinner,
-    beer,
-    wine,
-    cocktails,
-    coffee,
+    lunch: "", // V列（22列目）は現在未使用
+    dinner: "", // W列（23列目）は現在未使用
+    beer: "", // X列（24列目）は現在未使用
+    wine: "", // Y列（25列目）は現在未使用
+    cocktails: "", // Z列（26列目）は現在未使用
+    coffee: "", // 追加列は現在未使用
   });
 
   // 新機能: Google Maps URLの生成
@@ -513,16 +468,7 @@ function convertSheetRowToRestaurant(
   const actualLastUpdated =
     lastUpdatedFromSheet?.trim() || new Date().toISOString().split("T")[0];
 
-  // デバッグ: lastUpdated設定の確認
-  console.log("🗓️ lastUpdated設定デバッグ:", {
-    restaurantName: name.trim(),
-    lastUpdatedFromSheet,
-    lastUpdatedFromSheetTrimmed: lastUpdatedFromSheet?.trim(),
-    hasLastUpdatedFromSheet: !!lastUpdatedFromSheet?.trim(),
-    actualLastUpdated,
-    rowLength: row.length,
-    columnIndex41_AO: row[40], // 41列目（AO列、0ベースで40）
-  });
+  // lastUpdated設定（本番環境では詳細ログを出力しない）
 
   const baseRestaurant = {
     id: placeId,
@@ -538,19 +484,24 @@ function convertSheetRowToRestaurant(
     features,
     lastUpdated: actualLastUpdated,
     // 新機能フィールド
-    lastDataUpdate: new Date().toISOString().split("T")[0], // データ処理日は別途記録
     mainCategory,
     googleMapsUrl,
   };
 
   // 条件付きプロパティを追加（exactOptionalPropertyTypes対応）
-  return {
+  const restaurantResult = {
     ...baseRestaurant,
     ...(phoneValue && { phone: phoneValue }),
     ...(ratingValue !== null && { rating: ratingValue }),
     ...(reviewCountValue !== null && { reviewCount: reviewCountValue }),
     ...(website.trim() && { website: website.trim() }),
+    // lastDataUpdateは値がある場合のみ追加
+    ...(lastUpdatedFromSheet?.trim() && {
+      lastDataUpdate: lastUpdatedFromSheet.trim(),
+    }),
   };
+
+  return restaurantResult;
 }
 
 // 料理ジャンル判定用の正規表現パターン（パフォーマンス向上のため事前コンパイル）
@@ -1001,9 +952,7 @@ export async function fetchParkingsFromSheets(): Promise<Parking[]> {
       })
       .filter((parking): parking is Parking => parking !== null);
 
-    console.log(
-      `✅ ${validParkings.length}/${dataRows.length} 件の有効な駐車場データを変換しました`
-    );
+    // 駐車場データ変換完了
     return validParkings;
   } catch (error) {
     console.warn("駐車場データの取得に失敗しました:", error);
@@ -1068,9 +1017,7 @@ export async function fetchToiletsFromSheets(): Promise<Toilet[]> {
       })
       .filter((toilet): toilet is Toilet => toilet !== null);
 
-    console.log(
-      `✅ ${validToilets.length}/${dataRows.length} 件の有効なトイレデータを変換しました`
-    );
+    // トイレデータ変換完了
     return validToilets;
   } catch (error) {
     console.warn("公衆トイレデータの取得に失敗しました:", error);
@@ -1174,9 +1121,7 @@ export async function fetchAllMapPoints(): Promise<MapPoint[]> {
       }
     }
 
-    console.log(
-      `📊 統合マップポイント: 飲食店${restaurants.length}件 + 駐車場${parkings.length}件 + トイレ${toilets.length}件 = 合計${mapPoints.length}件`
-    );
+    // マップポイント統合完了
 
     return mapPoints;
   } catch (error) {
@@ -1213,7 +1158,7 @@ export function checkDataFreshness(): {
  * シートの行データをParking型に変換
  *
  * 実際のデータ構造（21フィールド）に対応:
- * Place ID, 駐車場名, 所在地, 緯度, 経度, カテゴリ, カテゴリ詳細, 営業状況, 施設説明, 完全住所, 詳細営業時間, バリアフリー対応, 支払い方法, 料金体系, トイレ設備, 施設評価, レビュー数, 地区, GoogleマップURL, 取得方法, 最終更新日時
+ * Place ID, 駐車場名, 所在地, 緯度, 経度, カテゴリ, カテゴリ詳細, 営業状況, 施設説明, 完全住所, 詳細営業時間, バリアフリー対応, 支払い方法, 料金体系, トイレ設備, 施設評価, レビュー数, 地区, GoogleマップURL, 取得方法, 最終更新日時（U列）
  */
 function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
   if (row.length < 5) {
@@ -1222,29 +1167,28 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
     );
   }
 
-  const [
-    placeId = "",
-    name = "",
-    address = "",
-    latStr = "",
-    lngStr = "",
-    category = "",
-    categoryDetail = "", // businessStatus（未使用）
-    ,
-    description = "", // fullAddress（未使用）
-    ,
-    detailedHours = "",
-    accessibility = "",
-    paymentMethods = "",
-    feeStructure = "",
-    toiletFacilities = "", // rating（未使用） // reviewCount（未使用）
-    ,
-    ,
-    district = "", // googleMapsUrl（未使用） // acquisitionMethod（未使用）
-    ,
-    ,
-    lastUpdatedFromSheet = "",
-  ] = row;
+  // 必要なフィールドを直接アクセスで取得
+  const placeId = row[0] || "";
+  const name = row[1] || "";
+  const address = row[2] || "";
+  const latStr = row[3] || "";
+  const lngStr = row[4] || "";
+  const category = row[5] || "";
+  const categoryDetail = row[6] || "";
+  // row[7] は営業状況（未使用）
+  const description = row[8] || "";
+  // row[9] は完全住所（未使用）
+  const detailedHours = row[10] || "";
+  const accessibility = row[11] || "";
+  const paymentMethods = row[12] || "";
+  const feeStructure = row[13] || "";
+  const toiletFacilities = row[14] || "";
+  // row[15] は施設評価（未使用）
+  // row[16] はレビュー数（未使用）
+  const district = row[17] || "";
+  // row[18] はGoogleマップURL（未使用）
+  // row[19] は取得方法（未使用）
+  const lastUpdatedFromSheet = row[20] || ""; // U列（21列目、0ベースで20番目）: 実際の最終更新日 - parkings用
 
   if (!placeId || !name || !address) {
     throw new Error(`Missing required parking fields in row ${rowNumber}`);
@@ -1291,6 +1235,10 @@ function convertSheetRowToParking(row: string[], rowNumber: number): Parking {
   return {
     ...baseParkingData,
     description: descriptionValue,
+    // lastDataUpdateは値がある場合のみ追加
+    ...(lastUpdatedFromSheet?.trim() && {
+      lastDataUpdate: lastUpdatedFromSheet.trim(),
+    }),
     // capacityはオプショナルでundefinedを許可するため、値がある場合のみ追加
     // 今回は駐車場データに収容台数情報がないため、プロパティ自体を追加しない
   };
@@ -1309,28 +1257,28 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
     );
   }
 
-  const [
-    placeId = "",
-    name = "",
-    address = "",
-    latStr = "",
-    lngStr = "",
-    category = "",
-    categoryDetail = "", // businessStatus（未使用）
-    ,
-    description = "", // fullAddress（未使用）
-    ,
-    detailedHours = "",
-    accessibility = "",
-    kidsSupport = "",
-    parkingAvailable = "", // rating（未使用） // reviewCount（未使用）
-    ,
-    ,
-    district = "", // googleMapsUrl（未使用） // acquisitionMethod（未使用）
-    ,
-    ,
-    lastUpdatedFromSheet = "",
-  ] = row;
+  // 必要なフィールドを直接アクセスで取得
+  const placeId = row[0] || "";
+  const name = row[1] || "";
+  const address = row[2] || "";
+  const latStr = row[3] || "";
+  const lngStr = row[4] || "";
+  const category = row[5] || "";
+  const categoryDetail = row[6] || "";
+  // row[7] は営業状況（未使用）
+  const description = row[8] || "";
+  // row[9] は完全住所（未使用）
+  const detailedHours = row[10] || "";
+  const accessibility = row[11] || "";
+  const kidsSupport = row[12] || "";
+  const parkingAvailable = row[13] || "";
+  // row[14] は未使用
+  // row[15] は施設評価（未使用）
+  // row[16] はレビュー数（未使用）
+  const district = row[17] || "";
+  // row[18] はGoogleマップURL（未使用）
+  // row[19] は取得方法（未使用）
+  const lastUpdatedFromSheet = row[20] || ""; // U列（21列目、0ベースで20番目）: 実際の最終更新日 - toilets用
 
   if (!placeId || !name || !address) {
     throw new Error(`Missing required toilet fields in row ${rowNumber}`);
@@ -1369,6 +1317,10 @@ function convertSheetRowToToilet(row: string[], rowNumber: number): Toilet {
     openingHours: parseOpeningHours(detailedHours),
     features: extractedFeatures,
     lastUpdated: actualLastUpdated,
+    // lastDataUpdateは値がある場合のみ追加
+    ...(lastUpdatedFromSheet?.trim() && {
+      lastDataUpdate: lastUpdatedFromSheet.trim(),
+    }),
   };
 }
 
