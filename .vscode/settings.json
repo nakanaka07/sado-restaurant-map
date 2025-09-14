@@ -104,6 +104,57 @@
   "github.copilot.chat.followups": "onDemand",
   "github.copilot.chat.localeOverride": "ja",
 
+  // === MCP (Model Context Protocol) サーバー設定 ===
+  // 佐渡飲食店マッププロジェクト用最適化済み設定
+  // 重複警告対策：競合するツールを統合・最適化
+
+  // コア開発ツール（必須）
+  "mcp.servers.github": {
+    "url": "https://api.githubcopilot.com/mcp/",
+    "description": "GitHub統合管理（Issues・PR・リポジトリ）",
+    "priority": "high",
+    "enabled": true
+  },
+  "mcp.servers.microsoft-docs": {
+    "url": "https://learn.microsoft.com/api/mcp",
+    "description": "技術文書・API参照",
+    "priority": "medium",
+    "enabled": true
+  },
+
+  // データ分析・処理（data-platform連携）
+  "mcp.servers.duckdb": {
+    "command": "uvx",
+    "args": [
+      "mcp-server-duckdb",
+      "--db-path",
+      "./data-platform/data/analytics.duckdb"
+    ],
+    "description": "ローカルデータ分析・SQL実行",
+    "priority": "medium",
+    "enabled": false,
+    "enabledWhen": "data-analysis"
+  },
+
+  // 生産性ツール（最小限・重複回避）
+  "mcp.servers.sequential-thinking": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    "description": "タスク分解・計画管理",
+    "priority": "low",
+    "enabled": true
+  },
+
+  // === MCP競合回避・優先度設定 ===
+  "mcp.serverPriority": {
+    "github": 100,
+    "microsoft-docs": 80,
+    "sequential-thinking": 60,
+    "duckdb": 40
+  },
+  "mcp.conflictResolution": "priority",
+  "mcp.toolOverlapHandling": "merge",
+
   // === ファイル形式別設定 ===
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
