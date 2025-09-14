@@ -9,10 +9,10 @@ import type { LatLngLiteral } from "@/types";
 // 地図関連の定数
 // ==============================
 
-/** 佐渡島の中心座標 */
+/** 佐渡島の中心座標（北部寄り） */
 export const SADO_CENTER: LatLngLiteral = {
-  lat: 38.018611,
-  lng: 138.367222,
+  lat: 38.08,
+  lng: 138.38,
 } as const;
 
 /** デフォルトの地図ズームレベル */
