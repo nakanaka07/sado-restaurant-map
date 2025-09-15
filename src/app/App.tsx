@@ -20,8 +20,8 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import PWABadge from "../components/layout/PWABadge";
-import { MapView } from "../components/map";
 import { CustomMapControls } from "../components/map/CustomMapControls"; // NEW: CustomMapControls 追加
+import { IntegratedMapView } from "../components/map/MapView/IntegratedMapView";
 import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
 
@@ -531,12 +531,13 @@ function App() {
                 />
               )}
 
-              {/* Fullscreen Map with Custom Controls */}
-              <MapView
+              {/* Fullscreen Map with A/B Testing Integration */}
+              <IntegratedMapView
                 mapPoints={filteredMapPoints}
                 center={SADO_CENTER}
                 loading={loading}
                 error={error}
+                userId={`user_${Date.now()}`} // 簡易的なユーザーID生成
                 customControls={
                   isMobile || isFullscreen ? (
                     <CustomMapControls

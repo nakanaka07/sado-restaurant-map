@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
-import { defineConfig } from "vite";
+import { visualizer } from "rollup-plugin-visualizer";
+import { defineConfig, type PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
 // 🔧 開発環境でのWorkbox完全制御
@@ -225,7 +226,18 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       ...(shouldEnablePWA ? [VitePWA(createPWAConfig(isProduction))] : []),
-    ],
+      // 🔍 バンドル分析プラグイン（ビルド時のみ）
+      ...(process.env.ANALYZE === "true"
+        ? [
+            visualizer({
+              filename: "dist/stats.html",
+              open: true,
+              gzipSize: true,
+              brotliSize: true,
+            }) as unknown as PluginOption, // 型互換性のための変換
+          ]
+        : []),
+    ] as PluginOption[],
 
     // パス解決の最適化
     resolve: {

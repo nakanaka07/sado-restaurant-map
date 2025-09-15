@@ -1,9 +1,20 @@
+/**
+ * @vitest-environment jsdom
+ */
+/// <reference types="vitest/globals" />
 import type { Restaurant } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RestaurantMap } from "./RestaurantMap";
 
+// DOM環境の安全性チェック
+if (typeof document === "undefined") {
+  throw new Error(
+    "DOM environment not available. Please ensure jsdom is properly configured."
+  );
+}
 // 型定義
 interface MockMapProps {
   children?: ReactNode;
@@ -78,11 +89,11 @@ vi.mock("@vis.gl/react-google-maps", () => ({
       aria-label={`Restaurant marker: ${title}`}
       onClick={onClick}
       style={{
-        cursor: 'pointer',
-        border: 'none',
-        background: 'transparent',
+        cursor: "pointer",
+        border: "none",
+        background: "transparent",
         padding: 0,
-        font: 'inherit'
+        font: "inherit",
       }}
       {...props}
     >
@@ -108,6 +119,12 @@ vi.mock("@vis.gl/react-google-maps", () => ({
 vi.mock("@/utils/analytics", () => ({
   trackRestaurantClick: vi.fn(),
   trackMapInteraction: vi.fn(),
+  trackEvent: vi.fn(),
+  initGA: vi.fn().mockResolvedValue(void 0),
+  trackPageView: vi.fn(),
+  trackSearch: vi.fn(),
+  trackFilter: vi.fn(),
+  trackPWAUsage: vi.fn(),
 }));
 
 describe("RestaurantMap", () => {
@@ -173,15 +190,33 @@ describe("RestaurantMap", () => {
 
   afterEach(() => {
     cleanup();
-    // 残存する要素の強制削除（テスト間の分離保証）
-    const remainingMarkers = document.querySelectorAll(
-      '[data-testid="advanced-marker"]'
-    );
-    remainingMarkers.forEach((marker) => marker.remove());
-    const remainingMaps = document.querySelectorAll(
-      '[data-testid="google-map"]'
-    );
-    remainingMaps.forEach((map) => map.remove());
+    // DOM環境の実行時検証と型ガード
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      try {
+        // 残存する要素の強制削除（テスト間の分離保証）
+        const remainingMarkers = document.querySelectorAll(
+          '[data-testid="advanced-marker"]'
+        );
+        remainingMarkers.forEach(marker => {
+          const parent = marker.parentNode;
+          if (parent) {
+            parent.removeChild(marker);
+          }
+        });
+
+        const remainingMaps = document.querySelectorAll(
+          '[data-testid="google-map"]'
+        );
+        remainingMaps.forEach(map => {
+          const parent = map.parentNode;
+          if (parent) {
+            parent.removeChild(map);
+          }
+        });
+      } catch (error) {
+        console.warn("テストクリーンアップエラー:", error);
+      }
+    }
   });
 
   describe("基本レンダリング", () => {
@@ -334,13 +369,18 @@ describe("RestaurantMap", () => {
     });
 
     it("phone情報がないレストランでも正常に表示されること", () => {
-      const restaurantWithoutPhone = [
+      const restaurantWithoutPhone: readonly Restaurant[] = [
         {
           ...mockRestaurants[0],
-          phone: undefined,
-        },
-      ];
-
+          // TypeScript exactOptionalPropertyTypes対応: undefinedの代わりにプロパティ削除
+        } as Restaurant,
+      ].map(restaurant => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { phone, ...rest } = restaurant as Restaurant & {
+          phone?: string;
+        };
+        return rest as Restaurant;
+      });
       render(
         <RestaurantMap {...defaultProps} restaurants={restaurantWithoutPhone} />
       );

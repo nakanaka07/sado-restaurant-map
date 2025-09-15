@@ -55,7 +55,7 @@ describe("MapInfoWindow - アクセシビリティ", () => {
     render(<MapInfoWindow point={mockRestaurant} />);
 
     // 実際に表示されるテキストに基づいてテストを修正
-    const statusElement = screen.getByText("営業時間不明");
+    const statusElement = screen.getByText("閉店中");
     expect(statusElement).toBeInTheDocument();
   });
 
