@@ -6,6 +6,9 @@
 import type { Restaurant } from "@/types";
 import { useCallback, useMemo, useRef, useState } from "react";
 
+// Phase 4: ClusterMarker統合
+import type { ClusterData } from "@/components/map/markers/ClusterMarker";
+
 /**
  * マーカー最適化設定
  */
@@ -18,6 +21,10 @@ interface MarkerOptimizationConfig {
   readonly virtualizationThreshold: number;
   /** デバッグモード */
   readonly debugMode: boolean;
+  /** Phase 4: クラスタリング有効化フラグ */
+  readonly enableClustering: boolean;
+  /** Phase 4: クラスタリング最小件数 */
+  readonly clusteringMinCount: number;
 }
 
 /**
@@ -52,6 +59,9 @@ interface PerformanceStats {
   readonly clusteredMarkers: number;
   readonly renderTime: number;
   readonly lastUpdate: number;
+  /** Phase 4: クラスター統計 */
+  readonly clusterCount: number;
+  readonly averageClusterSize: number;
 }
 
 /**
@@ -69,6 +79,8 @@ export const useMarkerOptimization = (
       clusteringDistance: 50,
       virtualizationThreshold: 1000,
       debugMode: process.env.NODE_ENV === "development",
+      enableClustering: true, // Phase 4: デフォルトでクラスタリング有効
+      clusteringMinCount: 2, // Phase 4: 2軒以上でクラスタリング
     };
     return { ...defaultConfig, ...config };
   }, [config]);
@@ -80,6 +92,8 @@ export const useMarkerOptimization = (
     clusteredMarkers: 0,
     renderTime: 0,
     lastUpdate: Date.now(),
+    clusterCount: 0,
+    averageClusterSize: 0,
   });
 
   // パフォーマンス測定用ref
@@ -178,9 +192,106 @@ export const useMarkerOptimization = (
   );
 
   /**
+   * Phase 4: クラスタリング機能
+   */
+  const generateClusters = useCallback(
+    (restaurants: Restaurant[], zoomLevel: number = 10): ClusterData[] => {
+      if (
+        !finalConfig.enableClustering ||
+        restaurants.length < finalConfig.clusteringMinCount
+      ) {
+        return [];
+      }
+
+      const clusters: ClusterData[] = [];
+      const processed = new Set<string>();
+      const adjustedDistance =
+        (finalConfig.clusteringDistance * (21 - zoomLevel)) / 21;
+
+      restaurants.forEach(restaurant => {
+        if (processed.has(restaurant.id)) return;
+
+        const clusterRestaurants = [restaurant];
+        processed.add(restaurant.id);
+
+        // 近接レストラン検索
+        restaurants.forEach(otherRestaurant => {
+          if (processed.has(otherRestaurant.id)) return;
+
+          const distance = calculatePixelDistance(
+            restaurant.coordinates,
+            otherRestaurant.coordinates,
+            zoomLevel
+          );
+
+          if (distance < adjustedDistance) {
+            clusterRestaurants.push(otherRestaurant);
+            processed.add(otherRestaurant.id);
+          }
+        });
+
+        // クラスターサイズが最小件数以上の場合のみ作成
+        if (clusterRestaurants.length >= finalConfig.clusteringMinCount) {
+          // クラスター中心計算
+          const centerLat =
+            clusterRestaurants.reduce((sum, r) => sum + r.coordinates.lat, 0) /
+            clusterRestaurants.length;
+          const centerLng =
+            clusterRestaurants.reduce((sum, r) => sum + r.coordinates.lng, 0) /
+            clusterRestaurants.length;
+
+          clusters.push({
+            id: `cluster-${restaurant.id}-${clusterRestaurants.length}`,
+            count: clusterRestaurants.length,
+            restaurants: clusterRestaurants,
+            position: { lat: centerLat, lng: centerLng },
+            bounds: {
+              north: Math.max(
+                ...clusterRestaurants.map(r => r.coordinates.lat)
+              ),
+              south: Math.min(
+                ...clusterRestaurants.map(r => r.coordinates.lat)
+              ),
+              east: Math.max(...clusterRestaurants.map(r => r.coordinates.lng)),
+              west: Math.min(...clusterRestaurants.map(r => r.coordinates.lng)),
+            },
+          });
+        }
+      });
+
+      return clusters;
+    },
+    [
+      finalConfig.enableClustering,
+      finalConfig.clusteringMinCount,
+      finalConfig.clusteringDistance,
+    ]
+  );
+
+  /**
+   * ピクセル単位距離計算（簡易版）
+   */
+  const calculatePixelDistance = useCallback(
+    (
+      coord1: { lat: number; lng: number },
+      coord2: { lat: number; lng: number },
+      zoomLevel: number
+    ): number => {
+      const pixelsPerDegree = (256 * Math.pow(2, zoomLevel)) / 360;
+      const deltaLat = Math.abs(coord1.lat - coord2.lat) * pixelsPerDegree;
+      const deltaLng =
+        Math.abs(coord1.lng - coord2.lng) *
+        pixelsPerDegree *
+        Math.cos((coord1.lat * Math.PI) / 180);
+      return Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng);
+    },
+    []
+  );
+
+  /**
    * 最適化されたマーカーの生成
    */
-  const optimizedMarkers = useMemo(() => {
+  const optimizedResult = useMemo(() => {
     renderStartTime.current = performance.now();
 
     // Step 1: 有効な座標のみをフィルタリング
@@ -209,7 +320,13 @@ export const useMarkerOptimization = (
       finalConfig.maxVisibleMarkers
     );
 
-    // Step 5: 最適化されたマーカーオブジェクト生成
+    // Step 5: Phase 4 - クラスタリング生成
+    const clusters = generateClusters(
+      limitedRestaurants.map(item => item.restaurant),
+      viewportBounds?.zoom || 10
+    );
+
+    // Step 6: 最適化されたマーカーオブジェクト生成
     const optimized: OptimizedMarker[] = limitedRestaurants.map(
       ({ restaurant, priority }) => ({
         id: `marker-${restaurant.id}`,
@@ -222,13 +339,25 @@ export const useMarkerOptimization = (
 
     // パフォーマンス統計更新
     const renderTime = performance.now() - renderStartTime.current;
+    const clusterCount = clusters.length;
+    const averageClusterSize =
+      clusterCount > 0
+        ? clusters.reduce((sum, cluster) => sum + cluster.count, 0) /
+          clusterCount
+        : 0;
+
     setPerformanceStats(prev => ({
       ...prev,
       totalMarkers: restaurants.length,
       visibleMarkers: optimized.length,
-      clusteredMarkers: 0, // クラスタリング未実装
+      clusteredMarkers: clusters.reduce(
+        (sum, cluster) => sum + cluster.count,
+        0
+      ),
       renderTime,
       lastUpdate: Date.now(),
+      clusterCount,
+      averageClusterSize,
     }));
 
     if (finalConfig.debugMode) {
@@ -240,6 +369,8 @@ export const useMarkerOptimization = (
         valid: validRestaurants.length,
         inViewport: viewportRestaurants.length,
         displayed: optimized.length,
+        clusters: clusterCount,
+        averageClusterSize: averageClusterSize.toFixed(1),
         renderTime: `${renderTime.toFixed(2)}ms`,
         ...(isNearLimit && {
           warning: "⚠️ Google Maps API制限(50個)に近づいています",
@@ -257,7 +388,7 @@ export const useMarkerOptimization = (
       }
     }
 
-    return optimized;
+    return { optimized, clusters };
   }, [
     restaurants,
     viewportBounds,
@@ -266,7 +397,11 @@ export const useMarkerOptimization = (
     isValidCoordinates,
     filterByViewport,
     calculatePriority,
+    generateClusters,
   ]);
+
+  const optimizedMarkers = optimizedResult.optimized;
+  const clusters = optimizedResult.clusters;
 
   /**
    * マーカーリセット関数
@@ -278,6 +413,8 @@ export const useMarkerOptimization = (
       clusteredMarkers: 0,
       renderTime: 0,
       lastUpdate: Date.now(),
+      clusterCount: 0,
+      averageClusterSize: 0,
     });
   }, []);
 
@@ -293,6 +430,7 @@ export const useMarkerOptimization = (
 
   return {
     optimizedMarkers,
+    clusters, // Phase 4: クラスターデータを追加
     performanceStats,
     config: finalConfig,
     resetOptimization,
@@ -300,6 +438,8 @@ export const useMarkerOptimization = (
     // ユーティリティ関数
     isValidCoordinates,
     calculateDistance,
+    // Phase 4: クラスタリング関数
+    generateClusters,
   };
 };
 

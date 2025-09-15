@@ -40,6 +40,11 @@ export const MARKER_SIZES = {
 
 export type MarkerSize = keyof typeof MARKER_SIZES;
 
+/**
+ * Phase 4: アニメーションタイプ
+ */
+export type MarkerAnimation = "none" | "attention" | "subtle" | "loading";
+
 interface CircularMarkerProps {
   /** マーカーカテゴリ */
   category: IcooonMarkerCategory;
@@ -53,6 +58,8 @@ interface CircularMarkerProps {
   className?: string;
   /** アクセシビリティラベル（上書き用） */
   ariaLabel?: string;
+  /** Phase 4: アニメーション効果 */
+  animation?: MarkerAnimation;
 }
 
 /**
@@ -100,11 +107,17 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
   onClick,
   className = "",
   ariaLabel,
+  animation = "none",
 }) => {
   const sizeConfig = MARKER_SIZES[size];
   const backgroundColor = CIRCULAR_MARKER_COLORS[category];
   const iconPath = ICON_PATH_MAP[category];
   const defaultAriaLabel = ARIA_LABEL_MAP[category];
+
+  // Phase 4: アニメーションクラス生成
+  const animationClass = animation !== "none" ? `${animation}-animation` : "";
+  const fullClassName =
+    `circular-marker ${className} ${interactive ? "interactive" : "static"} ${animationClass}`.trim();
 
   // 🔧 デバッグ用ログ（開発環境のみ）
   if (import.meta.env.DEV) {
@@ -134,7 +147,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
   return (
     <button
       type="button"
-      className={`circular-marker ${className} ${interactive ? "interactive" : "static"}`}
+      className={fullClassName}
       style={{
         width: sizeConfig.width,
         height: sizeConfig.height,
@@ -177,56 +190,145 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         aria-hidden="true"
       />
 
-      {/* ホバー時のカテゴリ表示（大きなサイズのみ） */}
+      {/* カテゴリツールチップ（Phase 4改善版） */}
       {size === "large" || size === "xlarge" ? (
         <div
           className="category-tooltip"
           style={{
             position: "absolute",
-            bottom: "-8px",
+            bottom: "-12px",
             left: "50%",
             transform: "translateX(-50%)",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backgroundColor: "rgba(0, 0, 0, 0.85)",
             color: "white",
-            padding: "2px 6px",
-            borderRadius: "4px",
-            fontSize: "10px",
+            padding: "4px 8px",
+            borderRadius: "6px",
+            fontSize: "11px",
             fontWeight: "500",
             whiteSpace: "nowrap",
             opacity: 0,
-            transition: "opacity 0.2s ease-in-out",
+            transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
             pointerEvents: "none",
             zIndex: 1000,
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
           }}
         >
           {ARIA_LABEL_MAP[category]}
         </div>
       ) : null}
 
-      {/* スタイル定義 */}
+      {/* Phase 4改善: 強化されたスタイル定義 */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
+        /* Phase 4: 改善されたホバー効果 */
         .circular-marker.interactive:hover {
-          transform: scale(1.1);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+          transform: scale(1.15) rotate(2deg);
+          box-shadow:
+            0 6px 20px rgba(0, 0, 0, 0.3),
+            0 0 0 4px rgba(66, 165, 245, 0.2);
+          background: linear-gradient(135deg, ${backgroundColor} 0%, ${backgroundColor}dd 100%);
+          filter: brightness(1.1) saturate(1.15);
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        /* アイコンのホバー効果 */
+        .circular-marker.interactive:hover .icon-image {
+          filter: brightness(0) saturate(100%) invert(100%) drop-shadow(0 0 4px rgba(255,255,255,0.8));
+        }
+
+        /* ツールチップの改善されたアニメーション */
         .circular-marker.interactive:hover .category-tooltip {
           opacity: 1;
+          transform: translateX(-50%) translateY(2px) scale(1.05);
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        /* ツールチップの矢印 */
+        .category-tooltip::before {
+          content: "";
+          position: absolute;
+          top: -4px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-bottom: 4px solid rgba(0, 0, 0, 0.85);
+        }
+
+        /* アクティブ状態（クリック時）の改善 */
         .circular-marker.interactive:active {
-          transform: scale(0.95);
+          transform: scale(0.95) rotate(-1deg);
+          transition: all 0.1s ease-out;
         }
 
+        /* フォーカス状態のアクセシビリティ向上 */
         .circular-marker:focus {
           outline: 3px solid #4A90E2;
-          outline-offset: 2px;
+          outline-offset: 3px;
+          box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.15),
+            0 0 0 6px rgba(74, 144, 226, 0.3);
         }
 
+        /* 静的マーカー（非インタラクティブ） */
         .circular-marker.static {
           pointer-events: none;
+          transition: none;
+        }
+
+        /* Phase 4: パルスアニメーション（注目時） */
+        .circular-marker.attention {
+          animation: marker-attention 2s ease-in-out infinite;
+        }
+
+        @keyframes marker-attention {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          }
+          50% {
+            transform: scale(1.08);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+          }
+        }
+
+        /* Phase 4: 呼吸アニメーション（軽微な動き） */
+        .circular-marker.subtle-animation {
+          animation: marker-breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes marker-breathe {
+          0%, 100% {
+            transform: scale(1);
+            filter: brightness(1) saturate(1);
+          }
+          50% {
+            transform: scale(1.02);
+            filter: brightness(1.05) saturate(1.05);
+          }
+        }
+
+        /* Phase 4: ローディングアニメーション */
+        .circular-marker.loading {
+          animation: marker-loading 1.5s ease-in-out infinite;
+        }
+
+        @keyframes marker-loading {
+          0% {
+            opacity: 0.5;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.1);
+          }
+          100% {
+            opacity: 0.5;
+            transform: scale(0.8);
+          }
         }
         `,
         }}

@@ -27,19 +27,23 @@
 
 ```text
 docs/planning/
-├── 📊 project-completion-status.md    # 完了状況一元管理
-└── ✅ completed-projects/             # 完了済み計画書（統合）
-    ├── phase1-4-completion-report.md  # アイコン最適化
-    ├── compression-success-report.md  # 緊急圧縮
-    ├── info-window-enhancement-completion-report.md # 情報ウィンドウ拡張完了
+├── 📊 project-completion-status.md          # 完了状況一元管理
+├── 🎨 flaticon-marker-implementation-guide.md # 最新マーカー実装ガイド
+└── 📦 completed-projects/                   # 完了済み計画書アーカイブ
+    ├── archive/                             # 統合アーカイブ
+    │   └── icon-optimization-archive.md     # アイコン最適化プロジェクト統合
+    ├── phase1-4-completion-report.md        # Phase 1-4 基盤構築完了
+    ├── compression-success-report.md        # 緊急圧縮成功報告
+    ├── info-window-enhancement-completion-report.md  # 情報ウィンドウ拡張完了
     ├── info-window-enhancement-implementation-plan.md # 情報ウィンドウ拡張計画
-    ├── icon-selection-guidelines.md   # 設計指針
-    ├── phase2-contrast-improvement-plan.md # コントラスト改善
-    ├── icon-quality-improvement-plan.md # 品質改善
-    ├── marker-improvement-roadmap.md   # マーカー改善ロードマップ
-    ├── marker-improvement-investigation.md # マーカー改善調査
-    ├── mobile-filter-improvement-plan.md # モバイルフィルター改善
-    └── URGENT-icon-optimization-guide.md # 緊急最適化
+    ├── icon-selection-guidelines.md         # 設計指針・品質基準
+    ├── phase2-contrast-improvement-plan.md  # コントラスト改善計画
+    ├── icon-quality-improvement-plan.md     # 品質改善計画
+    ├── marker-improvement-roadmap.md        # マーカー改善ロードマップ
+    ├── marker-improvement-investigation.md  # マーカー改善調査
+    ├── marker-redesign-plan.md             # マーカー再設計計画
+    ├── mobile-filter-improvement-plan.md    # モバイルフィルター改善
+    └── URGENT-icon-optimization-guide.md    # 緊急最適化ガイド
 ```
 
 ### 🎯 実装計画書

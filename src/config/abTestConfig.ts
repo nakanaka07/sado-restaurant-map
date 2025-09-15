@@ -14,10 +14,20 @@
 // ==============================
 
 /** A/Bテストのバリアント */
-export type ABTestVariant = "original" | "enhanced-png" | "svg" | "testing";
+export type ABTestVariant =
+  | "original"
+  | "enhanced-png"
+  | "svg"
+  | "testing"
+  | "phase4-enhanced";
 
 /** ロールアウトフェーズ */
-export type RolloutPhase = "phase1" | "phase2" | "phase3" | "complete";
+export type RolloutPhase =
+  | "phase1"
+  | "phase2"
+  | "phase3"
+  | "phase4"
+  | "complete";
 
 /** ユーザーセグメント */
 export type UserSegment =
@@ -82,6 +92,11 @@ export const ROLLOUT_PHASES: Record<
     description: "General User段階展開",
     targetSegments: ["early-adopter", "beta-tester", "general"],
   },
+  phase4: {
+    percentage: 100,
+    description: "Phase 4: UX最適化・クラスタリング機能",
+    targetSegments: ["early-adopter", "beta-tester"],
+  },
   complete: {
     percentage: 100,
     description: "全ユーザー完全展開",
@@ -142,9 +157,12 @@ function getVariantForUser(
     // セグメント別バリアント分配
     switch (segment) {
       case "early-adopter":
-        return "svg"; // 最新のSVGマーカー
+        // Phase 4の場合は新機能を優先
+        return config.currentPhase === "phase4" ? "phase4-enhanced" : "svg";
       case "beta-tester":
-        return "enhanced-png"; // 改良PNG
+        return config.currentPhase === "phase4"
+          ? "phase4-enhanced"
+          : "enhanced-png";
       case "general":
         return Math.random() < 0.5 ? "enhanced-png" : "original";
       case "control":
