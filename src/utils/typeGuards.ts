@@ -344,7 +344,7 @@ export const getSafeEnvConfig = <T>(
         key
       ];
 
-    if (validator && validator(envValue)) {
+    if (validator?.(envValue)) {
       return envValue;
     }
 

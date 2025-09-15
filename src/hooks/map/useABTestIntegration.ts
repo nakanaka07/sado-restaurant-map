@@ -73,11 +73,7 @@ export function useABTestIntegration(
   const trackSessionStart = useCallback(() => {
     if (!options.enableTracking) return;
 
-    abTestAnalytics.trackSessionStart(
-      options.variant,
-      options.segment,
-      undefined // userId は現在未実装
-    );
+    abTestAnalytics.trackSessionStart(options.variant, options.segment);
 
     if (options.debugMode) {
       console.log("📊 A/Bテストセッション開始:", {
@@ -103,8 +99,7 @@ export function useABTestIntegration(
         "restaurant", // マーカータイプ
         interaction.restaurant.mainCategory ||
           interaction.restaurant.cuisineType,
-        interaction.renderTime,
-        undefined // userId
+        interaction.renderTime
       );
 
       // 詳細イベント追跡
@@ -149,8 +144,7 @@ export function useABTestIntegration(
         options.segment,
         error.name || "UnknownError",
         error.message || "No error message",
-        error.stack,
-        undefined // userId
+        error.stack
       );
 
       if (options.debugMode) {

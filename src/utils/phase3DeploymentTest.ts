@@ -51,7 +51,7 @@ interface TestSuite {
 // ==============================
 
 class Phase3DeploymentTester {
-  private testResults: TestResult[] = [];
+  private readonly testResults: TestResult[] = [];
 
   /**
    * 全テストスイートを実行

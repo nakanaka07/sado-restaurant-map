@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CircularMarker SVG テスト</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .marker-test {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin: 20px 0;
+      }
+      .marker-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 CircularMarker SVG テスト</h1>
+    <p>各SVGアイコンが正しく表示されているか確認してください。</p>
+
+    <h2>直接SVG表示テスト</h2>
+    <div class="marker-test">
+      <div class="marker-item">
+        <img
+          src="./src/assets/markers/icooon-mono/ochawan-hashi.svg"
+          alt="和食"
+          style="
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) saturate(100%) invert(100%);
+          "
+        />
+        <span>和食（白色変換）</span>
+      </div>
+
+      <div class="marker-item">
+        <img
+          src="./src/assets/markers/icooon-mono/ramen-icon.svg"
+          alt="麺類"
+          style="
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) saturate(100%) invert(100%);
+          "
+        />
+        <span>麺類（白色変換）</span>
+      </div>
+
+      <div class="marker-item">
+        <img
+          src="./src/assets/markers/icooon-mono/parking-icon.svg"
+          alt="駐車場"
+          style="
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) saturate(100%) invert(100%);
+          "
+        />
+        <span>駐車場（白色変換）</span>
+      </div>
+
+      <div class="marker-item">
+        <img
+          src="./src/assets/markers/icooon-mono/toilet-pictogram.svg"
+          alt="トイレ"
+          style="
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) saturate(100%) invert(100%);
+          "
+        />
+        <span>トイレ（白色変換）</span>
+      </div>
+    </div>
+
+    <h2>元の色でのSVG表示テスト</h2>
+    <div class="marker-test">
+      <div class="marker-item">
+        <img
+          src="./src/assets/markers/icooon-mono/ochawan-hashi.svg"
+          alt="和食"
+          style="width: 32px; height: 32px"
+        />
+        <span>和食（元の色）</span>
+      </div>
+
+      <div class="marker-item">
+        <img
+          src="./src/assets/markers/icooon-mono/ramen-icon.svg"
+          alt="麺類"
+          style="width: 32px; height: 32px"
+        />
+        <span>麺類（元の色）</span>
+      </div>
+    </div>
+
+    <h2>円形マーカーテスト</h2>
+    <div class="marker-test">
+      <div class="marker-item">
+        <div
+          style="
+            width: 40px;
+            height: 40px;
+            background-color: #d32f2f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          "
+        >
+          <img
+            src="./src/assets/markers/icooon-mono/ochawan-hashi.svg"
+            alt="和食"
+            style="
+              width: 20px;
+              height: 20px;
+              filter: brightness(0) saturate(100%) invert(100%);
+            "
+          />
+        </div>
+        <span>和食（円形+白）</span>
+      </div>
+
+      <div class="marker-item">
+        <div
+          style="
+            width: 40px;
+            height: 40px;
+            background-color: #f57c00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          "
+        >
+          <img
+            src="./src/assets/markers/icooon-mono/ramen-icon.svg"
+            alt="麺類"
+            style="
+              width: 20px;
+              height: 20px;
+              filter: brightness(0) saturate(100%) invert(100%);
+            "
+          />
+        </div>
+        <span>麺類（円形+白）</span>
+      </div>
+    </div>
+
+    <p>
+      <strong>注意：</strong>
+      このテストページはViteアセット処理を使用していません。本番環境では異なる可能性があります。
+    </p>
+  </body>
+</html>

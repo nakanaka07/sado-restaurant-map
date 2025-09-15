@@ -82,7 +82,7 @@ export interface DashboardData {
 class ABTestAnalyticsService {
   private readonly storageKey = "ab-test-metrics";
   private readonly maxStorageEntries = 10000;
-  private sessionId: string;
+  private readonly sessionId: string;
   private metrics: ABTestMetrics[] = [];
 
   constructor() {
@@ -603,8 +603,10 @@ class ABTestAnalyticsService {
     }
 
     // 最高パフォーマンスバリアント特定
-    const bestVariant = summaries.reduce((best, current) =>
-      current.performanceScore > best.performanceScore ? current : best
+    const bestVariant = summaries.reduce(
+      (best, current) =>
+        current.performanceScore > best.performanceScore ? current : best,
+      summaries[0]
     );
 
     if (bestVariant.statisticalSignificance < 0.05) {

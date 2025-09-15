@@ -144,7 +144,7 @@ function gamma(n: number): number {
 // ==============================
 
 class StatisticalSignificanceAnalyzer {
-  private config: StatisticalTestConfig;
+  private readonly config: StatisticalTestConfig;
 
   constructor(config: StatisticalTestConfig = DEFAULT_TEST_CONFIG) {
     this.config = config;

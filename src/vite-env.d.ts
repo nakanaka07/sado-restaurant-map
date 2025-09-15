@@ -1,6 +1,17 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/react" />
 
+// SVG アセット型定義
+declare module "*.svg" {
+  const src: string;
+  export default src;
+}
+
+declare module "*.svg?url" {
+  const src: string;
+  export default src;
+}
+
 interface ImportMetaEnv {
   // Google Maps API設定（必須）
   readonly VITE_GOOGLE_MAPS_API_KEY: string;

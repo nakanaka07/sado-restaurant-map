@@ -210,21 +210,21 @@ export function formatBusinessHoursForDisplay(
 }
 
 /**
- * 今日の営業時間をフォーマット
+ * 営業時間の分類処理
  */
-function formatTodayHours(todayHoursList: OpeningHours[]): string {
-  const holidayHours = todayHoursList.filter(h => h.isHoliday);
-  const operatingHours = todayHoursList.filter(h => !h.isHoliday);
+function categorizeHours(todayHoursList: OpeningHours[]) {
+  return {
+    holidayHours: todayHoursList.filter(h => h.isHoliday),
+    operatingHours: todayHoursList.filter(h => !h.isHoliday),
+  };
+}
 
-  if (holidayHours.length > 0 && operatingHours.length === 0) {
-    return "本日定休日";
-  }
-
-  if (operatingHours.length === 0) {
-    return "本日営業時間不明";
-  }
-
+/**
+ * 営業時間の時間範囲を抽出
+ */
+function extractTimeRanges(operatingHours: OpeningHours[]): string[] {
   const timeRanges: string[] = [];
+
   for (const hours of operatingHours) {
     const ranges = parseMultipleTimeRanges(hours.open, hours.close);
     for (const range of ranges) {
@@ -236,6 +236,25 @@ function formatTodayHours(todayHoursList: OpeningHours[]): string {
       }
     }
   }
+
+  return timeRanges;
+}
+
+/**
+ * 今日の営業時間をフォーマット
+ */
+function formatTodayHours(todayHoursList: OpeningHours[]): string {
+  const { holidayHours, operatingHours } = categorizeHours(todayHoursList);
+
+  if (holidayHours.length > 0 && operatingHours.length === 0) {
+    return "本日定休日";
+  }
+
+  if (operatingHours.length === 0) {
+    return "本日営業時間不明";
+  }
+
+  const timeRanges = extractTimeRanges(operatingHours);
 
   if (timeRanges.length === 0) {
     return "本日営業時間不明";
