@@ -86,9 +86,14 @@ export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
       {} as Record<string, number>
     );
 
-    const topCuisineType = Object.keys(categoryCounts).reduce((a, b) =>
-      categoryCounts[a] > categoryCounts[b] ? a : b
-    );
+    const categoryKeys = Object.keys(categoryCounts);
+    const topCuisineType =
+      categoryKeys.length > 0
+        ? categoryKeys.reduce(
+            (a, b) => (categoryCounts[a] > categoryCounts[b] ? a : b),
+            categoryKeys[0]
+          ) // 初期値を追加
+        : "一般"; // デフォルトカテゴリ
 
     return { categoryCounts, topCuisineType };
   }, [restaurants]);

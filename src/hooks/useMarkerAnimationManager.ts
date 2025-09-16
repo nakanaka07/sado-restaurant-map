@@ -148,7 +148,8 @@ export const useMarkerAnimationManager = (
                   const lowestPriority =
                     finalConfig.priorityLevels[lowest[1]] ?? 0;
                   return priority < lowestPriority ? [id, anim] : lowest;
-                }
+                },
+                currentAnimations[0] // 初期値として最初の要素を設定
               );
 
               const animationPriority =
