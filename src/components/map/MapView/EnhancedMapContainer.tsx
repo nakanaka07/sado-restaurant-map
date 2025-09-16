@@ -374,7 +374,7 @@ export function EnhancedMapContainer({
       <Map
         defaultCenter={center}
         defaultZoom={11}
-        mapTypeId="terrain"
+        mapTypeId="hybrid"
         mapId={mapId}
         style={{ width: "100%", height: "100%" }}
         gestureHandling="greedy"

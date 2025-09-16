@@ -9,23 +9,24 @@ import React from "react";
 import type { IcooonMarkerCategory } from "../../../types/icooonMarker.types";
 
 /**
- * 10カテゴリ対応の円形背景カラー設定
- * 高コントラスト・視認性重視の色彩設計
+ * 🌈 食欲促進色彩理論に基づく配色設計
+ * 暖色系・高彩度・明度調整によりPNG版に近い鮮やかさを実現
+ * 佐渡島の食文化と観光客の心理に配慮した色彩選択
  */
 export const CIRCULAR_MARKER_COLORS: Record<IcooonMarkerCategory, string> = {
-  // 🍚 飲食店カテゴリ（8種類）
-  japanese: "#D32F2F", // 深紅 - 和食
-  noodles: "#F57C00", // オレンジ - 麺類
-  yakiniku: "#7B1FA2", // 紫 - 焼肉・グリル
-  international: "#388E3C", // 緑 - 多国籍料理
-  cafe: "#F9A825", // 金色 - カフェ・軽食
-  izakaya: "#E65100", // 深オレンジ - 居酒屋・バー
-  fastfood: "#5E35B1", // インディゴ - ファストフード
-  general: "#00695C", // ティール - 一般レストラン
+  // 🍚 飲食店カテゴリ（食欲促進重視の暖色系）
+  japanese: "#E53E3E", // 鮮やかな赤（朱色系）- 食欲促進効果最大化
+  noodles: "#FF8C00", // 明るいオレンジ（琥珀色）- だしの温かさを演出
+  yakiniku: "#D53F8C", // ピンクがかった紫 - 肉の美味しさを連想
+  international: "#38A169", // 鮮やかな緑 - 新鮮さと健康的なイメージ
+  cafe: "#FEB002", // 明るい金色（+20%明度）- コーヒーの香ばしさ
+  izakaya: "#DC143C", // 提灯の赤（クリムゾン）- 日本の夜文化を表現
+  fastfood: "#FF6B35", // 鮮やかなオレンジレッド - エネルギッシュさ
+  general: "#00A693", // 明るいティール（+15%明度）- 信頼感と清潔感
 
-  // 🏢 施設カテゴリ（2種類）
-  parking: "#455A64", // 青灰 - 駐車場
-  toilet: "#004D40", // ダークティール - トイレ
+  // 🏢 施設カテゴリ（視認性重視）
+  parking: "#546E7A", // 明るい青灰（+10%明度）- 視認性向上
+  toilet: "#2196F3", // 青色（ブルー）- 清潔感と機能性、料理の緑と区別
 };
 
 /**
@@ -144,25 +145,38 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
     }
   };
 
+  // CSS変数用のRGBA変換関数
+  const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   return (
     <button
       type="button"
       className={fullClassName}
-      style={{
-        width: sizeConfig.width,
-        height: sizeConfig.height,
-        backgroundColor: backgroundColor,
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        cursor: interactive ? "pointer" : "default",
-        transition: "all 0.2s ease-in-out",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-        border: "2px solid rgba(255, 255, 255, 0.3)",
-        padding: 0,
-      }}
+      style={
+        {
+          width: sizeConfig.width,
+          height: sizeConfig.height,
+          backgroundColor: backgroundColor,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          cursor: interactive ? "pointer" : "default",
+          transition: "all 0.2s ease-in-out",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+          border: "2px solid rgba(255, 255, 255, 0.3)",
+          padding: 0,
+          // CSS変数でカテゴリ別の色を設定
+          "--marker-color": backgroundColor,
+          "--marker-color-alpha": hexToRgba(backgroundColor, 0.4),
+        } as React.CSSProperties & { [key: string]: any }
+      }
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       disabled={!interactive}
@@ -221,13 +235,13 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
       <style
         dangerouslySetInnerHTML={{
           __html: `
-        /* Phase 4: 改善されたホバー効果 */
+        /* Phase 4: 改善されたホバー効果 - カテゴリ別個別対応 */
         .circular-marker.interactive:hover {
           transform: scale(1.15) rotate(2deg);
           box-shadow:
             0 6px 20px rgba(0, 0, 0, 0.3),
-            0 0 0 4px rgba(66, 165, 245, 0.2);
-          background: linear-gradient(135deg, ${backgroundColor} 0%, ${backgroundColor}dd 100%);
+            0 0 0 4px var(--marker-color-alpha);
+          background: linear-gradient(135deg, var(--marker-color) 0%, var(--marker-color) 100%);
           filter: brightness(1.1) saturate(1.15);
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
