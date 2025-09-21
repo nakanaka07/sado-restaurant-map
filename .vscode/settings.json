@@ -1,8 +1,7 @@
 {
-  // === 佐渡飲食店マップ - VS Code 設定 ===
+  // === 佐渡飲食店マップ - プロジェクト固有設定 ===
   // React 19 + TypeScript 5.7 + Vite 7 + Google Maps
-
-  // === TypeScript 5.7 最適化 ===
+  // === TypeScript 5.7 プロジェクト最適化 ===
   "typescript.preferences.includePackageJsonAutoImports": "auto",
   "typescript.suggest.autoImports": true,
   "typescript.suggest.paths": true,
@@ -13,18 +12,15 @@
   "typescript.preferences.allowRenameOfImportPath": true,
   "typescript.surveys.enabled": false,
   "typescript.suggest.objectLiteralMethodSnippets.enabled": true,
-
   // Inlay Hints（最小限・パフォーマンス重視）
   "typescript.inlayHints.parameterNames.enabled": "literals",
   "typescript.inlayHints.parameterNames.suppressWhenArgumentMatchesName": true,
-
-  // === React & ESLint & Prettier ===
+  // === React & ESLint プロジェクト設定 ===
   "emmet.includeLanguages": {
     "typescript": "typescriptreact",
     "javascript": "javascriptreact"
   },
   "emmet.triggerExpansionOnTab": true,
-  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
     "source.organizeImports": "explicit",
@@ -36,11 +32,7 @@
     "typescript",
     "typescriptreact"
   ],
-
-  // === ファイル管理 ===
-  "files.autoSave": "onFocusChange",
-  "files.trimTrailingWhitespace": true,
-  "files.insertFinalNewline": true,
+  // === プロジェクトファイル管理 ===
   "files.exclude": {
     "**/node_modules": true,
     "**/dist": true,
@@ -52,38 +44,14 @@
     "**/dist": true,
     "**/pnpm-lock.yaml": true
   },
-
-  // === エディタ最適化 ===
-  "editor.tabSize": 2,
-  "editor.insertSpaces": true,
-  "editor.wordWrap": "on",
-  "editor.minimap.enabled": true,
-  "editor.inlineSuggest.enabled": true,
-  "editor.bracketPairColorization.enabled": true,
-  "editor.guides.bracketPairs": "active",
-  "editor.stickyScroll.enabled": true,
-  "editor.stickyScroll.maxLineCount": 5,
-  "editor.cursorSmoothCaretAnimation": "on",
-  "editor.smoothScrolling": true,
-  "editor.acceptSuggestionOnEnter": "smart",
-  "editor.parameterHints.enabled": true,
-
-  // 2025年新機能
-  "editor.experimental.pasteActions.enabled": true,
-  "editor.experimental.asyncTokenization": true,
-
-  // === Git・デバッグ・テスト ===
-  "git.autofetch": true,
-  "git.enableSmartCommit": true,
+  // === テスト・デバッグ設定 ===
   "debug.inlineValues": "auto",
-  "debug.terminal.clearBeforeReusing": true,
   "debug.toolBarLocation": "floating",
   "testing.automaticallyOpenPeekView": "never",
   "testing.defaultGutterClickAction": "run",
   "vitest.enable": true,
   "vitest.commandLine": "pnpm test",
-
-  // === GitHub Copilot 2025最適化 ===
+  // === GitHub Copilot プロジェクト最適化 ===
   "github.copilot.chat.instructions": "docs/ai-assistant/copilot-instructions.md",
   "github.copilot.enable": {
     "*": true,
@@ -103,11 +71,9 @@
   },
   "github.copilot.chat.followups": "onDemand",
   "github.copilot.chat.localeOverride": "ja",
-
   // === MCP (Model Context Protocol) サーバー設定 ===
   // 佐渡飲食店マッププロジェクト用最適化済み設定
   // 重複警告対策：競合するツールを統合・最適化
-
   // コア開発ツール（必須）
   "mcp.servers.github": {
     "url": "https://api.githubcopilot.com/mcp/",
@@ -121,7 +87,6 @@
     "priority": "medium",
     "enabled": true
   },
-
   // データ分析・処理（data-platform連携）
   "mcp.servers.duckdb": {
     "command": "uvx",
@@ -135,16 +100,17 @@
     "enabled": false,
     "enabledWhen": "data-analysis"
   },
-
   // 生産性ツール（最小限・重複回避）
   "mcp.servers.sequential-thinking": {
     "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-sequential-thinking"
+    ],
     "description": "タスク分解・計画管理",
     "priority": "low",
     "enabled": true
   },
-
   // === MCP競合回避・優先度設定 ===
   "mcp.serverPriority": {
     "github": 100,
@@ -154,53 +120,44 @@
   },
   "mcp.conflictResolution": "priority",
   "mcp.toolOverlapHandling": "merge",
-
-  // === ファイル形式別設定 ===
+  // === ファイル形式別プロジェクト設定 ===
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.rulers": [80, 120]
+    "editor.rulers": [
+      80,
+      120
+    ]
   },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.rulers": [80, 120]
-  },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.rulers": [
+      80,
+      120
+    ]
   },
   "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.quickSuggestions": { "strings": true }
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.quickSuggestions": {
+      "strings": true
+    }
   },
   "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.wordWrap": "on",
-    "editor.formatOnSave": true,
-    "editor.rulers": [120]
+    "editor.rulers": [
+      120
+    ]
   },
-
-  // === その他設定 ===
+  // === Markdown Lint プロジェクト設定 ===
   "markdownlint.config": {
-    "MD046": { "style": "fenced" },
+    "MD046": {
+      "style": "fenced"
+    },
     "MD040": false,
     "MD024": false,
-    "MD013": { "line_length": 120 },
+    "MD013": {
+      "line_length": 120
+    },
     "MD001": false
   },
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "workbench.editor.enablePreview": false,
+  // === プロジェクトセキュリティ設定 ===
   "security.workspace.trust.untrustedFiles": "prompt",
+  // === Python環境（data-platform用） ===
   "python-envs.defaultEnvManager": "ms-python.python:system",
   "python-envs.pythonProjects": []
 }

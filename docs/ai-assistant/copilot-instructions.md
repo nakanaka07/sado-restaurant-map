@@ -5,8 +5,11 @@
 - ⚡ Vite 7 高速開発・ビルド
 - 🔍 検索・フィルタリング機能
 - 🧪 包括的テストカバレッジ**目的**: React 19.1.1 + TypeScript 5.7.3 + Vite 7.1.4 プロジェクト向けの統合開発支援
-  > **プロジェクト**: 佐渡飲食店マップアプリケーション（個人開発・GitHub Pages）
-  > **技術スタック**: React 19.1.1, TypeScript 5.7.3, Vite 7.1.4, Google Maps Advanced Markers, PWA
+  > **プロジェクト**: 佐渡飲食店マップアプリケーション（個**最終更新> 💡 **重要**: このガイドは`ai-prompts.md`の18個のプロンプト(番号1-6, 番号D1-D6, 番号P1-P6)と`analysis-accuracy-prompt.md`の実装分析手法と完全連携しています。正確な実装状況分析→適切なプロンプト選択→効率的な改善実行のサイクルで開発効率を最大化してください。\*: 2025年9月16日
+  > **連携ファイル\*\*: `ai-prompts.md`, `analysis-accuracy-prompt.md`, `README.md`
+
+> 💡 **重要**: このガイドは`ai-prompts.md`の18個のプロンプト(番号1-6, 番号D1-D6, 番号P1-P6)と`analysis-accuracy-prompt.md`の実装分析手法と完全連携しています。正確な実装状況分析→適切なプロンプト選択→効率的な改善実行のサイクルで開発効率を最大化してください。GitHub Pages）
+> **技術スタック**: React 19.1.1, TypeScript 5.7.3, Vite 7.1.4, Google Maps Advanced Markers, PWA
 
 ## 🏗️ プロジェクト概要
 
@@ -199,39 +202,39 @@ expect(calculateStatus(hours)).toBe(RestaurantStatus.OPEN);
 
 ### 🎯 ai-prompts.md 連携機能
 
-ユーザーが `#番号` 形式でプロンプトを指定した場合、以下の機能で対応：
+ユーザーが `番号` 形式でプロンプトを指定した場合、以下の機能で対応：
 
-#### 📄 ファイルレベルプロンプト (#1-#6)
+#### 📄 ファイルレベルプロンプト (1-6番)
 
 ```text
-#1 修正・強化    - TypeScript型エラー、セキュリティ問題、バグ修正
-#2 整理・清掃    - コードフォーマット、未使用コード削除、可読性向上
-#3 最適化       - パフォーマンス改善、メモ化、バンドルサイズ減
-#4 リファクタ   - 設計改善、責任分離、テスタビリティ向上
-#5 モダナイズ   - React 19新機能、TypeScript 5.7最新パターン適用
-#6 包括改善     - UX最適化、アクセシビリティ、総合品質向上
+（１）修正・強化    - TypeScript型エラー、セキュリティ問題、バグ修正
+（２）整理・清掃    - コードフォーマット、未使用コード削除、可読性向上
+（３）最適化       - パフォーマンス改善、メモ化、バンドルサイズ減
+（４）リファクタ   - 設計改善、責任分離、テスタビリティ向上
+（５）モダナイズ   - React 19新機能、TypeScript 5.7最新パターン適用
+（６）包括改善     - UX最適化、アクセシビリティ、総合品質向上
 ```
 
-#### 📁 ディレクトリレベルプロンプト (#D1-#D6)
+#### 📁 ディレクトリレベルプロンプト (D1-D6番)
 
 ```text
-#D1 ディレクトリ修正   - 機能単位でのバグ・型エラー解決
-#D2 ディレクトリ整理   - フォルダ構造、命名規則の統一
-#D3 ディレクトリ最適化 - モジュール間の効率化、依存関係最適化
-#D4 ディレクトリ再構築 - 責任分離、モジュール設計改善
-#D5 ディレクトリ更新   - 機能単位での技術更新、パターン適用
-#D6 ディレクトリ総合   - 機能エリア全体の包括改善
+（Ａ１）ディレクトリ修正   - 機能単位でのバグ・型エラー解決
+（Ａ２）ディレクトリ整理   - フォルダ構造、命名規則の統一
+（Ａ３）ディレクトリ最適化 - モジュール間の効率化、依存関係最適化
+（Ａ４）ディレクトリ再構築 - 責任分離、モジュール設計改善
+（Ａ５）ディレクトリ更新   - 機能単位での技術更新、パターン適用
+（Ａ６）ディレクトリ総合   - 機能エリア全体の包括改善
 ```
 
-#### 🏗️ プロジェクトレベルプロンプト (#P1-#P6)
+#### 🏗️ プロジェクトレベルプロンプト (P1-P6番)
 
 ```text
-#P1 プロジェクト修正   - 設定ファイル、依存関係、セキュリティ修正
-#P2 プロジェクト整理   - 構成、ドキュメント、開発環境整理
-#P3 プロジェクト最適化 - ビルド、デプロイ、CI/CD最適化
-#P4 アーキテクチャ改善 - システム設計、技術選定見直し
-#P5 技術スタック更新 - 基盤技術、フレームワーク更新
-#P6 プロジェクト総合   - 品質、保守性、拡張性の全面改善
+（Ｐ１）プロジェクト修正   - 設定ファイル、依存関係、セキュリティ修正
+（Ｐ２）プロジェクト整理   - 構成、ドキュメント、開発環境整理
+（Ｐ３）プロジェクト最適化 - ビルド、デプロイ、CI/CD最適化
+（Ｐ４）アーキテクチャ改善 - システム設計、技術選定見直し
+（Ｐ５）技術スタック更新 - 基盤技術、フレームワーク更新
+（Ｐ６）プロジェクト総合   - 品質、保守性、拡張性の全面改善
 ```
 
 ### 📊 優先度付き対応戦略
@@ -243,11 +246,11 @@ expect(calculateStatus(hours)).toBe(RestaurantStatus.OPEN);
 
 ### 🔧 統合プロンプト対応
 
-ユーザーが `#番号` でプロンプト指定時：
+ユーザーが `番号` でプロンプト指定時：
 
-- **#1-#6**: ファイルレベル（修正・整理・最適化・リファクタ・モダナイズ・包括改善）
-- **#D1-#D6**: ディレクトリレベル（機能単位の包括対応）
-- **#P1-#P6**: プロジェクトレベル（全体最適化・技術更新）
+- **番号 1-6**: ファイルレベル（修正・整理・最適化・リファクタ・モダナイズ・包括改善）
+- **番号 D1-D6**: ディレクトリレベル（機能単位の包括対応）
+- **番号 P1-P6**: プロジェクトレベル（全体最適化・技術更新）
 
 **優先度**: Critical(セキュリティ・アクセシビリティ) > High(パフォーマンス・UX) > Medium(品質) > Low(スタイル)
 
@@ -262,11 +265,11 @@ expect(calculateStatus(hours)).toBe(RestaurantStatus.OPEN);
 
 ### 🔧 技術リファレンス
 
-- [React 19](https://react.dev/) - Actions API、useActionState、use() hook
-- [TypeScript 5.7](https://www.typescriptlang.org/) - 最新型安全性機能
-- [Google Maps Advanced Markers](https://developers.google.com/maps/documentation/javascript/advanced-markers)
-- [@vis.gl/react-google-maps](https://visgl.github.io/react-google-maps/)
-- [Vite 7.0](https://vitejs.dev/) - Environment API、Baseline Widely Available
+- **React 19** (react.dev) - Actions API、useActionState、use() hook
+- **TypeScript 5.7** (typescriptlang.org) - 最新型安全性機能
+- **Google Maps Advanced Markers** (developers.google.com/maps)
+- **@vis.gl/react-google-maps** (visgl.github.io/react-google-maps)
+- **Vite 7.0** (vitejs.dev) - Environment API、Baseline Widely Available
 
 ### 🎯 応答スタイル
 
@@ -280,4 +283,4 @@ expect(calculateStatus(hours)).toBe(RestaurantStatus.OPEN);
 **最終更新**: 2025年9月16日
 **連携ファイル**: `ai-prompts.md`, `analysis-accuracy-prompt.md`, `README.md`
 
-> 💡 **重要**: このガイドは`ai-prompts.md`の18個のプロンプト(#1-#6, #D1-#D6, #P1-#P6)と`analysis-accuracy-prompt.md`の実装分析手法と完全連携しています。正確な実装状況分析→適切なプロンプト選択→効率的な改善実行のサイクルで開発効率を最大化してください。
+> 💡 **重要**: このガイドは`ai-prompts.md`の18個のプロンプト(番号1-6, 番号D1-D6, 番号P1-P6)と`analysis-accuracy-prompt.md`の実装分析手法と完全連携しています。正確な実装状況分析→適切なプロンプト選択→効率的な改善実行のサイクルで開発効率を最大化してください。
