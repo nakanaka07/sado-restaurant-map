@@ -16,22 +16,55 @@ import type { ClusterData } from "./clusterUtils";
  * ClusterMarker component props
  */
 interface ClusterMarkerProps {
-  cluster: ClusterData;
-  size?: number;
-  ariaLabel?: string;
+  readonly cluster: ClusterData;
+  readonly size?: number;
+  readonly ariaLabel?: string;
+  /**
+   * Optional callback for cluster click. If omitted, a `CustomEvent` named
+   * `sado:cluster-click` will be dispatched on `window` with the cluster
+   * detail so parent code can handle zooming or expansion.
+   */
+  readonly onClusterClick?: (cluster: ClusterData) => void;
 }
 
 export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
   cluster,
   size = 48,
   ariaLabel,
+  onClusterClick,
 }) => {
   const { position, count } = cluster;
 
   const handleClick = useCallback(() => {
-    // TODO: 実際のクリック処理をここに追加
-    console.log("Cluster clicked", cluster.id);
-  }, [cluster.id]);
+    // 親が handler を渡していれば呼び出す
+    if (typeof onClusterClick === "function") {
+      try {
+        onClusterClick(cluster);
+        return;
+      } catch (err) {
+        console.error("Error in onClusterClick prop:", err);
+      }
+    }
+
+    // フォールバック: 親が prop を渡していない場合は CustomEvent を dispatch
+    try {
+      const detail = {
+        id: cluster.id,
+        position: cluster.position,
+        count: cluster.count,
+      };
+      const ev = new CustomEvent("sado:cluster-click", { detail });
+      if (typeof window !== "undefined" && window.dispatchEvent) {
+        window.dispatchEvent(ev);
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("Cluster clicked (dispatched):", detail);
+      }
+    } catch (err) {
+      console.error("Cluster clicked error:", err);
+    }
+  }, [cluster, onClusterClick]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

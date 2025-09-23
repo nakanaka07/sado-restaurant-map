@@ -61,6 +61,15 @@ export const IcooonMarker: FC<IcooonMarkerProps> = ({
 
   // 状態に基づくスタイル
   const getMarkerStyle = useCallback(() => {
+    let zIndexValue: number;
+    if (isSelected) {
+      zIndexValue = 1000;
+    } else if (isHovered) {
+      zIndexValue = 999;
+    } else {
+      zIndexValue = 1;
+    }
+
     const baseStyle = {
       width: `${sizeConfig.width}px`,
       height: `${sizeConfig.height}px`,
@@ -81,7 +90,7 @@ export const IcooonMarker: FC<IcooonMarkerProps> = ({
         ? "0 4px 12px rgba(0,0,0,0.3)"
         : "0 2px 6px rgba(0,0,0,0.15)",
       transform: isHovered ? "scale(1.1)" : "scale(1)",
-      zIndex: isSelected ? 1000 : isHovered ? 999 : 1,
+      zIndex: zIndexValue,
       position: "relative" as const,
       overflow: "hidden" as const,
     };
@@ -140,7 +149,13 @@ export const IcooonMarker: FC<IcooonMarkerProps> = ({
         onKeyDown={handleKeyDown}
         role="button"
         tabIndex={0}
-        aria-label={`${config.accessibility.ariaLabel}${restaurant ? `: ${restaurant.name}` : ""}`}
+        aria-label={(() => {
+          let label = config.accessibility.ariaLabel;
+          if (restaurant?.name) {
+            label += `: ${restaurant.name}`;
+          }
+          return label;
+        })()}
         aria-describedby={ariaDescribedBy}
         aria-pressed={isSelected}
         data-testid={`icooon-marker-${category}`}

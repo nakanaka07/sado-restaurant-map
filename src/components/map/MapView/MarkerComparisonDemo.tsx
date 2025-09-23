@@ -105,10 +105,6 @@ export function MarkerComparisonDemo({
         return (
           <SVGMarkerSystem key={key} point={point} onClick={onMarkerClick} />
         );
-      default:
-        return (
-          <EnhancedPNGMarker key={key} point={point} onClick={onMarkerClick} />
-        );
     }
   };
 

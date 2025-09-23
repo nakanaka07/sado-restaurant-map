@@ -1,7 +1,7 @@
 import React from "react";
 
 interface VisuallyHiddenProps {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 /**
@@ -29,8 +29,8 @@ export function VisuallyHidden({ children }: VisuallyHiddenProps) {
 }
 
 interface SkipLinkProps {
-  href: string;
-  children: React.ReactNode;
+  readonly href: string;
+  readonly children: React.ReactNode;
 }
 
 /**
@@ -66,15 +66,15 @@ export function SkipLink({ href, children }: SkipLinkProps) {
 }
 
 interface AccessibleButtonProps {
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  ariaLabel?: string;
-  ariaDescribedBy?: string;
-  ariaExpanded?: boolean;
-  type?: "button" | "submit" | "reset";
-  variant?: "primary" | "secondary" | "danger";
-  size?: "small" | "medium" | "large";
+  readonly children: React.ReactNode;
+  readonly onClick?: () => void;
+  readonly disabled?: boolean;
+  readonly ariaLabel?: string;
+  readonly ariaDescribedBy?: string;
+  readonly ariaExpanded?: boolean;
+  readonly type?: "button" | "submit" | "reset";
+  readonly variant?: "primary" | "secondary" | "danger";
+  readonly size?: "small" | "medium" | "large";
 }
 
 /**
@@ -91,6 +91,33 @@ export function AccessibleButton({
   variant = "primary",
   size = "medium",
 }: AccessibleButtonProps) {
+  let padding: string;
+  if (size === "small") {
+    padding = "4px 8px";
+  } else if (size === "large") {
+    padding = "12px 24px";
+  } else {
+    padding = "8px 16px";
+  }
+
+  let fontSize: string;
+  if (size === "small") {
+    fontSize = "14px";
+  } else if (size === "large") {
+    fontSize = "18px";
+  } else {
+    fontSize = "16px";
+  }
+
+  let backgroundColor: string;
+  if (variant === "primary") {
+    backgroundColor = "#0066cc";
+  } else if (variant === "danger") {
+    backgroundColor = "#dc3545";
+  } else {
+    backgroundColor = "#6c757d";
+  }
+
   return (
     <button
       type={type}
@@ -101,23 +128,12 @@ export function AccessibleButton({
       aria-expanded={ariaExpanded}
       className={`btn btn--${variant} btn--${size}`}
       style={{
-        padding:
-          size === "small"
-            ? "4px 8px"
-            : size === "large"
-              ? "12px 24px"
-              : "8px 16px",
-        fontSize:
-          size === "small" ? "14px" : size === "large" ? "18px" : "16px",
+        padding,
+        fontSize,
         border: "none",
         borderRadius: "4px",
         cursor: disabled ? "not-allowed" : "pointer",
-        backgroundColor:
-          variant === "primary"
-            ? "#0066cc"
-            : variant === "danger"
-              ? "#dc3545"
-              : "#6c757d",
+        backgroundColor,
         color: "#fff",
         opacity: disabled ? 0.6 : 1,
         transition: "background-color 0.2s, opacity 0.2s",
@@ -129,16 +145,16 @@ export function AccessibleButton({
 }
 
 interface AccessibleInputProps {
-  id: string;
-  label: string;
-  type?: "text" | "email" | "password" | "search" | "tel" | "url";
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  required?: boolean;
-  disabled?: boolean;
-  error?: string;
-  description?: string;
+  readonly id: string;
+  readonly label: string;
+  readonly type?: "text" | "email" | "password" | "search" | "tel" | "url";
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly placeholder?: string;
+  readonly required?: boolean;
+  readonly disabled?: boolean;
+  readonly error?: string;
+  readonly description?: string;
 }
 
 /**
@@ -229,8 +245,8 @@ export function AccessibleInput({
 }
 
 interface LiveRegionProps {
-  children: React.ReactNode;
-  priority?: "polite" | "assertive";
+  readonly children: React.ReactNode;
+  readonly priority?: "polite" | "assertive";
 }
 
 /**
@@ -256,8 +272,8 @@ export function LiveRegion({ children, priority = "polite" }: LiveRegionProps) {
 }
 
 interface LoadingSpinnerProps {
-  size?: "small" | "medium" | "large";
-  label?: string;
+  readonly size?: "small" | "medium" | "large";
+  readonly label?: string;
 }
 
 /**
@@ -267,7 +283,14 @@ export function AccessibleLoadingSpinner({
   size = "medium",
   label = "読み込み中",
 }: LoadingSpinnerProps) {
-  const sizeValue = size === "small" ? 20 : size === "large" ? 60 : 40;
+  let sizeValue: number;
+  if (size === "small") {
+    sizeValue = 20;
+  } else if (size === "large") {
+    sizeValue = 60;
+  } else {
+    sizeValue = 40;
+  }
 
   return (
     <div
@@ -289,9 +312,9 @@ export function AccessibleLoadingSpinner({
 }
 
 interface FocusTrapProps {
-  children: React.ReactNode;
-  isActive: boolean;
-  onEscape?: () => void;
+  readonly children: React.ReactNode;
+  readonly isActive: boolean;
+  readonly onEscape?: () => void;
 }
 
 /**
@@ -334,12 +357,10 @@ export function FocusTrap({ children, isActive, onEscape }: FocusTrapProps) {
             e.preventDefault();
             lastElement?.focus();
           }
-        } else {
+        } else if (document.activeElement === lastElement) {
           // Tab
-          if (document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement?.focus();
-          }
+          e.preventDefault();
+          firstElement?.focus();
         }
       }
     };

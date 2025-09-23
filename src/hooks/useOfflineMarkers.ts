@@ -8,6 +8,147 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Restaurant } from "../types";
 
+// -----------------------------
+// Module-level helpers to keep hook body small
+// -----------------------------
+
+const EARTH_RADIUS_KM = 6371;
+
+function createLightweightRestaurantSimple(restaurant: Restaurant) {
+  return {
+    id: restaurant.id,
+    name: restaurant.name,
+    coordinates: restaurant.coordinates,
+    cuisineType: restaurant.cuisineType,
+    district: restaurant.district,
+    ...(restaurant.rating && { rating: restaurant.rating }),
+    isOfflineMode: true,
+    cachedAt: Date.now(),
+  };
+}
+
+function calculateDistanceForCoords(
+  restaurantCoords: { lat: number; lng: number },
+  userLocation?: { lat: number; lng: number }
+): number {
+  if (!userLocation) return Infinity;
+
+  const dLat = ((restaurantCoords.lat - userLocation.lat) * Math.PI) / 180;
+  const dLng = ((restaurantCoords.lng - userLocation.lng) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((userLocation.lat * Math.PI) / 180) *
+      Math.cos((restaurantCoords.lat * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return EARTH_RADIUS_KM * c;
+}
+
+function sortRestaurantsByPrioritySimple(
+  restaurants: Restaurant[],
+  opts: {
+    enableLocationPriority: boolean;
+    userLocation?: { lat: number; lng: number };
+    calculateDistanceFromUser: (coords: { lat: number; lng: number }) => number;
+  }
+) {
+  const { enableLocationPriority, userLocation, calculateDistanceFromUser } =
+    opts;
+
+  return [...restaurants].sort((a, b) => {
+    let scoreA = 0;
+    let scoreB = 0;
+
+    if (a.rating) scoreA += a.rating * 10;
+    if (b.rating) scoreB += b.rating * 10;
+
+    if (a.reviewCount) scoreA += Math.min(a.reviewCount / 5, 20);
+    if (b.reviewCount) scoreB += Math.min(b.reviewCount / 5, 20);
+
+    if (enableLocationPriority && userLocation) {
+      const distanceA = calculateDistanceFromUser(a.coordinates);
+      const distanceB = calculateDistanceFromUser(b.coordinates);
+
+      if (distanceA < Infinity) scoreA += 50 / (distanceA + 1);
+      if (distanceB < Infinity) scoreB += 50 / (distanceB + 1);
+    }
+
+    return scoreB - scoreA;
+  });
+}
+
+async function writeMarkersToCache(
+  lightweightMarkers: LightweightRestaurant[],
+  userLocation?: { lat: number; lng: number }
+) {
+  if ("serviceWorker" in navigator && "caches" in window) {
+    const cache = await caches.open("sado-restaurant-markers-v1");
+    const cacheData = {
+      markers: lightweightMarkers,
+      timestamp: Date.now(),
+      userLocation,
+    };
+
+    await cache.put(
+      "/cached-markers.json",
+      new Response(JSON.stringify(cacheData), {
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+  }
+}
+
+async function loadCachedMarkersFromCacheSimple(debugMode = false) {
+  try {
+    if (!("caches" in window)) return [];
+
+    const cache = await caches.open("sado-restaurant-markers-v1");
+    const cachedResponse = await cache.match("/cached-markers.json");
+    if (!cachedResponse) return [];
+
+    const raw = (await cachedResponse.json()) as unknown;
+    const { cachedMarkers, timestamp } = parseCachedData(raw);
+
+    const isValidCache =
+      timestamp > 0 && Date.now() - timestamp < 24 * 60 * 60 * 1000;
+    if (isValidCache && cachedMarkers.length > 0) {
+      if (debugMode) {
+        console.log("📂 Loaded cached markers:", {
+          count: cachedMarkers.length,
+          cacheAge: Math.round((Date.now() - timestamp) / 60000),
+        });
+      }
+      return cachedMarkers;
+    }
+
+    return [];
+  } catch (error) {
+    console.warn("⚠️ Failed to load cached markers:", error);
+    return [];
+  }
+}
+
+function parseCachedData(raw: unknown): {
+  cachedMarkers: LightweightRestaurant[];
+  timestamp: number;
+} {
+  const cacheData =
+    typeof raw === "object" && raw !== null
+      ? (raw as Record<string, unknown>)
+      : {};
+
+  const cachedMarkers = Array.isArray(cacheData.markers)
+    ? (cacheData.markers as LightweightRestaurant[])
+    : [];
+  const timestamp =
+    typeof cacheData.timestamp === "number" ? cacheData.timestamp : 0;
+
+  return { cachedMarkers, timestamp };
+}
+
 /**
  * オフライン状態の詳細情報
  */
@@ -82,80 +223,39 @@ export const useOfflineMarkers = (
   const [cachedMarkers, setCachedMarkers] = useState<LightweightRestaurant[]>(
     []
   );
-
-  /**
-   * レストランデータの軽量化
-   */
+  // For maintainability, heavy computations are delegated to module-level helpers
   const createLightweightRestaurant = useCallback(
-    (restaurant: Restaurant): LightweightRestaurant => {
-      return {
-        id: restaurant.id,
-        name: restaurant.name,
-        coordinates: restaurant.coordinates,
-        cuisineType: restaurant.cuisineType,
-        district: restaurant.district,
-        ...(restaurant.rating && { rating: restaurant.rating }),
-        isOfflineMode: true,
-        cachedAt: Date.now(),
-      };
-    },
+    (r: Restaurant) => createLightweightRestaurantSimple(r),
     []
   );
 
-  /**
-   * ユーザー位置からの距離計算
-   */
   const calculateDistanceFromUser = useCallback(
-    (restaurantCoords: { lat: number; lng: number }): number => {
-      if (!userLocation) return Infinity;
-
-      const R = 6371; // 地球の半径（km）
-      const dLat = ((restaurantCoords.lat - userLocation.lat) * Math.PI) / 180;
-      const dLng = ((restaurantCoords.lng - userLocation.lng) * Math.PI) / 180;
-
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((userLocation.lat * Math.PI) / 180) *
-          Math.cos((restaurantCoords.lat * Math.PI) / 180) *
-          Math.sin(dLng / 2) *
-          Math.sin(dLng / 2);
-
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    },
+    (coords: { lat: number; lng: number }) =>
+      calculateDistanceForCoords(coords, userLocation),
     [userLocation]
   );
 
-  /**
-   * 優先度に基づくレストランソート
-   */
   const sortRestaurantsByPriority = useCallback(
-    (restaurants: Restaurant[]): Restaurant[] => {
-      return [...restaurants].sort((a, b) => {
-        let scoreA = 0;
-        let scoreB = 0;
+    (rs: Restaurant[]) =>
+      (() => {
+        const opts: {
+          enableLocationPriority: boolean;
+          calculateDistanceFromUser: (coords: {
+            lat: number;
+            lng: number;
+          }) => number;
+          userLocation?: { lat: number; lng: number };
+        } = {
+          enableLocationPriority: finalConfig.enableLocationPriority,
+          calculateDistanceFromUser,
+        };
 
-        // 評価スコア
-        if (a.rating) scoreA += a.rating * 10;
-        if (b.rating) scoreB += b.rating * 10;
-
-        // レビュー数スコア
-        if (a.reviewCount) scoreA += Math.min(a.reviewCount / 5, 20);
-        if (b.reviewCount) scoreB += Math.min(b.reviewCount / 5, 20);
-
-        // 位置優先度（有効時）
-        if (finalConfig.enableLocationPriority && userLocation) {
-          const distanceA = calculateDistanceFromUser(a.coordinates);
-          const distanceB = calculateDistanceFromUser(b.coordinates);
-
-          // 近い方が優先（距離逆数を使用）
-          if (distanceA < Infinity) scoreA += 50 / (distanceA + 1);
-          if (distanceB < Infinity) scoreB += 50 / (distanceB + 1);
+        if (userLocation) {
+          opts.userLocation = userLocation;
         }
 
-        return scoreB - scoreA;
-      });
-    },
+        return sortRestaurantsByPrioritySimple(rs, opts);
+      })(),
     [
       finalConfig.enableLocationPriority,
       userLocation,
@@ -163,39 +263,19 @@ export const useOfflineMarkers = (
     ]
   );
 
-  /**
-   * マーカーキャッシュ更新
-   */
   const updateMarkerCache = useCallback(async () => {
     try {
-      // 優先度順にソート
       const prioritizedRestaurants = sortRestaurantsByPriority([
         ...restaurants,
       ]);
 
-      // 最大数まで軽量化してキャッシュ
       const lightweightMarkers = prioritizedRestaurants
         .slice(0, finalConfig.maxCachedMarkers)
         .map(createLightweightRestaurant);
 
       setCachedMarkers(lightweightMarkers);
 
-      // Service Workerでのキャッシュストレージ（利用可能な場合）
-      if ("serviceWorker" in navigator && "caches" in window) {
-        const cache = await caches.open("sado-restaurant-markers-v1");
-        const cacheData = {
-          markers: lightweightMarkers,
-          timestamp: Date.now(),
-          userLocation: userLocation,
-        };
-
-        await cache.put(
-          "/cached-markers.json",
-          new Response(JSON.stringify(cacheData), {
-            headers: { "Content-Type": "application/json" },
-          })
-        );
-      }
+      await writeMarkersToCache(lightweightMarkers, userLocation);
 
       if (finalConfig.debugMode) {
         console.log("📦 Offline markers cached:", {
@@ -218,51 +298,11 @@ export const useOfflineMarkers = (
   /**
    * キャッシュからマーカー読み込み
    */
-  const loadCachedMarkers = useCallback(async (): Promise<
-    LightweightRestaurant[]
-  > => {
-    try {
-      // Service Workerキャッシュから読み込み
-      if ("caches" in window) {
-        const cache = await caches.open("sado-restaurant-markers-v1");
-        const cachedResponse = await cache.match("/cached-markers.json");
-
-        if (cachedResponse) {
-          const raw = (await cachedResponse.json()) as unknown;
-          const cacheData =
-            typeof raw === "object" && raw !== null
-              ? (raw as Record<string, unknown>)
-              : {};
-
-          const cachedMarkers = Array.isArray(cacheData.markers)
-            ? (cacheData.markers as LightweightRestaurant[])
-            : [];
-
-          const timestamp =
-            typeof cacheData.timestamp === "number" ? cacheData.timestamp : 0;
-
-          // キャッシュの有効性チェック（24時間以内）
-          const isValidCache =
-            timestamp > 0 && Date.now() - timestamp < 24 * 60 * 60 * 1000;
-
-          if (isValidCache && cachedMarkers.length > 0) {
-            if (finalConfig.debugMode) {
-              console.log("📂 Loaded cached markers:", {
-                count: cachedMarkers.length,
-                cacheAge: Math.round((Date.now() - timestamp) / 60000),
-              });
-            }
-            return cachedMarkers;
-          }
-        }
-      }
-
-      return [];
-    } catch (error) {
-      console.warn("⚠️ Failed to load cached markers:", error);
-      return [];
-    }
-  }, [finalConfig.debugMode]);
+  const loadCachedMarkers = useCallback(
+    async (): Promise<LightweightRestaurant[]> =>
+      loadCachedMarkersFromCacheSimple(finalConfig.debugMode),
+    [finalConfig.debugMode]
+  );
 
   /**
    * オンライン/オフライン状態監視
