@@ -50,7 +50,7 @@ export abstract class AbstractDataService<T> {
 
       // バリデーション
       const validData = data.filter(
-        (item) => this.validator.validate(item).isValid
+        item => this.validator.validate(item).isValid
       );
 
       // キャッシュ保存
@@ -84,13 +84,13 @@ export class RestaurantService extends AbstractDataService<Restaurant> {
   async getAll(): Promise<Restaurant[]> {
     return this.fetchWithCache("restaurants", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("restaurant");
-      return mapPoints.filter((point) => point.type === "restaurant");
+      return mapPoints.filter(point => point.type === "restaurant");
     });
   }
 
   async getById(id: string): Promise<Restaurant | null> {
     const restaurants = await this.getAll();
-    return restaurants.find((r) => r.id === id) || null;
+    return restaurants.find(r => r.id === id) || null;
   }
 
   async getNearby(
@@ -98,7 +98,7 @@ export class RestaurantService extends AbstractDataService<Restaurant> {
     radius: number
   ): Promise<Restaurant[]> {
     const nearby = await this.dataSource.searchNearby(center, radius);
-    return nearby.filter((point) => point.type === "restaurant");
+    return nearby.filter(point => point.type === "restaurant");
   }
 }
 
@@ -109,7 +109,7 @@ export class ParkingService extends AbstractDataService<Parking> {
   async getAll(): Promise<Parking[]> {
     return this.fetchWithCache("parkings", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("parking");
-      return mapPoints.filter((point) => point.type === "parking");
+      return mapPoints.filter(point => point.type === "parking");
     });
   }
 }
@@ -121,7 +121,7 @@ export class ToiletService extends AbstractDataService<Toilet> {
   async getAll(): Promise<Toilet[]> {
     return this.fetchWithCache("toilets", async () => {
       const mapPoints = await this.dataSource.getMapPointsByType("toilet");
-      return mapPoints.filter((point) => point.type === "toilet");
+      return mapPoints.filter(point => point.type === "toilet");
     });
   }
 }
@@ -227,7 +227,7 @@ export class MapDataService {
     center: google.maps.LatLngLiteral,
     radius: number
   ): MapPoint[] {
-    return points.filter((point) => {
+    return points.filter(point => {
       const distance = this.calculateDistance(center, point);
       return distance <= radius;
     });

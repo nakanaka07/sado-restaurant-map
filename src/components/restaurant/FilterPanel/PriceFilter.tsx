@@ -24,7 +24,7 @@ export const PriceFilter = memo<PriceFilterProps>(function PriceFilter({
 }) {
   const priceOptions = useMemo(
     () =>
-      PRICE_OPTIONS.map((price) => (
+      PRICE_OPTIONS.map(price => (
         <option key={price} value={price}>
           {price}
         </option>
@@ -58,11 +58,11 @@ export const PriceFilter = memo<PriceFilterProps>(function PriceFilter({
           backgroundColor: "#fff",
           transition: "all 0.2s ease",
         }}
-        onFocus={(e) => {
+        onFocus={e => {
           e.target.style.borderColor = "#3b82f6";
           e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
         }}
-        onBlur={(e) => {
+        onBlur={e => {
           e.target.style.borderColor = "#e5e7eb";
           e.target.style.boxShadow = "none";
         }}

@@ -53,8 +53,7 @@ function getPointAriaLabel(point: MapPoint): string {
   } else if (isToilet(point)) {
     return `トイレ: ${point.name}`;
   }
-  // この行には到達しないはずだが、TypeScript警告のためフォールバック
-  return (point as any).name || "不明なポイント";
+  return "不明なポイント";
 }
 
 /**

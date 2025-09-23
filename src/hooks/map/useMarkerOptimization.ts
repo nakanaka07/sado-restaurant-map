@@ -7,7 +7,7 @@ import type { Restaurant } from "@/types";
 import { useCallback, useMemo, useRef, useState } from "react";
 
 // Phase 4: ClusterMarker統合
-import type { ClusterData } from "@/components/map/markers/ClusterMarker";
+import type { ClusterData } from "@/components/map/markers/clusterUtils";
 
 /**
  * マーカー最適化設定
@@ -192,6 +192,26 @@ export const useMarkerOptimization = (
   );
 
   /**
+   * ピクセル単位距離計算（簡易版）
+   */
+  const calculatePixelDistance = useCallback(
+    (
+      coord1: { lat: number; lng: number },
+      coord2: { lat: number; lng: number },
+      zoomLevel: number
+    ): number => {
+      const pixelsPerDegree = (256 * Math.pow(2, zoomLevel)) / 360;
+      const deltaLat = Math.abs(coord1.lat - coord2.lat) * pixelsPerDegree;
+      const deltaLng =
+        Math.abs(coord1.lng - coord2.lng) *
+        pixelsPerDegree *
+        Math.cos((coord1.lat * Math.PI) / 180);
+      return Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng);
+    },
+    []
+  );
+
+  /**
    * Phase 4: クラスタリング機能
    */
   const generateClusters = useCallback(
@@ -265,27 +285,8 @@ export const useMarkerOptimization = (
       finalConfig.enableClustering,
       finalConfig.clusteringMinCount,
       finalConfig.clusteringDistance,
+      calculatePixelDistance,
     ]
-  );
-
-  /**
-   * ピクセル単位距離計算（簡易版）
-   */
-  const calculatePixelDistance = useCallback(
-    (
-      coord1: { lat: number; lng: number },
-      coord2: { lat: number; lng: number },
-      zoomLevel: number
-    ): number => {
-      const pixelsPerDegree = (256 * Math.pow(2, zoomLevel)) / 360;
-      const deltaLat = Math.abs(coord1.lat - coord2.lat) * pixelsPerDegree;
-      const deltaLng =
-        Math.abs(coord1.lng - coord2.lng) *
-        pixelsPerDegree *
-        Math.cos((coord1.lat * Math.PI) / 180);
-      return Math.sqrt(deltaLat * deltaLat + deltaLng * deltaLng);
-    },
-    []
   );
 
   /**

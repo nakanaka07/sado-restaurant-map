@@ -336,7 +336,7 @@ export function organizeDetailedHours(
  * 曜日名を正規化（多様な表記に対応）
  */
 function normalizeDayName(dayStr: string): string {
-  const cleaned = dayStr.trim().replace(/[　\s]/g, "");
+  const cleaned = normalizeWhitespace(dayStr);
 
   // 英語曜日の日本語変換
   const englishToJapanese: Record<string, string> = {
@@ -449,7 +449,7 @@ function parseTimeToMinutes(timeStr: string): number | null {
  * 時間文字列を正規化（多様な表記に対応）
  */
 function normalizeTimeString(timeStr: string): string | null {
-  const cleaned = timeStr.trim().replace(/[　\s]/g, "");
+  const cleaned = normalizeWhitespace(timeStr);
 
   // 全角数字を半角に変換
   const halfWidth = cleaned.replace(/[０-９]/g, char =>
@@ -499,6 +499,15 @@ function mapDayToKey(dayStr: string): keyof DetailedOpeningHours | null {
   if (day.includes("日") || day.includes("sun")) return "sunday";
 
   return null;
+}
+
+/**
+ * 不正な空白文字を正規化して通常のトリム済み文字列を返す
+ */
+function normalizeWhitespace(s: string): string {
+  if (!s || typeof s !== "string") return "";
+  // 全角スペースや各種不可視空白を除去し、前後の空白をトリム
+  return s.replace(/[\u00A0\u2000-\u200B\u202F\u3000\uFEFF]/g, "").trim();
 }
 
 /**

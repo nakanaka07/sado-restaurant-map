@@ -219,7 +219,10 @@ vi.mock("../services/sheets/sheetsService", () => ({
   fetchAllMapPoints: vi.fn().mockResolvedValue([]),
   checkDataFreshness: vi.fn().mockResolvedValue({ needsUpdate: false }),
   SheetsApiError: class SheetsApiError extends Error {
-    constructor(message: string, public status: number = 500) {
+    constructor(
+      message: string,
+      public status: number = 500
+    ) {
       super(message);
       this.name = "SheetsApiError";
     }
@@ -229,8 +232,7 @@ vi.mock("../services/sheets/sheetsService", () => ({
 // Suppress console.log in tests
 if (process.env.NODE_ENV === "test") {
   // Vitest環境下で安全にconsole出力を抑制
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (console.log as any) = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (console.info as any) = () => {};
+  // Narrow console methods safely: use unknown then assert to function type
+  (console.log as unknown as (...args: unknown[]) => void) = () => {};
+  (console.info as unknown as (...args: unknown[]) => void) = () => {};
 }

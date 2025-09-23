@@ -119,7 +119,7 @@ export const isNonEmptyArray = <T>(arr: T[]): arr is [T, ...T[]] => {
 
 /** 文字列配列型ガード */
 export const isStringArray = (arr: unknown): arr is string[] => {
-  return Array.isArray(arr) && arr.every((item) => typeof item === "string");
+  return Array.isArray(arr) && arr.every(item => typeof item === "string");
 };
 
 // ==============================

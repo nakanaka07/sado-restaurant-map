@@ -29,24 +29,24 @@ import yakinikuIcon from "@/assets/png/yakiniku_icon.png";
  * 料理ジャンル別アイコンマップ（型安全）
  */
 export const CUISINE_ICONS: Readonly<Record<CuisineType, string>> = {
-  "日本料理": japaneseIcon,
-  "寿司": sushiIcon,
-  "海鮮": seafoodIcon,
+  日本料理: japaneseIcon,
+  寿司: sushiIcon,
+  海鮮: seafoodIcon,
   "焼肉・焼鳥": yakinikuIcon,
-  "ラーメン": ramenIcon,
+  ラーメン: ramenIcon,
   "そば・うどん": sobaIcon,
-  "中華": chineseIcon,
-  "イタリアン": italianIcon,
-  "フレンチ": frenchIcon,
+  中華: chineseIcon,
+  イタリアン: italianIcon,
+  フレンチ: frenchIcon,
   "カフェ・喫茶店": cafeIcon,
   "バー・居酒屋": barIcon,
-  "ファストフード": fastfoodIcon,
+  ファストフード: fastfoodIcon,
   "デザート・スイーツ": dessertIcon,
   "カレー・エスニック": curryIcon,
   "ステーキ・洋食": steakIcon,
   "弁当・テイクアウト": bentoIcon,
-  "レストラン": restaurantIcon,
-  "その他": otherIcon,
+  レストラン: restaurantIcon,
+  その他: otherIcon,
 } as const;
 
 /**

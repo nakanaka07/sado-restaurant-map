@@ -58,14 +58,17 @@ export const useOfflineMarkers = (
   userLocation?: { lat: number; lng: number },
   config?: Partial<OfflineMarkerConfig>
 ) => {
-  // 設定のデフォルト値
-  const finalConfig: OfflineMarkerConfig = {
-    maxCachedMarkers: 100,
-    simplificationLevel: "reduced",
-    enableLocationPriority: true,
-    debugMode: process.env.NODE_ENV === "development",
-    ...config,
-  };
+  // 設定のデフォルト値（安定化のため useMemo でラップ）
+  const finalConfig = useMemo<OfflineMarkerConfig>(
+    () => ({
+      maxCachedMarkers: 100,
+      simplificationLevel: "reduced",
+      enableLocationPriority: true,
+      debugMode: process.env.NODE_ENV === "development",
+      ...config,
+    }),
+    [config]
+  );
 
   // オフライン状態管理
   const [offlineState, setOfflineState] = useState<OfflineState>({
@@ -128,7 +131,7 @@ export const useOfflineMarkers = (
    */
   const sortRestaurantsByPriority = useCallback(
     (restaurants: Restaurant[]): Restaurant[] => {
-      return restaurants.sort((a, b) => {
+      return [...restaurants].sort((a, b) => {
         let scoreA = 0;
         let scoreB = 0;
 
@@ -225,20 +228,28 @@ export const useOfflineMarkers = (
         const cachedResponse = await cache.match("/cached-markers.json");
 
         if (cachedResponse) {
-          const cacheData = await cachedResponse.json();
-          const cachedMarkers = cacheData.markers as LightweightRestaurant[];
+          const raw = (await cachedResponse.json()) as unknown;
+          const cacheData =
+            typeof raw === "object" && raw !== null
+              ? (raw as Record<string, unknown>)
+              : {};
+
+          const cachedMarkers = Array.isArray(cacheData.markers)
+            ? (cacheData.markers as LightweightRestaurant[])
+            : [];
+
+          const timestamp =
+            typeof cacheData.timestamp === "number" ? cacheData.timestamp : 0;
 
           // キャッシュの有効性チェック（24時間以内）
           const isValidCache =
-            Date.now() - cacheData.timestamp < 24 * 60 * 60 * 1000;
+            timestamp > 0 && Date.now() - timestamp < 24 * 60 * 60 * 1000;
 
-          if (isValidCache && cachedMarkers) {
+          if (isValidCache && cachedMarkers.length > 0) {
             if (finalConfig.debugMode) {
               console.log("📂 Loaded cached markers:", {
                 count: cachedMarkers.length,
-                cacheAge: Math.round(
-                  (Date.now() - cacheData.timestamp) / 60000
-                ),
+                cacheAge: Math.round((Date.now() - timestamp) / 60000),
               });
             }
             return cachedMarkers;
@@ -267,7 +278,7 @@ export const useOfflineMarkers = (
       }));
 
       // オンライン復帰時にキャッシュ更新
-      updateMarkerCache();
+      void updateMarkerCache();
 
       if (finalConfig.debugMode) {
         console.log("🌐 Connection restored - updating marker cache");
@@ -291,9 +302,15 @@ export const useOfflineMarkers = (
     const estimateConnectionQuality = () => {
       if (!navigator.onLine) return;
 
-      const connection = (navigator as any).connection;
-      if (connection) {
-        const quality = connection.effectiveType === "4g" ? "good" : "poor";
+      const connection = (
+        navigator as unknown as {
+          connection?: { effectiveType?: string };
+        }
+      ).connection;
+
+      const effectiveType = connection?.effectiveType;
+      if (effectiveType) {
+        const quality = effectiveType === "4g" ? "good" : "poor";
         setOfflineState(prev => ({
           ...prev,
           connectionQuality: quality,
@@ -306,9 +323,9 @@ export const useOfflineMarkers = (
 
     // 初回キャッシュ更新
     if (navigator.onLine) {
-      updateMarkerCache();
+      void updateMarkerCache();
     } else {
-      loadCachedMarkers().then(setCachedMarkers);
+      void loadCachedMarkers().then(setCachedMarkers);
     }
 
     // 接続品質監視（サポートされている場合）

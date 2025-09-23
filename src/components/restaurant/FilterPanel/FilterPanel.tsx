@@ -197,11 +197,11 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
                 backgroundColor: "#fff",
                 transition: "all 0.2s ease",
               }}
-              onFocus={(e) => {
+              onFocus={e => {
                 e.target.style.borderColor = "#3b82f6";
                 e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 e.target.style.borderColor = "#e5e7eb";
                 e.target.style.boxShadow = "none";
               }}
@@ -270,7 +270,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               {(["restaurant", "parking", "toilet"] as MapPointType[]).map(
-                (pointType) => (
+                pointType => (
                   <label
                     key={pointType}
                     style={{
@@ -333,11 +333,11 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
                 backgroundColor: "#fff",
                 transition: "all 0.2s ease",
               }}
-              onFocus={(e) => {
+              onFocus={e => {
                 e.target.style.borderColor = "#3b82f6";
                 e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
               }}
-              onBlur={(e) => {
+              onBlur={e => {
                 e.target.style.borderColor = "#e5e7eb";
                 e.target.style.boxShadow = "none";
               }}
@@ -365,10 +365,10 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({
                 cursor: "pointer",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 e.currentTarget.style.backgroundColor = "#dc2626";
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.backgroundColor = "#ef4444";
               }}
               disabled={loading}

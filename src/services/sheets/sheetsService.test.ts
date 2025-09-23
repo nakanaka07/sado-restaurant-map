@@ -367,9 +367,9 @@ describe("Google Sheets API連携テスト", () => {
       const result = await fetchAllMapPoints();
 
       expect(result).toHaveLength(3);
-      expect(result.find((p) => p.type === "restaurant")).toBeDefined();
-      expect(result.find((p) => p.type === "parking")).toBeDefined();
-      expect(result.find((p) => p.type === "toilet")).toBeDefined();
+      expect(result.find(p => p.type === "restaurant")).toBeDefined();
+      expect(result.find(p => p.type === "parking")).toBeDefined();
+      expect(result.find(p => p.type === "toilet")).toBeDefined();
     });
 
     it("一部のAPIが失敗した場合でも成功したデータを返すべき", async () => {
@@ -454,9 +454,9 @@ describe("Google Sheets API連携テスト", () => {
       const result = await fetchAllMapPoints();
 
       expect(result).toHaveLength(2);
-      expect(result.find((p) => p.type === "restaurant")).toBeDefined();
-      expect(result.find((p) => p.type === "toilet")).toBeDefined();
-      expect(result.find((p) => p.type === "parking")).toBeUndefined();
+      expect(result.find(p => p.type === "restaurant")).toBeDefined();
+      expect(result.find(p => p.type === "toilet")).toBeDefined();
+      expect(result.find(p => p.type === "parking")).toBeUndefined();
     });
   });
 

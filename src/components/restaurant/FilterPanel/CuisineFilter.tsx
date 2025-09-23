@@ -38,7 +38,7 @@ export const CuisineFilter = memo<CuisineFilterProps>(function CuisineFilter({
 }) {
   const cuisineOptions = useMemo(
     () =>
-      CUISINE_OPTIONS.map((cuisine) => (
+      CUISINE_OPTIONS.map(cuisine => (
         <option key={cuisine} value={cuisine}>
           {cuisine}
         </option>
@@ -72,11 +72,11 @@ export const CuisineFilter = memo<CuisineFilterProps>(function CuisineFilter({
           backgroundColor: "#fff",
           transition: "all 0.2s ease",
         }}
-        onFocus={(e) => {
+        onFocus={e => {
           e.target.style.borderColor = "#3b82f6";
           e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
         }}
-        onBlur={(e) => {
+        onBlur={e => {
           e.target.style.borderColor = "#e5e7eb";
           e.target.style.boxShadow = "none";
         }}

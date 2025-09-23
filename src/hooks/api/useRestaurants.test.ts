@@ -248,7 +248,7 @@ describe("useRestaurants Hook", () => {
       result.current.setSortOrder("name");
     });
 
-    const names = result.current.filteredRestaurants.map((r) => r.name);
+    const names = result.current.filteredRestaurants.map(r => r.name);
     expect(names).toEqual([
       "そば処 竹の子",
       "海鮮市場 金太",
@@ -270,7 +270,7 @@ describe("useRestaurants Hook", () => {
     });
 
     const ratings = result.current.filteredRestaurants
-      .map((r) => r.rating)
+      .map(r => r.rating)
       .filter((rating): rating is number => rating !== undefined);
 
     if (ratings.length > 1) {

@@ -24,7 +24,7 @@ export function MapViewWithTesting({
   center,
   loading,
   error,
-  testingMode = false
+  testingMode = false,
 }: MapViewWithTestingProps) {
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);

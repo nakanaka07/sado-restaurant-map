@@ -24,19 +24,15 @@ import { FilterPanel } from "@/components/restaurant";
 import type { FilterHandlers } from "@/components/restaurant";
 
 const filterHandlers: FilterHandlers = {
-  onCuisineFilter: (cuisine) => applyFilters({ cuisine }),
-  onPriceFilter: (price) => applyFilters({ price }),
-  onDistrictFilter: (districts) => applyFilters({ districts }),
-  onSearchFilter: (search) => applyFilters({ search }),
-  onFeatureFilter: (features) => applyFilters({ features }),
+  onCuisineFilter: cuisine => applyFilters({ cuisine }),
+  onPriceFilter: price => applyFilters({ price }),
+  onDistrictFilter: districts => applyFilters({ districts }),
+  onSearchFilter: search => applyFilters({ search }),
+  onFeatureFilter: features => applyFilters({ features }),
   onResetFilters: () => resetAllFilters(),
 };
 
-<FilterPanel
-  {...filterHandlers}
-  loading={loading}
-  resultCount={filteredRestaurants.length}
-/>;
+<FilterPanel {...filterHandlers} loading={loading} resultCount={filteredRestaurants.length} />;
 ```
 
 ## 🏗️ データフロー
@@ -519,7 +515,7 @@ describe('Restaurant Components Integration', () => {
    ```typescript
    // メモ化の確認
    const memoizedRestaurants = useMemo(() => {
-     return restaurants.filter((restaurant) => {
+     return restaurants.filter(restaurant => {
        // フィルタリングロジック
      });
    }, [restaurants, filters]);
@@ -533,7 +529,7 @@ describe('Restaurant Components Integration', () => {
      console.log("Restaurant state updated:", {
        totalRestaurants: restaurants.length,
        filteredRestaurants: filteredRestaurants.length,
-       activeFilters: Object.keys(filters).filter((key) => filters[key]),
+       activeFilters: Object.keys(filters).filter(key => filters[key]),
      });
    }, [restaurants, filteredRestaurants, filters]);
    ```

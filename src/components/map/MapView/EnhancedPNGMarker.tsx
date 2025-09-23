@@ -59,10 +59,10 @@ export function EnhancedPNGMarker({ point, onClick }: EnhancedPNGMarkerProps) {
           position: "relative",
           padding: 0,
         }}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           e.currentTarget.style.transform = "scale(1.1)";
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           e.currentTarget.style.transform = "scale(1)";
         }}
         onClick={handleClick}

@@ -45,11 +45,11 @@ export const SearchFilter = memo<SearchFilterProps>(function SearchFilter({
           transition: "all 0.2s ease",
           backgroundColor: "#fff",
         }}
-        onFocus={(e) => {
+        onFocus={e => {
           e.target.style.borderColor = "#3b82f6";
           e.target.style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
         }}
-        onBlur={(e) => {
+        onBlur={e => {
           e.target.style.borderColor = "#e5e7eb";
           e.target.style.boxShadow = "none";
         }}

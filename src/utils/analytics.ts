@@ -219,7 +219,7 @@ export const checkGAStatus = async () => {
     gtagLoaded: boolean;
     dataLayerExists: boolean;
     environment: string;
-  }>((resolve) => {
+  }>(resolve => {
     const status = {
       measurementId: GA_MEASUREMENT_ID,
       measurementIdValid:
@@ -384,7 +384,7 @@ export const autoFixGA = () => {
         .then(() => {
           console.log("🔄 Google Analytics 再初期化完了");
         })
-        .catch((error) => {
+        .catch(error => {
           console.error("🔄 Google Analytics 再初期化失敗:", error);
         });
     }, 1000);

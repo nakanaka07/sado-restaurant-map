@@ -5,8 +5,8 @@
  * CircularMarkerとClusterMarkerのアニメーション制御
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { MarkerAnimation } from "../components/map/markers/CircularMarker";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { MarkerAnimation } from "../components/map/markers/constants";
 
 /**
  * 型ガード: 有効なMarkerAnimationかどうかをチェック
@@ -65,18 +65,20 @@ interface AnimationEvent {
 export const useMarkerAnimationManager = (
   config?: Partial<AnimationConfig>
 ) => {
-  // 設定のデフォルト値
-  const finalConfig: AnimationConfig = {
-    defaultDuration: 2000,
-    maxConcurrentAnimations: 10,
-    priorityLevels: {
-      attention: 3, // 最高優先度
-      loading: 2,
-      subtle: 1,
-      none: 0,
-    },
-    ...config,
-  };
+  // 設定のデフォルト値を useMemo で安定化
+  const finalConfig = useMemo<AnimationConfig>(() => {
+    const defaultConfig: AnimationConfig = {
+      defaultDuration: 2000,
+      maxConcurrentAnimations: 10,
+      priorityLevels: {
+        attention: 3, // 最高優先度
+        loading: 2,
+        subtle: 1,
+        none: 0,
+      },
+    };
+    return { ...defaultConfig, ...config };
+  }, [config]);
 
   // アニメーション状態管理
   const [animationState, setAnimationState] = useState<AnimationState>({
@@ -86,6 +88,53 @@ export const useMarkerAnimationManager = (
 
   // タイマー管理
   const animationTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  /**
+   * 特定マーカーのアニメーション停止
+   */
+  const stopMarkerAnimation = useCallback((markerId: string) => {
+    // 入力バリデーション
+    if (!isValidMarkerId(markerId)) {
+      console.warn(
+        "Invalid markerId provided to stopMarkerAnimation:",
+        markerId
+      );
+      return;
+    }
+
+    try {
+      // タイマークリア
+      const timer = animationTimers.current.get(markerId);
+      if (timer) {
+        clearTimeout(timer);
+        animationTimers.current.delete(markerId);
+      }
+
+      // 状態更新
+      setAnimationState(prev => {
+        const newAnimatingMarkers = new Set(prev.animatingMarkers);
+        const newMarkerAnimations = new Map(prev.markerAnimations);
+
+        newAnimatingMarkers.delete(markerId);
+        newMarkerAnimations.delete(markerId);
+
+        return {
+          ...prev,
+          animatingMarkers: newAnimatingMarkers,
+          markerAnimations: newMarkerAnimations,
+        };
+      });
+
+      if (process.env.NODE_ENV === "development") {
+        console.log(`⏹️ Animation stopped:`, {
+          markerId,
+          timestamp: Date.now(),
+        });
+      }
+    } catch (error) {
+      console.error("Error stopping marker animation:", error);
+    }
+  }, []);
 
   /**
    * 特定マーカーのアニメーション開始
@@ -140,17 +189,19 @@ export const useMarkerAnimationManager = (
             newAnimatingMarkers.size >= finalConfig.maxConcurrentAnimations
           ) {
             // 優先度の低いアニメーションを停止
-            const currentAnimations = Array.from(newMarkerAnimations.entries());
+            const currentAnimations: [string, MarkerAnimation][] = Array.from(
+              newMarkerAnimations.entries()
+            );
             if (currentAnimations.length > 0) {
-              const lowestPriority = currentAnimations.reduce(
-                (lowest, [id, anim]) => {
-                  const priority = finalConfig.priorityLevels[anim] ?? 0;
-                  const lowestPriority =
-                    finalConfig.priorityLevels[lowest[1]] ?? 0;
-                  return priority < lowestPriority ? [id, anim] : lowest;
-                },
-                currentAnimations[0] // 初期値として最初の要素を設定
-              );
+              const lowestPriority = currentAnimations.reduce<
+                [string, MarkerAnimation]
+              >((lowest, entry) => {
+                const [id, anim] = entry;
+                const priority = finalConfig.priorityLevels[anim] ?? 0;
+                const lowestPriorityValue =
+                  finalConfig.priorityLevels[lowest[1]] ?? 0;
+                return priority < lowestPriorityValue ? [id, anim] : lowest;
+              }, currentAnimations[0]);
 
               const animationPriority =
                 finalConfig.priorityLevels[animation] ?? 0;
@@ -200,7 +251,7 @@ export const useMarkerAnimationManager = (
         console.error("Error starting marker animation:", error);
       }
     },
-    [finalConfig]
+    [finalConfig, stopMarkerAnimation]
   );
 
   /**

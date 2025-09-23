@@ -395,8 +395,8 @@ const normalizeAddress = (address: string): string => {
   return address
     .trim()
     .replace(/\s+/g, "")
-    .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0)) // 全角数字を半角に
-    .replace(/[Ａ-Ｚａ-ｚ]/g, (s) =>
+    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0)) // 全角数字を半角に
+    .replace(/[Ａ-Ｚａ-ｚ]/g, s =>
       String.fromCharCode(s.charCodeAt(0) - 0xfee0)
     ); // 全角英字を半角に
 };

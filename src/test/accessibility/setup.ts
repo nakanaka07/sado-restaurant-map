@@ -9,8 +9,20 @@ import { afterEach, beforeAll } from "vitest";
 
 // テスト環境セットアップ
 beforeAll(() => {
-  // Mock Google Maps API for testing
-  (global as any).google = {
+  // Mock Google Maps API for testing with a narrow type
+  type MockGoogleMaps = {
+    maps: {
+      Map: (...args: unknown[]) => unknown;
+      Marker: (...args: unknown[]) => unknown;
+      InfoWindow: (...args: unknown[]) => unknown;
+      event: {
+        addListener: (...a: unknown[]) => unknown;
+        removeListener: (...a: unknown[]) => unknown;
+      };
+    };
+  };
+
+  const mockGoogle: MockGoogleMaps = {
     maps: {
       Map: vi.fn(() => ({
         setCenter: vi.fn(),
@@ -33,6 +45,9 @@ beforeAll(() => {
       },
     },
   };
+
+  // assign to global with a typed cast that isn't `any`
+  (globalThis as unknown as { google?: MockGoogleMaps }).google = mockGoogle;
 });
 
 afterEach(() => {

@@ -29,11 +29,7 @@ const points: MapPoint[] = [
   },
 ];
 
-<MapView
-  points={points}
-  center={{ lat: 38.0186, lng: 138.3669 }}
-  loading={false}
-/>;
+<MapView points={points} center={{ lat: 38.0186, lng: 138.3669 }} loading={false} />;
 ```
 
 ### RestaurantMap (レガシー)
@@ -41,21 +37,13 @@ const points: MapPoint[] = [
 ```tsx
 import { RestaurantMap } from "@/components/map";
 
-<RestaurantMap
-  restaurants={restaurants}
-  center={{ lat: 38.0186, lng: 138.3669 }}
-  loading={false}
-/>;
+<RestaurantMap restaurants={restaurants} center={{ lat: 38.0186, lng: 138.3669 }} loading={false} />;
 ```
 
 ## 🛠️ ユーティリティ関数
 
 ```tsx
-import {
-  getMarkerColorByCuisine,
-  getMarkerSizeByPrice,
-  getMarkerConfig,
-} from "@/components/map/utils";
+import { getMarkerColorByCuisine, getMarkerSizeByPrice, getMarkerConfig } from "@/components/map/utils";
 
 // 料理ジャンル別の色
 const color = getMarkerColorByCuisine("日本料理"); // "#ef4444"

@@ -13,6 +13,9 @@ export default tseslint.config(
       "coverage",
       "tools",
       "scripts",
+      "config/**",
+      "config/accessibility.config.ts",
+      "config/**.config.ts",
       "../*.config.js",
       "vitest.config.ts",
     ],
@@ -70,9 +73,12 @@ export default tseslint.config(
   },
   // Node.js設定ファイル用
   {
-    files: ["*.config.{js,ts}"],
+    files: ["**/*.config.{js,ts}"],
     languageOptions: {
       globals: globals.node,
+      parserOptions: {
+        project: undefined,
+      },
     },
     rules: {
       "@typescript-eslint/no-require-imports": "off",

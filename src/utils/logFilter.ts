@@ -118,7 +118,7 @@ export function setupLogFiltering(): void {
 export function disableWorkboxLogs(): void {
   // Service Worker内でのWorkboxログ無効化
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.addEventListener("message", (event) => {
+    navigator.serviceWorker.addEventListener("message", event => {
       // Workboxからのメッセージをフィルタリング
       if (
         event.data &&

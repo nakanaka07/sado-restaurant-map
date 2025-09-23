@@ -26,8 +26,8 @@ function PWABadge() {
     if (isDevelopment && "serviceWorker" in navigator) {
       navigator.serviceWorker
         .getRegistrations()
-        .then((registrations) => {
-          registrations.forEach((registration) => {
+        .then(registrations => {
+          registrations.forEach(registration => {
             console.log(
               "🔧 [PWA] Development mode: Unregistering Service Worker"
             );

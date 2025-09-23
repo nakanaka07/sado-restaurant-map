@@ -7,44 +7,16 @@
 
 import React from "react";
 import type { IcooonMarkerCategory } from "../../../types/icooonMarker.types";
+import {
+  ARIA_LABEL_MAP,
+  CIRCULAR_MARKER_COLORS,
+  ICON_PATH_MAP,
+  MARKER_SIZES,
+  MarkerAnimation,
+  MarkerSize,
+} from "./constants";
 
-/**
- * 🌈 食欲促進色彩理論に基づく配色設計
- * 暖色系・高彩度・明度調整によりPNG版に近い鮮やかさを実現
- * 佐渡島の食文化と観光客の心理に配慮した色彩選択
- */
-export const CIRCULAR_MARKER_COLORS: Record<IcooonMarkerCategory, string> = {
-  // 🍚 飲食店カテゴリ（食欲促進重視の暖色系）
-  japanese: "#E53E3E", // 鮮やかな赤（朱色系）- 食欲促進効果最大化
-  noodles: "#FF8C00", // 明るいオレンジ（琥珀色）- だしの温かさを演出
-  yakiniku: "#D53F8C", // ピンクがかった紫 - 肉の美味しさを連想
-  international: "#38A169", // 鮮やかな緑 - 新鮮さと健康的なイメージ
-  cafe: "#FEB002", // 明るい金色（+20%明度）- コーヒーの香ばしさ
-  izakaya: "#DC143C", // 提灯の赤（クリムゾン）- 日本の夜文化を表現
-  fastfood: "#FF6B35", // 鮮やかなオレンジレッド - エネルギッシュさ
-  general: "#00A693", // 明るいティール（+15%明度）- 信頼感と清潔感
-
-  // 🏢 施設カテゴリ（視認性重視）
-  parking: "#546E7A", // 明るい青灰（+10%明度）- 視認性向上
-  toilet: "#2196F3", // 青色（ブルー）- 清潔感と機能性、料理の緑と区別
-};
-
-/**
- * サイズ設定（レスポンシブ対応）
- */
-export const MARKER_SIZES = {
-  small: { width: 32, height: 32, iconSize: 16 },
-  medium: { width: 40, height: 40, iconSize: 20 },
-  large: { width: 48, height: 48, iconSize: 24 },
-  xlarge: { width: 64, height: 64, iconSize: 32 },
-} as const;
-
-export type MarkerSize = keyof typeof MARKER_SIZES;
-
-/**
- * Phase 4: アニメーションタイプ
- */
-export type MarkerAnimation = "none" | "attention" | "subtle" | "loading";
+// 定数は `constants.ts` に移動しました。
 
 interface CircularMarkerProps {
   /** マーカーカテゴリ */
@@ -67,39 +39,7 @@ interface CircularMarkerProps {
  * ICOOON MONO アイコンパスマッピング
  * Public Asset として提供（Vite Asset URL処理に依存しない確実な方法）
  */
-const getIconPath = (fileName: string): string => {
-  const baseUrl = import.meta.env.PROD ? "/sado-restaurant-map" : "";
-  return `${baseUrl}/icons/${fileName}`;
-};
-
-const ICON_PATH_MAP: Record<IcooonMarkerCategory, string> = {
-  japanese: getIconPath("ochawan-hashi.svg"),
-  noodles: getIconPath("ramen-icon.svg"),
-  yakiniku: getIconPath("steak-icon2.svg"),
-  international: getIconPath("earth-icon12.svg"),
-  cafe: getIconPath("tea-icon.svg"),
-  izakaya: getIconPath("wine-bottle.svg"),
-  fastfood: getIconPath("hamburger-icon7.svg"),
-  general: getIconPath("fork-knife.svg"),
-  parking: getIconPath("parking-icon.svg"),
-  toilet: getIconPath("toilet-pictogram.svg"),
-};
-
-/**
- * アクセシビリティラベルマッピング
- */
-const ARIA_LABEL_MAP: Record<IcooonMarkerCategory, string> = {
-  japanese: "和食レストラン",
-  noodles: "麺類レストラン",
-  yakiniku: "焼肉・グリルレストラン",
-  international: "多国籍料理レストラン",
-  cafe: "カフェ・軽食店",
-  izakaya: "居酒屋・バー",
-  fastfood: "ファストフード店",
-  general: "一般レストラン",
-  parking: "駐車場",
-  toilet: "トイレ",
-};
+// ICON_PATH_MAP と ARIA_LABEL_MAP は `constants.ts` を利用します
 
 export const CircularMarker: React.FC<CircularMarkerProps> = ({
   category,
@@ -175,7 +115,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           // CSS変数でカテゴリ別の色を設定
           "--marker-color": backgroundColor,
           "--marker-color-alpha": hexToRgba(backgroundColor, 0.4),
-        } as React.CSSProperties & { [key: string]: any }
+        } as React.CSSProperties & Record<string, string | number>
       }
       onClick={handleClick}
       onKeyDown={handleKeyDown}

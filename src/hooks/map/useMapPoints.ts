@@ -49,7 +49,7 @@ export function useMapPoints() {
    */
   const fetchData = useCallback(async () => {
     try {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
+      setState(prev => ({ ...prev, loading: true, error: null }));
 
       const mapPoints = await fetchAllMapPoints();
 
@@ -97,7 +97,7 @@ export function useMapPoints() {
   const filteredMapPoints = useMemo(() => {
     if (!state.data) return [];
 
-    return state.data.filter((point) => {
+    return state.data.filter(point => {
       return isPointMatchingFilters(point, filters);
     });
   }, [state.data, filters]);
@@ -155,7 +155,7 @@ export function useMapPoints() {
   const updateFilters = useCallback(
     (newFilters: Partial<ExtendedMapFilters>) => {
       startTransition(() => {
-        setFilters((prev) => ({ ...prev, ...newFilters }));
+        setFilters(prev => ({ ...prev, ...newFilters }));
       });
     },
     []
@@ -184,11 +184,9 @@ export function useMapPoints() {
     if (!state.data)
       return { restaurants: 0, parkings: 0, toilets: 0, total: 0 };
 
-    const restaurants = state.data.filter(
-      (p) => p.type === "restaurant"
-    ).length;
-    const parkings = state.data.filter((p) => p.type === "parking").length;
-    const toilets = state.data.filter((p) => p.type === "toilet").length;
+    const restaurants = state.data.filter(p => p.type === "restaurant").length;
+    const parkings = state.data.filter(p => p.type === "parking").length;
+    const toilets = state.data.filter(p => p.type === "toilet").length;
 
     return {
       restaurants,
@@ -318,7 +316,7 @@ function isFeatureFiltersMatching(
 ): boolean {
   // 特徴フィルター
   if (filters.features.length > 0) {
-    const hasMatchingFeature = filters.features.some((feature) =>
+    const hasMatchingFeature = filters.features.some(feature =>
       point.features.includes(feature)
     );
     if (!hasMatchingFeature) return false;
@@ -341,7 +339,7 @@ function isPointTypeSpecificFiltersMatching(
     filters.parkingFeatures &&
     filters.parkingFeatures.length > 0
   ) {
-    const hasMatchingFeature = filters.parkingFeatures.some((feature) =>
+    const hasMatchingFeature = filters.parkingFeatures.some(feature =>
       point.features.includes(feature)
     );
     if (!hasMatchingFeature) return false;
@@ -353,7 +351,7 @@ function isPointTypeSpecificFiltersMatching(
     filters.toiletFeatures &&
     filters.toiletFeatures.length > 0
   ) {
-    const hasMatchingFeature = filters.toiletFeatures.some((feature) =>
+    const hasMatchingFeature = filters.toiletFeatures.some(feature =>
       point.features.includes(feature)
     );
     if (!hasMatchingFeature) return false;
@@ -434,7 +432,7 @@ function isRestaurantCurrentlyOpen(point: MapPoint): boolean {
   });
   const currentTime = now.toTimeString().slice(0, 5);
 
-  const todayHours = point.openingHours.find((hours) =>
+  const todayHours = point.openingHours.find(hours =>
     hours.day.includes(currentDay.slice(0, 1))
   );
 

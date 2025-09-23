@@ -117,9 +117,9 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
 
   const handleDistrictToggle = useCallback(
     (district: SadoDistrict) => {
-      setSelectedDistricts((prev) => {
+      setSelectedDistricts(prev => {
         const newDistricts = prev.includes(district)
-          ? prev.filter((d) => d !== district)
+          ? prev.filter(d => d !== district)
           : [...prev, district];
         handlers.onDistrictFilter?.(newDistricts);
         trackFilter("district", district);
@@ -161,9 +161,9 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
 
   const handleFeatureToggle = useCallback(
     (feature: string) => {
-      setSelectedFeatures((prev) => {
+      setSelectedFeatures(prev => {
         const newFeatures = prev.includes(feature)
-          ? prev.filter((f) => f !== feature)
+          ? prev.filter(f => f !== feature)
           : [...prev, feature];
         handlers.onFeatureFilter?.(newFeatures);
         trackFilter("feature", feature);
@@ -175,9 +175,9 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
 
   const handlePointTypeToggle = useCallback(
     (pointType: MapPointType) => {
-      setSelectedPointTypes((prev) => {
+      setSelectedPointTypes(prev => {
         const newPointTypes = prev.includes(pointType)
-          ? prev.filter((pt) => pt !== pointType)
+          ? prev.filter(pt => pt !== pointType)
           : [...prev, pointType];
         handlers.onPointTypeFilter?.(newPointTypes);
         trackFilter("pointType", pointType);
@@ -202,11 +202,11 @@ export function useFilterState(handlers: FilterHandlers): FilterState {
   }, [handlers]);
 
   const toggleDistrictExpanded = useCallback(() => {
-    setIsDistrictExpanded((prev) => !prev);
+    setIsDistrictExpanded(prev => !prev);
   }, []);
 
   const toggleFeatureExpanded = useCallback(() => {
-    setIsFeatureExpanded((prev) => !prev);
+    setIsFeatureExpanded(prev => !prev);
   }, []);
 
   return {

@@ -103,10 +103,7 @@
   // 生産性ツール（最小限・重複回避）
   "mcp.servers.sequential-thinking": {
     "command": "npx",
-    "args": [
-      "-y",
-      "@modelcontextprotocol/server-sequential-thinking"
-    ],
+    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
     "description": "タスク分解・計画管理",
     "priority": "low",
     "enabled": true
@@ -122,16 +119,10 @@
   "mcp.toolOverlapHandling": "merge",
   // === ファイル形式別プロジェクト設定 ===
   "[typescript]": {
-    "editor.rulers": [
-      80,
-      120
-    ]
+    "editor.rulers": [80, 120]
   },
   "[typescriptreact]": {
-    "editor.rulers": [
-      80,
-      120
-    ]
+    "editor.rulers": [80, 120]
   },
   "[json]": {
     "editor.quickSuggestions": {
@@ -139,9 +130,7 @@
     }
   },
   "[markdown]": {
-    "editor.rulers": [
-      120
-    ]
+    "editor.rulers": [120]
   },
   // === Markdown Lint プロジェクト設定 ===
   "markdownlint.config": {

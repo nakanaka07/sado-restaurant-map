@@ -53,10 +53,10 @@ export function SkipLink({ href, children }: SkipLinkProps) {
         zIndex: 1000,
         transition: "top 0.3s",
       }}
-      onFocus={(e) => {
+      onFocus={e => {
         e.currentTarget.style.top = "6px";
       }}
-      onBlur={(e) => {
+      onBlur={e => {
         e.currentTarget.style.top = "-40px";
       }}
     >
@@ -105,8 +105,8 @@ export function AccessibleButton({
           size === "small"
             ? "4px 8px"
             : size === "large"
-            ? "12px 24px"
-            : "8px 16px",
+              ? "12px 24px"
+              : "8px 16px",
         fontSize:
           size === "small" ? "14px" : size === "large" ? "18px" : "16px",
         border: "none",
@@ -116,8 +116,8 @@ export function AccessibleButton({
           variant === "primary"
             ? "#0066cc"
             : variant === "danger"
-            ? "#dc3545"
-            : "#6c757d",
+              ? "#dc3545"
+              : "#6c757d",
         color: "#fff",
         opacity: disabled ? 0.6 : 1,
         transition: "background-color 0.2s, opacity 0.2s",
@@ -194,7 +194,7 @@ export function AccessibleInput({
         id={id}
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
         disabled={disabled}

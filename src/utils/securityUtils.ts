@@ -77,9 +77,7 @@ export function validateApiKey(apiKey: string | undefined): boolean {
 export function generateNonce(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
-    ""
-  );
+  return Array.from(array, byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
 /**
@@ -119,7 +117,7 @@ class RateLimiter {
     }
     // 古いリクエストを削除
     const validRequests = userRequests.filter(
-      (timestamp) => timestamp > windowStart
+      timestamp => timestamp > windowStart
     );
 
     if (validRequests.length >= this.maxRequests) {
@@ -136,7 +134,7 @@ class RateLimiter {
     const windowStart = now - this.windowMs;
     const userRequests = this.requests.get(identifier) || [];
     const validRequests = userRequests.filter(
-      (timestamp) => timestamp > windowStart
+      timestamp => timestamp > windowStart
     );
     return Math.max(0, this.maxRequests - validRequests.length);
   }
@@ -210,7 +208,7 @@ export class SecureStorage {
   static clear(): void {
     try {
       const keys = Object.keys(localStorage);
-      keys.forEach((key) => {
+      keys.forEach(key => {
         if (key.startsWith(this.prefix)) {
           localStorage.removeItem(key);
         }
@@ -234,7 +232,7 @@ export function checkSecurityHeaders(response: Response): void {
     "strict-transport-security",
   ];
 
-  securityHeaders.forEach((header) => {
+  securityHeaders.forEach(header => {
     if (!response.headers.get(header) && import.meta.env.DEV) {
       console.warn(`Missing security header: ${header}`);
     }

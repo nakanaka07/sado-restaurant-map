@@ -193,7 +193,7 @@ export const isRestaurant = (value: unknown): value is Restaurant => {
   if (address.length > 200) return false;
 
   // features配列の要素がすべて文字列かチェック
-  if (!features.every((feature) => isString(feature))) return false;
+  if (!features.every(feature => isString(feature))) return false;
 
   return true;
 };
@@ -383,7 +383,7 @@ export const validateRestaurant = (value: unknown): ValidationError[] => {
         features
       )
     );
-  } else if (!features.every((feature) => isString(feature))) {
+  } else if (!features.every(feature => isString(feature))) {
     errors.push(
       createValidationError(
         "features",

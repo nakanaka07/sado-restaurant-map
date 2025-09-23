@@ -60,7 +60,7 @@ export const FeatureFilter = memo<FeatureFilterProps>(function FeatureFilter({
 
   const featureCheckboxes = useMemo(
     () =>
-      AVAILABLE_FEATURES.map((feature) => (
+      AVAILABLE_FEATURES.map(feature => (
         <label
           key={feature}
           style={{
@@ -108,10 +108,10 @@ export const FeatureFilter = memo<FeatureFilterProps>(function FeatureFilter({
           cursor: "pointer",
           transition: "all 0.2s ease",
         }}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           e.currentTarget.style.backgroundColor = "#f3f4f6";
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           e.currentTarget.style.backgroundColor = "#f9fafb";
         }}
         aria-expanded={isExpanded}

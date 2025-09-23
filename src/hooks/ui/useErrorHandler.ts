@@ -46,7 +46,7 @@ export function useErrorHandler() {
     }
 
     setError(errorState);
-    setErrorHistory((prev) => [errorState, ...prev.slice(0, 9)]); // 最新10件保持
+    setErrorHistory(prev => [errorState, ...prev.slice(0, 9)]); // 最新10件保持
   }, []);
 
   const clearError = useCallback(() => {
@@ -154,13 +154,13 @@ export function setupGlobalErrorHandling() {
   }
 
   // 未処理のPromise拒否をキャッチ
-  window.addEventListener("unhandledrejection", (event) => {
+  window.addEventListener("unhandledrejection", event => {
     console.error("Unhandled promise rejection:", event.reason);
     event.preventDefault(); // デフォルトのエラー表示を抑制
   });
 
   // 一般的なJavaScriptエラーをキャッチ
-  window.addEventListener("error", (event) => {
+  window.addEventListener("error", event => {
     console.error("Global error:", event.error || event.message);
   });
 

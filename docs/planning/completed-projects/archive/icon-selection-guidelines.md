@@ -27,6 +27,7 @@
 ### 背景
 
 **Phase 1実装での主要フィードバック**:
+
 > "いい感じにアイコンによって、ジャンルを想像できるようになっています。いくつかのアイコンは画像が小さかったようで見にくいものもあったので、別な画像を探さなくてはいけません。あとは、選んだ画像が背景色と近かったので、この後画像を再度用意するときの留意点ですね。"
 
 ### 対象ユーザー
@@ -82,27 +83,27 @@
 export const ICON_TECHNICAL_REQUIREMENTS = {
   // 解像度仕様
   resolution: {
-    minimum: "128x128px",        // 絶対最小解像度
-    recommended: "256x256px",    // 推奨解像度
-    optimal: "512x512px",        // 将来対応最適解像度
-    displayTarget: "32x32px"     // 実際の表示サイズ
+    minimum: "128x128px", // 絶対最小解像度
+    recommended: "256x256px", // 推奨解像度
+    optimal: "512x512px", // 将来対応最適解像度
+    displayTarget: "32x32px", // 実際の表示サイズ
   },
 
   // ファイル形式
   format: {
-    primary: "PNG",              // 主要形式
-    transparency: "Required",     // 透明度サポート必須
+    primary: "PNG", // 主要形式
+    transparency: "Required", // 透明度サポート必須
     colorDepth: "24bit + Alpha", // フルカラー + 透明度チャンネル
-    compression: "Lossless"      // 品質優先の圧縮
+    compression: "Lossless", // 品質優先の圧縮
   },
 
   // 品質基準
   quality: {
-    antiAliasing: "Required",    // アンチエイリアス必須
-    sharpness: "High",           // 高鮮度
-    edgeClarity: "Clean",        // クリーンなエッジ
-    maxFileSize: "50KB"          // ファイルサイズ上限
-  }
+    antiAliasing: "Required", // アンチエイリアス必須
+    sharpness: "High", // 高鮮度
+    edgeClarity: "Clean", // クリーンなエッジ
+    maxFileSize: "50KB", // ファイルサイズ上限
+  },
 } as const;
 ```
 
@@ -113,13 +114,9 @@ export const FILE_MANAGEMENT_STANDARDS = {
   // 命名規則
   naming: {
     pattern: "[cuisine-type]-icon.png",
-    examples: [
-      "sushi-icon.png",
-      "ramen-icon.png",
-      "japanese-cuisine-icon.png"
-    ],
+    examples: ["sushi-icon.png", "ramen-icon.png", "japanese-cuisine-icon.png"],
     encoding: "UTF-8",
-    caseStyle: "kebab-case"
+    caseStyle: "kebab-case",
   },
 
   // ディレクトリ構造
@@ -127,7 +124,7 @@ export const FILE_MANAGEMENT_STANDARDS = {
     primary: "src/assets/png/cuisine/",
     backup: "src/assets/png/cuisine/backup/",
     sources: "design-sources/",
-    testing: "src/assets/png/cuisine/test/"
+    testing: "src/assets/png/cuisine/test/",
   },
 
   // バージョン管理
@@ -135,8 +132,8 @@ export const FILE_MANAGEMENT_STANDARDS = {
     scheme: "semantic",
     format: "[name]-v[major].[minor].png",
     example: "sushi-icon-v1.2.png",
-    changelog: "ICON_CHANGELOG.md"
-  }
+    changelog: "ICON_CHANGELOG.md",
+  },
 } as const;
 ```
 
@@ -150,33 +147,33 @@ export const FILE_MANAGEMENT_STANDARDS = {
 export const DESIGN_CONSISTENCY_RULES = {
   // デザインスタイル
   style: {
-    approach: "Flat Design",           // フラットデザイン
-    complexity: "Medium Detail",       // 適度なディテール
-    iconType: "Symbolic",             // 象徴的表現
+    approach: "Flat Design", // フラットデザイン
+    complexity: "Medium Detail", // 適度なディテール
+    iconType: "Symbolic", // 象徴的表現
     avoid: [
-      "Photorealistic",              // 写実的表現を避ける
-      "Overly Complex",              // 過度に複雑
-      "Too Abstract",                // 抽象的すぎる
-      "Brand Specific"               // 特定ブランド識別
-    ]
+      "Photorealistic", // 写実的表現を避ける
+      "Overly Complex", // 過度に複雑
+      "Too Abstract", // 抽象的すぎる
+      "Brand Specific", // 特定ブランド識別
+    ],
   },
 
   // サイズ・比率
   sizing: {
-    iconArea: "70-80%",              // キャンバス面積に対するアイコン占有率
-    padding: "10-15%",               // 周囲マージン
-    strokeWidth: "2-4px",            // ストローク幅（該当時）
-    minFeatureSize: "8px",           // 最小要素サイズ
-    aspectRatio: "1:1"               // 正方形比率
+    iconArea: "70-80%", // キャンバス面積に対するアイコン占有率
+    padding: "10-15%", // 周囲マージン
+    strokeWidth: "2-4px", // ストローク幅（該当時）
+    minFeatureSize: "8px", // 最小要素サイズ
+    aspectRatio: "1:1", // 正方形比率
   },
 
   // 構成原則
   composition: {
-    alignment: "Center",             // 中央配置
-    balance: "Symmetric",            // 対称バランス推奨
-    focus: "Single Element",         // 単一主要要素
-    clarity: "32px Readable"         // 32px表示での可読性
-  }
+    alignment: "Center", // 中央配置
+    balance: "Symmetric", // 対称バランス推奨
+    focus: "Single Element", // 単一主要要素
+    clarity: "32px Readable", // 32px表示での可読性
+  },
 } as const;
 ```
 
@@ -186,10 +183,10 @@ export const DESIGN_CONSISTENCY_RULES = {
 export const COLOR_CONTRAST_STANDARDS = {
   // WCAG準拠基準
   accessibility: {
-    wcagLevel: "AA",                 // WCAG 2.1 AA準拠
-    minimumRatio: "4.5:1",          // 最小コントラスト比
-    preferredRatio: "7:1",          // 推奨コントラスト比
-    testingRequired: true           // 全背景色でのテスト必須
+    wcagLevel: "AA", // WCAG 2.1 AA準拠
+    minimumRatio: "4.5:1", // 最小コントラスト比
+    preferredRatio: "7:1", // 推奨コントラスト比
+    testingRequired: true, // 全背景色でのテスト必須
   },
 
   // 背景色対応
@@ -212,10 +209,10 @@ export const COLOR_CONTRAST_STANDARDS = {
       "#6366f1", // ステーキ・洋食
       "#8b5cf6", // 弁当・テイクアウト
       "#06b6d4", // レストラン
-      "#6b7280"  // その他
+      "#6b7280", // その他
     ],
     mandatoryTesting: "All 18 colors",
-    fallbackStrategy: "White/Black outline"
+    fallbackStrategy: "White/Black outline",
   },
 
   // 色選択指針
@@ -223,8 +220,8 @@ export const COLOR_CONTRAST_STANDARDS = {
     preferredColors: ["#ffffff", "#000000", "#2d3748"],
     avoidSimilar: "Test against background hue",
     contrastEnhancement: "Drop shadow or outline",
-    colorBlindFriendly: "Required"
-  }
+    colorBlindFriendly: "Required",
+  },
 } as const;
 ```
 
@@ -236,61 +233,61 @@ export const COLOR_CONTRAST_STANDARDS = {
 
 ```typescript
 export const CUISINE_SPECIFIC_GUIDELINES = {
-  "日本料理": {
+  日本料理: {
     symbolOptions: [
       { icon: "箸", priority: "high", universality: "high" },
       { icon: "お椀", priority: "medium", universality: "medium" },
       { icon: "和食器", priority: "medium", universality: "low" },
-      { icon: "桜", priority: "low", universality: "medium" }
+      { icon: "桜", priority: "low", universality: "medium" },
     ],
     avoid: ["寿司（専用ジャンルと重複）", "複雑な漢字", "地域限定シンボル"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#ef4444", "#dc2626"],
-      testBackground: "#ef4444"
+      testBackground: "#ef4444",
     },
     accessibility: {
       altText: "日本料理アイコン",
-      description: "箸または和食器を象徴するアイコン"
-    }
+      description: "箸または和食器を象徴するアイコン",
+    },
   },
 
-  "寿司": {
+  寿司: {
     symbolOptions: [
       { icon: "握り寿司", priority: "high", universality: "high" },
       { icon: "巻き寿司", priority: "high", universality: "high" },
       { icon: "寿司下駄", priority: "medium", universality: "medium" },
-      { icon: "醤油皿", priority: "low", universality: "low" }
+      { icon: "醤油皿", priority: "low", universality: "low" },
     ],
     avoid: ["生魚単体", "複雑な盛り付け", "特定店舗の特徴"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#2d5016"],
       avoid: ["#f97316", "#ff8c00"],
-      testBackground: "#f97316"
+      testBackground: "#f97316",
     },
     accessibility: {
       altText: "寿司アイコン",
-      description: "寿司を表現するアイコン"
-    }
+      description: "寿司を表現するアイコン",
+    },
   },
 
-  "海鮮": {
+  海鮮: {
     symbolOptions: [
       { icon: "魚", priority: "high", universality: "high" },
       { icon: "エビ", priority: "medium", universality: "high" },
       { icon: "貝", priority: "medium", universality: "medium" },
-      { icon: "漁網", priority: "low", universality: "low" }
+      { icon: "漁網", priority: "low", universality: "low" },
     ],
     avoid: ["調理済み料理", "特定魚種", "複雑な海洋生物"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#1a365d"],
       avoid: ["#06b6d4", "#00bfff"],
-      testBackground: "#06b6d4"
+      testBackground: "#06b6d4",
     },
     accessibility: {
       altText: "海鮮アイコン",
-      description: "魚介類を表現するアイコン"
-    }
+      description: "魚介類を表現するアイコン",
+    },
   },
 
   "焼肉・焼鳥": {
@@ -298,37 +295,37 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "串", priority: "high", universality: "high" },
       { icon: "グリル", priority: "medium", universality: "medium" },
       { icon: "炭火", priority: "medium", universality: "low" },
-      { icon: "肉", priority: "low", universality: "medium" }
+      { icon: "肉", priority: "low", universality: "medium" },
     ],
     avoid: ["生肉", "血液表現", "特定部位"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#dc2626", "#b91c1c"],
-      testBackground: "#dc2626"
+      testBackground: "#dc2626",
     },
     accessibility: {
       altText: "焼肉・焼鳥アイコン",
-      description: "串焼き料理を表現するアイコン"
-    }
+      description: "串焼き料理を表現するアイコン",
+    },
   },
 
-  "ラーメン": {
+  ラーメン: {
     symbolOptions: [
       { icon: "ラーメン鉢", priority: "high", universality: "high" },
       { icon: "箸と鉢", priority: "high", universality: "medium" },
       { icon: "湯気", priority: "medium", universality: "low" },
-      { icon: "麺", priority: "low", universality: "low" }
+      { icon: "麺", priority: "low", universality: "low" },
     ],
     avoid: ["特定スープ色", "複雑な具材", "ブランド特徴"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#eab308", "#facc15"],
-      testBackground: "#eab308"
+      testBackground: "#eab308",
     },
     accessibility: {
       altText: "ラーメンアイコン",
-      description: "ラーメン鉢を表現するアイコン"
-    }
+      description: "ラーメン鉢を表現するアイコン",
+    },
   },
 
   "そば・うどん": {
@@ -336,75 +333,75 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "ざる", priority: "high", universality: "medium" },
       { icon: "箸", priority: "medium", universality: "high" },
       { icon: "そば・うどん", priority: "medium", universality: "medium" },
-      { icon: "天ぷら", priority: "low", universality: "low" }
+      { icon: "天ぷら", priority: "low", universality: "low" },
     ],
     avoid: ["ラーメンとの混同", "複雑な器", "地域限定スタイル"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#84cc16", "#65a30d"],
-      testBackground: "#84cc16"
+      testBackground: "#84cc16",
     },
     accessibility: {
       altText: "そば・うどんアイコン",
-      description: "そばまたはうどんを表現するアイコン"
-    }
+      description: "そばまたはうどんを表現するアイコン",
+    },
   },
 
-  "中華": {
+  中華: {
     symbolOptions: [
       { icon: "中華鍋", priority: "high", universality: "high" },
       { icon: "箸", priority: "medium", universality: "high" },
       { icon: "点心", priority: "medium", universality: "medium" },
-      { icon: "中華文様", priority: "low", universality: "low" }
+      { icon: "中華文様", priority: "low", universality: "low" },
     ],
     avoid: ["複雑な漢字", "地域限定料理", "政治的シンボル"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#dc2626"],
       avoid: ["#f59e0b", "#f97316"],
-      testBackground: "#f59e0b"
+      testBackground: "#f59e0b",
     },
     accessibility: {
       altText: "中華料理アイコン",
-      description: "中華料理を表現するアイコン"
-    }
+      description: "中華料理を表現するアイコン",
+    },
   },
 
-  "イタリアン": {
+  イタリアン: {
     symbolOptions: [
       { icon: "パスタ", priority: "high", universality: "high" },
       { icon: "ピザ", priority: "high", universality: "high" },
       { icon: "フォーク", priority: "medium", universality: "medium" },
-      { icon: "チーズ", priority: "low", universality: "low" }
+      { icon: "チーズ", priority: "low", universality: "low" },
     ],
     avoid: ["イタリア国旗", "複雑な料理", "ブランド商品"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#dc2626"],
       avoid: ["#10b981", "#059669"],
-      testBackground: "#10b981"
+      testBackground: "#10b981",
     },
     accessibility: {
       altText: "イタリアンアイコン",
-      description: "イタリア料理を表現するアイコン"
-    }
+      description: "イタリア料理を表現するアイコン",
+    },
   },
 
-  "フレンチ": {
+  フレンチ: {
     symbolOptions: [
       { icon: "ワイングラス", priority: "high", universality: "high" },
       { icon: "フォーク&ナイフ", priority: "high", universality: "high" },
       { icon: "シェフハット", priority: "medium", universality: "medium" },
-      { icon: "フランスパン", priority: "low", universality: "medium" }
+      { icon: "フランスパン", priority: "low", universality: "medium" },
     ],
     avoid: ["フランス国旗", "複雑な装飾", "高級ブランド"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#fbbf24"],
       avoid: ["#8b5cf6", "#7c3aed"],
-      testBackground: "#8b5cf6"
+      testBackground: "#8b5cf6",
     },
     accessibility: {
       altText: "フレンチアイコン",
-      description: "フランス料理を表現するアイコン"
-    }
+      description: "フランス料理を表現するアイコン",
+    },
   },
 
   "カフェ・喫茶店": {
@@ -412,18 +409,18 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "コーヒーカップ", priority: "high", universality: "high" },
       { icon: "コーヒー豆", priority: "medium", universality: "medium" },
       { icon: "ソーサー", priority: "medium", universality: "low" },
-      { icon: "湯気", priority: "low", universality: "low" }
+      { icon: "湯気", priority: "low", universality: "low" },
     ],
     avoid: ["ブランドロゴ", "複雑なラテアート", "特定商品"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#14b8a6", "#0891b2"],
-      testBackground: "#14b8a6"
+      testBackground: "#14b8a6",
     },
     accessibility: {
       altText: "カフェ・喫茶店アイコン",
-      description: "コーヒーを表現するアイコン"
-    }
+      description: "コーヒーを表現するアイコン",
+    },
   },
 
   "バー・居酒屋": {
@@ -431,37 +428,37 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "グラス", priority: "high", universality: "high" },
       { icon: "ビールジョッキ", priority: "high", universality: "high" },
       { icon: "徳利", priority: "medium", universality: "low" },
-      { icon: "乾杯", priority: "low", universality: "medium" }
+      { icon: "乾杯", priority: "low", universality: "medium" },
     ],
     avoid: ["アルコールブランド", "酔っ払い表現", "年齢制限表示"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#fbbf24"],
       avoid: ["#f59e0b", "#f97316"],
-      testBackground: "#f59e0b"
+      testBackground: "#f59e0b",
     },
     accessibility: {
       altText: "バー・居酒屋アイコン",
-      description: "飲み物を表現するアイコン"
-    }
+      description: "飲み物を表現するアイコン",
+    },
   },
 
-  "ファストフード": {
+  ファストフード: {
     symbolOptions: [
       { icon: "ハンバーガー", priority: "high", universality: "high" },
       { icon: "フライドポテト", priority: "high", universality: "high" },
       { icon: "カップ", priority: "medium", universality: "medium" },
-      { icon: "テイクアウト袋", priority: "low", universality: "low" }
+      { icon: "テイクアウト袋", priority: "low", universality: "low" },
     ],
     avoid: ["特定チェーン店", "ブランドカラー", "キャラクター"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#ef4444", "#dc2626"],
-      testBackground: "#ef4444"
+      testBackground: "#ef4444",
     },
     accessibility: {
       altText: "ファストフードアイコン",
-      description: "ファストフードを表現するアイコン"
-    }
+      description: "ファストフードを表現するアイコン",
+    },
   },
 
   "デザート・スイーツ": {
@@ -469,18 +466,18 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "ケーキ", priority: "high", universality: "high" },
       { icon: "アイスクリーム", priority: "high", universality: "high" },
       { icon: "クレープ", priority: "medium", universality: "medium" },
-      { icon: "ドーナツ", priority: "medium", universality: "high" }
+      { icon: "ドーナツ", priority: "medium", universality: "high" },
     ],
     avoid: ["特定ブランド", "複雑な装飾", "季節限定商品"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#ec4899", "#db2777"],
-      testBackground: "#ec4899"
+      testBackground: "#ec4899",
     },
     accessibility: {
       altText: "デザート・スイーツアイコン",
-      description: "デザートを表現するアイコン"
-    }
+      description: "デザートを表現するアイコン",
+    },
   },
 
   "カレー・エスニック": {
@@ -488,18 +485,18 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "カレー皿", priority: "high", universality: "medium" },
       { icon: "スプーン", priority: "medium", universality: "high" },
       { icon: "スパイス", priority: "medium", universality: "low" },
-      { icon: "ナン", priority: "low", universality: "low" }
+      { icon: "ナン", priority: "low", universality: "low" },
     ],
     avoid: ["特定国旗", "宗教的シンボル", "複雑な香辛料"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#f97316", "#ea580c"],
-      testBackground: "#f97316"
+      testBackground: "#f97316",
     },
     accessibility: {
       altText: "カレー・エスニックアイコン",
-      description: "カレーまたはエスニック料理を表現するアイコン"
-    }
+      description: "カレーまたはエスニック料理を表現するアイコン",
+    },
   },
 
   "ステーキ・洋食": {
@@ -507,18 +504,18 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "ステーキ", priority: "high", universality: "high" },
       { icon: "フォーク&ナイフ", priority: "high", universality: "high" },
       { icon: "皿", priority: "medium", universality: "low" },
-      { icon: "グリル跡", priority: "low", universality: "low" }
+      { icon: "グリル跡", priority: "low", universality: "low" },
     ],
     avoid: ["生肉表現", "血液", "高級ブランド"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#6366f1", "#4f46e5"],
-      testBackground: "#6366f1"
+      testBackground: "#6366f1",
     },
     accessibility: {
       altText: "ステーキ・洋食アイコン",
-      description: "ステーキまたは洋食を表現するアイコン"
-    }
+      description: "ステーキまたは洋食を表現するアイコン",
+    },
   },
 
   "弁当・テイクアウト": {
@@ -526,57 +523,57 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
       { icon: "弁当箱", priority: "high", universality: "medium" },
       { icon: "テイクアウト袋", priority: "high", universality: "high" },
       { icon: "容器", priority: "medium", universality: "medium" },
-      { icon: "箸", priority: "low", universality: "high" }
+      { icon: "箸", priority: "low", universality: "high" },
     ],
     avoid: ["特定ブランド容器", "複雑な包装", "商標"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#8b4513"],
       avoid: ["#8b5cf6", "#7c3aed"],
-      testBackground: "#8b5cf6"
+      testBackground: "#8b5cf6",
     },
     accessibility: {
       altText: "弁当・テイクアウトアイコン",
-      description: "弁当またはテイクアウトを表現するアイコン"
-    }
+      description: "弁当またはテイクアウトを表現するアイコン",
+    },
   },
 
-  "レストラン": {
+  レストラン: {
     symbolOptions: [
       { icon: "フォーク&ナイフ", priority: "high", universality: "high" },
       { icon: "皿", priority: "medium", universality: "medium" },
       { icon: "テーブル", priority: "low", universality: "low" },
-      { icon: "ナプキン", priority: "low", universality: "low" }
+      { icon: "ナプキン", priority: "low", universality: "low" },
     ],
     avoid: ["特定料理ジャンル", "高級・カジュアル指定", "複雑な装飾"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#64748b"],
       avoid: ["#06b6d4", "#0891b2"],
-      testBackground: "#06b6d4"
+      testBackground: "#06b6d4",
     },
     accessibility: {
       altText: "レストランアイコン",
-      description: "一般的なレストランを表現するアイコン"
-    }
+      description: "一般的なレストランを表現するアイコン",
+    },
   },
 
-  "その他": {
+  その他: {
     symbolOptions: [
       { icon: "クエスチョン", priority: "high", universality: "high" },
       { icon: "星", priority: "medium", universality: "high" },
       { icon: "一般的な皿", priority: "medium", universality: "medium" },
-      { icon: "ドット", priority: "low", universality: "high" }
+      { icon: "ドット", priority: "low", universality: "high" },
     ],
     avoid: ["混乱を招く象徴", "他ジャンルとの重複", "抽象的すぎる形"],
     colorRecommendations: {
       safe: ["#ffffff", "#000000", "#374151"],
       avoid: ["#6b7280", "#9ca3af"],
-      testBackground: "#6b7280"
+      testBackground: "#6b7280",
     },
     accessibility: {
       altText: "その他アイコン",
-      description: "分類されていない飲食店を表現するアイコン"
-    }
-  }
+      description: "分類されていない飲食店を表現するアイコン",
+    },
+  },
 } as const;
 ```
 
@@ -721,11 +718,13 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 ```markdown
 **症状**: 32px表示時にアイコンの詳細が見えない
 **原因**:
+
 - 元画像の解像度不足
 - 不適切なリサイズアルゴリズム
 - アンチエイリアスの不適切な設定
 
 **解決策**:
+
 1. 高解像度素材（256px以上）の使用
 2. 適切なリサイズツールの選択
 3. エッジ保持アルゴリズムの適用
@@ -737,11 +736,13 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 ```markdown
 **症状**: 特定の背景色でアイコンが識別困難
 **原因**:
+
 - アイコン色と背景色の類似
 - コントラスト比不足
 - 透明度の不適切な処理
 
 **解決策**:
+
 1. コントラストチェッカーでの事前確認
 2. 白い縁取り（ストローク）の追加
 3. ドロップシャドウエフェクトの適用
@@ -753,11 +754,13 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 ```markdown
 **症状**: 50KB制限を超える、読み込みが遅い
 **原因**:
+
 - 過度に高い解像度
 - 無駄な透明領域
 - 非効率な圧縮
 
 **解決策**:
+
 1. 適切な解像度への調整（256px推奨）
 2. キャンバスサイズの最適化
 3. PNG圧縮ツールの使用
@@ -769,11 +772,13 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 ```markdown
 **症状**: スマートフォンでの視認性・操作性不足
 **原因**:
+
 - レスポンシブ設計の不足
 - タッチターゲットサイズ不足
 - 画面密度対応不足
 
 **解決策**:
+
 1. ビューポートベースのサイズ調整
 2. 最小タッチターゲット44px確保
 3. 高DPI対応の実装
@@ -785,11 +790,13 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 ```markdown
 **症状**: ユーザーが料理ジャンルを推測できない
 **原因**:
+
 - 象徴性の不足
 - 類似デザインの使用
 - 文化的理解の差
 
 **解決策**:
+
 1. より明確な象徴の選択
 2. ユーザーテストによる検証
 3. 代替案の検討
@@ -806,12 +813,14 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 
 ```markdown
 **評価項目**:
+
 - ユーザーフィードバック分析
 - アクセシビリティ監査結果
 - パフォーマンス測定値
 - ブラウザ互換性確認
 
 **アクション**:
+
 - 問題アイコンの特定
 - 改善優先度の設定
 - 次月改善計画の策定
@@ -821,12 +830,14 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 
 ```markdown
 **実施内容**:
+
 - 問題アイコンの置換実装
 - 新ジャンル追加への対応
 - デザインガイドラインの更新
 - 競合他社調査・ベンチマーク
 
 **アウトプット**:
+
 - 更新されたアイコンセット
 - 改訂版ガイドライン
 - パフォーマンス改善報告
@@ -836,12 +847,14 @@ export const CUISINE_SPECIFIC_GUIDELINES = {
 
 ```markdown
 **検討事項**:
+
 - 全アイコンセットの包括的見直し
 - デザインシステムの根本的更新
 - 技術基盤の見直し（PNG→SVG移行等）
 - ユーザビリティの大幅向上
 
 **目標**:
+
 - 次世代アイコンシステムの構築
 - 大幅なユーザーエクスペリエンス向上
 - 技術的負債の解消
@@ -857,22 +870,22 @@ export const QUALITY_METRICS = {
     loadTime: "< 200ms per icon",
     fileSize: "< 50KB per icon",
     resolution: "> 256px source",
-    compression: "< 50% size reduction"
+    compression: "< 50% size reduction",
   },
 
   accessibility: {
     contrastRatio: "> 4.5:1 (all backgrounds)",
     wcagCompliance: "AA level",
     screenReaderCompat: "100%",
-    colorBlindFriendly: "100%"
+    colorBlindFriendly: "100%",
   },
 
   usability: {
     recognitionRate: "> 90%",
     satisfactionScore: "> 4.0/5.0",
     errorRate: "< 10%",
-    completionTime: "< 3 seconds"
-  }
+    completionTime: "< 3 seconds",
+  },
 } as const;
 ```
 
@@ -880,12 +893,14 @@ export const QUALITY_METRICS = {
 
 ```markdown
 **ユーザーフィードバック収集**:
+
 - 月次アンケート調査
 - ユーザビリティテストセッション
 - A/Bテストによる比較評価
 - フォーカスグループインタビュー
 
 **内部評価プロセス**:
+
 - デザインレビューセッション
 - 技術品質監査
 - アクセシビリティ専門家レビュー
@@ -939,9 +954,9 @@ graph TD
 
 ## 改訂履歴
 
-| バージョン | 日付 | 変更内容 | 担当者 |
-|-----------|------|----------|--------|
-| 1.0 | 2025-08-27 | 初版作成（Phase 1実装結果を基に策定） | 開発チーム |
+| バージョン | 日付       | 変更内容                              | 担当者     |
+| ---------- | ---------- | ------------------------------------- | ---------- |
+| 1.0        | 2025-08-27 | 初版作成（Phase 1実装結果を基に策定） | 開発チーム |
 
 ---
 

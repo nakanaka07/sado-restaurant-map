@@ -43,7 +43,7 @@ export const DistrictFilter = memo<DistrictFilterProps>(
 
     const districtCheckboxes = useMemo(
       () =>
-        DISTRICTS.map((district) => (
+        DISTRICTS.map(district => (
           <label
             key={district}
             style={{
@@ -91,10 +91,10 @@ export const DistrictFilter = memo<DistrictFilterProps>(
             cursor: "pointer",
             transition: "all 0.2s ease",
           }}
-          onMouseEnter={(e) => {
+          onMouseEnter={e => {
             e.currentTarget.style.backgroundColor = "#f3f4f6";
           }}
-          onMouseLeave={(e) => {
+          onMouseLeave={e => {
             e.currentTarget.style.backgroundColor = "#f9fafb";
           }}
           aria-expanded={isExpanded}
