@@ -1,6 +1,5 @@
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
-import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig, type PluginOption } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -204,12 +203,32 @@ export default defineConfig(({ mode }) => {
       ...(shouldEnablePWA ? [VitePWA(createPWAConfig(isProduction))] : []),
       ...(process.env.ANALYZE === "true"
         ? [
-            visualizer({
-              filename: "dist/stats.html",
-              open: true,
-              gzipSize: true,
-              brotliSize: true,
-            }) as unknown as PluginOption,
+            // Dynamically require visualizer only when ANALYZE is enabled so
+            // the dev server doesn't crash if the package is not installed.
+            ((): PluginOption => {
+              try {
+                // use require to support both CJS and ESM resolution in Node
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const viz = require("rollup-plugin-visualizer").visualizer;
+                return viz({
+                  filename: "dist/stats.html",
+                  open: true,
+                  gzipSize: true,
+                  brotliSize: true,
+                }) as unknown as PluginOption;
+              } catch (e: unknown) {
+                // If the package isn't installed, warn and continue without it.
+                // This prevents the dev server from failing on missing optional deps.
+                // Include the caught error in the log so the exception is handled and
+                // linters (e.g. Sonar S2486) won't complain about an unused variable.
+                // eslint-disable-next-line no-console
+                console.warn(
+                  "rollup-plugin-visualizer is not installed. Set ANALYZE=true and install it if you want bundle analysis. Continuing without visualizer.",
+                  e
+                );
+                return {} as PluginOption;
+              }
+            })(),
           ]
         : []),
     ] as PluginOption[],
