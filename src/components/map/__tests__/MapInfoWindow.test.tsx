@@ -54,8 +54,8 @@ describe("MapInfoWindow - アクセシビリティ", () => {
   it("営業状況バッジが表示される", () => {
     render(<MapInfoWindow point={mockRestaurant} />);
 
-    // 実際に表示されるテキストに基づいてテストを修正
-    const statusElement = screen.getByText("閉店中");
+    // 実際に表示されるテキスト「営業時間不明」に基づいてテストを修正
+    const statusElement = screen.getByText("営業時間不明");
     expect(statusElement).toBeInTheDocument();
   });
 

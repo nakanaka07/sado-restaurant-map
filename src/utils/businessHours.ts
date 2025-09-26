@@ -28,25 +28,36 @@ export function calculateBusinessStatus(
   // 今日の営業時間を検索（複数セッション対応）
   const todayHoursList = findAllTodayHours(openingHours, currentDay);
 
-  if (todayHoursList.length === 0) {
+  // 深夜営業のために前日の営業時間も検索
+  const yesterdayDate = new Date(currentTime);
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayDay = getCurrentDay(yesterdayDate);
+  const yesterdayHoursList = findAllTodayHours(openingHours, yesterdayDay);
+
+  const allRelevantHours = [...todayHoursList, ...yesterdayHoursList];
+
+  if (allRelevantHours.length === 0) {
     return BusinessStatus.UNKNOWN;
   }
 
-  // 定休日チェック
-  if (todayHoursList.every(hours => hours.isHoliday)) {
-    return BusinessStatus.CLOSED;
-  }
-
-  // 各営業セッションをチェック
-  for (const todayHours of todayHoursList) {
-    if (todayHours.isHoliday) {
+  // 各営業セッションをチェック（今日と昨日の両方）
+  for (const hours of allRelevantHours) {
+    if (hours.isHoliday) {
       continue;
     }
 
-    const businessStatus = checkSingleSession(todayHours, currentMinutes);
+    const businessStatus = checkSingleSession(hours, currentMinutes);
     if (businessStatus === BusinessStatus.OPEN) {
       return BusinessStatus.OPEN;
     }
+  }
+
+  // 定休日チェック（今日の営業時間のみ）
+  if (
+    todayHoursList.length > 0 &&
+    todayHoursList.every(hours => hours.isHoliday)
+  ) {
+    return BusinessStatus.CLOSED;
   }
 
   return BusinessStatus.CLOSED;
@@ -79,8 +90,10 @@ function checkSingleSession(
     const effectiveCloseTime = getEffectiveCloseTime(closeTime, range.close);
 
     // 深夜営業（日をまたぐ）の判定
-    if (effectiveCloseTime < openTime) {
-      if (currentMinutes >= openTime || currentMinutes <= effectiveCloseTime) {
+    if (closeTime < openTime) {
+      // 日をまたぐ営業（例: 18:00-02:00）
+      // 今日の開店時間以降、または翌日の閉店時間以前
+      if (currentMinutes >= openTime || currentMinutes <= closeTime) {
         return BusinessStatus.OPEN;
       }
     } else if (
@@ -106,7 +119,7 @@ function parseMultipleTimeRanges(
     return parseComplexTimeRanges(openStr);
   }
 
-  // 通常の営業時間
+  // 通常の営業時間（L.O.表記も含む）
   return [{ open: openStr, close: closeStr }];
 }
 
@@ -183,17 +196,31 @@ export function formatBusinessHoursForDisplay(
     return "営業時間不明";
   }
 
-  const day = currentDay ?? new Date().getDay();
-  const dayName = getCurrentDay(
-    new Date(Date.now() + day * 24 * 60 * 60 * 1000)
-  );
+  let dayName: string;
+  if (currentDay !== undefined) {
+    // テスト等で特定の曜日が指定された場合
+    // getDay() は 0=日曜日、1=月曜日...なので、直接マッピング
+    const days = [
+      "日曜日",
+      "月曜日",
+      "火曜日",
+      "水曜日",
+      "木曜日",
+      "金曜日",
+      "土曜日",
+    ];
+    dayName = days[currentDay] || getCurrentDay(new Date());
+  } else {
+    // 通常は今日の曜日を使用
+    dayName = getCurrentDay(new Date());
+  }
 
   // 今日の営業時間を優先表示（複数セッション対応）
   const todayHoursList = findAllTodayHours(openingHours, dayName);
 
   if (todayHoursList.length > 0) {
     const todayFormatted = formatTodayHours(todayHoursList);
-    if (todayFormatted) {
+    if (todayFormatted !== null) {
       return todayFormatted;
     }
   }
@@ -226,13 +253,10 @@ function extractTimeRanges(operatingHours: OpeningHours[]): string[] {
   const timeRanges: string[] = [];
 
   for (const hours of operatingHours) {
-    const ranges = parseMultipleTimeRanges(hours.open, hours.close);
-    for (const range of ranges) {
-      if (range.open && range.close) {
-        const formatted = formatTimeRange(range.open, range.close);
-        if (formatted && !timeRanges.includes(formatted)) {
-          timeRanges.push(formatted);
-        }
+    const extractedRanges = extractSingleHourRanges(hours);
+    for (const formatted of extractedRanges) {
+      if (formatted && !timeRanges.includes(formatted)) {
+        timeRanges.push(formatted);
       }
     }
   }
@@ -241,9 +265,60 @@ function extractTimeRanges(operatingHours: OpeningHours[]): string[] {
 }
 
 /**
+ * 単一の営業時間エントリから時間範囲を抽出
+ */
+function extractSingleHourRanges(hours: OpeningHours): string[] {
+  // 分割営業時間のテストケース対応: open に "11:00-14:00,17:00-21:00" が入る場合
+  if (hours.open.includes("-") && hours.open.includes(",")) {
+    return extractComplexTimeRanges(hours.open);
+  }
+
+  // 通常の営業時間
+  return extractNormalTimeRanges(hours.open, hours.close);
+}
+
+/**
+ * 複雑な分割営業時間の範囲を抽出
+ */
+function extractComplexTimeRanges(openStr: string): string[] {
+  const results: string[] = [];
+  const ranges = parseComplexTimeRanges(openStr);
+
+  for (const range of ranges) {
+    if (range.open && range.close) {
+      const formatted = formatTimeRange(range.open, range.close);
+      if (formatted) {
+        results.push(formatted);
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
+ * 通常の営業時間の範囲を抽出
+ */
+function extractNormalTimeRanges(openStr: string, closeStr: string): string[] {
+  const results: string[] = [];
+  const ranges = parseMultipleTimeRanges(openStr, closeStr);
+
+  for (const range of ranges) {
+    if (range.open && range.close) {
+      const formatted = formatTimeRange(range.open, range.close);
+      if (formatted) {
+        results.push(formatted);
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
  * 今日の営業時間をフォーマット
  */
-function formatTodayHours(todayHoursList: OpeningHours[]): string {
+function formatTodayHours(todayHoursList: OpeningHours[]): string | null {
   const { holidayHours, operatingHours } = categorizeHours(todayHoursList);
 
   if (holidayHours.length > 0 && operatingHours.length === 0) {
@@ -251,13 +326,13 @@ function formatTodayHours(todayHoursList: OpeningHours[]): string {
   }
 
   if (operatingHours.length === 0) {
-    return "本日営業時間不明";
+    return null; // 今日の営業時間が不明な場合はnullを返して、週間表示にフォールバック
   }
 
   const timeRanges = extractTimeRanges(operatingHours);
 
   if (timeRanges.length === 0) {
-    return "本日営業時間不明";
+    return null; // 時間範囲が取得できない場合はnullを返して、週間表示にフォールバック
   }
 
   const prefix = "本日 ";
@@ -268,17 +343,27 @@ function formatTodayHours(todayHoursList: OpeningHours[]): string {
  * 週間営業時間をフォーマット
  */
 function formatWeeklyHours(validHours: readonly OpeningHours[]): string {
-  return validHours
-    .map(h => {
-      const dayShort = h.day.replace(/曜日$/, "");
-      const ranges = parseMultipleTimeRanges(h.open, h.close);
-      const timeStr = ranges
-        .map(r => formatTimeRange(r.open, r.close))
-        .filter(Boolean)
-        .join(",");
-      return `${dayShort}:${timeStr}`;
-    })
-    .join(" ");
+  return validHours.map(formatSingleDayHours).join(" ");
+}
+
+/**
+ * 単一日の営業時間をフォーマット
+ */
+function formatSingleDayHours(h: OpeningHours): string {
+  const dayShort = h.day.replace(/曜日$/, "");
+
+  // L.O.表記などの特別表記を保持しながらフォーマット
+  if (h.close.includes("L.O") || h.close.includes("ラストオーダー")) {
+    return `${dayShort}:${h.open}-${h.close}`;
+  }
+
+  // 通常の営業時間
+  const ranges = parseMultipleTimeRanges(h.open, h.close);
+  const timeStr = ranges
+    .map(r => formatTimeRange(r.open, r.close))
+    .filter(Boolean)
+    .join(",");
+  return `${dayShort}:${timeStr}`;
 }
 
 /**
@@ -302,7 +387,8 @@ function formatTimeRange(openStr: string, closeStr: string): string {
 
   // ラストオーダー表記の保持
   if (closeStr.includes("L.O") || closeStr.includes("ラストオーダー")) {
-    return `${normalizedOpen}-${normalizedClose}(L.O)`;
+    // 元の表記を保持（L.O.が含まれた文字列）
+    return `${normalizedOpen}-${closeStr}`;
   }
 
   return `${normalizedOpen}-${normalizedClose}`;
@@ -450,13 +536,23 @@ function parseTimeToMinutes(timeStr: string): number | null {
  */
 function normalizeTimeString(timeStr: string): string | null {
   const cleaned = normalizeWhitespace(timeStr);
+  const halfWidth = convertFullWidthToHalfWidth(cleaned);
+  return parseTimePatterns(halfWidth);
+}
 
-  // 全角数字を半角に変換
-  const halfWidth = cleaned.replace(/[０-９]/g, char =>
+/**
+ * 全角数字を半角に変換
+ */
+function convertFullWidthToHalfWidth(str: string): string {
+  return str.replace(/[０-９]/g, char =>
     String.fromCharCode(char.charCodeAt(0) - 0xfee0)
   );
+}
 
-  // 各種時間表記の正規化
+/**
+ * 時間パターンを解析
+ */
+function parseTimePatterns(halfWidth: string): string | null {
   const patterns = [
     /^(\d{1,2}):(\d{2})$/, // 11:30
     /^(\d{1,2})時(\d{2})分?$/, // 11時30分, 11時30
@@ -469,19 +565,27 @@ function normalizeTimeString(timeStr: string): string | null {
   for (const pattern of patterns) {
     const match = pattern.exec(halfWidth);
     if (match) {
-      // 4桁数字形式の特別処理
-      if (pattern.source === "^(\\d{3,4})$") {
-        const timeStr = match[0].padStart(4, "0");
-        return `${timeStr.slice(0, 2)}:${timeStr.slice(2, 4)}`;
-      }
-      // 通常の2グループキャプチャ
-      if (match[1] && match[2]) {
-        return `${match[1].padStart(2, "0")}:${match[2].padStart(2, "0")}`;
-      }
+      return formatMatchedTime(pattern, match);
     }
   }
 
   return null;
+}
+
+/**
+ * マッチした時間パターンをフォーマット
+ */
+function formatMatchedTime(pattern: RegExp, match: RegExpExecArray): string {
+  // 4桁数字形式の特別処理
+  if (pattern.source === "^(\\d{3,4})$") {
+    const timeStr = match[0].padStart(4, "0");
+    return `${timeStr.slice(0, 2)}:${timeStr.slice(2, 4)}`;
+  }
+  // 通常の2グループキャプチャ
+  if (match[1] && match[2]) {
+    return `${match[1].padStart(2, "0")}:${match[2].padStart(2, "0")}`;
+  }
+  return "";
 }
 
 /**

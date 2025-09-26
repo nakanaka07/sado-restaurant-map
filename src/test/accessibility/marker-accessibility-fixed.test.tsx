@@ -87,12 +87,18 @@ describe("Marker Accessibility Tests", () => {
         </div>
       );
 
-      const marker = screen.getByRole("button");
-      expect(marker).toHaveAttribute(
+      const buttons = screen.getAllByRole("button");
+      const markerWithAriaDescription = buttons.find(
+        button => button.getAttribute("aria-describedby") === "restaurant-info"
+      );
+      expect(markerWithAriaDescription).toHaveAttribute(
         "aria-label",
         "日本料理レストラン テストレストラン 営業中"
       );
-      expect(marker).toHaveAttribute("aria-describedby", "restaurant-info");
+      expect(markerWithAriaDescription).toHaveAttribute(
+        "aria-describedby",
+        "restaurant-info"
+      );
     });
   });
 

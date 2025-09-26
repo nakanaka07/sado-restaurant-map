@@ -165,7 +165,8 @@ describe("businessHours - 強化版", () => {
         },
       ];
 
-      const formatted = formatBusinessHoursForDisplay(openingHours);
+      // 月曜日（1）として評価
+      const formatted = formatBusinessHoursForDisplay(openingHours, 1);
       expect(formatted).toContain("本日");
       expect(formatted).toContain("11:00");
       expect(formatted).toContain("21:00");
@@ -176,7 +177,8 @@ describe("businessHours - 強化版", () => {
         { day: "月曜日", open: "17:00", close: "21:00(L.O)", isHoliday: false },
       ];
 
-      const formatted = formatBusinessHoursForDisplay(openingHours);
+      // 月曜日（1）として評価
+      const formatted = formatBusinessHoursForDisplay(openingHours, 1);
       expect(formatted).toContain("L.O");
     });
 
@@ -194,7 +196,8 @@ describe("businessHours - 強化版", () => {
         { day: "月曜日", open: "", close: "", isHoliday: true },
       ];
 
-      const formatted = formatBusinessHoursForDisplay(openingHours);
+      // 月曜日（1）として評価
+      const formatted = formatBusinessHoursForDisplay(openingHours, 1);
       expect(formatted).toBe("本日定休日");
     });
 
