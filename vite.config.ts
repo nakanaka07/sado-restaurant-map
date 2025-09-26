@@ -207,21 +207,26 @@ export default defineConfig(({ mode }) => {
             // the dev server doesn't crash if the package is not installed.
             ((): PluginOption => {
               try {
-                // use require to support both CJS and ESM resolution in Node
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const viz = require("rollup-plugin-visualizer").visualizer;
-                return viz({
+                // Dynamically require rollup-plugin-visualizer when ANALYZE is enabled
+                const { visualizer } = require("rollup-plugin-visualizer") as {
+                  visualizer: (options: {
+                    filename: string;
+                    open: boolean;
+                    gzipSize: boolean;
+                    brotliSize: boolean;
+                  }) => PluginOption;
+                };
+                return visualizer({
                   filename: "dist/stats.html",
                   open: true,
                   gzipSize: true,
                   brotliSize: true,
-                }) as unknown as PluginOption;
+                });
               } catch (e: unknown) {
                 // If the package isn't installed, warn and continue without it.
                 // This prevents the dev server from failing on missing optional deps.
                 // Include the caught error in the log so the exception is handled and
                 // linters (e.g. Sonar S2486) won't complain about an unused variable.
-                // eslint-disable-next-line no-console
                 console.warn(
                   "rollup-plugin-visualizer is not installed. Set ANALYZE=true and install it if you want bundle analysis. Continuing without visualizer.",
                   e
