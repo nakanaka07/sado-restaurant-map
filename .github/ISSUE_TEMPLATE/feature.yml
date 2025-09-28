@@ -1,0 +1,48 @@
+name: "✨ Feature Request"
+description: 新しい機能 / UX 向上の提案
+labels: ["feat"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 機能サマリ
+      placeholder: 例) マーカー遅延ロード実装
+    validations:
+      required: true
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景 / 課題
+      description: なぜ必要か, 現状の問題
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目的 (Why)
+      description: 期待するアウトカム / KPI など
+    validations:
+      required: true
+  - type: textarea
+    id: ac
+    attributes:
+      label: AC (受入条件)
+      description: 箇条書きで具体的に
+      placeholder: |
+        - ～～できる
+        - ～～が表示される
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      options: [P0, P1, P2, P3]
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: 制約 (任意)
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足 / 参考 (任意)

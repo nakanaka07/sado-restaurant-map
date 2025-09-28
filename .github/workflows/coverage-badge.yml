@@ -1,0 +1,64 @@
+name: Coverage Badge
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+jobs:
+  gen-badge:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate coverage
+        run: pnpm test:coverage
+
+      - name: Extract coverage
+        id: extract
+        run: |
+          pct=$(jq '.total.lines.pct' coverage/coverage-summary.json | xargs printf '%.0f')
+          echo "pct=$pct" >> $GITHUB_OUTPUT
+
+      - name: Generate badge svg
+        run: |
+          pct=${{ steps.extract.outputs.pct }}
+          color=blue
+          if [ "$pct" -ge 90 ]; then color=brightgreen; elif [ "$pct" -ge 75 ]; then color=green; elif [ "$pct" -ge 60 ]; then color=yellow; elif [ "$pct" -ge 45 ]; then color=orange; else color=red; fi
+          echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"150\" height=\"20\"><linearGradient id=\"b\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><mask id=\"a\"><rect width=\"150\" height=\"20\" rx=\"3\" fill=\"#fff\"/></mask><g mask=\"url(#a)\"><rect width=\"80\" height=\"20\" fill=\"#555\"/><rect x=\"80\" width=\"70\" height=\"20\" fill=\"#${color}\"/><rect width=\"150\" height=\"20\" fill=\"url(#b)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"11\"><text x=\"40\" y=\"15\">coverage</text><text x=\"115\" y=\"15\">${pct}%</text></g></svg>" > coverage-badge.svg
+
+      - name: Commit badge
+        run: |
+          mkdir -p assets
+          mv coverage-badge.svg assets/
+          git config user.name 'github-actions'
+          git config user.email 'actions@github.com'
+          git add assets/coverage-badge.svg
+          git commit -m "chore: update coverage badge" || echo 'No changes'
+          git push origin HEAD:${GITHUB_REF##*/}
+
+      - name: Summary
+        shell: bash
+        env:
+          COV: ${{ steps.extract.outputs.pct }}
+        run: |
+          echo "Coverage badge updated: ${COV}%" >> $GITHUB_STEP_SUMMARY
+
+      - name: Done
+        run: echo "Badge workflow finished"

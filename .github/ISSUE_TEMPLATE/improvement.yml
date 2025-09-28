@@ -1,0 +1,47 @@
+name: "🛠 Improvement / Refactor"
+description: 既存コード/構成の改善・リファクタ提案
+labels: ["refactor"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 改善サマリ
+      placeholder: 例) MapMarker.tsx の責務分割
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: 現状 / 課題
+      description: なぜ改善が必要か (読みづらい/拡張困難/重い等)
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 改善案 (概要)
+      description: どう変えるか (責務, 分割方針, 型, API)
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: 効果 / メリット
+      description: DX / パフォーマンス / a11y / セキュリティ など
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: リスク / 懸念 (任意)
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足 / 参考 (任意)
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      options: [P0, P1, P2, P3]
+    validations:
+      required: true

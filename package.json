@@ -2,6 +2,7 @@
   "name": "sado-restaurant-map",
   "private": true,
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -22,7 +23,8 @@
     "analyze:dev": "vite-bundle-analyzer",
     "deploy": "pnpm run build && gh-pages -d dist",
     "clean": "rimraf dist dev-dist coverage .vite node_modules/.vite",
-    "generate:pwa-assets": "pwa-assets-generator --config config/pwa-assets.config.ts"
+    "generate:pwa-assets": "pwa-assets-generator --config config/pwa-assets.config.ts",
+    "size-limit": "size-limit"
   },
   "dependencies": {
     "@types/google.maps": "^3.58.1",
@@ -60,6 +62,8 @@
     "vite-bundle-analyzer": "^1.2.3",
     "vite-plugin-pwa": "^1.0.3",
     "vitest": "^3.2.4",
+    "@size-limit/file": "^11.1.4",
+    "size-limit": "^11.1.4",
     "workbox-core": "^7.3.0",
     "workbox-window": "^7.3.0"
   }

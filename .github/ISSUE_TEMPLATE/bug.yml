@@ -1,0 +1,54 @@
+name: "🐞 Bug Report"
+description: 不具合報告
+labels: ["fix"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: 不具合サマリ
+      placeholder: 例) 初回ロードで地図が表示されない
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: 環境情報
+      description: OS / ブラウザ / 端末 / バージョンなど
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現手順
+      description: 手順を番号付きで
+      placeholder: |
+        1. ～へ遷移
+        2. ボタンXをクリック
+        3. エラー発生
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待結果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の結果 / エラーメッセージ
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ / スクリーンショット (任意)
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      options: [P0, P1, P2, P3]
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足 (任意)
