@@ -2,12 +2,15 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../styles/App.css"; // App.cssを最優先で読み込み
 import "../styles/index.css";
+import { registerPWA } from "./PWARegister"; // PWA (prod only)
 import { autoApplySuppression } from "./suppressLogs"; // log suppression
 
 // 重要: suppress を適用した後で App を動的 import し、
 // App モジュール評価時の console.* を抑制する。
 (async () => {
   autoApplySuppression();
+  // Production のみ PWA を登録
+  registerPWA();
 
   const { default: App } = await import("./App");
 

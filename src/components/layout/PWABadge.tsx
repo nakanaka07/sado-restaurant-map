@@ -1,112 +1,70 @@
 import { useEffect, useState } from "react";
 import "../../styles/PWABadge.css";
 
+/**
+ * WHY: vite-plugin-pwa の仮想モジュールは ビルド時に static analysis される前提。
+ * 過去実装では `['virtual', 'pwa-register', 'react'].join(':')` のような
+ * 動的文字列結合により `virtual:/pwa-register/react` (コロン後にスラッシュ挿入) という
+ * 存在しないパスをブラウザがフェッチ → 404 → コンソールにノイズ、という問題が発生した。
+ * さらに hook 版 (virtual:pwa-register/react) を使う必要性は薄く、
+ * 基本的な registerSW API で十分だったため、hook 依存を排除し以下の方針に統一:
+ *   1. runtime では `import("virtual:pwa-register")` をそのまま静的リテラルで記述 (Vite が置換)。
+ *   2. DEV 環境では service worker 未登録でも問題ないよう try/catch で吸収。
+ *   3. UI state (offlineReady / needRefresh) はフック経由ではなくローカルで保持。
+ * このコメントは将来誰かが再び動的パス生成へ戻さないためのガード目的。
+ */
+
 // 🔧 PWA関連の型定義
-type PWAModule = {
-  useRegisterSW: (options: {
-    onRegisteredSW?: (swUrl: string, r?: ServiceWorkerRegistration) => void;
-  }) => {
-    offlineReady: [boolean, (value: boolean) => void];
-    needRefresh: [boolean, (value: boolean) => void];
-    updateServiceWorker: (reloadPage?: boolean) => Promise<void>;
-  };
-};
+// Hook 版モジュールを使うと dynamic import で解決されない環境があったため
+// ベースの registerSW API に切り替え、状態管理はローカル実装する。
+type RegisterSWFn = (options?: {
+  immediate?: boolean;
+  onNeedRefresh?: () => void;
+  onOfflineReady?: () => void;
+  onRegistered?: (reg?: ServiceWorkerRegistration) => void;
+  onRegisterError?: (error: unknown) => void;
+}) => void;
 
-// 🔧 開発環境でのvirtual moduleエラー対応
-// PWAが無効な開発環境では、このコンポーネントは何も表示しない
-const isPWAEnabled =
-  import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
-
-// 🔧 開発環境でのService Worker完全制御
-const isDevelopment = import.meta.env.DEV;
-
+// 有効時のみ SW 状態を監視するバッジコンポーネント
 function PWABadge() {
-  // 開発環境でService Workerを強制アンレジスター
-  useEffect(() => {
-    if (isDevelopment && "serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .getRegistrations()
-        .then(registrations => {
-          registrations.forEach(registration => {
-            console.log(
-              "🔧 [PWA] Development mode: Unregistering Service Worker"
-            );
-            registration.unregister().catch(console.warn);
-          });
-        })
-        .catch(console.warn);
-    }
-  }, []);
-
-  // PWAが無効化されている場合は何も表示しない
-  if (!isPWAEnabled) {
-    return null;
-  }
-
-  // PWAが有効な場合のみ実際のPWA機能を読み込み
-  return <PWABadgeWithSW />;
-}
-
-// PWA機能を持つコンポーネント（PWA有効時のみ読み込まれる）
-function PWABadgeWithSW() {
-  const [pwaSW, setPwaSW] = useState<PWAModule | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [offlineReady, setOfflineReady] = useState(false);
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const [registration, setRegistration] = useState<
+    ServiceWorkerRegistration | undefined
+  >(undefined);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    // 文字列結合でvirtual moduleを動的構築（静的解析を回避）
-    const pwaModuleName = ["virtual:", "pwa-register", "react"].join("/");
-
-    const loadPWAModule = async () => {
+    const init = async () => {
       try {
-        const pwaModule = (await import(
-          /* @vite-ignore */ pwaModuleName
-        )) as PWAModule;
-        setPwaSW(pwaModule);
-      } catch (error) {
-        console.warn("PWA module not available:", error);
+        const { registerSW } = (await import("virtual:pwa-register")) as {
+          registerSW: RegisterSWFn;
+        };
+        registerSW({
+          onOfflineReady: () => setOfflineReady(true),
+          onNeedRefresh: () => setNeedRefresh(true),
+          onRegistered: r => setRegistration(r),
+          onRegisterError: err => console.warn("[PWA] register error", err),
+        });
+      } catch (e) {
+        console.warn("[PWA] base module not available:", e);
       } finally {
-        setIsLoaded(true);
+        setLoaded(true);
       }
     };
-
-    void loadPWAModule();
+    void init();
   }, []);
 
-  // モジュールが読み込まれていない場合は何も表示しない
-  if (!isLoaded || !pwaSW?.useRegisterSW) {
-    return null;
-  }
+  if (!loaded) return null;
 
-  return <PWABadgeContent useRegisterSW={pwaSW.useRegisterSW} />;
-}
-
-function PWABadgeContent({
-  useRegisterSW,
-}: {
-  readonly useRegisterSW: PWAModule["useRegisterSW"];
-}) {
   // check for updates every hour
   const period = 60 * 60 * 1000;
-
-  const {
-    offlineReady: [offlineReady, setOfflineReady],
-    needRefresh: [needRefresh, setNeedRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegisteredSW(swUrl: string, r: ServiceWorkerRegistration | undefined) {
-      if (period <= 0) return;
-      if (r?.active?.state === "activated") {
-        registerPeriodicSync(period, swUrl, r);
-      } else if (r?.installing) {
-        r.installing.addEventListener("statechange", (e: Event) => {
-          const sw = e.target as ServiceWorker;
-          if (sw.state === "activated") {
-            registerPeriodicSync(period, swUrl, r);
-          }
-        });
-      }
-    },
-  });
+  if (registration) {
+    // 登録済み SW の状態に応じて周期更新をセット
+    if (registration.active?.state === "activated") {
+      registerPeriodicSync(period, registration.active.scriptURL, registration);
+    }
+  }
 
   function close() {
     setOfflineReady(false);
@@ -127,11 +85,14 @@ function PWABadgeContent({
             )}
           </div>
           <div className="PWABadge-buttons">
-            {needRefresh && (
+            {needRefresh && registration && (
               <button
                 className="PWABadge-toast-button"
                 onClick={() => {
-                  updateServiceWorker(true).catch(console.error);
+                  registration
+                    .update()
+                    .then(() => location.reload())
+                    .catch(console.error);
                 }}
               >
                 Reload
