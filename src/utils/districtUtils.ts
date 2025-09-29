@@ -19,7 +19,30 @@
  * @see https://www.city.sado.niigata.jp/soshiki/2002/2359.html
  */
 
+import postalDistrictMap from "@/data/postalDistrictMap.json" assert { type: "json" };
 import type { SadoDistrict } from "@/types";
+
+// =============================
+// 正規化/エイリアス補助定義
+// =============================
+/** 異体字 / 表記ゆれ文字の置換マップ */
+const VARIANT_CHAR_MAP: Record<string, string> = {
+  佛: "仏", // 阿佛坊 → 阿仏坊
+  // 追加候補: '﨑': '崎' など必要になったら拡張
+};
+
+/** 住所内のノイズ要素除去用 (逆ジオコード由来の冗長語/郵便番号など) */
+const NOISE_PATTERNS: RegExp[] = [
+  /日本/g,
+  /新潟県/g, // 県名は判定に不要
+  /\d{3}-?\d{4}/g, // 郵便番号
+];
+
+/** キーワード辞書に存在しない短縮・略記表現のエイリアス */
+const DISTRICT_ALIASES: Record<string, SadoDistrict> = {
+  // 逆ジオ/手入力で "佐渡市奈良町" の形が来るケース → 相川地区
+  奈良町: "相川",
+};
 
 /**
  * 判定できなかった住所を記録するセット（開発環境用）
@@ -392,13 +415,26 @@ const DISTRICT_KEYWORDS: Record<string, SadoDistrict> = {
  * @returns 正規化された住所
  */
 const normalizeAddress = (address: string): string => {
-  return address
+  let normalized = address
     .trim()
     .replace(/\s+/g, "")
-    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0)) // 全角数字を半角に
+    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0)) // 全角数字→半角
     .replace(/[Ａ-Ｚａ-ｚ]/g, s =>
       String.fromCharCode(s.charCodeAt(0) - 0xfee0)
-    ); // 全角英字を半角に
+    ); // 全角英字→半角
+
+  // 異体字置換
+  normalized = normalized.replace(/./g, ch => VARIANT_CHAR_MAP[ch] ?? ch);
+
+  // ノイズ除去
+  for (const pattern of NOISE_PATTERNS) {
+    normalized = normalized.replace(pattern, "");
+  }
+
+  // 連続ハイフン/残留記号の簡易整理（郵便番号除去後の残骸対策）
+  normalized = normalized.replace(/--+/g, "-");
+
+  return normalized;
 };
 
 /**
@@ -417,6 +453,13 @@ const findDistrictByKeywords = (
   for (const keyword of sortedKeywords) {
     if (normalizedAddress.includes(keyword)) {
       return DISTRICT_KEYWORDS[keyword];
+    }
+  }
+
+  // エイリアス判定 (短縮表現など)
+  for (const alias in DISTRICT_ALIASES) {
+    if (normalizedAddress.includes(alias)) {
+      return DISTRICT_ALIASES[alias];
     }
   }
 
@@ -460,10 +503,44 @@ export const getDistrictFromAddress = (address: string): SadoDistrict => {
     }
   }
 
-  // どの地区にも該当しない場合
+  // どの地区にも該当しない場合 → 条件付き郵便番号フォールバック
+
+  // 郵便番号抽出 (7桁 / ハイフン任意)
+  const postalRegex = /(\d{3})-?(\d{4})/;
+  const postalMatch = postalRegex.exec(address);
+  if (postalMatch) {
+    const postalCode = `${postalMatch[1]}${postalMatch[2]}`; // 7桁連結
+
+    // フォールバック適用条件:
+    // 1) 既に district 未確定
+    // 2) 住所文字列に漢字の地名らしき >=2文字連続が存在しない (番号 + 国/県のみ想定)
+    // 3) postalDistrictMap に登録済み
+    // 4) 開発環境（運用前検証目的）
+    const hasKanjiPlaceToken = /[\u4E00-\u9FFF]{2,}/.test(
+      address.replace(/佐渡市|新潟県|日本/g, "")
+    );
+    if (
+      !hasKanjiPlaceToken &&
+      (postalDistrictMap as any)[postalCode] &&
+      import.meta.env.DEV
+    ) {
+      const fallbackDistrict = (postalDistrictMap as any)[
+        postalCode
+      ] as SadoDistrict;
+      console.info(
+        `[district:fallback:postal] ${postalCode} → ${fallbackDistrict} (住所に有効地名要素なし)`
+      );
+      return fallbackDistrict;
+    }
+  }
+
+  // それでも判定できない場合
   if (import.meta.env.DEV) {
-    unknownAddresses.add(address);
-    console.warn(`地区を判定できませんでした: ${address}`);
+    // 既に記録済みなら warn を再出力しない（ノイズ抑制）
+    if (!unknownAddresses.has(address)) {
+      unknownAddresses.add(address);
+      console.warn(`地区を判定できませんでした: ${address}`);
+    }
   }
   return "その他";
 };
