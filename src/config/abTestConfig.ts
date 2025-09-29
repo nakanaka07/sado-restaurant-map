@@ -281,7 +281,7 @@ export function loadABTestState(): UserClassification | null {
 
 /** A/Bテストイベントの記録 */
 export function trackABTestEvent(
-  eventType: "assigned" | "interaction" | "conversion",
+  eventType: "assigned" | "interaction" | "conversion" | "override_marker_type",
   data: {
     variant: ABTestVariant;
     segment: UserSegment;
@@ -319,6 +319,41 @@ export function trackABTestEvent(
 // 開発者ユーティリティ
 // ==============================
 
+// ==============================
+// MarkerType 派生ロジック (UI同期用)
+// ==============================
+
+/** マーカー描画システムで使用する型 (UI側と共有) */
+export type MarkerType =
+  | "original"
+  | "enhanced-png"
+  | "svg"
+  | "circular-icooon";
+
+/**
+ * A/Bバリアントから実際に使用する MarkerType を決定
+ * ※ 現段階では variant と 1:1 だが将来の phase4-enhanced 等を circular-icooon にマッピング
+ * @param variant ABTestVariant
+ */
+export function deriveMarkerType(variant: ABTestVariant): MarkerType {
+  switch (variant) {
+    case "original":
+      return "original";
+    case "enhanced-png":
+      return "enhanced-png";
+    case "svg":
+      return "svg";
+    case "phase4-enhanced":
+      // Phase4 拡張では circular 系を想定 (暫定)
+      return "circular-icooon";
+    case "testing":
+      // テストバリアントは比較しやすい中間の svg を既定 (ユーザーが UI で override 可)
+      return "svg";
+    default:
+      return "original";
+  }
+}
+
 /**
  * A/Bテストの現在状態をコンソールに出力（開発用）
  */
@@ -348,7 +383,7 @@ export function resetABTestState(): void {
 }
 
 // 開発環境での自動デバッグ
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && typeof window !== "undefined") {
   // @ts-expect-error - 開発環境のwindowオブジェクト拡張
   window.debugABTest = debugABTestStatus;
   // @ts-expect-error - 開発環境のwindowオブジェクト拡張

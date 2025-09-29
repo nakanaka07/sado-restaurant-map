@@ -29,7 +29,9 @@
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
       "userDataDir": "${workspaceFolder}/.vscode/edge-user-data-safe",
-      "runtimeArgs": ["--remote-debugging-port=9226"],
+      "runtimeArgs": [
+        "--remote-debugging-port=9226"
+      ],
       "env": {
         "VITE_DEBUG": "true"
       },
@@ -73,14 +75,29 @@
       "name": "🔧 Vite Development Server Debug",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/.bin/vite",
-      "args": ["--host", "127.0.0.1", "--port", "5173"],
+      "args": [
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5173"
+      ],
       "cwd": "${workspaceFolder}",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "vite:*"
       },
       "outputCapture": "std",
-      "skipFiles": ["<node_internals>/**"]
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "type": "msedge",
+      "name": "🍽️ Preview (Prod Build)",
+      "request": "launch",
+      "url": "http://127.0.0.1:4173/sado-restaurant-map/",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMaps": true
     }
   ]
 }

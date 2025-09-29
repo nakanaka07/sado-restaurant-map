@@ -16,13 +16,14 @@ import {
   type ABTestVariant,
   classifyUser,
   CURRENT_AB_TEST_CONFIG,
+  deriveMarkerType,
   loadABTestState,
+  type MarkerType,
   saveABTestState,
   trackABTestEvent,
   type UserClassification,
 } from "../../../config/abTestConfig";
 import { EnhancedMapContainer } from "./EnhancedMapContainer";
-import { MapContainer } from "./MapContainer";
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MapErrorFallback } from "./MapErrorFallback";
 
@@ -56,6 +57,8 @@ export function IntegratedMapView({
   const [currentVariant, setCurrentVariant] =
     useState<ABTestVariant>("original");
   const [isTestingModeActive, setIsTestingModeActive] = useState(false);
+  const [markerType, setMarkerType] = useState<MarkerType | null>(null);
+  const [isUserOverride, setIsUserOverride] = useState(false);
 
   // ユーザー分類の実行
   useEffect(() => {
@@ -87,6 +90,9 @@ export function IntegratedMapView({
 
         setUserClassification(classification);
         setCurrentVariant(classification.variant);
+        // 初期 markerType を variant から導出
+        const initialMarker = deriveMarkerType(classification.variant);
+        setMarkerType(initialMarker);
 
         // テストモードの可否を設定
         setIsTestingModeActive(
@@ -114,6 +120,7 @@ export function IntegratedMapView({
         setUserClassification(fallbackClassification);
         setCurrentVariant("original");
         setIsTestingModeActive(false);
+        setMarkerType(deriveMarkerType("original"));
       }
     };
 
@@ -194,28 +201,50 @@ export function IntegratedMapView({
     isTestingModeActive ||
     (userClassification.testingModeAvailable && import.meta.env.DEV);
 
+  // マーカータイプがまだ未設定 (分類直後) の場合はローディング表示
+  if (!markerType) {
+    return (
+      <div className="map-loading">
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "24px", marginBottom: "8px" }}>🧪</div>
+          <p style={{ color: "#6c757d" }}>マーカータイプ初期化中...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <MapErrorBoundary>
-      {shouldUseTestingMode ? (
-        <EnhancedMapContainer
-          mapPoints={mapPoints}
-          center={center}
-          mapId={mapId}
-          selectedPoint={selectedPoint}
-          onMarkerClick={handleMarkerClick}
-          onCloseInfoWindow={handleCloseInfoWindow}
-        />
-      ) : (
-        <MapContainer
-          mapPoints={mapPoints}
-          center={center}
-          mapId={mapId}
-          selectedPoint={selectedPoint}
-          onMarkerClick={handleMarkerClick}
-          onCloseInfoWindow={handleCloseInfoWindow}
-          customControls={customControls}
-        />
-      )}
+      {/**
+       * 仕様簡素化: 常に EnhancedMapContainer を使用し、パネル表示有無で挙動制御。
+       * 本番ではユーザー変更を許さないため showSelectionPanel = shouldUseTestingMode
+       */}
+      <EnhancedMapContainer
+        mapPoints={mapPoints}
+        center={center}
+        mapId={mapId}
+        selectedPoint={selectedPoint}
+        onMarkerClick={handleMarkerClick}
+        onCloseInfoWindow={handleCloseInfoWindow}
+        // 新規 props (後でコンポーネント側に追加予定)
+        initialMarkerType={markerType}
+        showSelectionPanel={shouldUseTestingMode}
+        onMarkerTypeChange={next => {
+          setMarkerType(next);
+          // override 判定: variant 由来 marker と異なる場合
+          const derived = deriveMarkerType(currentVariant);
+          const overridden = derived !== next;
+          setIsUserOverride(overridden);
+          if (overridden) {
+            trackABTestEvent("override_marker_type", {
+              variant: currentVariant,
+              segment: userClassification.segment,
+              phase: CURRENT_AB_TEST_CONFIG.currentPhase,
+              metadata: { from: derived, to: next },
+            });
+          }
+        }}
+      />
 
       {/* カスタムコントロールをテストモードでも表示 */}
       {shouldUseTestingMode && customControls && (
@@ -230,16 +259,28 @@ export function IntegratedMapView({
             top: "10px",
             right: "10px",
             zIndex: 1001,
-            background: "rgba(0,0,0,0.8)",
+            background: isUserOverride
+              ? "linear-gradient(90deg,#ff9800,#f57c00)"
+              : "rgba(0,0,0,0.8)",
             color: "white",
             padding: "8px 12px",
             borderRadius: "6px",
             fontSize: "12px",
             fontFamily: "monospace",
+            boxShadow: isUserOverride
+              ? "0 0 0 2px #ff9800 inset,0 4px 12px rgba(0,0,0,0.35)"
+              : "0 2px 6px rgba(0,0,0,0.3)",
+            transition: "background 0.2s ease",
           }}
+          aria-label={
+            isUserOverride
+              ? "A/B割当とは異なるマーカータイプがユーザーにより上書きされています"
+              : "A/Bテスト現在の状態"
+          }
         >
           🧪 A/B: {currentVariant} | 👤 {userClassification.segment} | 🎯{" "}
-          {CURRENT_AB_TEST_CONFIG.currentPhase}
+          {CURRENT_AB_TEST_CONFIG.currentPhase} | 🗺 {markerType}
+          {isUserOverride && "* (override)"}
           {shouldUseTestingMode && " | 🔬 TEST"}
         </div>
       )}

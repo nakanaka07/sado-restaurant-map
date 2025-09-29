@@ -127,4 +127,8 @@ AC:
 
 ---
 
-Last-Updated: 2025-09-27
+Last-Updated: 2025-09-29
+
+## 13. 参照ドキュメント
+
+- A/Bテストとマーカー同期仕様: `docs/ab-test-marker-sync.md` (variant→markerType マッピング / override 表示 / イベント定義)
