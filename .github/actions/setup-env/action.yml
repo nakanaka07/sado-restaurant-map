@@ -3,15 +3,17 @@ description: "Common Node + PNPM + Install setup with cache"
 runs:
   using: "composite"
   steps:
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: pnpm
+    # NOTE: actions/setup-node@v4 の cache: pnpm は内部で `pnpm store path` を実行し
+    # キャッシュディレクトリを取得するため、先に pnpm/action-setup で pnpm を PATH に追加する必要がある。
     - name: Setup PNPM
       uses: pnpm/action-setup@v4
       with:
         version: 9
+    - name: Setup Node (with pnpm cache)
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
       shell: bash
