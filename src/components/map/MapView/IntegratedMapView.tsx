@@ -59,6 +59,7 @@ export function IntegratedMapView({
   const [isTestingModeActive, setIsTestingModeActive] = useState(false);
   const [markerType, setMarkerType] = useState<MarkerType | null>(null);
   const [isUserOverride, setIsUserOverride] = useState(false);
+  const [isABTestInfoCollapsed, setIsABTestInfoCollapsed] = useState(false);
 
   // ユーザー分類の実行
   useEffect(() => {
@@ -255,36 +256,47 @@ export function IntegratedMapView({
 
       {/* A/Bテスト情報表示（開発環境のみ） */}
       {import.meta.env.DEV && (
-        <div
+        <button
+          type="button"
           style={{
             position: "absolute",
             top: "10px",
-            right: "10px",
+            right: "140px", // マップコントロールと重ならないよう左に移動
             zIndex: 1001,
             background: isUserOverride
               ? "linear-gradient(90deg,#ff9800,#f57c00)"
               : "rgba(0,0,0,0.8)",
             color: "white",
-            padding: "8px 12px",
+            padding: "6px 10px", // 少しコンパクトに
             borderRadius: "6px",
-            fontSize: "12px",
+            fontSize: "11px", // 少し小さく
             fontFamily: "monospace",
             boxShadow: isUserOverride
               ? "0 0 0 2px #ff9800 inset,0 4px 12px rgba(0,0,0,0.35)"
               : "0 2px 6px rgba(0,0,0,0.3)",
-            transition: "background 0.2s ease",
+            transition: "all 0.2s ease",
+            backdropFilter: "blur(4px)", // ぼかし効果追加
+            cursor: "pointer",
+            border: "none", // ボタンのデフォルトボーダーを削除
           }}
+          onClick={() => setIsABTestInfoCollapsed(!isABTestInfoCollapsed)}
           aria-label={
             isUserOverride
-              ? "A/B割当とは異なるマーカータイプがユーザーにより上書きされています"
-              : "A/Bテスト現在の状態"
+              ? "A/B割当とは異なるマーカータイプがユーザーにより上書きされています。クリックして詳細表示を切り替え"
+              : "A/Bテスト現在の状態。クリックして詳細表示を切り替え"
           }
         >
-          🧪 A/B: {currentVariant} | 👤 {userClassification.segment} | 🎯{" "}
-          {CURRENT_AB_TEST_CONFIG.currentPhase} | 🗺 {markerType}
-          {isUserOverride && "* (override)"}
-          {shouldUseTestingMode && " | 🔬 TEST"}
-        </div>
+          {isABTestInfoCollapsed ? (
+            "🧪"
+          ) : (
+            <>
+              🧪 A/B: {currentVariant} | 👤 {userClassification.segment} | 🎯{" "}
+              {CURRENT_AB_TEST_CONFIG.currentPhase} | 🗺 {markerType}
+              {isUserOverride && "* (override)"}
+              {shouldUseTestingMode && " | 🔬 TEST"}
+            </>
+          )}
+        </button>
       )}
     </MapErrorBoundary>
   );

@@ -119,15 +119,16 @@ export function EnhancedMapContainer({
         <div
           style={{
             position: "absolute",
-            top: "20px",
+            top: "80px", // フィルターパネルと重ならないよう下に移動
             left: "20px",
             zIndex: 1000,
-            background: "white",
+            background: "rgba(255, 255, 255, 0.95)", // 半透明化
             borderRadius: "12px",
             padding: "16px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
             border: "1px solid #e0e0e0",
             minWidth: "280px",
+            backdropFilter: "blur(8px)", // ぼかし効果
           }}
         >
           <h3
@@ -359,15 +360,16 @@ export function EnhancedMapContainer({
         <div
           style={{
             position: "absolute",
-            bottom: "20px",
+            bottom: "80px", // マップコントロールと重ならないよう上に移動
             right: "20px",
             zIndex: 1000,
-            background: "white",
+            background: "rgba(255, 255, 255, 0.95)", // 半透明化
             borderRadius: "12px",
             padding: "16px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
             border: "1px solid #e0e0e0",
             minWidth: "220px",
+            backdropFilter: "blur(8px)", // ぼかし効果
           }}
         >
           <h4 style={{ margin: "0 0 12px", fontSize: "14px", color: "#333" }}>
