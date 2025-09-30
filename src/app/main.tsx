@@ -2,15 +2,24 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../styles/App.css"; // App.cssを最優先で読み込み
 import "../styles/index.css";
-import { registerPWA } from "./PWARegister"; // PWA (prod only)
 import { autoApplySuppression } from "./suppressLogs"; // log suppression
 
 // 重要: suppress を適用した後で App を動的 import し、
 // App モジュール評価時の console.* を抑制する。
 async function bootstrap(): Promise<void> {
   autoApplySuppression();
-  // Production のみ PWA を登録 (非同期完了を待つ)
-  await registerPWA();
+
+  // PWA登録（本番環境またはENABLE_PWA_DEV=trueの場合のみ）
+  const isPWAEnabled =
+    import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
+  if (isPWAEnabled) {
+    try {
+      const { registerPWA } = await import("./PWARegister");
+      await registerPWA();
+    } catch (error) {
+      console.warn("PWA registration failed:", error);
+    }
+  }
 
   const { default: App } = await import("./App");
 

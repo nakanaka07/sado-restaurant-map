@@ -212,11 +212,8 @@ export function classifyUser(
     segment,
     variant,
     isInTest,
-    // 本番環境では統計パネル・テストモードを一切無効化
-    testingModeAvailable:
-      import.meta.env.DEV &&
-      config.testingModeEnabled &&
-      (segment === "early-adopter" || segment === "beta-tester"),
+    // 開発環境では常にテストモードを有効にし、本番環境では統計パネル・テストモードを一切無効化
+    testingModeAvailable: import.meta.env.DEV && config.testingModeEnabled,
   };
 }
 

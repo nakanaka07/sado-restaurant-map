@@ -19,11 +19,33 @@ import {
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
-import PWABadge from "../components/layout/PWABadge";
 import { CustomMapControls } from "../components/map/CustomMapControls"; // NEW: CustomMapControls 追加
 import { IntegratedMapView } from "../components/map/MapView/IntegratedMapView";
 import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
+
+// 条件付きPWABadgeコンポーネント
+const ConditionalPWABadge = () => {
+  const [PWABadge, setPWABadge] = useState<React.ComponentType | null>(null);
+
+  useEffect(() => {
+    // 本番環境またはENABLE_PWA_DEV=trueの場合のみPWABadgeを読み込み
+    const isPWAEnabled =
+      import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
+
+    if (isPWAEnabled) {
+      import("../components/layout/PWABadge")
+        .then(module => setPWABadge(() => module.default))
+        .catch(error => {
+          console.warn("PWABadge could not be loaded:", error);
+        });
+    }
+  }, []);
+
+  if (!PWABadge) return null;
+
+  return <PWABadge />;
+};
 
 // モバイル検出用のカスタムフック
 function useIsMobile() {
@@ -565,7 +587,7 @@ function App() {
           </APIProvider>
         </main>
 
-        <PWABadge />
+        <ConditionalPWABadge />
       </div>
     </>
   );
