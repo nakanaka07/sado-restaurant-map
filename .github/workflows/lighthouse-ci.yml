@@ -12,23 +12,13 @@ jobs:
     permissions:
       contents: read
       actions: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
 
       - name: Build (production)
         run: pnpm build
@@ -36,5 +26,51 @@ jobs:
       - name: Run Lighthouse CI
         run: npx lhci autorun --config=lighthouserc.json --budgetsFile=lighthouse-budgets.json || echo "LHCI finished with non-zero exit (soft fail)"
 
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: Extract Lighthouse scores & thresholds
+        id: scores
+        run: |
+          manifest=.lighthouseci/manifest.json
+          if [ ! -f "$manifest" ]; then echo "Manifest missing"; exit 0; fi
+          node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('.lighthouseci/manifest.json','utf8'));const rep=m[0];const cat=rep.summary;const pct=v=>Math.round(v*100);const scores={performance:pct(cat.performance||0),accessibility:pct(cat.accessibility||0),seo:pct(cat.seo||0),best:pct(cat['best-practices']||cat.bestPractices||0),pwa:pct(cat.pwa||0)};fs.writeFileSync('lh-scores.json', JSON.stringify(scores,null,2));console.log('Scores:',scores);"
+          cat lh-scores.json
+          PERF_WARN=70; PERF_FAIL=60; ACC_WARN=85; ACC_FAIL=75
+          perf=$(jq '.performance' lh-scores.json); acc=$(jq '.accessibility' lh-scores.json)
+          status="ok"
+          if [ "$perf" -lt $PERF_FAIL ] || [ "$acc" -lt $ACC_FAIL ]; then status="fail"; fi
+          if [ "$status" = "fail" ]; then echo "hard_fail=true" >> $GITHUB_OUTPUT; else echo "hard_fail=false" >> $GITHUB_OUTPUT; fi
+          echo "perf=$perf" >> $GITHUB_OUTPUT
+          echo "acc=$acc" >> $GITHUB_OUTPUT
+
+      - name: Post PR comment (if applicable)
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -e
+          resp=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' https://api.github.com/repos/$REPO/commits/$HEAD_SHA/pulls)
+          pr=$(echo "$resp" | jq -r '.[0].number // empty')
+          if [ -z "$pr" ]; then echo "No PR found for head sha"; exit 0; fi
+          scores=$(cat lh-scores.json | jq -r '. | to_entries | map("| " + .key + " | " + (.value|tostring) + "% |") | join("\n")')
+          body="<!--lhci-report-->\n### Lighthouse Scores\n| Category | Score |\n|----------|-------|\n${scores}\n"
+          curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' -d "$(jq -nc --arg body "$body" '{body:$body}')" https://api.github.com/repos/$REPO/issues/$pr/comments > /dev/null || echo 'Comment failed'
+
       - name: Summary
-        run: echo "Lighthouse CI run completed" >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo "Lighthouse CI run completed" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.scores.outputs.hard_fail }}" = "true" ]; then echo "One or more scores below hard fail threshold" >> $GITHUB_STEP_SUMMARY; fi
+
+      - name: Enforce fail thresholds
+        if: steps.scores.outputs.hard_fail == 'true'
+        run: |
+          echo "Failing due to Lighthouse score below hard threshold." >&2
+          exit 1

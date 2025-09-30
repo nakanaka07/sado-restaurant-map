@@ -10,43 +10,37 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: write # assets/coverage-badge.svg を push するため
-      pull-requests: write # フォールバックでPRを開く際に必要
+      contents: write
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate coverage
-        run: pnpm test:coverage
-
-      - name: Extract coverage
-        id: extract
+      - name: Fetch coverage summary artifact from CI run
+        id: fetch
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pct=$(jq '.total.lines.pct' coverage/coverage-summary.json | xargs printf '%.0f')
-          echo "pct=$pct" >> $GITHUB_OUTPUT
+          set -e
+          api="https://api.github.com/repos/${REPO}/actions/runs/${RUN_ID}/artifacts"
+            url=$(curl -sf -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' "$api" | jq -r '.artifacts[] | select(.name=="coverage-summary") | .archive_download_url' || true)
+            if [ -z "$url" ]; then echo "Artifact not found"; exit 1; fi
+            curl -L -H "Authorization: Bearer ${GH_TOKEN}" -o artifact.zip "$url"
+            unzip artifact.zip || (echo 'Unzip failed'; ls -al; exit 1)
+            if [ ! -f coverage-summary.json ]; then echo 'coverage-summary.json missing'; exit 1; fi
+            jq '.total.lines.pct' coverage-summary.json | xargs printf 'pct=%.*f\n' 0 >> $GITHUB_OUTPUT
 
       - name: Generate badge svg
+        id: badge
         run: |
-          pct=${{ steps.extract.outputs.pct }}
+          pct=${{ steps.fetch.outputs.pct }}
           color=blue
           if [ "$pct" -ge 90 ]; then color=brightgreen; elif [ "$pct" -ge 75 ]; then color=green; elif [ "$pct" -ge 60 ]; then color=yellow; elif [ "$pct" -ge 45 ]; then color=orange; else color=red; fi
-          echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"150\" height=\"20\"><linearGradient id=\"b\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><mask id=\"a\"><rect width=\"150\" height=\"20\" rx=\"3\" fill=\"#fff\"/></mask><g mask=\"url(#a)\"><rect width=\"80\" height=\"20\" fill=\"#555\"/><rect x=\"80\" width=\"70\" height=\"20\" fill=\"#${color}\"/><rect width=\"150\" height=\"20\" fill=\"url(#b)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"11\"><text x=\"40\" y=\"15\">coverage</text><text x=\"115\" y=\"15\">${pct}%</text></g></svg>" > coverage-badge.svg
+          echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"150\" height=\"20\"><linearGradient id=\"b\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><mask id=\"a\"><rect width=\"150\" height=\"20\" rx=\"3\" fill=\"#fff\"/></mask><g mask=\"url(#a)\"><rect width=\"80\" height=\"20\" fill=\"#555\"/><rect x=\"80\" width=\"70\" height=\"20\" fill=\"#$color\"/><rect width=\"150\" height=\"20\" fill=\"url(#b)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"11\"><text x=\"40\" y=\"15\">coverage</text><text x=\"115\" y=\"15\">${pct}%</text></g></svg>" > coverage-badge.svg
 
       - name: Commit badge
         env:
@@ -63,23 +57,11 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update coverage badge"
-          # 直接 push 試行
-          if git push origin HEAD:${GITHUB_REF##*/}; then
-            echo 'Direct push succeeded'
-          else
-            echo 'Direct push failed - creating PR'
-            BRANCH="coverage-badge-update-${GITHUB_RUN_ID}"
-            git checkout -b "$BRANCH"
-            git push origin "$BRANCH"
-            gh api repos/${{ github.repository }}/pulls -f title='chore: update coverage badge' -f head="$BRANCH" -f base='${GITHUB_REF##*/}' -f body='Automated coverage badge update fallback via workflow.' || echo 'PR creation failed'
-          fi
+          git push || echo 'Push failed (protected branch?)'
 
       - name: Summary
-        shell: bash
-        env:
-          COV: ${{ steps.extract.outputs.pct }}
         run: |
-          echo "Coverage badge updated: ${COV}%" >> $GITHUB_STEP_SUMMARY
+          echo "Coverage badge updated: ${{ steps.fetch.outputs.pct }}%" >> $GITHUB_STEP_SUMMARY
 
       - name: Done
         run: echo "Badge workflow finished"

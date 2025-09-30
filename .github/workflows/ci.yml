@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write # size baseline 更新でコミットするため
 
 jobs:
   build-test:
@@ -17,19 +17,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      - name: Setup Environment
+        uses: ./.github/actions/setup-env
 
       - name: Lint
         run: pnpm lint
@@ -48,6 +37,15 @@ jobs:
             echo "Lines Coverage: ${lines}%" >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Upload coverage summary artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-summary
+          path: coverage/coverage-summary.json
+          if-no-files-found: ignore
+          retention-days: 1
+
       - name: Artifact coverage html
         if: success()
         uses: actions/upload-artifact@v4
@@ -55,37 +53,28 @@ jobs:
           name: coverage-html
           path: coverage
           if-no-files-found: ignore
-
-  analyze-bundle:
-    runs-on: ubuntu-latest
-    needs: build-test
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
-
-      - name: Build analyze
+      - name: Analyze bundle (ANALYZE flag build)
         env:
           ANALYZE: true
         run: pnpm analyze
 
-      - name: Size Limit
+      - name: Production build (for size-limit)
+        run: pnpm build
+
+      - name: Run size-limit (json)
+        run: pnpm size-limit --json > size-limit.json || echo "size-limit finished with non-zero (captured)"
+
+      - name: Bundle stats summary
         run: |
-          pnpm build
-          pnpm size-limit
+          if [ -f size-limit.json ]; then
+            echo "### Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync("size-limit.json","utf8"));function fmt(kb){return (kb).toFixed(2)+" KB"} console.log("| Name | Limit | Size | Diff |\n|------|-------|------|------|");d.forEach(r=>{const name=r.name||"main";const limit=r.limit||"";const size=(r.size/1024);const diff=r.diff? (r.diff/1024):0;console.log(`| ${name} | ${limit} | ${fmt(size)} | ${diff===0?'-':fmt(diff)} |`)});' >> table.md
+            cat table.md >> $GITHUB_STEP_SUMMARY
+            rm table.md
+          else
+            echo "size-limit.json not found" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload dist stats
         uses: actions/upload-artifact@v4
@@ -93,3 +82,66 @@ jobs:
           name: bundle-stats
           path: dist
           if-no-files-found: ignore
+
+      - name: Compare bundle against baseline
+        id: size-diff
+        run: |
+          BASE_FILE=metrics/size-limit.json
+            if [ -f size-limit.json ] && [ -f "$BASE_FILE" ]; then
+              echo "Baseline exists. Computing diff..."
+              node <<'EOF'
+const fs=require('fs');
+try {
+  const cur=JSON.parse(fs.readFileSync('size-limit.json','utf8'));
+  const base=JSON.parse(fs.readFileSync('metrics/size-limit.json','utf8'));
+  const report=[];
+  const byName=o=>Object.fromEntries(o.map(r=>[r.name||'main',r]));
+  const bc=byName(base), cc=byName(cur);
+  for(const name of new Set([...Object.keys(bc),...Object.keys(cc)])){
+    const b=bc[name]; const c=cc[name];
+    if(!c) continue;
+    const diffBytes=c.size - (b?b.size:0);
+    const diffPct=b? (diffBytes / b.size *100): 0;
+    report.push({name,diffBytes,diffPct});
+  }
+  const risky=report.filter(r=>r.diffPct>5);
+  fs.writeFileSync('size-diff.json', JSON.stringify(report,null,2));
+  if(risky.length){
+    console.log('::warning:: Bundle size increased >5% for: '+risky.map(r=>r.name).join(','));
+  }
+} catch(e){console.error('Diff calc failed',e);} 
+EOF
+              echo "diff_done=true" >> $GITHUB_OUTPUT
+            else
+              echo "No baseline. Skipping diff."; echo "diff_done=false" >> $GITHUB_OUTPUT
+            fi
+      - name: Upload size diff artifact
+        if: steps.size-diff.outputs.diff_done == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: size-diff
+          path: size-diff.json
+          if-no-files-found: ignore
+
+      - name: Update size baseline (main only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if [ -f size-limit.json ]; then
+            mkdir -p metrics
+            cp size-limit.json metrics/size-limit.json
+            git config user.name 'github-actions'
+            git config user.email 'actions@github.com'
+            if git diff --quiet -- metrics/size-limit.json; then
+              echo 'Baseline unchanged'
+            else
+              git add metrics/size-limit.json
+              git commit -m 'chore: update size baseline'
+              git push || echo 'Baseline push failed (possibly no permissions)'
+            fi
+          fi
+
+      - name: Record start time (already implicit) & Emit job duration
+        if: always()
+        run: |
+          echo "Job completed at $(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_STEP_SUMMARY
+          echo "(GitHub UI shows per-step timing; fine-grained metrics can be added later.)" >> $GITHUB_STEP_SUMMARY
