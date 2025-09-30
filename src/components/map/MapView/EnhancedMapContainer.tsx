@@ -119,8 +119,8 @@ export function EnhancedMapContainer({
         <div
           style={{
             position: "absolute",
-            top: "80px", // フィルターパネルと重ならないよう下に移動
-            left: "20px",
+            top: "20px", // 元の位置に戻す
+            left: "280px", // フィルターパネルの右側に配置
             zIndex: 1000,
             background: "rgba(255, 255, 255, 0.95)", // 半透明化
             borderRadius: "12px",

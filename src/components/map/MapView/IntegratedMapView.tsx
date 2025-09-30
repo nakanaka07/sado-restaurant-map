@@ -56,7 +56,6 @@ export function IntegratedMapView({
     useState<UserClassification | null>(null);
   const [currentVariant, setCurrentVariant] =
     useState<ABTestVariant>("original");
-  const [isTestingModeActive, setIsTestingModeActive] = useState(false);
   const [markerType, setMarkerType] = useState<MarkerType | null>(null);
   const [isUserOverride, setIsUserOverride] = useState(false);
   const [isABTestInfoCollapsed, setIsABTestInfoCollapsed] = useState(false);
@@ -95,12 +94,6 @@ export function IntegratedMapView({
         const initialMarker = deriveMarkerType(classification.variant);
         setMarkerType(initialMarker);
 
-        // テストモードの可否を設定
-        setIsTestingModeActive(
-          classification.testingModeAvailable &&
-            classification.variant === "testing"
-        );
-
         // 開発環境での分類結果表示
         if (import.meta.env.DEV) {
           console.log("🧪 A/B Test Classification:", {
@@ -120,7 +113,6 @@ export function IntegratedMapView({
         };
         setUserClassification(fallbackClassification);
         setCurrentVariant("original");
-        setIsTestingModeActive(false);
         setMarkerType(deriveMarkerType("original"));
       }
     };
@@ -198,11 +190,8 @@ export function IntegratedMapView({
   }
 
   // テストモードが有効な場合はEnhancedMapContainerを使用
-  // 本番環境では統計パネル・テストUI一切無効化
-  const shouldUseTestingMode =
-    import.meta.env.DEV &&
-    (isTestingModeActive ||
-      (userClassification.testingModeAvailable && import.meta.env.DEV));
+  // 開発環境では常にテストパネルを表示、本番環境では統計パネル・テストUI一切無効化
+  const shouldUseTestingMode = import.meta.env.DEV;
 
   // マーカータイプがまだ未設定 (分類直後) の場合はローディング表示
   if (!markerType) {
