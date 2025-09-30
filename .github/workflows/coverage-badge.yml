@@ -9,9 +9,14 @@ jobs:
   gen-badge:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # assets/coverage-badge.svg を push するため
+      pull-requests: write # フォールバックでPRを開く際に必要
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
@@ -44,14 +49,30 @@ jobs:
           echo "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"150\" height=\"20\"><linearGradient id=\"b\" x2=\"0\" y2=\"100%\"><stop offset=\"0\" stop-color=\"#bbb\" stop-opacity=\".1\"/><stop offset=\"1\" stop-opacity=\".1\"/></linearGradient><mask id=\"a\"><rect width=\"150\" height=\"20\" rx=\"3\" fill=\"#fff\"/></mask><g mask=\"url(#a)\"><rect width=\"80\" height=\"20\" fill=\"#555\"/><rect x=\"80\" width=\"70\" height=\"20\" fill=\"#${color}\"/><rect width=\"150\" height=\"20\" fill=\"url(#b)\"/></g><g fill=\"#fff\" text-anchor=\"middle\" font-family=\"Verdana,Geneva,DejaVu Sans,sans-serif\" text-rendering=\"geometricPrecision\" font-size=\"11\"><text x=\"40\" y=\"15\">coverage</text><text x=\"115\" y=\"15\">${pct}%</text></g></svg>" > coverage-badge.svg
 
       - name: Commit badge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
           mkdir -p assets
           mv coverage-badge.svg assets/
           git config user.name 'github-actions'
           git config user.email 'actions@github.com'
           git add assets/coverage-badge.svg
-          git commit -m "chore: update coverage badge" || echo 'No changes'
-          git push origin HEAD:${GITHUB_REF##*/}
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+            exit 0
+          fi
+          git commit -m "chore: update coverage badge"
+          # 直接 push 試行
+          if git push origin HEAD:${GITHUB_REF##*/}; then
+            echo 'Direct push succeeded'
+          else
+            echo 'Direct push failed - creating PR'
+            BRANCH="coverage-badge-update-${GITHUB_RUN_ID}"
+            git checkout -b "$BRANCH"
+            git push origin "$BRANCH"
+            gh api repos/${{ github.repository }}/pulls -f title='chore: update coverage badge' -f head="$BRANCH" -f base='${GITHUB_REF##*/}' -f body='Automated coverage badge update fallback via workflow.' || echo 'PR creation failed'
+          fi
 
       - name: Summary
         shell: bash
