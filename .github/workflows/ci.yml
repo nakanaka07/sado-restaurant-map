@@ -43,15 +43,23 @@ jobs:
             pct=$(jq '.total.lines.pct' coverage/coverage-summary.json || echo 0)
             echo "Detected coverage lines pct=${pct}%" >> $GITHUB_STEP_SUMMARY
 
-            # 小数点を含む比較のため整数に変換 (例: 26.9 -> 269, 20 -> 200)
-            pct_int=$(echo "${pct} * 10" | awk '{printf "%.0f", $1}')
-            threshold_int=200
-
-            if [ "${pct_int}" -ge "${threshold_int}" ]; then
-              echo "✅ Coverage ${pct}% meets 20% threshold"
+            # Use bc for reliable floating point comparison
+            if command -v bc >/dev/null 2>&1; then
+              if (( $(echo "${pct} >= 20" | bc -l) )); then
+                echo "✅ Coverage ${pct}% meets 20% threshold"
+              else
+                echo "❌ Coverage ${pct}% < 20% threshold (gradually increase to 50%)" >&2
+                exit 1
+              fi
             else
-              echo "❌ Coverage ${pct}% < 20% threshold (gradually increase to 50%)" >&2
-              exit 1
+              # Fallback: Use awk with proper variable substitution
+              result=$(awk -v pct="$pct" 'BEGIN { print (pct >= 20) ? "pass" : "fail" }')
+              if [ "$result" = "pass" ]; then
+                echo "✅ Coverage ${pct}% meets 20% threshold"
+              else
+                echo "❌ Coverage ${pct}% < 20% threshold (gradually increase to 50%)" >&2
+                exit 1
+              fi
             fi
           else
             echo "coverage-summary.json not found" >&2; exit 1
