@@ -76,16 +76,36 @@ if (process.env.NODE_ENV === "test") {
   // React Testing Library による自動 act() 処理を信頼
   const originalError = console.error;
   console.error = (...args: unknown[]) => {
-    if (
-      typeof args[0] === "string" &&
-      args[0].includes("Warning: An update to") &&
-      args[0].includes("was not wrapped in act")
-    ) {
-      // act() 警告をテスト環境でのみ抑制
-      return;
+    const first = args[0];
+    const msg = typeof first === "string" ? first : "";
+
+    // 抑制対象パターン (過剰ノイズ / 外部ライブラリ由来 / 意図したエラーパス)
+    const suppressPatterns: RegExp[] = [
+      /Warning: An update to .* was not wrapped in act/, // act() 警告
+      /React does not recognize the `zIndex` prop on a DOM element/, // ライブラリがzIndexをdivへ透過
+      /Not implemented: window.open/, // jsdom未実装 (下でモック)
+      /Failed to fetch restaurants from sheets/, // エラーパス検証用ノイズ
+      /Google Sheets API request failed:/, // Sheets API エラー系
+    ];
+
+    if (suppressPatterns.some(r => r.test(msg))) {
+      return; // テストで期待される・無視可能なノイズ
     }
+
     originalError.call(console, ...args);
   };
+}
+
+// window.open を jsdom 環境で安全にモック (Not implemented 警告回避)
+if (typeof window.open !== "function") {
+  Object.defineProperty(window, "open", {
+    value: vi.fn(() => null),
+    writable: true,
+    configurable: true,
+  });
+} else {
+  // 既存実装が jsdom の not implemented を投げる場合でも上書き
+  window.open = vi.fn(() => null) as unknown as typeof window.open;
 }
 
 // Google Maps API の型安全なモック実装
