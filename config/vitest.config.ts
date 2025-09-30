@@ -24,6 +24,7 @@ export default defineConfig({
       // Vitest で json-summary レポーターを追加し coverage/coverage-summary.json を生成する。
       // 以前は reporter に含まれておらず artifact が空 -> badge 生成失敗していた。
       reporter: ["text", "json", "json-summary", "html"],
+      include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "node_modules/",
         "src/test/",
@@ -33,6 +34,13 @@ export default defineConfig({
         "dev-dist/",
         "tools/",
         "scripts/",
+        ".vscode/",
+        "data-platform/",
+        "src/**/*.test.{ts,tsx}",
+        "src/**/__tests__/",
+        "src/test-circular-marker.tsx",
+        "src/main.tsx",
+        "src/vite-env.d.ts",
       ],
     },
   },
