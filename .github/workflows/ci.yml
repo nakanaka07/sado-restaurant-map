@@ -62,7 +62,16 @@ jobs:
         run: pnpm build
 
       - name: Run size-limit (json)
-        run: pnpm size-limit --json > size-limit.json || echo "size-limit finished with non-zero (captured)"
+        run: |
+          # Use npx to bypass pnpm script banner so output is pure JSON
+          npx --no-install size-limit --json > size-limit.json.tmp 2>/dev/null || echo "size-limit exited non-zero (continuing)"
+          # Validate JSON (basic) and move
+          if jq -e . size-limit.json.tmp >/dev/null 2>&1; then
+            mv size-limit.json.tmp size-limit.json
+          else
+            echo '{}' > size-limit.json
+            echo '::warning:: size-limit did not produce valid JSON; using empty object'
+          fi
 
       - name: Bundle stats summary
         run: |
