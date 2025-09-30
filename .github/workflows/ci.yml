@@ -87,34 +87,13 @@ jobs:
         id: size-diff
         run: |
           BASE_FILE=metrics/size-limit.json
-            if [ -f size-limit.json ] && [ -f "$BASE_FILE" ]; then
-              echo "Baseline exists. Computing diff..."
-              node <<'EOF'
-const fs=require('fs');
-try {
-  const cur=JSON.parse(fs.readFileSync('size-limit.json','utf8'));
-  const base=JSON.parse(fs.readFileSync('metrics/size-limit.json','utf8'));
-  const report=[];
-  const byName=o=>Object.fromEntries(o.map(r=>[r.name||'main',r]));
-  const bc=byName(base), cc=byName(cur);
-  for(const name of new Set([...Object.keys(bc),...Object.keys(cc)])){
-    const b=bc[name]; const c=cc[name];
-    if(!c) continue;
-    const diffBytes=c.size - (b?b.size:0);
-    const diffPct=b? (diffBytes / b.size *100): 0;
-    report.push({name,diffBytes,diffPct});
-  }
-  const risky=report.filter(r=>r.diffPct>5);
-  fs.writeFileSync('size-diff.json', JSON.stringify(report,null,2));
-  if(risky.length){
-    console.log('::warning:: Bundle size increased >5% for: '+risky.map(r=>r.name).join(','));
-  }
-} catch(e){console.error('Diff calc failed',e);}
-EOF
-              echo "diff_done=true" >> $GITHUB_OUTPUT
-            else
-              echo "No baseline. Skipping diff."; echo "diff_done=false" >> $GITHUB_OUTPUT
-            fi
+          if [ -f size-limit.json ] && [ -f "$BASE_FILE" ]; then
+            echo "Baseline exists. Computing diff..."
+            node -e "const fs=require('fs');try{const cur=JSON.parse(fs.readFileSync('size-limit.json','utf8'));const base=JSON.parse(fs.readFileSync('metrics/size-limit.json','utf8'));const byName=o=>Object.fromEntries(o.map(r=>[r.name||'main',r]));const bc=byName(base),cc=byName(cur);const report=[];for(const name of new Set([...Object.keys(bc),...Object.keys(cc)])){const b=bc[name],c=cc[name];if(!c) continue;const diffBytes=c.size-(b?b.size:0);const diffPct=b?(diffBytes/b.size*100):0;report.push({name,diffBytes,diffPct});}const risky=report.filter(r=>r.diffPct>5);fs.writeFileSync('size-diff.json',JSON.stringify(report,null,2));if(risky.length)console.log('::warning:: Bundle size increased >5% for: '+risky.map(r=>r.name).join(','));}catch(e){console.error('Diff calc failed',e);}" || echo "Diff script failed"
+            echo "diff_done=true" >> $GITHUB_OUTPUT
+          else
+            echo "No baseline. Skipping diff."; echo "diff_done=false" >> $GITHUB_OUTPUT
+          fi
       - name: Upload size diff artifact
         if: steps.size-diff.outputs.diff_done == 'true'
         uses: actions/upload-artifact@v4
