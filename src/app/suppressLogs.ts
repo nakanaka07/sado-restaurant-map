@@ -23,16 +23,22 @@ export function suppressLogs(options: SuppressOptions = {}) {
   originalConsole = { ...console };
 
   // 基本 no-op
-  const noop = () => {};
-  (console as any).log = noop;
-  (console as any).info = noop;
-  (console as any).debug = noop;
+  const noop: (..._args: unknown[]) => void = () => {};
+
+  // console メソッドを mutable に扱うための補助型
+  type MutableConsole = {
+    [K in keyof Console]: Console[K];
+  };
+  const mConsole = console as unknown as MutableConsole;
+  mConsole.log = noop;
+  mConsole.info = noop;
+  mConsole.debug = noop;
 
   if (options.suppressWarn) {
-    (console as any).warn = noop;
+    mConsole.warn = noop;
   }
   if (options.suppressError) {
-    (console as any).error = noop;
+    mConsole.error = noop;
   }
 }
 
@@ -53,9 +59,9 @@ export function autoApplySuppression() {
 
 // 型補助: 将来 logger ラッパ導入時に差し替え予定
 export const logger = {
-  log: (...args: any[]) => console.log(...args),
-  info: (...args: any[]) => console.info(...args),
-  debug: (...args: any[]) => console.debug(...args),
-  warn: (...args: any[]) => console.warn(...args),
-  error: (...args: any[]) => console.error(...args),
+  log: (...args: unknown[]) => console.log(...args),
+  info: (...args: unknown[]) => console.info(...args),
+  debug: (...args: unknown[]) => console.debug(...args),
+  warn: (...args: unknown[]) => console.warn(...args),
+  error: (...args: unknown[]) => console.error(...args),
 };

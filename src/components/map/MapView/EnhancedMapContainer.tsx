@@ -42,7 +42,6 @@ export function EnhancedMapContainer({
   );
 
   // 外部 initialMarkerType 変更を同期 (rare case)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   if (initialMarkerType && initialMarkerType !== selectedMarkerType) {
     // 外部制御優先 (ユーザー override でない場合)
     setSelectedMarkerType(initialMarkerType);

@@ -519,14 +519,16 @@ export const getDistrictFromAddress = (address: string): SadoDistrict => {
     const hasKanjiPlaceToken = /[\u4E00-\u9FFF]{2,}/.test(
       address.replace(/佐渡市|新潟県|日本/g, "")
     );
+    const postalDistrictMapTyped = postalDistrictMap as Record<
+      string,
+      SadoDistrict
+    >;
     if (
       !hasKanjiPlaceToken &&
-      (postalDistrictMap as any)[postalCode] &&
+      postalDistrictMapTyped[postalCode] &&
       import.meta.env.DEV
     ) {
-      const fallbackDistrict = (postalDistrictMap as any)[
-        postalCode
-      ] as SadoDistrict;
+      const fallbackDistrict = postalDistrictMapTyped[postalCode];
       console.info(
         `[district:fallback:postal] ${postalCode} → ${fallbackDistrict} (住所に有効地名要素なし)`
       );
