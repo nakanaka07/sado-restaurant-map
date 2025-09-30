@@ -20,7 +20,10 @@ export default defineConfig({
     hookTimeout: 10000,
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      // NOTE: coverage-badge ワークフローが coverage-summary.json を artifact として取得するため
+      // Vitest で json-summary レポーターを追加し coverage/coverage-summary.json を生成する。
+      // 以前は reporter に含まれておらず artifact が空 -> badge 生成失敗していた。
+      reporter: ["text", "json", "json-summary", "html"],
       exclude: [
         "node_modules/",
         "src/test/",
