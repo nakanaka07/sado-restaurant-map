@@ -1,0 +1,40 @@
+name: Lighthouse CI
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+jobs:
+  lhci:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (production)
+        run: pnpm build
+
+      - name: Run Lighthouse CI
+        run: npx lhci autorun --config=lighthouserc.json --budgetsFile=lighthouse-budgets.json || echo "LHCI finished with non-zero exit (soft fail)"
+
+      - name: Summary
+        run: echo "Lighthouse CI run completed" >> $GITHUB_STEP_SUMMARY
