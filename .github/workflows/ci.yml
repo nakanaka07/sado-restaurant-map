@@ -109,7 +109,7 @@ try {
   if(risky.length){
     console.log('::warning:: Bundle size increased >5% for: '+risky.map(r=>r.name).join(','));
   }
-} catch(e){console.error('Diff calc failed',e);} 
+} catch(e){console.error('Diff calc failed',e);}
 EOF
               echo "diff_done=true" >> $GITHUB_OUTPUT
             else
