@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # assets/coverage-badge.svg を push するため
+      contents: write # assets/coverage-badge.svg を push するため
       pull-requests: write # フォールバックでPRを開く際に必要
     steps:
       - name: Checkout
