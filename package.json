@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint . --config config/eslint.config.js",
     "lint:fix": "eslint . --config config/eslint.config.js --fix",
+    "prepare": "husky install",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest --config config/vitest.config.ts",
@@ -66,6 +67,34 @@
     "size-limit": "^11.1.4",
     "workbox-core": "^7.3.0",
     "workbox-window": "^7.3.0",
-    "@lhci/cli": "^0.14.0"
+    "@lhci/cli": "^0.14.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10"
+  },
+  "size-limit": [
+    {
+      "name": "main",
+      "path": "dist/assets/index-*.js",
+      "limit": "250 KB"
+    },
+    {
+      "name": "react-vendor",
+      "path": "dist/assets/react-vendor-*.js",
+      "limit": "180 KB"
+    },
+    {
+      "name": "google-maps",
+      "path": "dist/assets/google-maps-*.js",
+      "limit": "380 KB"
+    }
+  ],
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --config config/eslint.config.js --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx,json,md,css,scss}": [
+      "prettier --write"
+    ]
   }
 }

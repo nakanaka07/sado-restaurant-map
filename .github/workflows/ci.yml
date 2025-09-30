@@ -37,6 +37,16 @@ jobs:
             echo "Lines Coverage: ${lines}%" >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Enforce coverage threshold (>=50%)
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            pct=$(jq '.total.lines.pct' coverage/coverage-summary.json || echo 0)
+            echo "Detected coverage lines pct=${pct}" >> $GITHUB_STEP_SUMMARY
+            awk 'BEGIN { exit !('"${pct}"' >= 50) }' || { echo "Coverage ${pct}% < 50% threshold" >&2; exit 1; }
+          else
+            echo "coverage-summary.json not found" >&2; exit 1
+          fi
+
       - name: Upload coverage summary artifact
         if: success()
         uses: actions/upload-artifact@v4

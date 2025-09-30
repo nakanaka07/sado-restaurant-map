@@ -10,7 +10,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: read
       pull-requests: write
     steps:
@@ -74,3 +74,19 @@ jobs:
         run: |
           echo "Failing due to Lighthouse score below hard threshold." >&2
           exit 1
+
+      - name: Persist Lighthouse scores (main only)
+        if: github.ref == 'refs/heads/main' && steps.scores.outputs.perf != ''
+        run: |
+          if [ -f lh-scores.json ]; then
+            mkdir -p metrics/lighthouse
+            ts=$(date -u +%Y%m%dT%H%M%SZ)
+            cp lh-scores.json metrics/lighthouse/$ts.json
+            git config user.name 'github-actions'
+            git config user.email 'actions@github.com'
+            git add metrics/lighthouse/$ts.json || true
+            git commit -m "chore: add lighthouse score $ts" || echo 'No diff to commit'
+            git push || echo 'Push failed (permissions?)'
+          else
+            echo 'lh-scores.json missing; skip persistence'
+          fi
