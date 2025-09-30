@@ -69,7 +69,7 @@ jobs:
           if [ -f size-limit.json ]; then
             echo "### Bundle Size Report" >> $GITHUB_STEP_SUMMARY
             echo '' >> $GITHUB_STEP_SUMMARY
-            node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync("size-limit.json","utf8"));function fmt(kb){return (kb).toFixed(2)+" KB"} console.log("| Name | Limit | Size | Diff |\n|------|-------|------|------|");d.forEach(r=>{const name=r.name||"main";const limit=r.limit||"";const size=(r.size/1024);const diff=r.diff? (r.diff/1024):0;console.log(`| ${name} | ${limit} | ${fmt(size)} | ${diff===0?'-':fmt(diff)} |`)});' >> table.md
+            node -e 'const fs=require("fs");const d=JSON.parse(fs.readFileSync("size-limit.json","utf8"));function fmt(kb){return (kb).toFixed(2)+" KB"} console.log("| Name | Limit | Size | Diff |\n|------|-------|------|------|");d.forEach(r=>{const name=r.name||"main";const limit=r.limit||"";const size=(r.size/1024);const diff=r.diff? (r.diff/1024):0;console.log(`| ${name} | ${limit} | ${fmt(size)} | ${diff===0?"-":fmt(diff)} |`)});' >> table.md
             cat table.md >> $GITHUB_STEP_SUMMARY
             rm table.md
           else
