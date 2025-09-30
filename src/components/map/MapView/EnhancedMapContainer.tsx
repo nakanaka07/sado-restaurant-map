@@ -354,46 +354,50 @@ export function EnhancedMapContainer({
         </div>
       )}
 
-      {/* 統計情報パネル */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          right: "20px",
-          zIndex: 1000,
-          background: "white",
-          borderRadius: "12px",
-          padding: "16px",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          border: "1px solid #e0e0e0",
-          minWidth: "220px",
-        }}
-      >
-        <h4 style={{ margin: "0 0 12px", fontSize: "14px", color: "#333" }}>
-          📊 表示中のマーカー
-        </h4>
-        <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.4" }}>
-          <div>
-            🍽️ レストラン:{" "}
-            {mapPoints.filter(p => p.type === "restaurant").length}件
-          </div>
-          <div>
-            🅿️ 駐車場: {mapPoints.filter(p => p.type === "parking").length}件
-          </div>
-          <div>
-            🚻 トイレ: {mapPoints.filter(p => p.type === "toilet").length}件
-          </div>
-          <div style={{ marginTop: "8px", fontWeight: "bold", color: "#333" }}>
-            合計: {mapPoints.length}件
-          </div>
-          <div style={{ marginTop: "6px", fontSize: "11px", color: "#999" }}>
-            マーカー:{" "}
-            {selectedMarkerType === "circular-icooon"
-              ? "Circular ICOOON"
-              : selectedMarkerType}
+      {/* 統計情報パネル（開発/テスト環境のみ） */}
+      {showSelectionPanel && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "20px",
+            right: "20px",
+            zIndex: 1000,
+            background: "white",
+            borderRadius: "12px",
+            padding: "16px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            border: "1px solid #e0e0e0",
+            minWidth: "220px",
+          }}
+        >
+          <h4 style={{ margin: "0 0 12px", fontSize: "14px", color: "#333" }}>
+            📊 表示中のマーカー
+          </h4>
+          <div style={{ fontSize: "12px", color: "#666", lineHeight: "1.4" }}>
+            <div>
+              🍽️ レストラン:{" "}
+              {mapPoints.filter(p => p.type === "restaurant").length}件
+            </div>
+            <div>
+              🅿️ 駐車場: {mapPoints.filter(p => p.type === "parking").length}件
+            </div>
+            <div>
+              🚻 トイレ: {mapPoints.filter(p => p.type === "toilet").length}件
+            </div>
+            <div
+              style={{ marginTop: "8px", fontWeight: "bold", color: "#333" }}
+            >
+              合計: {mapPoints.length}件
+            </div>
+            <div style={{ marginTop: "6px", fontSize: "11px", color: "#999" }}>
+              マーカー:{" "}
+              {selectedMarkerType === "circular-icooon"
+                ? "Circular ICOOON"
+                : selectedMarkerType}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 地図本体 */}
       <Map

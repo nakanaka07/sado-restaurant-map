@@ -197,9 +197,11 @@ export function IntegratedMapView({
   }
 
   // テストモードが有効な場合はEnhancedMapContainerを使用
+  // 本番環境では統計パネル・テストUI一切無効化
   const shouldUseTestingMode =
-    isTestingModeActive ||
-    (userClassification.testingModeAvailable && import.meta.env.DEV);
+    import.meta.env.DEV &&
+    (isTestingModeActive ||
+      (userClassification.testingModeAvailable && import.meta.env.DEV));
 
   // マーカータイプがまだ未設定 (分類直後) の場合はローディング表示
   if (!markerType) {
