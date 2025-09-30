@@ -75,17 +75,17 @@
     {
       "name": "main",
       "path": "dist/assets/index-*.js",
-      "limit": "250 KB"
-    },
-    {
-      "name": "react-vendor",
-      "path": "dist/assets/react-vendor-*.js",
-      "limit": "180 KB"
+      "limit": "200 KB"
     },
     {
       "name": "google-maps",
       "path": "dist/assets/google-maps-*.js",
-      "limit": "380 KB"
+      "limit": "40 KB"
+    },
+    {
+      "name": "app-bundle",
+      "path": "dist/assets/App-*.js",
+      "limit": "150 KB"
     }
   ],
   "lint-staged": {

@@ -85,7 +85,7 @@ jobs:
             git config user.name 'github-actions'
             git config user.email 'actions@github.com'
             git add metrics/lighthouse/$ts.json || true
-            git commit -m "chore: add lighthouse score $ts" || echo 'No diff to commit'
+            git commit -m "chore: add lighthouse score $ts [skip ci]" || echo 'No diff to commit'
             git push || echo 'Push failed (permissions?)'
           else
             echo 'lh-scores.json missing; skip persistence'

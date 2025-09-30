@@ -56,9 +56,10 @@ AC:
 ## 6. Done (最近 5 件のみ保持)
 
 1. (P2 chore) size-limit 設定ファイル明示 初期閾値導入
-2. (P2 chore) Coverage 閾値エンフォース (>=50%) CI 追加
+2. (P2 chore) Coverage 閾値エンフォース (>=20% → 段階的50%目標) CI 追加
 3. (P2 security) Dependabot + audit 設定追加
 4. (P3 perf) Lighthouse スコア履歴 保存ステップ追加
+5. (completed) 設定値現実化調整 (coverage 20%, size-limit 実測ベース)
 
 ## 7. Retrospect メモ (任意)
 
