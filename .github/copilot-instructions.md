@@ -2,9 +2,21 @@
 
 (短く・再利用可能。AI は不足時のみ検索。空行で区切るが送信時統合される。)
 
+## 0. Development Context & Partnership
+
+**Personal Developer Environment**: Individual development using VS Code Insiders. Copilot serves as primary coding partner, mentor, and collaborative assistant.
+
+**Partnership Philosophy**: Maintain best practices, stay current with latest technologies, build sustainable development workflows. Prioritize clear communication, proactive suggestions, and continuous learning together.
+
+**Continuous Improvement**: Regularly review and update instructions. Suggest improvements when patterns change or new tools emerge. Flag when current practices may be outdated.
+
+**Task Visibility**: Convert ad-hoc ideas into actionable tasks. Maintain task awareness across chat sessions. Use `docs/TASKS.md` for persistent task tracking.
+
 ## 1. Project Overview
 
 `sado-restaurant-map`: 佐渡島の飲食店/トイレ/駐車場等 POI を React 19 + TypeScript + Vite で表示する PWA。重点: パフォーマンス / アクセシビリティ / 型安全 / オフライン許容。フロント主体、`data-platform/` に Python ETL/整形コードを含む。
+
+**Production Environment**: https://nakanaka07.github.io/sado-restaurant-map/ (GitHub Pages deployment)
 
 ## 2. Tech Stack & Key Tools
 
@@ -56,6 +68,14 @@ CI で lint / type-check / tests / coverage artifact / size-limit / lighthouse (
 
 Always: 最小差分 / 破壊的変更時 README or Glossary 更新提案。検索前に本ファイルと Glossary/COLLAB_PROMPT を参照。大量ファイル一括リネーム・自動整形は明示承認なしで行わない。失敗/不確実: 早期 Blocker 報告。
 
+**Key Documentation References**:
+
+- `docs/SHARED_GLOSSARY.md`: 専門用語・概念定義
+- `docs/COLLAB_PROMPT.md`: AI協働の詳細ガイドライン
+- `docs/pwa-implementation-notes.md`: PWA実装の詳細仕様
+- `docs/ab-test-marker-sync.md`: ABテスト・マーカー同期仕様
+- `docs/TASKS.md`: 現在のタスク状況・優先度
+
 ## 12. Common Pitfalls
 
 - 動的生成した仮想モジュール文字列 (禁止) → 404 fetch 発生。
@@ -74,7 +94,20 @@ Trust these instructions first. Only grep/search if: (a) 未定義の新規 API 
 
 `// TODO(debt:reason)` コメントで技術的負債。週次棚卸し (手動)。
 
-## 16. Python Subtree Quick Note
+## 16. Task Management & Continuous Improvement
+
+**Task Persistence**: Use `docs/TASKS.md` to track ideas, improvements, and pending work. Convert chat discussions into actionable items. Include priority levels and completion estimates.
+
+**Instruction Evolution**: Monthly review of these instructions. Propose updates when:
+
+- New tools/frameworks emerge
+- Development patterns change
+- Performance bottlenecks identified
+- Collaboration friction observed
+
+**Knowledge Gaps**: Proactively identify areas where documentation or automation could improve efficiency. Suggest when to create new scripts, configs, or documentation.
+
+## 17. Python Subtree Quick Note
 
 `data-platform/` は独立Python環境 (requirements.txt)。Node ワークフローから独立。将来: matrix で pytest 追加予定。JavaScript 側から直接 import なし。
 
