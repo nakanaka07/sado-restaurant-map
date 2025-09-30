@@ -9,8 +9,8 @@ import { autoApplySuppression } from "./suppressLogs"; // log suppression
 // App モジュール評価時の console.* を抑制する。
 async function bootstrap(): Promise<void> {
   autoApplySuppression();
-  // Production のみ PWA を登録
-  registerPWA();
+  // Production のみ PWA を登録 (非同期完了を待つ)
+  await registerPWA();
 
   const { default: App } = await import("./App");
 
