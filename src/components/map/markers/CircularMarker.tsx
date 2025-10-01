@@ -103,7 +103,11 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         {
           width: sizeConfig.width,
           height: sizeConfig.height,
-          backgroundColor: backgroundColor,
+          // 駐車場は視認性向上のためストライプパターン (WCAG AA コントラスト確保) を適用
+          background:
+            category === "parking"
+              ? `repeating-linear-gradient(135deg, ${backgroundColor} 0 8px, ${backgroundColor} 8px 16px, ${hexToRgba(backgroundColor, 0.85)} 16px 24px)`
+              : backgroundColor,
           borderRadius: "50%",
           display: "flex",
           alignItems: "center",
