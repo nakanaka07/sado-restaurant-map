@@ -280,6 +280,126 @@ export const CircularMarkerTest: React.FC = () => {
           キーで選択、マウスクリックでも操作可能
         </p>
       </div>
+
+      {/* トイレアイコンサイズ比較 */}
+      <div
+        style={{
+          marginTop: "30px",
+          padding: "20px",
+          backgroundColor: "white",
+          borderRadius: "8px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h3
+          style={{ marginBottom: "20px", textAlign: "center", color: "#555" }}
+        >
+          🚻 トイレアイコン拡大表示 (円の淵近くまで)
+        </h3>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "40px",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              トイレ (Medium)
+            </div>
+            <CircularMarker category="toilet" size="medium" />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              トイレ (Large)
+            </div>
+            <CircularMarker category="toilet" size="large" />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              トイレ (XLarge)
+            </div>
+            <CircularMarker category="toilet" size="xlarge" />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "40px",
+            flexWrap: "wrap",
+            alignItems: "center",
+            marginTop: "30px",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              カフェ (XLarge)
+            </div>
+            <CircularMarker category="cafe" size="xlarge" />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              トイレ (XLarge)
+            </div>
+            <CircularMarker category="toilet" size="xlarge" />
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                marginBottom: "10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              駐車場 (XLarge)
+            </div>
+            <CircularMarker category="parking" size="xlarge" />
+          </div>
+        </div>
+        <p
+          style={{
+            marginTop: "20px",
+            fontSize: "14px",
+            color: "#666",
+            textAlign: "center",
+          }}
+        >
+          ℹ️ トイレアイコンが他のカテゴリより約1.4倍大きく表示されます
+        </p>
+      </div>
     </div>
   );
 };

@@ -44,7 +44,17 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function computeIconSize(base: number, ringed: boolean): number {
+function computeIconSize(
+  base: number,
+  ringed: boolean,
+  category: IcooonMarkerCategory
+): number {
+  // トイレアイコンは特別に大きく表示（enhanced-pngサイズ感）
+  if (category === "toilet") {
+    // ベースサイズの約1.4倍（円の淵近くまで拡大）
+    return Math.round(base * 1.4);
+  }
+
   if (!ringed) return base;
   if (base >= 20) return base - 2; // medium+ cases
   return base - 1; // small
@@ -90,7 +100,11 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
   const isRinged = isParking || (!isParking && ringed);
 
   // Icon size (avoid nested ternaries inline in JSX)
-  const computedIconSize = computeIconSize(sizeConfig.iconSize, isRinged);
+  const computedIconSize = computeIconSize(
+    sizeConfig.iconSize,
+    isRinged,
+    category
+  );
 
   // Build classname
   const fullClassName = buildClassName(
@@ -228,40 +242,47 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           position: absolute;
           left: 50%;
           top: 50%;
-          /* Base core circle size */
-          /* Slightly reduced to keep outer visual footprint consistent with non-ringed markers */
-          width: 72%;
-          height: 72%;
+          /* Base core circle size - enlarged to maintain visual presence */
+          width: 78%;
+          height: 78%;
           transform: translate(-50%, -50%);
           background: ${parkingColor}; /* green core */
           border-radius: 50%;
           z-index: 0;
           transition: transform 0.25s ease, filter 0.25s ease;
-          /* Multi-ring stack (green core + white ring + green ring + outer white ring + subtle outline)
-             We build outward using successive spread radii; fine-tune values for visual proportion.
+          /* Adjusted ring stack for consistent outer footprint with other markers
+             Total outer size: ~2px to match standard marker border
              Order: inset subtle core edge, then outward rings.
           */
           box-shadow:
             0 0 0 1px rgba(0,0,0,0.05) inset, /* subtle inner definition */
-            0 0 0 4px #FFFFFF,                /* inner white ring (4px) */
-            0 0 0 8px ${parkingColor},       /* mid green ring (adds 4px beyond white) */
-            0 0 0 10px #FFFFFF,               /* outer white ring (adds 2px) */
-            0 0 0 11.7px rgba(0,0,0,0.06);    /* faint outline (adds 0.7px) */
+            0 0 0 2.5px #FFFFFF,              /* inner white ring (2.5px) */
+            0 0 0 5px ${parkingColor},        /* mid green ring (adds 2.5px) */
+            0 0 0 6.5px #FFFFFF,              /* outer white ring (adds 1.5px) */
+            0 0 0 7px rgba(0,0,0,0.06);       /* faint outline (adds 0.5px) */
         }
         .circular-marker.parking-marker .icon-image { position: relative; z-index: 1; }
         .circular-marker.parking-marker.interactive:hover::before {
-          /* remove scale; add gentle glow ring */
-          filter: brightness(1.02) saturate(1.04);
+          /* subtle brightness increase without filter (prevents repainting) */
           box-shadow:
             0 0 0 1px rgba(0,0,0,0.05) inset,
-            0 0 0 5px #FFFFFF,
-            0 0 0 9px ${parkingColor},
-            0 0 0 10.3px #FFFFFF,
-            0 0 0 12px rgba(0,0,0,0.10),
-            0 0 4px 2px rgba(76,175,80,0.35); /* soft colored glow */
+            0 0 0 2.5px #FFFFFF,
+            0 0 0 5px ${parkingColor},
+            0 0 0 6.5px #FFFFFF,
+            0 0 0 7px rgba(0,0,0,0.08),
+            0 0 2px 2px rgba(76,175,80,0.3); /* gentle outer glow */
         }
         .circular-marker.parking-marker.interactive:hover {
-          box-shadow: 0 3px 9px rgba(0,0,0,0.24);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+          transform: scale(1.05);
+          transition: all 0.25s ease;
+        }
+
+        /* 通常マーカー（リングなし）のホバー効果 */
+        .circular-marker.interactive:not(.parking-marker):not(.ringed-marker):hover {
+          box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+          transform: scale(1.05);
+          transition: all 0.25s ease;
         }
 
         /* 汎用リング付きマーカー (非駐車場カテゴリで ringed=true の場合) */
@@ -287,29 +308,32 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         }
         .circular-marker.ringed-marker .icon-image { position: relative; z-index: 1; }
         .circular-marker.ringed-marker.interactive:hover::before {
-          filter: brightness(1.02) saturate(1.04);
+          /* maintain structure, add subtle glow */
           box-shadow:
             0 0 0 1px rgba(0,0,0,0.05) inset,
-            0 0 0 5px #FFFFFF,
-            0 0 0 9px var(--marker-color),
-            0 0 0 10.3px #FFFFFF,
-            0 0 0 12px rgba(0,0,0,0.10),
-            0 0 4px 2px rgba(255,255,255,0.35); /* neutral glow */
+            0 0 0 4px #FFFFFF,
+            0 0 0 8px var(--marker-color),
+            0 0 0 10px #FFFFFF,
+            0 0 0 11.7px rgba(0,0,0,0.08),
+            0 0 2px 2px rgba(255,255,255,0.25); /* gentle outer glow */
         }
         .circular-marker.ringed-marker.interactive:hover {
-          box-shadow: 0 3px 9px rgba(0,0,0,0.24);
+          box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+          transform: scale(1.05);
+          transition: all 0.25s ease;
         }
 
-        /* アイコンのホバー効果 */
+        /* アイコンのホバー効果（控えめなグロー） */
         .circular-marker.interactive:hover .icon-image {
-          filter: brightness(0) saturate(100%) invert(100%) drop-shadow(0 0 3px rgba(255,255,255,0.65));
+          filter: brightness(0) saturate(100%) invert(100%) drop-shadow(0 0 3px rgba(255,255,255,0.8));
+          transition: filter 0.25s ease;
         }
 
-        /* ツールチップの改善されたアニメーション */
+        /* ツールチップの改善されたアニメーション（スケール削除） */
         .circular-marker.interactive:hover .category-tooltip {
           opacity: 1;
-          transform: translateX(-50%) translateY(2px) scale(1.05);
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          transform: translateX(-50%) translateY(-2px);
+          transition: opacity 0.25s ease-out, transform 0.25s ease-out;
         }
 
         /* ツールチップの矢印 */
@@ -326,11 +350,10 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           border-bottom: 4px solid rgba(0, 0, 0, 0.85);
         }
 
-        /* アクティブ状態（クリック時）の改善 */
+        /* アクティブ状態（クリック時）- シャドウのみ変更 */
         .circular-marker.interactive:active {
-          /* minimal nudge, no rotation to avoid visual wobble */
-          transform: translateY(1px);
-          transition: transform 0.08s ease-out;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.2) !important;
+          transition: box-shadow 0.05s ease-out;
         }
 
         /* Stability & performance hints */
@@ -343,10 +366,12 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           .circular-marker.loading { animation: none !important; }
           .circular-marker.parking-marker.interactive:hover::before,
           .circular-marker.ringed-marker.interactive:hover::before {
-            transform: translate(-50%, -50%) scale(1);
-            filter: brightness(1) saturate(1);
+            transform: translate(-50%, -50%);
           }
-          .circular-marker.interactive:active { transform: scale(0.98); }
+          .circular-marker.interactive:hover,
+          .circular-marker.interactive:active {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+          }
         }
 
         /* フォーカス状態のアクセシビリティ向上 */

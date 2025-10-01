@@ -22,11 +22,11 @@ export const ToiletHistogram: React.FC<ToiletHistogramProps> = ({
   const bars = values.slice(0, maxBars);
   if (!bars.length) return null;
 
-  const gap = 2; // 単位ギャップ (% of viewBox width)
+  const gap = 1.5; // 単位ギャップ (% of viewBox width) - より密に配置
   const totalGap = gap * (bars.length + 1);
   const barW = (100 - totalGap) / bars.length;
-  const maxHeight = 70; // 下基準からの最大高さ(%). 上 30% 余白で円リングやアイコンとの干渉回避
-  const baseline = 85; // 下端位置
+  const maxHeight = 85; // 下基準からの最大高さ(%). 円の淵近くまで拡大
+  const baseline = 90; // 下端位置 - より下に配置
 
   return (
     <svg

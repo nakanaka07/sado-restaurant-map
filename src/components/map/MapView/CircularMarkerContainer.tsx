@@ -157,7 +157,6 @@ export const CircularMarkerContainer: React.FC<
             <CircularMarker
               category={category}
               size={markerSize}
-              className="hover:scale-105 transition-transform duration-200"
               ariaLabel={getPointAriaLabel(point)}
               onClick={() => onPointClick?.(point)}
             />
