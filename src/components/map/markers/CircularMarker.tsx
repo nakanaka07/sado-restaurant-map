@@ -82,12 +82,18 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           cursor: interactive ? "pointer" : "default",
           transition: "all 0.25s ease-in-out",
           boxShadow: isParking
-              ? [
-                  "0 0 0 2px #FFFFFF",
-                  "0 0 0 5px " + parkingColor,
-                  "0 0 0 9px #FFFFFF",
-                  "0 2px 6px rgba(0,0,0,0.30)",
-                ].join(", ")
+            ? [
+                // inner thin white ring (~1.5px 視覚相当)
+                "0 0 0 1.5px #FFFFFF",
+                // green spacer (inner edge→約3px)
+                "0 0 0 4.5px " + parkingColor,
+                // thicker outer white ring (強調)
+                "0 0 0 11px #FFFFFF",
+                // faint outer outline (薄い境界分離)
+                "0 0 0 11.75px rgba(0,0,0,0.08)",
+                // drop shadow
+                "0 2px 5px rgba(0,0,0,0.28)",
+              ].join(", ")
             : "0 2px 8px rgba(0,0,0,0.15)",
           border: isParking ? "none" : "2px solid rgba(255,255,255,0.3)",
           padding: 0,
@@ -158,10 +164,11 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
 
         .circular-marker.parking-marker.interactive:hover {
           box-shadow:
-            0 0 0 2px #FFFFFF,
-            0 0 0 5px ${parkingColor},
-            0 0 0 9px #FFFFFF,
-            0 6px 16px rgba(0,0,0,0.38);
+            0 0 0 1.5px #FFFFFF,
+            0 0 0 4.5px ${parkingColor},
+            0 0 0 11px #FFFFFF,
+            0 0 0 11.75px rgba(0,0,0,0.10),
+            0 4px 14px rgba(0,0,0,0.40);
         }
 
         /* アイコンのホバー効果 */
