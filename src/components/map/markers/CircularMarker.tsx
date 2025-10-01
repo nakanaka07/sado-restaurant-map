@@ -74,7 +74,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           width: sizeConfig.width,
           height: sizeConfig.height,
           // parking は本体背景を白にして擬似要素で緑コアを描く
-          background: isParking ? '#FFFFFF' : baseColor,
+          background: isParking ? "#FFFFFF" : baseColor,
           borderRadius: "50%",
           display: "flex",
           alignItems: "center",
@@ -84,10 +84,10 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           transition: "all 0.25s ease-in-out",
           boxShadow: isParking
             ? [
-                // outer white ring (single) - we already have white base, this extends outward
-                "0 0 0 10.5px #FFFFFF",
-                // subtle outline
-                "0 0 0 11.1px rgba(0,0,0,0.06)",
+                // outer white ring (reduced spread 10.5px -> 10.0px)
+                "0 0 0 10px #FFFFFF",
+                // subtle outline adjusted accordingly (11.1 -> 10.6)
+                "0 0 0 10.6px rgba(0,0,0,0.06)",
                 // depth shadow
                 "0 2px 5px rgba(0,0,0,0.26)",
               ].join(", ")
@@ -164,8 +164,8 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           position: absolute;
           left: 50%;
           top: 50%;
-          width: 60%;
-          height: 60%;
+          width: 62%;
+          height: 62%;
           transform: translate(-50%, -50%);
           background: ${parkingColor};
           border-radius: 50%;
@@ -175,13 +175,13 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         }
         .circular-marker.parking-marker .icon-image { position: relative; z-index: 1; }
         .circular-marker.parking-marker.interactive:hover::before {
-          transform: translate(-50%, -50%) scale(1.06);
+          transform: translate(-50%, -50%) scale(1.04);
           filter: brightness(1.05) saturate(1.08);
         }
         .circular-marker.parking-marker.interactive:hover {
           box-shadow:
-            0 0 0 10.5px #FFFFFF,
-            0 0 0 11.1px rgba(0,0,0,0.075),
+            0 0 0 10px #FFFFFF,
+            0 0 0 10.6px rgba(0,0,0,0.075),
             0 5px 15px rgba(0,0,0,0.40);
         }
 
