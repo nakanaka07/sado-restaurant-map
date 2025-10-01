@@ -82,13 +82,12 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           cursor: interactive ? "pointer" : "default",
           transition: "all 0.25s ease-in-out",
           boxShadow: isParking
-            ? [
-                "0 0 0 2px #FFFFFF",
-                "0 0 0 5px " + parkingColor,
-                "0 0 0 9px #FFFFFF",
-                "0 0 0 10px #000000",
-                "0 2px 6px rgba(0,0,0,0.35)",
-              ].join(", ")
+              ? [
+                  "0 0 0 2px #FFFFFF",
+                  "0 0 0 5px " + parkingColor,
+                  "0 0 0 9px #FFFFFF",
+                  "0 2px 6px rgba(0,0,0,0.30)",
+                ].join(", ")
             : "0 2px 8px rgba(0,0,0,0.15)",
           border: isParking ? "none" : "2px solid rgba(255,255,255,0.3)",
           padding: 0,
@@ -162,28 +161,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
             0 0 0 2px #FFFFFF,
             0 0 0 5px ${parkingColor},
             0 0 0 9px #FFFFFF,
-            0 0 0 10px #000000,
-            0 6px 18px rgba(0,0,0,0.45);
-        }
-        .circular-marker.parking-marker::after {
-          content: "";
-          position: absolute;
-          top: -4px;
-          left: -4px;
-          width: calc(100% + 8px);
-          height: calc(100% + 8px);
-          border-radius: 50%;
-          border: 3px solid #000; /* 外側黒リング */
-          box-shadow: 0 0 0 1px rgba(255,255,255,0.15); /* 薄い内側分離線 */
-          pointer-events: none;
-        }
-        .circular-marker.parking-marker.interactive:hover::after {
-          /* ホバー時もリングを維持。拡大と同期 */
-          top: -5px;
-          left: -5px;
-          width: calc(100% + 10px);
-          height: calc(100% + 10px);
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            0 6px 16px rgba(0,0,0,0.38);
         }
 
         /* アイコンのホバー効果 */
