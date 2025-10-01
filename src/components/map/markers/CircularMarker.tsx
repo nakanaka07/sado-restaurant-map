@@ -174,10 +174,10 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           */
           box-shadow:
             0 0 0 1px rgba(0,0,0,0.05) inset, /* subtle inner definition */
-            0 0 0 3px #FFFFFF,               /* inner white ring */
-            0 0 0 6px ${parkingColor},       /* mid green ring */
-            0 0 0 10px #FFFFFF,              /* outer white ring */
-            0 0 0 10.7px rgba(0,0,0,0.06);   /* faint outline */
+            0 0 0 6px #FFFFFF,                /* inner white ring (6px) */
+            0 0 0 12px ${parkingColor},       /* mid green ring (adds 6px beyond white) */
+            0 0 0 15px #FFFFFF,               /* outer white ring (adds 3px) */
+            0 0 0 15.7px rgba(0,0,0,0.06);    /* faint outline (adds 0.7px) */
         }
         .circular-marker.parking-marker .icon-image { position: relative; z-index: 1; }
         .circular-marker.parking-marker.interactive:hover::before {
@@ -185,10 +185,10 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           filter: brightness(1.05) saturate(1.08);
           box-shadow:
             0 0 0 1px rgba(0,0,0,0.05) inset,
-            0 0 0 3.1px #FFFFFF,
-            0 0 0 6.2px ${parkingColor},
-            0 0 0 10.3px #FFFFFF,
-            0 0 0 11px rgba(0,0,0,0.08);
+            0 0 0 6.2px #FFFFFF,
+            0 0 0 12.3px ${parkingColor},
+            0 0 0 15.3px #FFFFFF,
+            0 0 0 16.1px rgba(0,0,0,0.08);
         }
         .circular-marker.parking-marker.interactive:hover {
           box-shadow:
