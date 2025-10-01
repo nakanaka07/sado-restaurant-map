@@ -58,7 +58,9 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
   // Phase 4: アニメーションクラス生成
   const animationClass = animation !== "none" ? `${animation}-animation` : "";
   const fullClassName =
-    `circular-marker ${className} ${interactive ? "interactive" : "static"} ${animationClass}`.trim();
+    `circular-marker ${className} ${interactive ? "interactive" : "static"} ${animationClass} ${
+      category === "parking" ? "parking-marker" : ""
+    }`.trim();
 
   // 🔧 デバッグ用ログ（開発環境のみ）
   if (import.meta.env.DEV) {
@@ -137,15 +139,14 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         {
           width: sizeConfig.width,
           height: sizeConfig.height,
-          // 駐車場: 高コントラスト 45deg ストライプ (8px 幅)
           background:
             category === "parking" && parkingStripe
               ? `repeating-linear-gradient(45deg,
-                  ${parkingStripe.light} 0 6px,
-                  ${parkingStripe.dark} 6px 12px,
-                  ${parkingStripe.medium} 12px 18px,
-                  ${parkingStripe.dark2} 18px 24px
-                )`
+                ${parkingStripe.light} 0 6px,
+                ${parkingStripe.dark} 6px 12px,
+                ${parkingStripe.medium} 12px 18px,
+                ${parkingStripe.dark2} 18px 24px
+              )`
               : backgroundColor,
           borderRadius: "50%",
           display: "flex",
@@ -154,10 +155,16 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           position: "relative",
           cursor: interactive ? "pointer" : "default",
           transition: "all 0.2s ease-in-out",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-          border: "2px solid rgba(255, 255, 255, 0.3)",
+          // 通常影 / 駐車場は多層リング
+          boxShadow:
+            category === "parking"
+              ? "0 0 0 2px #9ea5aa, 0 0 0 4px #000, 0 2px 8px rgba(0,0,0,0.35)"
+              : "0 2px 8px rgba(0, 0, 0, 0.15)",
+          border:
+            category === "parking"
+              ? "none"
+              : "2px solid rgba(255, 255, 255, 0.3)",
           padding: 0,
-          // CSS変数でカテゴリ別の色を設定
           "--marker-color": backgroundColor,
           "--marker-color-alpha": hexToRgba(backgroundColor, 0.4),
         } as React.CSSProperties & Record<string, string | number>
@@ -228,6 +235,31 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
             0 0 0 4px var(--marker-color-alpha);
           background: linear-gradient(135deg, var(--marker-color) 0%, var(--marker-color) 100%);
           filter: brightness(1.1) saturate(1.15);
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 駐車場専用: 外側黒リング (擬似要素) */
+        .circular-marker.parking-marker {
+          position: relative;
+        }
+        .circular-marker.parking-marker::after {
+          content: "";
+          position: absolute;
+          top: -4px;
+          left: -4px;
+          width: calc(100% + 8px);
+          height: calc(100% + 8px);
+          border-radius: 50%;
+          border: 3px solid #000; /* 外側黒リング */
+          box-shadow: 0 0 0 1px rgba(255,255,255,0.15); /* 薄い内側分離線 */
+          pointer-events: none;
+        }
+        .circular-marker.parking-marker.interactive:hover::after {
+          /* ホバー時もリングを維持。拡大と同期 */
+          top: -5px;
+          left: -5px;
+          width: calc(100% + 10px);
+          height: calc(100% + 10px);
           transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
