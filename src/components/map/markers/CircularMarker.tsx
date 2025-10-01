@@ -95,6 +95,33 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
+  // 明瞭ストライプ用カラー生成 (parking のみ)
+  const deriveStripeColors = (hex: string): { light: string; dark: string } => {
+    // シンプルな明度調整 (HSL 変換を避け高速化)
+    const toRGB = (h: string) => [
+      parseInt(h.slice(1, 3), 16),
+      parseInt(h.slice(3, 5), 16),
+      parseInt(h.slice(5, 7), 16),
+    ];
+    const toHex = (r: number, g: number, b: number) =>
+      `#${r.toString(16).padStart(2, "0")}${g
+        .toString(16)
+        .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+    const clamp = (v: number) => Math.min(255, Math.max(0, v));
+    const [r, g, b] = toRGB(hex);
+    // lighten +24%, darken -18% 程度で白アイコンとのコントラスト確保
+    const light = toHex(
+      clamp(r + (255 - r) * 0.24),
+      clamp(g + (255 - g) * 0.24),
+      clamp(b + (255 - b) * 0.24)
+    );
+    const dark = toHex(clamp(r * 0.82), clamp(g * 0.82), clamp(b * 0.82));
+    return { light, dark };
+  };
+
+  const parkingStripe =
+    category === "parking" ? deriveStripeColors(backgroundColor) : null;
+
   return (
     <button
       type="button"
@@ -103,10 +130,10 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         {
           width: sizeConfig.width,
           height: sizeConfig.height,
-          // 駐車場は視認性向上のためストライプパターン (WCAG AA コントラスト確保) を適用
+          // 駐車場: 高コントラスト 45deg ストライプ (8px 幅)
           background:
-            category === "parking"
-              ? `repeating-linear-gradient(135deg, ${backgroundColor} 0 8px, ${backgroundColor} 8px 16px, ${hexToRgba(backgroundColor, 0.85)} 16px 24px)`
+            category === "parking" && parkingStripe
+              ? `repeating-linear-gradient(45deg, ${parkingStripe.light} 0 8px, ${parkingStripe.dark} 8px 16px)`
               : backgroundColor,
           borderRadius: "50%",
           display: "flex",
