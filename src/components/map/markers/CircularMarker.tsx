@@ -71,8 +71,10 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
   }
 
   const handleClick = (e: React.MouseEvent) => {
+    // AdvancedMarker 親へのバブリングを許可しても良いが、
+    // 今回は CircularMarker 自身で onClick を完結させるため preventDefault のみ。
+    // InfoWindow 表示は Container から渡された onClick で行われる。
     e.preventDefault();
-    e.stopPropagation();
     if (interactive && onClick) {
       onClick();
     }

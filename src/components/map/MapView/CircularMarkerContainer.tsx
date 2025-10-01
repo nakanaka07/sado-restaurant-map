@@ -151,7 +151,7 @@ export const CircularMarkerContainer: React.FC<
           <AdvancedMarker
             key={`${point.type}-${index}`}
             position={point.coordinates}
-            onClick={() => onPointClick?.(point)}
+            // AdvancedMarker 側の onClick は削除し、子ボタンで完結させる
             style={{ cursor: "pointer" }}
           >
             <CircularMarker
@@ -159,6 +159,7 @@ export const CircularMarkerContainer: React.FC<
               size={markerSize}
               className="hover:scale-105 transition-transform duration-200"
               ariaLabel={getPointAriaLabel(point)}
+              onClick={() => onPointClick?.(point)}
             />
           </AdvancedMarker>
         );
