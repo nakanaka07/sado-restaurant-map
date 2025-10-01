@@ -84,11 +84,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           transition: "all 0.25s ease-in-out",
           boxShadow: isParking
             ? [
-                // outer white ring (reduced spread 10.5px -> 10.0px)
-                "0 0 0 10px #FFFFFF",
-                // subtle outline adjusted accordingly (11.1 -> 10.6)
-                "0 0 0 10.6px rgba(0,0,0,0.06)",
-                // depth shadow
+                // depth shadow only (rings handled by pseudo-element)
                 "0 2px 5px rgba(0,0,0,0.26)",
               ].join(", ")
             : "0 2px 8px rgba(0,0,0,0.15)",
@@ -164,25 +160,40 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           position: absolute;
           left: 50%;
           top: 50%;
-          width: 62%;
-          height: 62%;
+          /* Base core circle size */
+          width: 56%;
+          height: 56%;
           transform: translate(-50%, -50%);
-          background: ${parkingColor};
+          background: ${parkingColor}; /* green core */
           border-radius: 50%;
           z-index: 0;
           transition: transform 0.25s ease, filter 0.25s ease;
-          box-shadow: 0 0 0 1px rgba(0,0,0,0.05) inset;
+          /* Multi-ring stack (green core + white ring + green ring + outer white ring + subtle outline)
+             We build outward using successive spread radii; fine-tune values for visual proportion.
+             Order: inset subtle core edge, then outward rings.
+          */
+          box-shadow:
+            0 0 0 1px rgba(0,0,0,0.05) inset, /* subtle inner definition */
+            0 0 0 3px #FFFFFF,               /* inner white ring */
+            0 0 0 6px ${parkingColor},       /* mid green ring */
+            0 0 0 10px #FFFFFF,              /* outer white ring */
+            0 0 0 10.7px rgba(0,0,0,0.06);   /* faint outline */
         }
         .circular-marker.parking-marker .icon-image { position: relative; z-index: 1; }
         .circular-marker.parking-marker.interactive:hover::before {
           transform: translate(-50%, -50%) scale(1.04);
           filter: brightness(1.05) saturate(1.08);
+          box-shadow:
+            0 0 0 1px rgba(0,0,0,0.05) inset,
+            0 0 0 3.1px #FFFFFF,
+            0 0 0 6.2px ${parkingColor},
+            0 0 0 10.3px #FFFFFF,
+            0 0 0 11px rgba(0,0,0,0.08);
         }
         .circular-marker.parking-marker.interactive:hover {
           box-shadow:
-            0 0 0 10px #FFFFFF,
-            0 0 0 10.6px rgba(0,0,0,0.075),
-            0 5px 15px rgba(0,0,0,0.40);
+            0 2px 5px rgba(0,0,0,0.30),
+            0 5px 15px rgba(0,0,0,0.35);
         }
 
         /* アイコンのホバー効果 */
