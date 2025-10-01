@@ -96,7 +96,9 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
   };
 
   // 明瞭ストライプ用カラー生成 (parking のみ)
-  const deriveStripeColors = (hex: string): { light: string; dark: string } => {
+  const deriveStripeColors = (
+    hex: string
+  ): { light: string; dark: string; medium: string; dark2: string } => {
     // シンプルな明度調整 (HSL 変換を避け高速化)
     const toRGB = (h: string) => [
       parseInt(h.slice(1, 3), 16),
@@ -109,14 +111,19 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         .padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
     const clamp = (v: number) => Math.min(255, Math.max(0, v));
     const [r, g, b] = toRGB(hex);
-    // lighten +24%, darken -18% 程度で白アイコンとのコントラスト確保
+    // light: +55% toward white (ほぼ白に近い灰色) ※完全白は白アイコン可読性低下懸念
     const light = toHex(
-      clamp(r + (255 - r) * 0.24),
-      clamp(g + (255 - g) * 0.24),
-      clamp(b + (255 - b) * 0.24)
+      clamp(r + (255 - r) * 0.55),
+      clamp(g + (255 - g) * 0.55),
+      clamp(b + (255 - b) * 0.55)
     );
-    const dark = toHex(clamp(r * 0.82), clamp(g * 0.82), clamp(b * 0.82));
-    return { light, dark };
+    // medium: 元色 (基準帯)
+    const medium = hex;
+    // dark: -30% (強いコントラスト)
+    const dark = toHex(clamp(r * 0.7), clamp(g * 0.7), clamp(b * 0.7));
+    // dark2: -45% (より濃い帯) ※ sequence: light, dark, medium, dark2
+    const dark2 = toHex(clamp(r * 0.55), clamp(g * 0.55), clamp(b * 0.55));
+    return { light, dark, medium, dark2 };
   };
 
   const parkingStripe =
@@ -133,7 +140,12 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           // 駐車場: 高コントラスト 45deg ストライプ (8px 幅)
           background:
             category === "parking" && parkingStripe
-              ? `repeating-linear-gradient(45deg, ${parkingStripe.light} 0 8px, ${parkingStripe.dark} 8px 16px)`
+              ? `repeating-linear-gradient(45deg,
+                  ${parkingStripe.light} 0 6px,
+                  ${parkingStripe.dark} 6px 12px,
+                  ${parkingStripe.medium} 12px 18px,
+                  ${parkingStripe.dark2} 18px 24px
+                )`
               : backgroundColor,
           borderRadius: "50%",
           display: "flex",
