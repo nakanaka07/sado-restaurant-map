@@ -144,21 +144,34 @@ export const CircularMarkerContainer: React.FC<
 
   return (
     <>
-      {filteredPoints.map((point, index) => {
+      {filteredPoints.map(point => {
         const category = mapPointToIcooonCategory(point);
+
+        const handleClick = () => {
+          // デバッグ用ログ（開発時のみ）: 駐車場だけ InfoWindow が開かない問題調査
+          if (import.meta.env.DEV) {
+            console.debug("[CircularMarkerContainer] marker click", {
+              id: point.id,
+              type: point.type,
+              name: point.name,
+            });
+          }
+          onPointClick?.(point);
+        };
 
         return (
           <AdvancedMarker
-            key={`${point.type}-${index}`}
+            key={point.id} // 安定したキー: index 依存を排除し再マウントによる state 喪失を防止
             position={point.coordinates}
-            // AdvancedMarker 側の onClick は削除し、子ボタンで完結させる
+            // AdvancedMarker 自体にもフォールバック onClick を付与（ボタンが何らかでイベント阻害された場合の保険）
+            onClick={handleClick}
             style={{ cursor: "pointer" }}
           >
             <CircularMarker
               category={category}
               size={markerSize}
               ariaLabel={getPointAriaLabel(point)}
-              onClick={() => onPointClick?.(point)}
+              onClick={handleClick}
             />
           </AdvancedMarker>
         );

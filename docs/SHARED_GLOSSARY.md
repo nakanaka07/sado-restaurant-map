@@ -102,6 +102,10 @@ AC:
 優先度: P1
 ```
 
+\n
+
+## 12. 今後の拡張候補
+
 ## 10. AI 応答期待フォーマット
 
 - 最初: 状況 + 次アクション 1文
@@ -119,6 +123,17 @@ AC:
 | データ削除 | 個人情報保持しない方針                                |
 
 ## 12. 今後の拡張候補
+
+\n+## 13. テスト環境(jsdom) 運用メモ (Last-Updated: 2025-10-02)
+
+DOM を操作/検証する Vitest テスト (`@testing-library/react` 使用) は必ず jsdom 環境で実行する。
+
+- 原則: グローバル設定で `environment: "jsdom"`
+- 例外 (単独実行 / 明示性向上): テストファイル先頭に `/* @vitest-environment jsdom */`
+- Fast Fail: `src/test/setup.ts` 冒頭で `document` 未定義なら即例外 → 設定漏れを早期検知
+- よくある誤り: コピーした新規テストにディレクティブを入れ忘れ → `document is not defined`
+
+再発防止方針: Fast-fail チェックを維持し、トラブル時はまず `vitest --config config/vitest.config.ts --environment jsdom` 実行で切り分け。
 
 - CI: GitHub Actions ワークフロー (lint/test/build/a11y)
 - 自動ラベル: PR タイトルプリフィックスで振分け

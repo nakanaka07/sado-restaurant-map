@@ -223,9 +223,12 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
         </div>
       )}
 
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
+      {process.env.NODE_ENV !== "test" && (
+        <style
+          // NOTE(test-optim): テスト環境では巨大インラインCSSが jsdom の `Could not parse CSS stylesheet` ノイズを大量発生させるためスキップ。
+          // 視覚的スタイルは E2E/実ブラウザで担保し、ユニットテストではアクセシビリティ & クリック挙動のみ検証する方針。
+          dangerouslySetInnerHTML={{
+            __html: `
             0 0 0 4px var(--marker-color-alpha);
           background: linear-gradient(135deg, var(--marker-color) 0%, var(--marker-color) 100%);
           filter: brightness(1.1) saturate(1.15);
@@ -441,8 +444,9 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           }
         }
         `,
-        }}
-      />
+          }}
+        />
+      )}
     </button>
   );
 };

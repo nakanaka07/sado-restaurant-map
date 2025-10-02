@@ -250,7 +250,8 @@ export function IntegratedMapView({
           style={{
             position: "absolute",
             top: "10px",
-            right: "140px", // マップコントロールと重ならないよう左に移動
+            left: "50%",
+            transform: "translateX(-50%)",
             zIndex: 1001,
             background: isUserOverride
               ? "linear-gradient(90deg,#ff9800,#f57c00)"

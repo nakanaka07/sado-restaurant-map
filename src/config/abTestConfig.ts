@@ -333,22 +333,16 @@ export type MarkerType =
  * @param variant ABTestVariant
  */
 export function deriveMarkerType(variant: ABTestVariant): MarkerType {
-  switch (variant) {
-    case "original":
-      return "original";
-    case "enhanced-png":
-      return "enhanced-png";
-    case "svg":
-      return "svg";
-    case "phase4-enhanced":
-      // Phase4 拡張では circular 系を想定 (暫定)
-      return "circular-icooon";
-    case "testing":
-      // テストバリアントは比較しやすい中間の svg を既定 (ユーザーが UI で override 可)
-      return "svg";
-    default:
-      return "original";
-  }
+  // ポリシー: 現在は全バリアント circular-icooon に統一。
+  // Sonar 警告回避と将来再拡張を見据え mapping 形式で実装。
+  const mapping: Record<ABTestVariant, MarkerType> = {
+    original: "circular-icooon",
+    "enhanced-png": "circular-icooon",
+    svg: "circular-icooon",
+    "phase4-enhanced": "circular-icooon",
+    testing: "circular-icooon",
+  };
+  return mapping[variant];
 }
 
 /**

@@ -1,3 +1,10 @@
+// Fast-fail: jsdom environment must be active for DOM-based tests
+if (typeof document === "undefined" || typeof window === "undefined") {
+  throw new Error(
+    "Test setup: jsdom environment not active. Ensure environment=jsdom or per-file /* @vitest-environment jsdom */ is set."
+  );
+}
+
 // Environment variables for testing - 最優先で設定
 process.env.VITE_GA_MEASUREMENT_ID = "G-TEST123456";
 process.env.VITE_GOOGLE_MAPS_API_KEY = "TEST_API_KEY";
