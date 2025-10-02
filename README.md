@@ -145,4 +145,4 @@ MIT License — 詳細は `LICENSE` を参照。
 
 ---
 
-Generated: 2025-09-27
+Last Updated: 2025-10-02

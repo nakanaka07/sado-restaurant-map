@@ -10,7 +10,7 @@
  */
 
 import type { ABTestVariant, UserSegment } from "@/config/abTestConfig";
-import { trackEvent } from "./analytics";
+import { trackEvent } from "@/utils/analytics";
 
 // ==============================
 // A/Bテスト分析型定義
@@ -112,7 +112,10 @@ class ABTestAnalyticsService {
         this.metrics = this.metrics.filter(m => m.timestamp > weekAgo);
       }
     } catch (error) {
-      console.warn("A/Bテストメトリクス読み込みエラー:", error);
+      console.error(
+        "ABTestAnalytics data submission error:",
+        error instanceof Error ? error.message : String(error)
+      );
       this.metrics = [];
     }
   }

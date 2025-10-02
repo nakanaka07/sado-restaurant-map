@@ -12,7 +12,7 @@
 
 import type { MigrationReadinessCheck } from "@/config/phase3MigrationPlan";
 import { evaluatePhase3Readiness } from "@/config/phase3MigrationPlan";
-import { abTestAnalytics } from "@/utils/abTestAnalytics";
+import { abTestAnalytics } from "./abTestAnalytics";
 
 // ==============================
 // 監視システム型定義

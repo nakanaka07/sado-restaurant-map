@@ -10,11 +10,8 @@
  * 5. セキュリティとアクセシビリティ対応
  */
 
-import type {
-  ABTestResultSummary,
-  DashboardData,
-} from "@/utils/abTestAnalytics";
-import { abTestAnalytics } from "@/utils/abTestAnalytics";
+import type { ABTestResultSummary, DashboardData } from "@/services/abtest";
+import { abTestAnalytics } from "@/services/abtest";
 import React, { useCallback, useEffect, useState } from "react";
 
 // ==============================

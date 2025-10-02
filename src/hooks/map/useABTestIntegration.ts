@@ -10,8 +10,8 @@
  */
 
 import type { ABTestVariant, UserSegment } from "@/config/abTestConfig";
+import { abTestAnalytics } from "@/services/abtest";
 import type { Restaurant } from "@/types";
-import { abTestAnalytics } from "@/utils/abTestAnalytics";
 import { useCallback, useEffect, useState } from "react";
 
 // ==============================

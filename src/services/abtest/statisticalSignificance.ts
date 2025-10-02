@@ -11,7 +11,7 @@
  * 6. 継続監視と早期停止判定
  */
 
-import { abTestAnalytics } from "@/utils/abTestAnalytics";
+import { abTestAnalytics } from "./abTestAnalytics";
 
 // ==============================
 // 統計検定型定義

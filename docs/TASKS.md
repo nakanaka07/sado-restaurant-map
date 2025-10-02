@@ -79,4 +79,4 @@ AC:
 - manage_todo_list は 現在作業中のみ を反映。
 - 複数タスク並列禁止。行き詰まり → Blocker コメント化 → Backlog 戻し。
 
-Last Updated: 2025-09-30
+Last Updated: 2025-10-02

@@ -35,6 +35,6 @@ vite-plugin-pwa 導入時、開発中に `virtual:/pwa-register/react` をフェ
 - `src/types/pwa-register.d.ts` : 仮想モジュール型宣言
 - `vite.config.ts` : PWA plugin 設定
 
-## 更新履歴
+---
 
-- 2025-09-29: 初版作成 (動的結合 → 静的リテラルへの移行理由を記録)
+Last Updated: 2025-09-29

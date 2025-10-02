@@ -24,8 +24,8 @@ import {
   getMonitoringStatus,
   startABTestMonitoring,
   stopABTestMonitoring,
-} from "@/utils/abTestMonitoring";
-import { performStatisticalAnalysis } from "@/utils/statisticalSignificance";
+} from "./abTestMonitoring";
+import { performStatisticalAnalysis } from "./statisticalSignificance";
 
 // ==============================
 // テスト設定

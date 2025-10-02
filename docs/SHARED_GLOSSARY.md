@@ -142,7 +142,7 @@ DOM を操作/検証する Vitest テスト (`@testing-library/react` 使用) �
 
 ---
 
-Last-Updated: 2025-09-29
+Last Updated: 2025-10-02
 
 ## 13. 参照ドキュメント
 

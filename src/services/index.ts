@@ -24,5 +24,40 @@ export {
   ToiletService,
 } from "./abstractions/AbstractDataService";
 
+// A/B Test Services
+export {
+  abTestAnalytics,
+  analyzeABTestResults,
+  applyMultipleComparisonCorrection,
+  calculateSampleSize,
+  displayABTestResults,
+  monitoringSystem,
+  performStatisticalAnalysis,
+  runPhase3DeploymentTests,
+  shouldProceedToNextPhase,
+  startABTestMonitoring,
+  stopABTestMonitoring,
+  type ABTestAlert,
+  type ABTestAnalysisResult,
+  type ABTestEventType,
+  type ABTestMetrics,
+  type ABTestMonitoringConfig,
+  type ABTestMonitoringState,
+  type ABTestRealtimeMetrics,
+  type ABTestResultSummary,
+  type AlertSeverity,
+  type AlertType,
+  type BayesianAnalysisResult,
+  type ComparisonGroup,
+  type DashboardData,
+  type PerformanceMetrics,
+  type RolloutRecommendation,
+  type StatisticalRecommendation,
+  type StatisticalTestConfig,
+  type StatisticalTestResult,
+  type TestResult,
+  type TestSuite,
+} from "./abtest";
+
 // Re-export types for convenience
 export type { SheetsApiConfig, SheetsApiResponse } from "@/types";

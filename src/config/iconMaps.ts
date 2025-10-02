@@ -3,6 +3,7 @@
  * React Fast Refresh対応のため、コンポーネントから分離
  */
 
+import type { CuisineType } from "@/types";
 import {
   CafeIcon,
   ChineseIcon,
@@ -20,7 +21,7 @@ import {
  * 料理ジャンル別アイコンマップ
  * 実際に存在するアイコンのみ使用
  */
-export const CUISINE_ICON_MAP = {
+export const CUISINE_ICON_MAP: Record<CuisineType, React.ComponentType> = {
   日本料理: RestaurantIcon,
   寿司: SushiIcon,
   ラーメン: RamenIcon,
@@ -67,11 +68,6 @@ export const getIconComponent = (
 
   return DefaultIcon;
 };
-
-/**
- * 料理ジャンル型定義
- */
-export type CuisineType = keyof typeof CUISINE_ICON_MAP;
 
 /**
  * 施設タイプ型定義

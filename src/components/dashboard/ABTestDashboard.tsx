@@ -3,8 +3,8 @@
  * 外部UIライブラリに依存しない、セキュアなダッシュボード
  */
 
-import type { DashboardData } from "@/utils/abTestAnalytics";
-import { abTestAnalytics } from "@/utils/abTestAnalytics";
+import type { DashboardData } from "@/services/abtest";
+import { abTestAnalytics } from "@/services/abtest";
 import React, { useEffect, useMemo, useState } from "react";
 
 // ==============================
@@ -465,6 +465,7 @@ export const ABTestDashboard: React.FC = () => {
             "enhanced-png": "bg-green-500",
             svg: "bg-yellow-500",
             testing: "bg-red-500",
+            "phase4-enhanced": "bg-purple-500",
           } as const
         )[variant.variant] || "bg-gray-500",
     }));

@@ -40,4 +40,6 @@
 - override 状態を localStorage に保存し再訪時再現
 - Storybook で各 variant + markerType 組合せを可視化
 
-Last-Updated: 2025-09-29
+---
+
+Last Updated: 2025-09-29

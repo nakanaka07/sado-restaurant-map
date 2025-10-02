@@ -4,7 +4,7 @@
  */
 
 import { PHASE3_MIGRATION_CONFIG } from "@/config/phase3MigrationPlan";
-import { PerformanceMetrics } from "@/utils/abTestAnalytics";
+import { PerformanceMetrics } from "./abTestAnalytics";
 
 // ==============================
 // A/Bテスト結果分析

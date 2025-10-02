@@ -10,11 +10,8 @@
  */
 
 import { CURRENT_AB_TEST_CONFIG } from "@/config/abTestConfig";
-import type {
-  ABTestResultSummary,
-  DashboardData,
-} from "@/utils/abTestAnalytics";
-import { abTestAnalytics, displayABTestResults } from "@/utils/abTestAnalytics";
+import type { ABTestResultSummary, DashboardData } from "@/services/abtest";
+import { abTestAnalytics, displayABTestResults } from "@/services/abtest";
 import React, { useEffect, useState } from "react";
 
 // ==============================
