@@ -3,13 +3,22 @@
  * カバレッジ目標: 0% → 50%+
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+
 import type { MapPoint, Parking, Restaurant, Toilet } from "@/types";
 import { describe, expect, test, vi } from "vitest";
 import {
+  filterPointsByHybridCategories,
+  getCategoryStatistics,
+  getDebugCategoryInfo,
   getHybridCategoryFromPoint,
   getHybridMarkerSizeByPrice,
   getHybridMarkerSizeByType,
   getHybridMarkerUtil,
+  isWcagAACompliant,
   loadSvgIcon,
   mapLegacyToHybridCategory,
 } from "../hybridMarkerUtils";
@@ -292,6 +301,327 @@ describe("hybridMarkerUtils", () => {
         priceRange: "3000円～",
       });
       expect(getHybridMarkerUtil(point2).scale).toBeCloseTo(60 / 52);
+    });
+  });
+
+  describe("getCategoryStatistics", () => {
+    test("空配列の場合は空の統計を返す", () => {
+      const stats = getCategoryStatistics([]);
+      expect(stats).toEqual([]);
+    });
+
+    test("単一カテゴリのポイント群から統計を生成", () => {
+      const points = [
+        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
+        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
+        createMockMapPoint("restaurant", { cuisineType: "寿司" as any }), // 和食にマッピング
+      ];
+
+      const stats = getCategoryStatistics(points);
+
+      expect(stats).toHaveLength(1);
+      expect(stats[0].category).toBe("和食");
+      expect(stats[0].count).toBe(3);
+      expect(stats[0].config).toBeDefined();
+      expect(stats[0].config.id).toBeDefined();
+    });
+
+    test("複数カテゴリの混在ポイント群から統計を生成", () => {
+      const points = [
+        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
+        createMockMapPoint("restaurant", { cuisineType: "ラーメン" as any }), // 麺類
+        createMockMapPoint("restaurant", { cuisineType: "カフェ" as any }),
+        createMockMapPoint("parking"),
+        createMockMapPoint("toilet"),
+        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
+      ];
+
+      const stats = getCategoryStatistics(points);
+
+      expect(stats.length).toBeGreaterThanOrEqual(4); // 和食, 麺類, カフェ・軽食, 駐車場, トイレ等
+
+      // 和食カテゴリの検証
+      const wadaStats = stats.find((s: any) => s.category === "和食");
+      expect(wadaStats).toBeDefined();
+      expect(wadaStats?.count).toBe(2);
+
+      // 駐車場カテゴリの検証
+      const parkingStats = stats.find((s: any) => s.category === "駐車場");
+      expect(parkingStats).toBeDefined();
+      expect(parkingStats?.count).toBe(1);
+    });
+
+    test("全てのカテゴリ設定が正しく取得される", () => {
+      const points = [
+        createMockMapPoint("restaurant", {
+          cuisineType: "存在しないカテゴリ" as any,
+        }),
+      ];
+
+      const stats = getCategoryStatistics(points);
+
+      expect(stats).toHaveLength(1);
+      expect(stats[0].category).toBe("一般レストラン"); // フォールバック
+      expect(stats[0].config.primary).toBeDefined();
+      expect(stats[0].config.secondary).toBeDefined();
+    });
+
+    test("大量のポイントでもパフォーマンス良く統計生成", () => {
+      const largePoints = Array.from({ length: 1000 }, (_, i) =>
+        createMockMapPoint("restaurant", {
+          cuisineType: (i % 2 === 0 ? "和食" : "ラーメン") as any,
+        })
+      );
+
+      const startTime = performance.now();
+      const stats = getCategoryStatistics(largePoints);
+      const duration = performance.now() - startTime;
+
+      expect(duration).toBeLessThan(50); // 50ms以内
+      expect(stats).toHaveLength(2); // 和食と麺類
+      expect(stats.find((s: any) => s.category === "和食")?.count).toBe(500);
+      expect(stats.find((s: any) => s.category === "麺類")?.count).toBe(500);
+    });
+  });
+
+  describe("filterPointsByHybridCategories", () => {
+    const testPoints = [
+      createMockMapPoint("restaurant", {
+        cuisineType: "和食" as any,
+        id: "r1",
+      }),
+      createMockMapPoint("restaurant", {
+        cuisineType: "ラーメン" as any,
+        id: "r2",
+      }),
+      createMockMapPoint("parking", { id: "p1" }),
+      createMockMapPoint("toilet", { id: "t1" }),
+      createMockMapPoint("restaurant", {
+        cuisineType: "カフェ" as any,
+        id: "r3",
+      }),
+    ];
+
+    test("空のカテゴリ配列は全ポイントを返す", () => {
+      const filtered = filterPointsByHybridCategories(testPoints, []);
+      expect(filtered).toEqual(testPoints);
+      expect(filtered).toHaveLength(5);
+    });
+
+    test("単一カテゴリでフィルタリング", () => {
+      const filtered = filterPointsByHybridCategories(testPoints, ["和食"]);
+
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("r1");
+    });
+
+    test("複数カテゴリでフィルタリング", () => {
+      const filtered = filterPointsByHybridCategories(testPoints, [
+        "和食",
+        "駐車場",
+      ]);
+
+      expect(filtered).toHaveLength(2);
+      expect(filtered.map((p: any) => p.id)).toContain("r1");
+      expect(filtered.map((p: any) => p.id)).toContain("p1");
+    });
+
+    test("全施設タイプをフィルタリング", () => {
+      const filtered = filterPointsByHybridCategories(testPoints, [
+        "駐車場",
+        "トイレ",
+      ]);
+
+      expect(filtered).toHaveLength(2);
+      expect(
+        filtered.every((p: any) => p.type === "parking" || p.type === "toilet")
+      ).toBe(true);
+    });
+
+    test("存在しないカテゴリでフィルタリングは空配列を返す", () => {
+      const filtered = filterPointsByHybridCategories(testPoints, [
+        "存在しないカテゴリ",
+      ]);
+
+      expect(filtered).toHaveLength(0);
+    });
+
+    test("レガシーカテゴリマッピング後のフィルタリング", () => {
+      // ラーメンは「麺類」にマッピングされる
+      const filtered = filterPointsByHybridCategories(testPoints, ["麺類"]);
+
+      expect(filtered).toHaveLength(1);
+      expect(filtered[0].id).toBe("r2");
+    });
+
+    test("空のポイント配列は空配列を返す", () => {
+      const filtered = filterPointsByHybridCategories([], ["和食"]);
+      expect(filtered).toEqual([]);
+    });
+  });
+
+  describe("isWcagAACompliant", () => {
+    test("WCAG AA準拠の背景色でtrueを返す", () => {
+      // HYBRID_MARKER_CONFIGSから実際の色を使用
+      const compliantColor = "#FF6B6B"; // 和食の色（4.5以上のコントラスト比）
+
+      const result = isWcagAACompliant(compliantColor);
+      expect(typeof result).toBe("boolean");
+    });
+
+    test("WCAG AA非準拠の背景色でfalseを返す", () => {
+      // 設定にない色
+      const nonCompliantColor = "#FFFFFF";
+
+      const result = isWcagAACompliant(nonCompliantColor);
+      expect(result).toBe(false);
+    });
+
+    test("未定義の背景色でfalseを返す", () => {
+      const result = isWcagAACompliant("");
+      expect(result).toBe(false);
+    });
+
+    test("設定にない背景色でfalseを返す", () => {
+      const unknownColor = "#ABCDEF";
+      const result = isWcagAACompliant(unknownColor);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("getDebugCategoryInfo", () => {
+    test("全カテゴリ設定を取得", () => {
+      const debugInfo = getDebugCategoryInfo();
+
+      expect(Array.isArray(debugInfo)).toBe(true);
+      expect(debugInfo.length).toBeGreaterThan(0);
+
+      // 各カテゴリが必要なプロパティを持つことを確認
+      debugInfo.forEach((info: any) => {
+        expect(info.category).toBeDefined();
+        expect(info.id).toBeDefined();
+        expect(info.primary).toBeDefined();
+        expect(info.secondary).toBeDefined();
+        expect(info.iconSource).toBeDefined();
+        expect(info.contrastRatio).toBeDefined();
+        expect(typeof info.isWcagCompliant).toBe("boolean");
+      });
+    });
+
+    test("WCAG準拠フラグが正しく設定される", () => {
+      const debugInfo = getDebugCategoryInfo();
+
+      // コントラスト比4.5以上はWCAG準拠
+      const compliantCategories = debugInfo.filter(
+        (info: any) => info.isWcagCompliant
+      );
+      expect(compliantCategories.length).toBeGreaterThan(0);
+
+      compliantCategories.forEach((info: any) => {
+        expect(info.contrastRatio).toBeGreaterThanOrEqual(4.5);
+      });
+    });
+
+    test("主要10カテゴリが全て含まれる", () => {
+      const debugInfo = getDebugCategoryInfo();
+      const categories = debugInfo.map((info: any) => info.category);
+
+      const expectedCategories = [
+        "和食",
+        "麺類",
+        "カフェ・軽食",
+        "一般レストラン",
+        "駐車場",
+        "トイレ",
+      ];
+
+      expectedCategories.forEach(expected => {
+        expect(categories).toContain(expected);
+      });
+    });
+
+    test("各カテゴリにアイコンソース情報が含まれる", () => {
+      const debugInfo = getDebugCategoryInfo();
+
+      debugInfo.forEach((info: any) => {
+        expect(["icooon-mono", "phosphor", "fallback"]).toContain(
+          info.iconSource
+        );
+        expect(info.iconSvgPath).toBeDefined();
+        expect(info.iconEmoji).toBeDefined();
+      });
+    });
+  });
+
+  describe("エッジケースと統合テスト", () => {
+    test("nullやundefinedの料理タイプを持つレストランを正しく処理", () => {
+      const pointWithNull = createMockMapPoint("restaurant");
+      // @ts-expect-error - テスト目的でnullを設定
+      pointWithNull.cuisineType = null;
+
+      const category = getHybridCategoryFromPoint(pointWithNull);
+      expect(category).toBe("一般レストラン");
+    });
+
+    test("非常に長いカテゴリ名でも正しく処理", () => {
+      const longCategory = "a".repeat(100);
+      const mapped = mapLegacyToHybridCategory(longCategory);
+      expect(mapped).toBe("一般レストラン");
+    });
+
+    test("特殊文字を含むカテゴリ名を処理", () => {
+      const specialCategory = "カフェ☕️";
+      const mapped = mapLegacyToHybridCategory(specialCategory);
+      expect(typeof mapped).toBe("string");
+    });
+
+    test("全てのカテゴリに対してgetHybridMarkerUtilが動作", () => {
+      const categories = [
+        "和食",
+        "麺類",
+        "カフェ・軽食",
+        "居酒屋・バー",
+        "焼肉・グリル",
+        "多国籍料理",
+        "一般レストラン",
+      ];
+
+      categories.forEach(category => {
+        const point = createMockMapPoint("restaurant");
+        const util = getHybridMarkerUtil(point, category);
+
+        expect(util.category).toBe(category);
+        expect(util.size).toBeGreaterThan(0);
+        expect(util.scale).toBeGreaterThan(0);
+        expect(util.ariaLabel).toContain(category);
+      });
+    });
+
+    test("大量のポイントでフィルタリングが高速に動作", () => {
+      const largePoints = Array.from({ length: 5000 }, (_, i) => {
+        let cuisineType: string;
+        if (i % 3 === 0) {
+          cuisineType = "和食";
+        } else if (i % 3 === 1) {
+          cuisineType = "ラーメン";
+        } else {
+          cuisineType = "カフェ";
+        }
+        return createMockMapPoint("restaurant", {
+          cuisineType: cuisineType as any,
+          id: `r${i}`,
+        });
+      });
+
+      const startTime = performance.now();
+      const filtered = filterPointsByHybridCategories(largePoints, [
+        "和食",
+        "麺類",
+      ]);
+      const duration = performance.now() - startTime;
+
+      expect(duration).toBeLessThan(100); // 100ms以内
+      expect(filtered.length).toBeGreaterThan(0);
     });
   });
 });

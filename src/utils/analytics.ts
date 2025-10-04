@@ -222,8 +222,7 @@ export const checkGAStatus = async () => {
   }>(resolve => {
     const status = {
       measurementId: GA_MEASUREMENT_ID,
-      measurementIdValid:
-        GA_MEASUREMENT_ID && GA_MEASUREMENT_ID.startsWith("G-"),
+      measurementIdValid: GA_MEASUREMENT_ID?.startsWith("G-"),
       gtagLoaded: typeof window !== "undefined" && !!window.gtag,
       dataLayerExists: typeof window !== "undefined" && !!window.dataLayer,
       environment: import.meta.env.MODE,

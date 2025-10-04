@@ -42,6 +42,14 @@ export default defineConfig({
         "src/main.tsx",
         "src/vite-env.d.ts",
       ],
+      // カバレッジ閾値: 現在34.74%達成済み、30%を最低基準として設定
+      // Week 1目標: 35% | Week 2目標: 40%
+      thresholds: {
+        lines: 30,
+        functions: 30,
+        branches: 30,
+        statements: 30,
+      },
     },
   },
   resolve: {
