@@ -299,9 +299,50 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: "index.html",
         output: {
-          manualChunks: {
-            "google-maps": ["@vis.gl/react-google-maps"],
-            "react-vendor": ["react", "react-dom"],
+          manualChunks: (id: string) => {
+            // React vendor libraries (highest priority)
+            if (
+              id.includes("node_modules/react") ||
+              id.includes("node_modules/react-dom")
+            ) {
+              return "react-vendor";
+            }
+
+            // Google Maps library (heavy dependency)
+            if (id.includes("@vis.gl/react-google-maps")) {
+              return "google-maps";
+            }
+
+            // Marker components (Phase 8 optimization)
+            if (
+              id.includes("src/components/map/markers/") ||
+              id.includes("src/components/map/UnifiedMarker") ||
+              id.includes("src/utils/markerColorUtils") ||
+              id.includes("src/utils/hybridMarkerUtils")
+            ) {
+              return "markers";
+            }
+
+            // Data processing & services (Phase 8 optimization)
+            if (
+              id.includes("src/services/") ||
+              id.includes("src/utils/districtUtils") ||
+              id.includes("src/utils/businessHours") ||
+              id.includes("src/utils/dateUtils")
+            ) {
+              return "data-processing";
+            }
+
+            // UI components (Phase 8 optimization)
+            if (
+              id.includes("src/components/common/") ||
+              id.includes("src/components/restaurant/")
+            ) {
+              return "ui-components";
+            }
+
+            // Default: return undefined to let Vite decide
+            return undefined;
           },
           assetFileNames: (assetInfo: {
             name: string | undefined;
