@@ -132,7 +132,7 @@ describe("hybridMarkerUtils", () => {
     });
 
     test("価格帯がない場合はベースサイズを返す", () => {
-      expect(getHybridMarkerSizeByPrice(undefined)).toBe(52);
+      expect(getHybridMarkerSizeByPrice()).toBe(52);
       expect(getHybridMarkerSizeByPrice(undefined, 48)).toBe(48);
     });
 

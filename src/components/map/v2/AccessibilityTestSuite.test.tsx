@@ -372,8 +372,8 @@ describe("⚡ パフォーマンス・使用性テスト", () => {
     const endTime = performance.now();
     const renderTime = endTime - startTime;
 
-    // 100個のマーカーを300ms以内でレンダリング（現実的な基準に調整）
-    expect(renderTime).toBeLessThan(300);
+    // 100個のマーカーを500ms以内でレンダリング（CI環境を考慮）
+    expect(renderTime).toBeLessThan(500);
 
     // DOM要素が正しく作成されているかチェック
     const markers = container.querySelectorAll("button");

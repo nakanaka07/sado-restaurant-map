@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   calculateBusinessStatus,
   formatBusinessHoursForDisplay,
+  mapCategoryToCuisineType,
+  organizeDetailedHours,
 } from "../businessHours";
 
 describe("businessHours - 強化版", () => {
@@ -214,6 +216,122 @@ describe("businessHours - 強化版", () => {
       const formatted = formatBusinessHoursForDisplay(openingHours);
       expect(formatted).toContain("11:30");
       expect(formatted).toContain("14:00");
+    });
+  });
+
+  /**
+   * organizeDetailedHours のテスト
+   */
+  describe("organizeDetailedHours", () => {
+    it("converts OpeningHours array to DetailedOpeningHours object", () => {
+      const hours: OpeningHours[] = [
+        { day: "月曜日", open: "11:00", close: "20:00", isHoliday: false },
+        { day: "火曜日", open: "11:00", close: "20:00", isHoliday: false },
+      ];
+
+      const result = organizeDetailedHours(hours);
+
+      expect(result.monday).toEqual({
+        open: "11:00",
+        close: "20:00",
+        isClosed: false,
+      });
+      expect(result.tuesday).toEqual({
+        open: "11:00",
+        close: "20:00",
+        isClosed: false,
+      });
+    });
+
+    it("handles holiday flag as isClosed", () => {
+      const hours: OpeningHours[] = [
+        { day: "水曜日", open: "", close: "", isHoliday: true },
+      ];
+
+      const result = organizeDetailedHours(hours);
+
+      expect(result.wednesday).toEqual({
+        open: "",
+        close: "",
+        isClosed: true,
+      });
+    });
+
+    it("returns empty object for empty array", () => {
+      const result = organizeDetailedHours([]);
+
+      expect(result).toEqual({});
+    });
+
+    it("handles all 7 days correctly", () => {
+      const hours: OpeningHours[] = [
+        { day: "月曜日", open: "09:00", close: "17:00", isHoliday: false },
+        { day: "火曜日", open: "09:00", close: "17:00", isHoliday: false },
+        { day: "水曜日", open: "09:00", close: "17:00", isHoliday: false },
+        { day: "木曜日", open: "09:00", close: "17:00", isHoliday: false },
+        { day: "金曜日", open: "09:00", close: "17:00", isHoliday: false },
+        { day: "土曜日", open: "10:00", close: "16:00", isHoliday: false },
+        { day: "日曜日", open: "10:00", close: "16:00", isHoliday: false },
+      ];
+
+      const result = organizeDetailedHours(hours);
+
+      expect(Object.keys(result)).toHaveLength(7);
+      expect(result.saturday?.open).toBe("10:00");
+      expect(result.sunday?.close).toBe("16:00");
+    });
+  });
+
+  /**
+   * mapCategoryToCuisineType のテスト
+   */
+  describe("mapCategoryToCuisineType", () => {
+    describe("Japanese cuisine mapping", () => {
+      it('maps "寿司" to "寿司"', () => {
+        expect(mapCategoryToCuisineType("寿司")).toBe("寿司");
+        expect(mapCategoryToCuisineType("sushi")).toBe("寿司");
+      });
+
+      it('maps "ラーメン" to "ラーメン"', () => {
+        expect(mapCategoryToCuisineType("ラーメン")).toBe("ラーメン");
+        expect(mapCategoryToCuisineType("RAMEN")).toBe("ラーメン");
+      });
+
+      it('maps "和食" to "日本料理"', () => {
+        expect(mapCategoryToCuisineType("和食")).toBe("日本料理");
+        expect(mapCategoryToCuisineType("日本料理")).toBe("日本料理");
+      });
+    });
+
+    describe("Western cuisine mapping", () => {
+      it('maps "イタリアン" to "イタリアン"', () => {
+        expect(mapCategoryToCuisineType("イタリアン")).toBe("イタリアン");
+        expect(mapCategoryToCuisineType("italian")).toBe("イタリアン");
+      });
+
+      it('maps "フレンチ" to "フレンチ"', () => {
+        expect(mapCategoryToCuisineType("フレンチ")).toBe("フレンチ");
+        expect(mapCategoryToCuisineType("french")).toBe("フレンチ");
+      });
+    });
+
+    describe("Other cuisine mapping", () => {
+      it('maps "カフェ" to "カフェ・喫茶店"', () => {
+        expect(mapCategoryToCuisineType("カフェ")).toBe("カフェ・喫茶店");
+        expect(mapCategoryToCuisineType("cafe")).toBe("カフェ・喫茶店");
+      });
+
+      it('maps "中華" to "中華"', () => {
+        expect(mapCategoryToCuisineType("中華")).toBe("中華");
+        expect(mapCategoryToCuisineType("chinese")).toBe("中華");
+      });
+    });
+
+    describe("Fallback behavior", () => {
+      it('returns "その他" for unknown categories', () => {
+        expect(mapCategoryToCuisineType("未知のカテゴリー")).toBe("その他");
+        expect(mapCategoryToCuisineType("random")).toBe("その他");
+      });
     });
   });
 });

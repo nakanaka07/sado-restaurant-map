@@ -32,7 +32,7 @@ const createMockRestaurant = (
 describe("useMarkerOptimization", () => {
   describe("基本動作", () => {
     test("初期化時に空配列を返す", () => {
-      const { result } = renderHook(() => useMarkerOptimization([], undefined));
+      const { result } = renderHook(() => useMarkerOptimization([]));
 
       expect(result.current.optimizedMarkers).toEqual([]);
       expect(result.current.clusters).toEqual([]);
@@ -48,7 +48,7 @@ describe("useMarkerOptimization", () => {
       ];
 
       const { result } = renderHook(() =>
-        useMarkerOptimization(mockRestaurants, undefined)
+        useMarkerOptimization(mockRestaurants)
       );
 
       expect(result.current.optimizedMarkers.length).toBe(3);
@@ -205,7 +205,7 @@ describe("useMarkerOptimization", () => {
 
       const startTime = performance.now();
       const { result } = renderHook(() =>
-        useMarkerOptimization(mockRestaurants, undefined)
+        useMarkerOptimization(mockRestaurants)
       );
       const endTime = performance.now();
 
