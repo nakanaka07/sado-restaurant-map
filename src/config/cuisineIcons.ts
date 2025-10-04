@@ -6,24 +6,26 @@
 import type { CuisineType } from "@/types";
 
 // PNG料理ジャンルアイコンのインポート
-import barIcon from "@/assets/png/bar_icon.png";
 import bentoIcon from "@/assets/png/bento_icon.png";
-import cafeIcon from "@/assets/png/cafe_icon.png";
 import chineseIcon from "@/assets/png/chinese_icon.png";
 import curryIcon from "@/assets/png/curry_icon.png";
 import dessertIcon from "@/assets/png/dessert_icon.png";
-import fastfoodIcon from "@/assets/png/fastfood_icon.png";
 import frenchIcon from "@/assets/png/french_icon.png";
 import italianIcon from "@/assets/png/italian_icon.png";
-import japaneseIcon from "@/assets/png/japanese_icon.png";
 import otherIcon from "@/assets/png/other_icon.png";
-import ramenIcon from "@/assets/png/ramen_icon.png";
 import restaurantIcon from "@/assets/png/restaurant_icon.png";
 import seafoodIcon from "@/assets/png/seafood_icon.png";
 import sobaIcon from "@/assets/png/soba_icon.png";
-import steakIcon from "@/assets/png/steak_icon.png";
 import sushiIcon from "@/assets/png/sushi_icon.png";
 import yakinikuIcon from "@/assets/png/yakiniku_icon.png";
+
+// SVG料理ジャンルアイコンのインポート (ICOOON-MONO: 軽量最適化版)
+import fastfoodIcon from "@/assets/markers/icooon-mono/hamburger-icon7.svg";
+import japaneseIcon from "@/assets/markers/icooon-mono/ochawan-hashi.svg";
+import ramenIcon from "@/assets/markers/icooon-mono/ramen-icon.svg";
+import steakIcon from "@/assets/markers/icooon-mono/steak-icon2.svg";
+import cafeIcon from "@/assets/markers/icooon-mono/tea-icon.svg";
+import barIcon from "@/assets/markers/icooon-mono/wine-bottle.svg";
 
 /**
  * 料理ジャンル別アイコンマップ（型安全）

@@ -1,6 +1,7 @@
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig, type PluginOption } from "vite";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import { VitePWA } from "vite-plugin-pwa";
 
 type WorkboxPluginLike = {
@@ -204,6 +205,25 @@ export default defineConfig(({ mode }) => {
       (isProduction ? "/sado-restaurant-map/" : "/"),
     plugins: [
       react(),
+      ...(isProduction
+        ? [
+            ViteImageOptimizer({
+              png: {
+                quality: 80,
+              },
+              jpeg: {
+                quality: 80,
+              },
+              jpg: {
+                quality: 80,
+              },
+              webp: {
+                lossless: false,
+                quality: 75,
+              },
+            }),
+          ]
+        : []),
       ...(shouldEnablePWA ? [VitePWA(createPWAConfig(isProduction))] : []),
       ...(process.env.ANALYZE === "true"
         ? [

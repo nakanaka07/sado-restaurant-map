@@ -65,6 +65,12 @@ export default defineConfig({
         __dirname,
         "../src/test/mocks/pwa-register.ts"
       ),
+      // Image file mocks for testing (SVG, PNG, etc.)
+      "\\.(png|jpg|jpeg|gif|svg|webp)$": path.resolve(
+        __dirname,
+        "../src/test/mocks/fileMock.ts"
+      ),
     },
   },
+  assetsInclude: ["**/*.png", "**/*.svg", "**/*.jpg", "**/*.jpeg"],
 });

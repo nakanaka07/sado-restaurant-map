@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-10-04T14:28:54.643Z",
+  "lastUpdated": "2025-10-04T16:39:16.479Z",
   "current": {
-    "timestamp": "2025-10-04T14:28:54.638Z",
-    "totalFiles": 55,
-    "totalSize": 3227061,
-    "totalSizeKB": "3151.43",
+    "timestamp": "2025-10-04T16:39:16.473Z",
+    "totalFiles": 49,
+    "totalSize": 1810948,
+    "totalSizeKB": "1768.50",
     "mainChunk": {
       "path": "assets\\index-VOeiJmwc.js",
       "size": 175283,
@@ -27,8 +27,8 @@
     "allFiles": [
       {
         "path": "apple-touch-icon.png",
-        "size": 13887,
-        "sizeKB": "13.56"
+        "size": 4905,
+        "sizeKB": "4.79"
       },
       {
         "path": "assets\\App-C09Fy55u.js",
@@ -61,19 +61,19 @@
         "sizeKB": "51.12"
       },
       {
-        "path": "assets\\images\\bar_icon-CCAIdTKJ.png",
-        "size": 96285,
-        "sizeKB": "94.03"
-      },
-      {
         "path": "assets\\images\\bento_icon-BE017dT6.png",
-        "size": 25422,
-        "sizeKB": "24.83"
+        "size": 13390,
+        "sizeKB": "13.08"
       },
       {
-        "path": "assets\\images\\cafe_icon-CeCutp44.png",
-        "size": 317715,
-        "sizeKB": "310.27"
+        "path": "assets\\images\\chinese_icon-_kMUG3xb.png",
+        "size": 143775,
+        "sizeKB": "140.41"
+      },
+      {
+        "path": "assets\\images\\curry_icon-DGTHQGOy.png",
+        "size": 11292,
+        "sizeKB": "11.03"
       }
     ]
   },
@@ -88,16 +88,16 @@
     },
     "appChunk": {
       "current": 66.4,
-      "previous": 39.44,
-      "diff": "26.96",
-      "percent": "68.36",
-      "status": "increased"
+      "previous": 66.4,
+      "diff": "0.00",
+      "percent": "0.00",
+      "status": "unchanged"
     },
     "total": {
-      "current": 3151.43,
-      "previous": 3155.02,
-      "diff": "-3.59",
-      "percent": "-0.11",
+      "current": 1768.5,
+      "previous": 2363.23,
+      "diff": "-594.73",
+      "percent": "-25.17",
       "status": "decreased"
     }
   },
@@ -119,6 +119,18 @@
       "totalSizeKB": "3155.02",
       "mainChunkSizeKB": "171.17",
       "appChunkSizeKB": "39.44"
+    },
+    {
+      "timestamp": "2025-10-04T14:28:54.638Z",
+      "totalSizeKB": "3151.43",
+      "mainChunkSizeKB": "171.17",
+      "appChunkSizeKB": "66.40"
+    },
+    {
+      "timestamp": "2025-10-04T14:57:50.255Z",
+      "totalSizeKB": "2363.23",
+      "mainChunkSizeKB": "171.17",
+      "appChunkSizeKB": "66.40"
     }
   ]
 }
