@@ -159,5 +159,16 @@ describe("dateUtils", () => {
       const result = isDataFresh("invalid-date", 24);
       expect(result).toBe(false);
     });
+
+    it("returns false for empty string", () => {
+      const result = isDataFresh("", 24);
+      expect(result).toBe(false);
+    });
+
+    it("handles zero threshold", () => {
+      const now = new Date();
+      const result = isDataFresh(now.toISOString(), 0);
+      expect(result).toBe(true);
+    });
   });
 });

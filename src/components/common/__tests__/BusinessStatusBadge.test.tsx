@@ -39,4 +39,27 @@ describe("BusinessStatusBadge", () => {
     const badge = container.querySelector('[aria-label*="営業状況"]');
     expect(badge).toBeInTheDocument();
   });
+
+  it("営業中バッジがレンダリングされる", () => {
+    const { container } = render(
+      <BusinessStatusBadge status={BusinessStatus.OPEN} />
+    );
+
+    expect(container.firstChild).toBeInTheDocument();
+  });
+
+  it("閉店中バッジに適切なスタイルが適用される", () => {
+    const { container } = render(
+      <BusinessStatusBadge status={BusinessStatus.CLOSED} />
+    );
+
+    const badge = container.firstChild as HTMLElement;
+    expect(badge).toBeInTheDocument();
+  });
+
+  it("UNKNOWNステータスでもエラーにならない", () => {
+    expect(() => {
+      render(<BusinessStatusBadge status={BusinessStatus.UNKNOWN} />);
+    }).not.toThrow();
+  });
 });
