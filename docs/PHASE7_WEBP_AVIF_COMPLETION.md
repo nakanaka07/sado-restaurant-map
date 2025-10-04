@@ -42,11 +42,13 @@
 dist/: 1795.68 KB (1.75 MB)
 
 主要チャンク:
-- index.js: 175.28 KB (gzip: 55.95 KB)
-- App.js: 68.03 KB (gzip: 19.86 KB)
-- IntegratedMapView.js: 55.22 KB (gzip: 16.73 KB)
-- google-maps.js: 38.12 KB (gzip: 13.52 KB)
+- index.js: 171.17 KB (gzip: 48.34 KB)
+- App.js: 66.43 KB (gzip: 16.72 KB)
+- IntegratedMapView.js: 53.93 KB (gzip: N/A)
+- google-maps.js: 37.23 KB (gzip: 12.02 KB)
 ```
+
+**Note**: 実測値（2025-10-05時点）。メトリクス詳細は `metrics/size-limit.json` 参照。
 
 ---
 

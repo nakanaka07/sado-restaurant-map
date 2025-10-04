@@ -124,8 +124,8 @@ TypeError: Cannot read properties of undefined (reading 'catch')
 
 ```
 ✓ Test Files  24 passed (24)
-✓ Tests  394 passed (394)
-✓ Duration  9.48s
+✓ Tests  416 passed (416)
+✓ Duration  9.65s
 ```
 
 **Unhandled Errors**: **0件** ✅
@@ -139,7 +139,7 @@ TypeError: Cannot read properties of undefined (reading 'catch')
 | 指標                 | Before | After   | 改善         |
 | -------------------- | ------ | ------- | ------------ |
 | **Unhandled Errors** | 10件   | **0件** | **-100%** 🎉 |
-| Tests Passing        | 394    | 394     | 維持 ✅      |
+| Tests Passing        | 416    | 416     | 維持 ✅      |
 | Type Errors          | 0      | 0       | 維持 ✅      |
 | Lint Errors          | 0      | 0       | 維持 ✅      |
 | Build Status         | ✅     | ✅      | 維持 ✅      |

@@ -20,7 +20,7 @@
 
 ### 品質指標 ✅
 
-- ✅ **394 tests passing** (0 failures)
+- ✅ **416 tests passing** (0 failures) [Updated: 2025-10-05]
 - ✅ **0 type errors** (TypeScript strict mode)
 - ✅ **0 lint errors** (ESLint + Prettier)
 - ✅ **100% backward compatibility** (legacy imports redirected)

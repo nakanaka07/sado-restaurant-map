@@ -1,8 +1,9 @@
 # Phase 8: Task 1 - Code Splitting 強化
 
 **タスク**: P0 Code Splitting
-**工数**: 4時間
+**工数**: 4時間 (残り約 2-3時間)
 **目標**: メインチャンク削減 (-43%), TBT -3,000ms
+**ステータス**: 部分実装済み (Phase 4.5にてAPIProvider/IntegratedMapView lazy化完了)
 
 ---
 
@@ -63,6 +64,17 @@
 
 ### Task 1.2: React.lazy() 導入 (3時間)
 
+**既実装コンポーネント** ✅:
+
+- APIProvider (`@vis.gl/react-google-maps`) - Phase 4.5でlazy化済み
+- IntegratedMapView - Phase 4.5でlazy化済み (53.93 KB)
+
+**未実装コンポーネント**:
+
+- LoadingSpinner (基盤コンポーネント)
+- ErrorBoundary (基盤コンポーネント)
+- Dashboard, Analytics, Settings, Help等
+
 #### Subtask 1.2.1: LoadingSpinner 作成 (30分)
 
 - [ ] **Step 1**: ファイル作成
@@ -108,50 +120,50 @@
 
 ---
 
-#### Subtask 1.2.3: IntegratedMapView 遅延化 (1時間)
+#### Subtask 1.2.3: IntegratedMapView 遅延化 (1時間) ✅ **実装済み (Phase 4.5)**
 
-- [ ] **Step 1**: 現状確認
+- [x] **Step 1**: 現状確認
 
   ```bash
   grep -r "import.*IntegratedMapView" src/
+  # Result: src/app/App.tsx:31 (lazy import)
   ```
 
-- [ ] **Step 2**: App.tsx 修正
+- [x] **Step 2**: App.tsx 修正
 
   ```typescript
   const IntegratedMapView = lazy(() =>
-    import("./pages/IntegratedMapView").then(m => ({
-      default: m.IntegratedMapView,
+    import("../components/map/MapView/IntegratedMapView").then(module => ({
+      default: module.IntegratedMapView,
     }))
   );
   ```
 
-- [ ] **Step 3**: Suspense でラップ
+- [x] **Step 3**: Suspense でラップ
 
   ```typescript
-  <Suspense fallback={<LoadingSpinner />}>
-    <IntegratedMapView />
+  <Suspense fallback={<div className="loading-container">
+    <span>地図を読み込み中...</span>
+  </div>}>
+    <APIProvider>
+      <IntegratedMapView />
+    </APIProvider>
   </Suspense>
   ```
 
-- [ ] **Step 4**: ErrorBoundary でラップ
+- [ ] **Step 4**: ErrorBoundary でラップ (未実装)
 
   ```typescript
-  <ErrorBoundary>
-    <Suspense fallback={<LoadingSpinner />}>
-      <IntegratedMapView />
-    </Suspense>
-  </ErrorBoundary>
+  # TODO: ErrorBoundaryコンポーネント作成後に実装
   ```
 
-- [ ] **Step 5**: 動作確認
+- [x] **Step 5**: 動作確認
 
   ```bash
   pnpm preview
   # Network タブで確認:
-  # - IntegratedMapView.js が別チャンク
-  # - 初期ロードで読み込まれない
-  # - ページ遷移時に読み込まれる
+  # - IntegratedMapView-Oe6c_4_2.js: 53.93 KB (別チャンク)
+  # - 初期ロードで遅延読み込み確認済み
   ```
 
 ---
@@ -224,7 +236,29 @@
 
 ## 📊 測定 & 記録
 
-### Before (現状)
+### Before (現状 - Phase 7完了時点)
+
+**実測値** (2025-10-05):
+
+```
+Total Bundle: 1795.68 KB (65 files)
+Main Chunk: 171.17 KB (gzip: 48.34 KB)
+App Chunk: 66.43 KB (gzip: 16.72 KB)
+IntegratedMapView: 53.93 KB (lazy loaded ✅)
+Google Maps: 37.23 KB (gzip: 12.02 KB)
+
+Tests: 416 passing
+Type Errors: 0
+Lint Errors: 0
+```
+
+**Phase 4.5で実装済み**:
+
+- APIProvider: lazy import ✅
+- IntegratedMapView: lazy import ✅
+- Suspense fallback: シンプルなdiv (LoadingSpinner未使用)
+
+### After (目標)
 
 | 指標        | Mobile   | Desktop |
 | ----------- | -------- | ------- |

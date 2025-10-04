@@ -1,0 +1,97 @@
+{
+  "timestamp": "2025-10-05T00:00:00.000Z",
+  "phase": "Phase 7 Complete (Post-WebP/AVIF)",
+  "summary": {
+    "totalBundleSize": "1795.68 KB",
+    "totalFiles": 65,
+    "gzipSizes": {
+      "main": "48.34 KB",
+      "google-maps": "12.02 KB",
+      "app-bundle": "16.72 KB"
+    }
+  },
+  "chunks": {
+    "index": {
+      "file": "index-D3JRs9Du.js",
+      "size": "171.17 KB",
+      "description": "Main entry point"
+    },
+    "app": {
+      "file": "App-DWMhXGyg.js",
+      "size": "66.43 KB",
+      "description": "App component (Phase 4.5 optimized)"
+    },
+    "integratedMapView": {
+      "file": "IntegratedMapView-Oe6c_4_2.js",
+      "size": "53.93 KB",
+      "description": "Map view (lazy loaded)"
+    },
+    "googleMaps": {
+      "file": "google-maps-D3x-C6e9.js",
+      "size": "37.23 KB",
+      "description": "Google Maps vendor chunk"
+    },
+    "workbox": {
+      "file": "workbox-window.prod.es5-DMXp7Fa7.js",
+      "size": "5.55 KB",
+      "description": "PWA service worker"
+    },
+    "pwa": {
+      "file": "PWABadge-Cia7lFju.js + virtual_pwa-register-BCtbM5HN.js + PWARegister-DLEAsUdX.js",
+      "size": "3.29 KB",
+      "description": "PWA components"
+    },
+    "reactVendor": {
+      "file": "react-vendor-l0sNRNKZ.js",
+      "size": "0.00 KB",
+      "description": "React vendor (included in main)"
+    }
+  },
+  "sizeLimitResults": [
+    {
+      "name": "main",
+      "passed": true,
+      "size": 48343,
+      "sizeLimit": 200000,
+      "usage": "24.17%"
+    },
+    {
+      "name": "google-maps",
+      "passed": true,
+      "size": 12023,
+      "sizeLimit": 40000,
+      "usage": "30.06%"
+    },
+    {
+      "name": "app-bundle",
+      "passed": true,
+      "size": 16722,
+      "sizeLimit": 150000,
+      "usage": "11.15%"
+    }
+  ],
+  "baseline": {
+    "phase": "Phase 2 (Baseline)",
+    "totalBundleSize": "3459.48 KB",
+    "reference": "PHASE3_COMPLETION_REPORT.md"
+  },
+  "cumulativeReduction": {
+    "fromBaseline": "-1663.80 KB",
+    "percentage": "-48.09%",
+    "phases": [
+      "Phase 3: -322.21 KB (Legacy migration)",
+      "Phase 4: +17.75 KB (Initial dynamic import overhead)",
+      "Phase 4.5: -3.59 KB (Selective rollback)",
+      "Phase 5: -788.20 KB (ICOOON-MONO SVG)",
+      "Phase 6: -594.73 KB (PNG auto-optimization)",
+      "Phase 7: WebP/AVIF (reflected in current size)"
+    ]
+  },
+  "notes": [
+    "Main chunk includes React vendor due to Vite's automatic inlining",
+    "PWA components are conditionally loaded in production",
+    "IntegratedMapView and APIProvider are lazy loaded (Phase 4.5)",
+    "All PNG icons optimized with WebP/AVIF (Phase 7)",
+    "Size-limit checks passed with comfortable margins"
+  ]
+}

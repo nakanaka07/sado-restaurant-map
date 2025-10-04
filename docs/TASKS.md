@@ -41,6 +41,15 @@ AC:
 
 ## 4. Backlog (優先度付き候補)
 
+### Phase 8: JavaScript 最適化 (計画段階)
+
+- (P0 perf) **manualChunks関数実装** [Issue #TBD] – markers/data-processing分離、TBT -3000ms目標（Phase 8 Task 1.1）
+- (P1 feat) **LoadingSpinner/ErrorBoundary作成** [Issue #TBD] – lazy loading UX改善、再利用可能なコンポーネント（Phase 8 Task 1.2.1-1.2.2）
+- (P1 perf) **Dashboard遅延化** [Issue #TBD] – React.lazy + Suspense、初期ロード高速化（Phase 8 Task 1.2.4）
+- (P2 perf) **Unused JavaScript削減** [Issue #TBD] – 345-359 KiB削減、Tree-shaking強化（Phase 8 Task 2）
+
+### その他最適化
+
 - (P2 perf) Dead Code Elimination [Issue #TBD] – Bundle analyzer実行、未使用コード削除、-20-40 KB削減目標（任意）
 - (P2 refactor) UnifiedMarker Phase 5: Legacy完全削除 [Issue #TBD] – A/Bテスト完了後、legacy/削除、-30-40 KB削減目標
 - (P1 test) UnifiedMarker E2Eテスト追加 (Playwright) [Issue #TBD] – マーカー描画・クリック・選択状態検証
@@ -60,17 +69,16 @@ AC:
 
 1. **(P1 perf) Phase 6: PNG Auto-Optimization (vite-plugin-image-optimizer)** ✅ (2025-10-05)
    - 残り17 PNGを自動最適化: 平均51%削減
-   - 総バンドル: -594.73 KB (-25.17%) 削減達成 🎉
-   - **Phase 5+6累積: -48.88%削減** (Baseline比 -1691 KB) 🔥
-   - PWA precache: -594 KiB (-35.9%)
-   - Quality Gates全通過 (394 tests, 0 errors)
+   - 総削減量: -594.73 KB (-25.17%)
+   - Baseline比累積: -48.88% (目標-14%を大幅超過)
+   - vite.config.ts: ViteImageOptimizer設定追加
+   - Quality Gates: 416 tests passing, 0 errors
    - vite-plugin-image-optimizer導入完了
 2. **(P1 perf) Phase 5: Image Optimization (ICOOON-MONO SVG)** ✅ (2025-10-04)
    - 6アイコンPNG→SVG置換: cafe/ramen/bar/fastfood/japanese/steak (-773 KB)
-   - 総バンドル: -788.20 KB (-25.01%) 削減達成 🎉
-   - **-14%目標を+11.01%超過達成**
-   - ファイル数削減: 55 → 49 files (-6 files)
-   - Quality Gates全通過 (394 tests, 0 errors)
+   - 総削減量: -788.20 KB (-25.01%)
+   - Baseline比累積: -31.69%
+   - getCuisineIconUrl: SVG優先ロジック追加
    - テスト環境: 画像モック設定追加 (fileMock.ts)
 3. **(P1 perf) Phase 4.5: Selective Optimization** ✅ (2025-01-XX)
    - 選択的動的Importロールバック: CustomMapControls, FilterPanel インライン化
