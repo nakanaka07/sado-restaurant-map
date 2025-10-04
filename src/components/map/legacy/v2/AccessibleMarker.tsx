@@ -1,12 +1,23 @@
 /**
  * @fileoverview Accessible Marker Component - WCAG 2.2 AA準拠
  * 包括的アクセシビリティ対応マーカー
+ *
+ * @deprecated このコンポーネントは非推奨です。
+ * 代わりに `UnifiedMarker` with `variant="icon"` を使用してください。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import type { MapPoint } from "@/types";
 import { isRestaurant } from "@/types/type-guards";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import React from "react";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ AccessibleMarker is deprecated. Use UnifiedMarker with variant='icon' instead."
+  );
+}
 
 interface AccessibleMarkerProps {
   readonly point: MapPoint;

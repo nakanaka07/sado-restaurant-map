@@ -366,6 +366,25 @@ describe("hybridMarkerUtils", () => {
       expect(stats[0].config.secondary).toBeDefined();
     });
 
+    test("未定義カテゴリがconfigフォールバックを使用 (line 199カバー)", () => {
+      // HYBRID_MARKER_CONFIGSに存在しない架空のカテゴリを作成
+      const points = [
+        createMockMapPoint("restaurant", {
+          cuisineType: "架空の料理ジャンル999" as any,
+        }),
+      ];
+
+      const stats = getCategoryStatistics(points);
+
+      expect(stats).toHaveLength(1);
+      // フォールバック設定（一般レストラン）が使用される
+      expect(stats[0].config).toBeDefined();
+      expect(stats[0].config.id).toBeDefined();
+      expect(stats[0].config.primary).toBeDefined();
+      expect(stats[0].config.secondary).toBeDefined();
+      expect(stats[0].config.iconEmoji).toBeDefined();
+    });
+
     test("大量のポイントでもパフォーマンス良く統計生成", () => {
       const largePoints = Array.from({ length: 1000 }, (_, i) =>
         createMockMapPoint("restaurant", {
@@ -560,6 +579,15 @@ describe("hybridMarkerUtils", () => {
       pointWithNull.cuisineType = null;
 
       const category = getHybridCategoryFromPoint(pointWithNull);
+      expect(category).toBe("一般レストラン");
+    });
+
+    test("未知のpoint.typeでもデフォルト値を返す (line 78カバー)", () => {
+      const unknownPoint = createMockMapPoint("restaurant");
+      // @ts-expect-error - テスト目的で未知のtypeを設定
+      unknownPoint.type = "unknown_type";
+
+      const category = getHybridCategoryFromPoint(unknownPoint);
       expect(category).toBe("一般レストラン");
     });
 

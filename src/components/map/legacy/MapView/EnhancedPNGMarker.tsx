@@ -1,6 +1,10 @@
 /**
  * @fileoverview Enhanced PNG Marker Component
  * Phase 1実装 - 既存PNG活用による即座改善（料理ジャンル別アイコン完全対応）
+ *
+ * @deprecated このコンポーネントは非推奨です。
+ * 代わりに `UnifiedMarker` with `variant="icon"` を使用してください。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import { getCuisineIconUrl } from "@/config/cuisineIcons";
@@ -9,7 +13,14 @@ import type { CuisineType } from "@/types/restaurant.types";
 import { isRestaurant } from "@/types/type-guards";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import React from "react";
-import { getMarkerColorByCuisine } from "../utils/markerUtils";
+import { getMarkerColorByCuisine } from "../../utils/markerUtils";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ EnhancedPNGMarker is deprecated. Use UnifiedMarker with variant='icon' instead."
+  );
+}
 
 // 既存施設アセットのインポート
 import anoIcon01 from "@/assets/png/ano_icon01.png";

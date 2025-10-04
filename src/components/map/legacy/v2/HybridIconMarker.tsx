@@ -1,12 +1,23 @@
 /**
  * @fileoverview Hybrid Icon Marker Component - ICOOON MONO + Phosphor Icons対応
  * WCAG 2.2 AA準拠 + 日本製高品質SVGアイコン統合マーカー
+ *
+ * @deprecated このコンポーネントは非推奨です。
+ * 代わりに `UnifiedMarker` with `variant="icon"` を使用してください。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import type { MapPoint } from "@/types";
 import { isRestaurant } from "@/types/type-guards";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import React from "react";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ HybridIconMarker is deprecated. Use UnifiedMarker with variant='icon' instead."
+  );
+}
 
 interface HybridIconMarkerProps {
   readonly point: MapPoint;

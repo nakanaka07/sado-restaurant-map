@@ -22,11 +22,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SVGMarkerTemplate } from "../templates/SVGMarkerTemplate";
+import { SVGMarkerTemplate } from "../legacy/templates/SVGMarkerTemplate";
 import {
   createMarkerDesignConfig,
   type MarkerCategory,
-} from "../v2/MarkerDesignSystem";
+} from "./MarkerDesignSystem";
 
 // Analytics モック
 vi.mock("@/utils/analytics", () => ({

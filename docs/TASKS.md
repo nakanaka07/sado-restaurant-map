@@ -37,10 +37,14 @@ AC:
 
 ## 3. Active (作業中)
 
-現在なし（Chat manage_todo_list のみ）。
+なし (Phase 4.5完了、次フェーズ検討中)
 
 ## 4. Backlog (優先度付き候補)
 
+- (P1 perf) 画像最適化: PNG→WebP/SVG変換 [Issue #TBD] – 18 cuisine icons最適化、-50-80 KB削減目標（最優先）
+- (P2 perf) Dead Code Elimination [Issue #TBD] – Bundle analyzer実行、未使用コード削除、-20-40 KB削減目標
+- (P2 refactor) UnifiedMarker Phase 5: Legacy完全削除 [Issue #TBD] – A/Bテスト完了後、legacy/削除、-30-40 KB削減目標
+- (P1 test) UnifiedMarker E2Eテスト追加 (Playwright) [Issue #TBD] – マーカー描画・クリック・選択状態検証
 - (P2 feat) Path-specific Copilot instructions 追加 (`.github/instructions/frontend.instructions.md`) – AI 検索コスト低減
 - (P2 chore) Pre-commit (husky + lint-staged) 導入 – 失敗早期化
 - (P3 perf) Lighthouse スコア履歴 metrics 追加 – トレンド可視化
@@ -55,11 +59,32 @@ AC:
 
 ## 6. Done (最近 5 件のみ保持)
 
-1. (P2 chore) size-limit 設定ファイル明示 初期閾値導入
-2. (P2 chore) Coverage 閾値エンフォース (>=20% → 段階的50%目標) CI 追加
-3. (P2 security) Dependabot + audit 設定追加
-4. (P3 perf) Lighthouse スコア履歴 保存ステップ追加
-5. (completed) 設定値現実化調整 (coverage 20%, size-limit 実測ベース)
+1. **(P1 perf) Phase 4.5: Selective Optimization** ✅ (2025-01-XX)
+   - 選択的動的Importロールバック: CustomMapControls, FilterPanel インライン化
+   - Barrel Export確認: hooks/utils/services/components 全て最適化済み
+   - チャンク数削減: 59 → 55 files (-4 files)
+   - 総バンドル: -3.59 KB (-0.11%) 削減達成
+   - 累積削減: -8.91% (Phase 4: -8.80% → Phase 4.5: -8.91%)
+   - Quality Gates全通過 (394 tests, 0 errors)
+2. **(P0 refactor) UnifiedMarker Phase 4: Bundle Optimization** ✅ (2025-01-XX)
+   - Tree-shaking最適化: 3 barrel files最適化 (sideEffects設定)
+   - 動的Import実装: APIProvider/IntegratedMapView/CustomMapControls/FilterPanel
+   - App chunk: -67.07% (-80.34 KB) 削減達成
+   - 総バンドル: +0.57% (+17.75 KB) ※チャンク分割オーバーヘッド
+   - 累積削減: -8.80% (Phase 3: -9.31% → Phase 4: -8.80%)
+3. **(P0 refactor) UnifiedMarker Phase 3: Legacy Migration** ✅ (2025-01-XX)
+   - 10ファイルをlegacy/へ移行 + deprecation warnings
+   - バンドルサイズ: -322.21 KB (-9.31%)
+   - App chunk: -14.07 KB (-10.51%)
+   - 5ファイル削減 (58→53 files)
+4. **(P0 refactor) UnifiedMarker Phase 2: Integration** ✅ (2025-01-XX)
+   - EnhancedMapContainer統合
+   - A/Bテストインフラ接続 (variant prop)
+   - パフォーマンスベンチマーク実装 (benchmark-performance.js)
+5. **(P0 refactor) UnifiedMarker Phase 1: Strategy Pattern実装** ✅ (2025-10-04)
+   - UnifiedMarker.tsx + 3実装クラス作成
+   - 型定義テスト 11件追加
+   - Cognitive Complexity最適化
 
 ## 7. Retrospect メモ (任意)
 
@@ -79,4 +104,4 @@ AC:
 - manage_todo_list は 現在作業中のみ を反映。
 - 複数タスク並列禁止。行き詰まり → Blocker コメント化 → Backlog 戻し。
 
-Last Updated: 2025-10-02
+Last Updated: 2025-01-XX (Phase 4.5完了、-8.91%削減達成、次は画像最適化P1)

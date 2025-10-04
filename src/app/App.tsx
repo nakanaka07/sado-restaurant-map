@@ -16,13 +16,23 @@ import {
   logUnknownAddressStats,
   testDistrictAccuracy,
 } from "@/utils/districtUtils";
-import { APIProvider } from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
-import { CustomMapControls } from "../components/map/CustomMapControls"; // NEW: CustomMapControls 追加
-import { IntegratedMapView } from "../components/map/MapView/IntegratedMapView";
+import { CustomMapControls } from "../components/map/CustomMapControls";
 import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
+
+// 動的import: 重量Google Maps関連コンポーネントのみ (Phase 4.5最適化)
+const APIProvider = lazy(() =>
+  import("@vis.gl/react-google-maps").then(module => ({
+    default: module.APIProvider,
+  }))
+);
+const IntegratedMapView = lazy(() =>
+  import("../components/map/MapView/IntegratedMapView").then(module => ({
+    default: module.IntegratedMapView,
+  }))
+);
 
 // 条件付きPWABadgeコンポーネント
 const ConditionalPWABadge = () => {
@@ -529,62 +539,72 @@ function App() {
 
       <div className="app">
         <main id="main-content" className="app-main">
-          <APIProvider
-            apiKey={apiKey}
-            libraries={["maps", "marker", "geometry"]}
+          {/* Suspense: Google Maps関連の動的import用フォールバック */}
+          <Suspense
+            fallback={
+              <div className="loading-container" aria-live="polite">
+                <span>地図を読み込み中...</span>
+              </div>
+            }
           >
-            <div className="app-content">
-              {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
-              {!isMobile && !isFullscreen && (
-                <FilterPanel
-                  loading={loading}
-                  resultCount={filteredMapPoints.length}
-                  stats={stats}
-                  onCuisineFilter={handleCuisineFilter}
-                  onPriceFilter={handlePriceFilter}
-                  onDistrictFilter={handleDistrictFilter}
-                  onRatingFilter={handleRatingFilter}
-                  onOpenNowFilter={handleOpenNowFilter}
-                  onSearchFilter={handleSearchFilter}
-                  onSortChange={updateSortOrder}
-                  onFeatureFilter={handleFeatureFilter}
-                  onPointTypeFilter={handlePointTypeFilter}
-                  onResetFilters={handleResetFilters}
-                />
-              )}
+            <APIProvider
+              apiKey={apiKey}
+              libraries={["maps", "marker", "geometry"]}
+            >
+              <div className="app-content">
+                {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
+                {!isMobile && !isFullscreen && (
+                  <FilterPanel
+                    loading={loading}
+                    resultCount={filteredMapPoints.length}
+                    stats={stats}
+                    onCuisineFilter={handleCuisineFilter}
+                    onPriceFilter={handlePriceFilter}
+                    onDistrictFilter={handleDistrictFilter}
+                    onRatingFilter={handleRatingFilter}
+                    onOpenNowFilter={handleOpenNowFilter}
+                    onSearchFilter={handleSearchFilter}
+                    onSortChange={updateSortOrder}
+                    onFeatureFilter={handleFeatureFilter}
+                    onPointTypeFilter={handlePointTypeFilter}
+                    onResetFilters={handleResetFilters}
+                  />
+                )}
 
-              {/* Fullscreen Map with A/B Testing Integration */}
-              <IntegratedMapView
-                mapPoints={filteredMapPoints}
-                center={SADO_CENTER}
-                loading={loading}
-                error={error}
-                userId={`user_${Date.now()}`} // 簡易的なユーザーID生成
-                customControls={
-                  isMobile || isFullscreen ? (
-                    <CustomMapControls
-                      loading={loading}
-                      resultCount={filteredMapPoints.length}
-                      stats={stats}
-                      onCuisineFilter={handleCuisineFilter}
-                      onPriceFilter={handlePriceFilter}
-                      onDistrictFilter={handleDistrictFilter}
-                      onRatingFilter={handleRatingFilter}
-                      onOpenNowFilter={handleOpenNowFilter}
-                      onSearchFilter={handleSearchFilter}
-                      onSortChange={updateSortOrder}
-                      onFeatureFilter={handleFeatureFilter}
-                      onPointTypeFilter={handlePointTypeFilter}
-                      onResetFilters={handleResetFilters}
-                      position={
-                        window.google?.maps?.ControlPosition?.BOTTOM_LEFT || 10
-                      }
-                    />
-                  ) : null
-                }
-              />
-            </div>
-          </APIProvider>
+                {/* Fullscreen Map with A/B Testing Integration */}
+                <IntegratedMapView
+                  mapPoints={filteredMapPoints}
+                  center={SADO_CENTER}
+                  loading={loading}
+                  error={error}
+                  userId={`user_${Date.now()}`} // 簡易的なユーザーID生成
+                  customControls={
+                    isMobile || isFullscreen ? (
+                      <CustomMapControls
+                        loading={loading}
+                        resultCount={filteredMapPoints.length}
+                        stats={stats}
+                        onCuisineFilter={handleCuisineFilter}
+                        onPriceFilter={handlePriceFilter}
+                        onDistrictFilter={handleDistrictFilter}
+                        onRatingFilter={handleRatingFilter}
+                        onOpenNowFilter={handleOpenNowFilter}
+                        onSearchFilter={handleSearchFilter}
+                        onSortChange={updateSortOrder}
+                        onFeatureFilter={handleFeatureFilter}
+                        onPointTypeFilter={handlePointTypeFilter}
+                        onResetFilters={handleResetFilters}
+                        position={
+                          window.google?.maps?.ControlPosition?.BOTTOM_LEFT ||
+                          10
+                        }
+                      />
+                    ) : null
+                  }
+                />
+              </div>
+            </APIProvider>
+          </Suspense>
         </main>
 
         <ConditionalPWABadge />

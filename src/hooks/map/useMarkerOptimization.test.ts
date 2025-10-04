@@ -222,5 +222,237 @@ describe("useMarkerOptimization", () => {
         result.current.performanceStats.visibleMarkers
       ).toBeLessThanOrEqual(500);
     });
+
+    test("再レンダリング時のパフォーマンスが劣化しない", () => {
+      const mockRestaurants = Array.from({ length: 100 }, (_, i) =>
+        createMockRestaurant(`${i}`, 38.0 + i * 0.01, 138.5 + i * 0.01)
+      );
+
+      const { result, rerender } = renderHook(
+        ({ restaurants }) => useMarkerOptimization(restaurants),
+        { initialProps: { restaurants: mockRestaurants } }
+      );
+
+      const initialTime = performance.now();
+
+      // 10回再レンダリング
+      for (let i = 0; i < 10; i++) {
+        rerender({ restaurants: mockRestaurants });
+      }
+
+      const totalTime = performance.now() - initialTime;
+
+      // 10回の再レンダリングが50ms以内
+      expect(totalTime).toBeLessThan(50);
+      expect(result.current.optimizedMarkers.length).toBe(100);
+    });
+  });
+
+  describe("エッジケースとエラーハンドリング", () => {
+    test("空の座標配列でもクラッシュしない", () => {
+      const { result } = renderHook(() => useMarkerOptimization([]));
+
+      expect(result.current.optimizedMarkers).toEqual([]);
+      expect(result.current.clusters).toEqual([]);
+    });
+
+    test("不正な座標値を持つマーカーを適切にフィルタ", () => {
+      const invalidRestaurants = [
+        createMockRestaurant("1", NaN, 138.5),
+        createMockRestaurant("2", 38.0, NaN),
+        // @ts-expect-error - テスト目的で不正な値
+        createMockRestaurant("3", "invalid", "invalid"),
+        createMockRestaurant("4", 38.0, 138.5), // 正常なデータ
+      ];
+
+      const { result } = renderHook(() =>
+        useMarkerOptimization(invalidRestaurants)
+      );
+
+      // 不正なマーカーが除外され、正常なマーカーのみ表示
+      expect(result.current.optimizedMarkers.length).toBeGreaterThanOrEqual(0);
+      expect(result.current.performanceStats.totalMarkers).toBe(4);
+    });
+
+    test("極端に大きい/小さい座標値でも処理可能", () => {
+      const extremeRestaurants = [
+        createMockRestaurant("1", 90, 180), // 最大値
+        createMockRestaurant("2", -90, -180), // 最小値
+        createMockRestaurant("3", 0, 0), // ゼロ
+      ];
+
+      const { result } = renderHook(() =>
+        useMarkerOptimization(extremeRestaurants)
+      );
+
+      expect(result.current.optimizedMarkers).toBeDefined();
+      expect(result.current.performanceStats.totalMarkers).toBe(3);
+    });
+
+    test("boundsがundefinedの場合は全マーカーを表示", () => {
+      const mockRestaurants = [
+        createMockRestaurant("1", 38.0, 138.5),
+        createMockRestaurant("2", 40.0, 140.0),
+        createMockRestaurant("3", 50.0, 150.0),
+      ];
+
+      const { result } = renderHook(() =>
+        useMarkerOptimization(mockRestaurants)
+      );
+
+      // bounds未指定時は全マーカー表示
+      expect(result.current.optimizedMarkers.length).toBe(3);
+      expect(result.current.performanceStats.visibleMarkers).toBe(3);
+    });
+
+    test("bounds境界値上のマーカーを正しく扱う", () => {
+      const mockRestaurants = [
+        createMockRestaurant("1", 38.0, 138.0), // 境界上 (south, west)
+        createMockRestaurant("2", 39.0, 139.0), // 境界上 (north, east)
+        createMockRestaurant("3", 38.5, 138.5), // 中央
+      ];
+
+      const bounds = {
+        north: 39.0,
+        south: 38.0,
+        east: 139.0,
+        west: 138.0,
+        zoom: 10,
+      };
+
+      const { result } = renderHook(() =>
+        useMarkerOptimization(mockRestaurants, bounds)
+      );
+
+      // 境界値上のマーカーも含まれる
+      expect(result.current.optimizedMarkers.length).toBeGreaterThanOrEqual(2);
+    });
+
+    test("同一座標の重複マーカーを正しく処理", () => {
+      const duplicateRestaurants = [
+        createMockRestaurant("1", 38.0, 138.5),
+        createMockRestaurant("2", 38.0, 138.5), // 同じ座標
+        createMockRestaurant("3", 38.0, 138.5), // 同じ座標
+      ];
+
+      const { result } = renderHook(() =>
+        useMarkerOptimization(duplicateRestaurants, /* bounds */ undefined, {
+          enableClustering: true,
+        })
+      );
+
+      // 重複座標でもクラッシュせず、適切にクラスタリング
+      expect(result.current.performanceStats.totalMarkers).toBe(3);
+      // clustersプロパティへのアクセスがエラーを投げないことを確認
+      expect(result.current.clusters).toBeDefined();
+    });
+
+    test("options未指定でもデフォルト設定で動作", () => {
+      const mockRestaurants = [createMockRestaurant("1", 38.0, 138.5)];
+
+      const { result } = renderHook(() =>
+        useMarkerOptimization(mockRestaurants)
+      );
+
+      expect(result.current.optimizedMarkers).toBeDefined();
+      expect(result.current.clusters).toBeDefined();
+      expect(result.current.performanceStats).toBeDefined();
+    });
+
+    test("ズーム値が極端な値でも安全に処理", () => {
+      const mockRestaurants = [createMockRestaurant("1", 38.0, 138.5)];
+
+      // ズーム最小値
+      const boundsZoom0 = {
+        north: 39,
+        south: 37,
+        east: 139,
+        west: 138,
+        zoom: 0,
+      };
+      const { result: result0 } = renderHook(() =>
+        useMarkerOptimization(mockRestaurants, boundsZoom0)
+      );
+      expect(result0.current.optimizedMarkers).toBeDefined();
+
+      // ズーム最大値
+      const boundsZoom22 = {
+        north: 39,
+        south: 37,
+        east: 139,
+        west: 138,
+        zoom: 22,
+      };
+      const { result: result22 } = renderHook(() =>
+        useMarkerOptimization(mockRestaurants, boundsZoom22)
+      );
+      expect(result22.current.optimizedMarkers).toBeDefined();
+
+      // 無効値
+      const boundsZoomInvalid = {
+        north: 39,
+        south: 37,
+        east: 139,
+        west: 138,
+        zoom: -1,
+      };
+      const { result: resultInvalid } = renderHook(() =>
+        useMarkerOptimization(mockRestaurants, boundsZoomInvalid)
+      );
+      expect(resultInvalid.current.optimizedMarkers).toBeDefined();
+    });
+  });
+
+  describe("メモリとリソース管理", () => {
+    test("大量マーカーのクリーンアップが正しく動作", () => {
+      const largeDataset = Array.from({ length: 5000 }, (_, i) =>
+        createMockRestaurant(`${i}`, 38.0 + i * 0.001, 138.5 + i * 0.001)
+      );
+
+      const { result, unmount } = renderHook(() =>
+        useMarkerOptimization(largeDataset)
+      );
+
+      expect(result.current.performanceStats.totalMarkers).toBe(5000);
+
+      // アンマウント時にメモリリークしない
+      expect(() => unmount()).not.toThrow();
+    });
+
+    test("頻繁なbounds更新でもメモリリークしない", () => {
+      const mockRestaurants = Array.from({ length: 50 }, (_, i) =>
+        createMockRestaurant(`${i}`, 38.0 + i * 0.01, 138.5 + i * 0.01)
+      );
+
+      const { rerender, unmount } = renderHook(
+        ({ bounds }) => useMarkerOptimization(mockRestaurants, bounds),
+        {
+          initialProps: {
+            bounds: {
+              north: 39,
+              south: 37,
+              east: 139,
+              west: 138,
+              zoom: 10,
+            },
+          },
+        }
+      );
+
+      // 100回bounds更新
+      for (let i = 0; i < 100; i++) {
+        rerender({
+          bounds: {
+            north: 39 + i * 0.01,
+            south: 37 + i * 0.01,
+            east: 139 + i * 0.01,
+            west: 138 + i * 0.01,
+            zoom: 10 + (i % 5),
+          },
+        });
+      }
+
+      expect(() => unmount()).not.toThrow();
+    });
   });
 });

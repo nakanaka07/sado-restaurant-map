@@ -1,6 +1,10 @@
 /**
  * @fileoverview Marker Comparison Demo Component
  * マーカー比較デモ - 改善前後の比較表示
+ *
+ * @deprecated このデモコンポーネントは削除予定です。
+ * UnifiedMarkerで統一され、比較が不要になりました。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import type { MapPoint } from "@/types";
@@ -8,6 +12,11 @@ import React, { useState } from "react";
 import { EnhancedPNGMarker } from "./EnhancedPNGMarker";
 import { MapMarker } from "./MapMarker";
 import { SVGMarkerSystem } from "./SVGMarkerSystem";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn("⚠️ MarkerComparisonDemo is deprecated and will be removed.");
+}
 
 interface MarkerComparisonDemoProps {
   readonly points: MapPoint[];

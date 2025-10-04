@@ -1,0 +1,124 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-10-04T14:28:54.643Z",
+  "current": {
+    "timestamp": "2025-10-04T14:28:54.638Z",
+    "totalFiles": 55,
+    "totalSize": 3227061,
+    "totalSizeKB": "3151.43",
+    "mainChunk": {
+      "path": "assets\\index-VOeiJmwc.js",
+      "size": 175283,
+      "sizeKB": "171.17",
+      "gzipKB": "unknown"
+    },
+    "appChunk": {
+      "path": "assets\\App-C09Fy55u.js",
+      "size": 67995,
+      "sizeKB": "66.40",
+      "gzipKB": "unknown"
+    },
+    "googleMapsChunk": {
+      "path": "assets\\google-maps-D3x-C6e9.js",
+      "size": 38124,
+      "sizeKB": "37.23",
+      "gzipKB": "unknown"
+    },
+    "allFiles": [
+      {
+        "path": "apple-touch-icon.png",
+        "size": 13887,
+        "sizeKB": "13.56"
+      },
+      {
+        "path": "assets\\App-C09Fy55u.js",
+        "size": 67995,
+        "sizeKB": "66.40"
+      },
+      {
+        "path": "assets\\App-C09Fy55u.js.map",
+        "size": 63937,
+        "sizeKB": "62.44"
+      },
+      {
+        "path": "assets\\css\\index-j19ppTp0.css",
+        "size": 20544,
+        "sizeKB": "20.06"
+      },
+      {
+        "path": "assets\\css\\PWABadge-DqUK_xOX.css",
+        "size": 401,
+        "sizeKB": "0.39"
+      },
+      {
+        "path": "assets\\google-maps-D3x-C6e9.js",
+        "size": 38124,
+        "sizeKB": "37.23"
+      },
+      {
+        "path": "assets\\google-maps-D3x-C6e9.js.map",
+        "size": 52347,
+        "sizeKB": "51.12"
+      },
+      {
+        "path": "assets\\images\\bar_icon-CCAIdTKJ.png",
+        "size": 96285,
+        "sizeKB": "94.03"
+      },
+      {
+        "path": "assets\\images\\bento_icon-BE017dT6.png",
+        "size": 25422,
+        "sizeKB": "24.83"
+      },
+      {
+        "path": "assets\\images\\cafe_icon-CeCutp44.png",
+        "size": 317715,
+        "sizeKB": "310.27"
+      }
+    ]
+  },
+  "comparison": {
+    "isFirstRun": false,
+    "mainChunk": {
+      "current": 171.17,
+      "previous": 171.17,
+      "diff": "0.00",
+      "percent": "0.00",
+      "status": "unchanged"
+    },
+    "appChunk": {
+      "current": 66.4,
+      "previous": 39.44,
+      "diff": "26.96",
+      "percent": "68.36",
+      "status": "increased"
+    },
+    "total": {
+      "current": 3151.43,
+      "previous": 3155.02,
+      "diff": "-3.59",
+      "percent": "-0.11",
+      "status": "decreased"
+    }
+  },
+  "history": [
+    {
+      "timestamp": "2025-10-04T13:05:50.704Z",
+      "totalSizeKB": "3459.48",
+      "mainChunkSizeKB": "171.16",
+      "appChunkSizeKB": "133.85"
+    },
+    {
+      "timestamp": "2025-10-04T13:36:25.533Z",
+      "totalSizeKB": "3137.27",
+      "mainChunkSizeKB": "171.16",
+      "appChunkSizeKB": "119.78"
+    },
+    {
+      "timestamp": "2025-10-04T14:09:47.605Z",
+      "totalSizeKB": "3155.02",
+      "mainChunkSizeKB": "171.17",
+      "appChunkSizeKB": "39.44"
+    }
+  ]
+}

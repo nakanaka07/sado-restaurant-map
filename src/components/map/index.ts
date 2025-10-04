@@ -6,4 +6,23 @@ export { EnhancedMapContainer } from "./MapView/EnhancedMapContainer";
 export { MapView } from "./MapView/MapView";
 export { MapViewWithTesting } from "./MapView/MapViewWithTesting";
 export { RestaurantMap } from "./RestaurantMap";
-export * from "./utils"; // ユーティリティも公開
+
+// Tree-shaking最適化: export * を個別exportに変換
+export {
+  getMarkerColorByCuisine,
+  getMarkerConfig,
+  getMarkerIcon,
+} from "./utils";
+
+// UnifiedMarker および各Strategy実装
+export { UnifiedMarker } from "./UnifiedMarker";
+export type {
+  MarkerSize,
+  MarkerStrategyProps,
+  MarkerVariant,
+  UnifiedMarkerProps,
+} from "./UnifiedMarker";
+
+export { IconMarker } from "./markers/IconMarker";
+export { PinMarker } from "./markers/PinMarker";
+export { SVGMarker } from "./markers/SVGMarker";

@@ -1,12 +1,23 @@
 /**
  * @fileoverview MapMarker component
  * 地図マーカーコンポーネント
+ *
+ * @deprecated このコンポーネントは非推奨です。
+ * 代わりに `UnifiedMarker` with `variant="pin"` を使用してください。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import type { MapPoint } from "@/types";
 import { AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 import { useCallback } from "react";
-import { getMarkerIcon, getMarkerSize } from "../utils";
+import { getMarkerIcon, getMarkerSize } from "../../utils";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ MapMarker is deprecated. Use UnifiedMarker with variant='pin' instead."
+  );
+}
 
 interface MapMarkerProps {
   readonly point: MapPoint;

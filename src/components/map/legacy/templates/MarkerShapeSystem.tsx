@@ -1,7 +1,18 @@
 /**
  * @fileoverview 形状システム・ジオメトリ生成ユーティリティ
  * 数学的に最適化された形状パス生成とレスポンシブ対応
+ *
+ * @deprecated このユーティリティは非推奨です。
+ * SVGマーカー内部ユーティリティに統合されました。
+ * 詳細: src/components/map/legacy/README.md
  */
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ MarkerShapeSystem is deprecated. SVG utilities are now integrated internally."
+  );
+}
 
 // ==============================
 // 基本型定義

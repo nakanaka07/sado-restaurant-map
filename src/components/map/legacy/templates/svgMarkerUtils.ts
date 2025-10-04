@@ -1,9 +1,11 @@
 /**
  * @fileoverview SVGマーカー用ユーティリティ関数
  * React Fast Refresh対応のため、コンポーネントと分離
+ *
+ * @deprecated このファイルは非推奨です。legacy/templates/SVGMarkerTemplate.tsx の一部です。
  */
 
-import type { MarkerShape, MarkerSize } from "../v2/MarkerDesignSystem";
+import type { MarkerShape, MarkerSize } from "../../v2/MarkerDesignSystem";
 
 // ==============================
 // 形状パス生成関数

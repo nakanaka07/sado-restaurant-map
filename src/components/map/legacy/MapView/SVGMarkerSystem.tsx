@@ -1,6 +1,10 @@
 /**
  * @fileoverview SVG Marker System Component
  * SVGマーカーシステム - Phase 2実装
+ *
+ * @deprecated このコンポーネントは非推奨です。
+ * 代わりに `UnifiedMarker` with `variant="svg"` を使用してください。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import { getIconComponent } from "@/config/iconMaps";
@@ -8,7 +12,14 @@ import type { MapPoint } from "@/types";
 import { isRestaurant } from "@/types/type-guards";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import React from "react";
-import { getMarkerColorByCuisine } from "../utils/markerUtils";
+import { getMarkerColorByCuisine } from "../../utils/markerUtils";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ SVGMarkerSystem is deprecated. Use UnifiedMarker with variant='svg' instead."
+  );
+}
 
 interface SVGMarkerSystemProps {
   readonly point: MapPoint;

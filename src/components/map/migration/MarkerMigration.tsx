@@ -16,8 +16,8 @@ import type {
   PerformanceMetrics,
 } from "@/types/migration";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { OptimizedRestaurantMarker } from "../OptimizedRestaurantMarker";
-import { SVGMarkerTemplate } from "../templates/SVGMarkerTemplate";
+import { OptimizedRestaurantMarker } from "../legacy/OptimizedRestaurantMarker";
+import { SVGMarkerTemplate } from "../legacy/templates/SVGMarkerTemplate";
 import { createMarkerDesignConfig } from "../v2/MarkerDesignSystem";
 import {
   migrateCuisineToCategory,

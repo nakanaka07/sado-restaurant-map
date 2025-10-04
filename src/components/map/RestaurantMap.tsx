@@ -10,10 +10,10 @@ import type { MigrationConfig } from "@/types/migration";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
 import { Map } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { OptimizedRestaurantMarker } from "./legacy/OptimizedRestaurantMarker";
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MarkerMigrationSystem } from "./migration/MarkerMigration";
 import { OptimizedInfoWindow } from "./OptimizedInfoWindow";
-import { OptimizedRestaurantMarker } from "./OptimizedRestaurantMarker";
 
 interface RestaurantMapProps {
   readonly restaurants: readonly Restaurant[];

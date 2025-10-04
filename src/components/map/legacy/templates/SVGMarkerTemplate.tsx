@@ -7,6 +7,10 @@
  * 2. レスポンシブサイズ対応
  * 3. WCAG 2.2 AA準拠
  * 4. 最適化されたSVG生成
+ *
+ * @deprecated このコンポーネントは非推奨です。
+ * 代わりに `UnifiedMarker` with `variant="svg"` を使用してください。
+ * 詳細: src/components/map/legacy/README.md
  */
 
 import React from "react";
@@ -14,13 +18,20 @@ import type {
   MarkerCategory,
   MarkerDesignSystem,
   MarkerSize,
-} from "../v2/MarkerDesignSystem";
+} from "../../v2/MarkerDesignSystem";
 import {
   adjustColorBrightness,
   generateShapePath,
   getIconSize,
   getMarkerDimensions,
 } from "./svgMarkerUtils";
+
+// Deprecation警告
+if (process.env.NODE_ENV === "development") {
+  console.warn(
+    "⚠️ SVGMarkerTemplate is deprecated. Use UnifiedMarker with variant='svg' instead."
+  );
+}
 
 // ==============================
 // SVGマーカーコンポーネントProps

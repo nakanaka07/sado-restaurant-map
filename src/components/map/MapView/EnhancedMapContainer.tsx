@@ -3,14 +3,15 @@
  * マーカータイプ選択機能付きMapContainer
  */
 
+import type { ABTestVariant } from "@/config/abTestConfig";
+import { classifyUser } from "@/config/abTestConfig";
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { MarkerVariant } from "../UnifiedMarker";
+import { UnifiedMarker } from "../UnifiedMarker";
 import { CircularMarkerContainer } from "./CircularMarkerContainer";
-import { EnhancedPNGMarker } from "./EnhancedPNGMarker";
 import { MapInfoWindow } from "./MapInfoWindow";
-import { MapMarker } from "./MapMarker";
-import { SVGMarkerSystem } from "./SVGMarkerSystem";
 
 interface EnhancedMapContainerProps {
   readonly mapPoints: readonly MapPoint[];
@@ -24,7 +25,35 @@ interface EnhancedMapContainerProps {
   readonly showSelectionPanel?: boolean; // パネル表示制御（本番で非表示）
 }
 
-type MarkerType = "original" | "enhanced-png" | "svg" | "circular-icooon";
+// UnifiedMarkerに統一、circular-icooonは互換性のため保持
+type MarkerType = "circular-icooon" | "unified-marker";
+
+/**
+ * A/BテストvariantからUnifiedMarker variantへのマッピング
+ */
+function mapABTestVariantToMarkerVariant(
+  abVariant: ABTestVariant
+): MarkerVariant {
+  const mapping: Record<ABTestVariant, MarkerVariant> = {
+    original: "pin",
+    "enhanced-png": "icon",
+    svg: "svg",
+    testing: "icon",
+    "phase4-enhanced": "icon",
+  };
+  return mapping[abVariant];
+}
+
+/**
+ * マーカータイプから表示名を取得
+ */
+function getMarkerTypeDisplayName(markerType: MarkerType): string {
+  const displayNames: Record<MarkerType, string> = {
+    "circular-icooon": "Circular ICOOON",
+    "unified-marker": "UnifiedMarker",
+  };
+  return displayNames[markerType];
+}
 
 export function EnhancedMapContainer({
   mapPoints,
@@ -37,15 +66,42 @@ export function EnhancedMapContainer({
   onMarkerTypeChange,
   showSelectionPanel = true,
 }: EnhancedMapContainerProps) {
-  const [selectedMarkerType, setSelectedMarkerType] = useState<MarkerType>(
-    initialMarkerType ?? "circular-icooon"
+  // 🧪 A/Bテスト: ユーザー分類とvariant決定
+  const abTestClassification = useMemo(() => {
+    return classifyUser();
+  }, []);
+
+  // 🎯 A/BテストからUnifiedMarker variantを導出
+  const unifiedMarkerVariant = useMemo(
+    () => mapABTestVariantToMarkerVariant(abTestClassification.variant),
+    [abTestClassification.variant]
   );
 
-  // 外部 initialMarkerType 変更を同期 (rare case)
-  if (initialMarkerType && initialMarkerType !== selectedMarkerType) {
-    // 外部制御優先 (ユーザー override でない場合)
-    setSelectedMarkerType(initialMarkerType);
-  }
+  // 🔄 デフォルトMarkerType: initialMarkerType優先、次にA/Bテスト結果
+  const defaultMarkerType = useMemo((): MarkerType => {
+    if (initialMarkerType) {
+      return initialMarkerType;
+    }
+    // A/Bテストが有効でテスト対象の場合はUnifiedMarkerを使用
+    // (開発環境でのtestingModeAvailableチェックを含む)
+    if (
+      abTestClassification.testingModeAvailable &&
+      abTestClassification.isInTest
+    ) {
+      return "unified-marker";
+    }
+    return "circular-icooon";
+  }, [initialMarkerType, abTestClassification]);
+
+  const [selectedMarkerType, setSelectedMarkerType] =
+    useState<MarkerType>(defaultMarkerType);
+
+  // 外部 initialMarkerType 変更を同期
+  useEffect(() => {
+    if (initialMarkerType && initialMarkerType !== selectedMarkerType) {
+      setSelectedMarkerType(initialMarkerType);
+    }
+  }, [initialMarkerType, selectedMarkerType]);
 
   // エラー防止のためのクリックハンドラーをメモ化
   const handleMarkerClick = useCallback(
@@ -67,24 +123,12 @@ export function EnhancedMapContainer({
     }
   }, [onCloseInfoWindow]);
 
-  // マーカーコンポーネントを選択
+  // マーカーコンポーネントを選択 (UnifiedMarkerに統一)
   const renderMarker = useCallback(
     (point: MapPoint, index: number) => {
       const key = `${selectedMarkerType}-${point.id}-${index}`;
 
       switch (selectedMarkerType) {
-        case "original":
-          return (
-            <MapMarker key={key} point={point} onClick={handleMarkerClick} />
-          );
-        case "svg":
-          return (
-            <SVGMarkerSystem
-              key={key}
-              point={point}
-              onClick={handleMarkerClick}
-            />
-          );
         case "circular-icooon":
           return (
             <CircularMarkerContainer
@@ -94,19 +138,20 @@ export function EnhancedMapContainer({
               onPointClick={handleMarkerClick}
             />
           );
-        case "enhanced-png":
+        case "unified-marker":
         default:
-          // enhanced-pngとdefaultを統合してコード重複を解消
           return (
-            <EnhancedPNGMarker
+            <UnifiedMarker
               key={key}
               point={point}
               onClick={handleMarkerClick}
+              variant={unifiedMarkerVariant}
+              size="medium"
             />
           );
       }
     },
-    [selectedMarkerType, handleMarkerClick]
+    [selectedMarkerType, handleMarkerClick, unifiedMarkerVariant]
   );
 
   return (
@@ -147,134 +192,6 @@ export function EnhancedMapContainer({
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            <label
-              htmlFor="marker-type-original"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                backgroundColor:
-                  selectedMarkerType === "original" ? "#f0f7ff" : "transparent",
-                border:
-                  selectedMarkerType === "original"
-                    ? "2px solid #2196f3"
-                    : "2px solid transparent",
-                transition: "all 0.2s ease",
-              }}
-              aria-label="オリジナルマーカー (35px) を選択"
-            >
-              <input
-                id="marker-type-original"
-                type="radio"
-                name="markerType"
-                value="original"
-                checked={selectedMarkerType === "original"}
-                onChange={e => {
-                  const next = e.target.value as MarkerType;
-                  setSelectedMarkerType(next);
-                  onMarkerTypeChange?.(next);
-                }}
-                style={{ margin: 0 }}
-              />
-              <div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  オリジナル (35px)
-                </div>
-                <div style={{ fontSize: "12px", color: "#666" }}>
-                  現在のピンマーカー、絵文字使用
-                </div>
-              </div>
-            </label>
-
-            <label
-              htmlFor="marker-type-enhanced-png"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                backgroundColor:
-                  selectedMarkerType === "enhanced-png"
-                    ? "#fff3e0"
-                    : "transparent",
-                border:
-                  selectedMarkerType === "enhanced-png"
-                    ? "2px solid #ff9800"
-                    : "2px solid transparent",
-                transition: "all 0.2s ease",
-              }}
-              aria-label="改良PNGマーカー (48px) を選択"
-            >
-              <input
-                id="marker-type-enhanced-png"
-                type="radio"
-                name="markerType"
-                value="enhanced-png"
-                checked={selectedMarkerType === "enhanced-png"}
-                onChange={e => {
-                  const next = e.target.value as MarkerType;
-                  setSelectedMarkerType(next);
-                  onMarkerTypeChange?.(next);
-                }}
-                style={{ margin: 0 }}
-              />
-              <div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  改良PNG (48px) ⭐
-                </div>
-                <div style={{ fontSize: "12px", color: "#666" }}>
-                  37%大型化、グラデーション背景
-                </div>
-              </div>
-            </label>
-
-            <label
-              htmlFor="marker-type-svg"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                backgroundColor:
-                  selectedMarkerType === "svg" ? "#e8f5e8" : "transparent",
-                border:
-                  selectedMarkerType === "svg"
-                    ? "2px solid #4caf50"
-                    : "2px solid transparent",
-                transition: "all 0.2s ease",
-              }}
-              aria-label="SVGマーカー (60px) を選択"
-            >
-              <input
-                id="marker-type-svg"
-                type="radio"
-                name="markerType"
-                value="svg"
-                checked={selectedMarkerType === "svg"}
-                onChange={e => {
-                  const next = e.target.value as MarkerType;
-                  setSelectedMarkerType(next);
-                  onMarkerTypeChange?.(next);
-                }}
-                style={{ margin: 0 }}
-              />
-              <div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  SVG (60px) 🚀
-                </div>
-                <div style={{ fontSize: "12px", color: "#666" }}>
-                  71%大型化、無限スケーラブル
-                </div>
-              </div>
-            </label>
-
             {/* CircularMarker ICOOON MONO Option */}
             <label
               htmlFor="marker-type-circular"
@@ -319,6 +236,51 @@ export function EnhancedMapContainer({
                 </div>
               </div>
             </label>
+
+            {/* UnifiedMarker Option (Phase 1完了) */}
+            <label
+              htmlFor="marker-type-unified"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                cursor: "pointer",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                backgroundColor:
+                  selectedMarkerType === "unified-marker"
+                    ? "#f3e5f5"
+                    : "transparent",
+                border:
+                  selectedMarkerType === "unified-marker"
+                    ? "2px solid #9c27b0"
+                    : "2px solid transparent",
+                transition: "all 0.2s ease",
+              }}
+              aria-label="UnifiedMarkerを選択"
+            >
+              <input
+                id="marker-type-unified"
+                type="radio"
+                name="markerType"
+                value="unified-marker"
+                checked={selectedMarkerType === "unified-marker"}
+                onChange={e => {
+                  const next = e.target.value as MarkerType;
+                  setSelectedMarkerType(next);
+                  onMarkerTypeChange?.(next);
+                }}
+                style={{ margin: 0 }}
+              />
+              <div>
+                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                  UnifiedMarker 🚀 NEW
+                </div>
+                <div style={{ fontSize: "12px", color: "#666" }}>
+                  Strategy Pattern統合実装
+                </div>
+              </div>
+            </label>
           </div>
 
           {/* 現在の選択の説明 */}
@@ -342,16 +304,47 @@ export function EnhancedMapContainer({
               現在の表示:
             </div>
             <div style={{ fontSize: "11px", color: "#6c757d" }}>
-              {selectedMarkerType === "original" &&
-                "従来のピンマーカー (35px、絵文字使用)"}
-              {selectedMarkerType === "enhanced-png" &&
-                "Phase 1: 37%大型化、グラデーション背景、既存PNG活用"}
-              {selectedMarkerType === "svg" &&
-                "Phase 2: 71%大型化、無限スケーラブル、軽量SVG"}
               {selectedMarkerType === "circular-icooon" &&
-                "Phase 3: ICOOON MONO統合、TypeScript完全対応、WCAG 2.2 AA準拠"}
+                "Circular ICOOON: ICOOON MONO統合、TypeScript完全対応、WCAG 2.2 AA準拠"}
+              {selectedMarkerType === "unified-marker" &&
+                `UnifiedMarker (推奨): variant=${unifiedMarkerVariant} (A/B: ${abTestClassification.segment})`}
             </div>
           </div>
+
+          {/* A/Bテスト情報（開発環境のみ） */}
+          {showSelectionPanel && abTestClassification.testingModeAvailable && (
+            <div
+              style={{
+                marginTop: "12px",
+                padding: "10px",
+                backgroundColor: "#fff3cd",
+                borderRadius: "8px",
+                border: "1px solid #ffc107",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "11px",
+                  fontWeight: "bold",
+                  marginBottom: "6px",
+                  color: "#856404",
+                }}
+              >
+                🧪 A/Bテスト情報:
+              </div>
+              <div style={{ fontSize: "10px", color: "#856404" }}>
+                <div>セグメント: {abTestClassification.segment}</div>
+                <div>
+                  バリアント: {abTestClassification.variant} → variant=
+                  {unifiedMarkerVariant}
+                </div>
+                <div>
+                  テスト参加:{" "}
+                  {abTestClassification.isInTest ? "Yes ✓" : "No (Control)"}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -392,10 +385,7 @@ export function EnhancedMapContainer({
               合計: {mapPoints.length}件
             </div>
             <div style={{ marginTop: "6px", fontSize: "11px", color: "#999" }}>
-              マーカー:{" "}
-              {selectedMarkerType === "circular-icooon"
-                ? "Circular ICOOON"
-                : selectedMarkerType}
+              マーカー: {getMarkerTypeDisplayName(selectedMarkerType)}
             </div>
           </div>
         </div>

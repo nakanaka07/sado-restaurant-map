@@ -7,7 +7,7 @@ import { DEFAULT_MAP_TYPE } from "@/config";
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
 import { ReactNode, useCallback } from "react";
-import { EnhancedPNGMarker } from "./EnhancedPNGMarker";
+import { EnhancedPNGMarker } from "../legacy/MapView/EnhancedPNGMarker";
 import { MapInfoWindow } from "./MapInfoWindow";
 
 interface MapContainerProps {
