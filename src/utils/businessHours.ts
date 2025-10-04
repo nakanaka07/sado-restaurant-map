@@ -614,19 +614,7 @@ function normalizeWhitespace(s: string): string {
   return s.replace(/[\u00A0\u2000-\u200B\u202F\u3000\uFEFF]/g, "").trim();
 }
 
-/**
- * Google Maps URLを生成
- */
-export function generateGoogleMapsUrl(
-  name: string,
-  coordinates: { lat: number; lng: number }
-): string {
-  const baseUrl = "https://www.google.com/maps/search/";
-  const query = encodeURIComponent(
-    `${name} ${coordinates.lat},${coordinates.lng}`
-  );
-  return `${baseUrl}${query}/@${coordinates.lat},${coordinates.lng},17z`;
-}
+// Note: generateGoogleMapsUrl moved to googleMapsUtils.ts for better organization
 
 /**
  * レストランカテゴリーから料理ジャンルをマッピング

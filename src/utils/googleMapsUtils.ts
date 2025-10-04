@@ -273,7 +273,8 @@ export function extractPlaceIdFromUrl(url: string): string | null {
     }
 
     // URL パスから抽出を試行
-    const pathMatch = url.match(/\/place\/.*?\/.*?([A-Za-z0-9_-]{27})/);
+    const pathRegex = /\/place\/.*?\/.*?([A-Za-z0-9_-]{27})/;
+    const pathMatch = pathRegex.exec(url);
     if (pathMatch) {
       return pathMatch[1];
     }

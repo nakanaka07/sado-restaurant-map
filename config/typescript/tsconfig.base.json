@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
     /* TypeScript 5.7 新機能 */
@@ -21,40 +17,18 @@
     "moduleDetection": "force",
     "noEmit": true,
     /* Path mapping */
-    // NOTE: baseUrl は TS7 で削除予定 (https://aka.ms/ts6)。
-    // 現在はパスエイリアス維持のため一時的に残し、TS7 移行時に以下へ移行予定:
-    // 1) bundler の import maps (Vite: resolve.alias) へ統合
-    // 2) or tsconfig の rootDirs + 相対 import へのリライト
-    // 暫定的に ignoreDeprecations で抑制しつつ追跡。
-    "baseUrl": "../../",
+    // TypeScript 7.0 準備: baseUrl は廃止予定のため、Vite resolve.alias に移行
+    // 現在はViteでaliasが設定済み、TSは型解決のみでpathsを使用
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@components/*": [
-        "src/components/*"
-      ],
-      "@hooks/*": [
-        "src/hooks/*"
-      ],
-      "@types/*": [
-        "src/types/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
-      ],
-      "@data/*": [
-        "src/data/*"
-      ],
-      "@assets/*": [
-        "src/assets/*"
-      ],
-      "@config/*": [
-        "src/config/*"
-      ],
-      "@services/*": [
-        "src/services/*"
-      ]
+      "@/*": ["../../src/*"],
+      "@components/*": ["../../src/components/*"],
+      "@hooks/*": ["../../src/hooks/*"],
+      "@types/*": ["../../src/types/*"],
+      "@utils/*": ["../../src/utils/*"],
+      "@data/*": ["../../src/data/*"],
+      "@assets/*": ["../../src/assets/*"],
+      "@config/*": ["../../src/config/*"],
+      "@services/*": ["../../src/services/*"]
     },
     /* Strict Type Checking */
     "strict": true,

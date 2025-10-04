@@ -4,7 +4,7 @@
  */
 
 import type { Restaurant } from "@/types";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Phase 4: ClusterMarker統合
 import type { ClusterData } from "@/components/map/markers/clusterUtils";
@@ -72,6 +72,9 @@ export const useMarkerOptimization = (
   viewportBounds?: ViewportBounds,
   config: Partial<MarkerOptimizationConfig> = {}
 ) => {
+  // config を JSON 文字列化して安定した依存関係を作成
+  const configKey = JSON.stringify(config);
+
   // finalConfigをuseMemo化して依存関係を安定化
   const finalConfig = useMemo(() => {
     const defaultConfig: MarkerOptimizationConfig = {
@@ -83,7 +86,8 @@ export const useMarkerOptimization = (
       clusteringMinCount: 2, // Phase 4: 2軒以上でクラスタリング
     };
     return { ...defaultConfig, ...config };
-  }, [config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [configKey]);
 
   // パフォーマンス統計
   const [performanceStats, setPerformanceStats] = useState<PerformanceStats>({
@@ -338,7 +342,7 @@ export const useMarkerOptimization = (
       })
     );
 
-    // パフォーマンス統計更新
+    // パフォーマンス統計計算（state更新はuseEffect内で行う）
     const renderTime = performance.now() - renderStartTime.current;
     const clusterCount = clusters.length;
     const averageClusterSize =
@@ -347,8 +351,7 @@ export const useMarkerOptimization = (
           clusterCount
         : 0;
 
-    setPerformanceStats(prev => ({
-      ...prev,
+    const stats: PerformanceStats = {
       totalMarkers: restaurants.length,
       visibleMarkers: optimized.length,
       clusteredMarkers: clusters.reduce(
@@ -359,7 +362,7 @@ export const useMarkerOptimization = (
       lastUpdate: Date.now(),
       clusterCount,
       averageClusterSize,
-    }));
+    };
 
     if (finalConfig.debugMode) {
       const isNearLimit = optimized.length >= 40; // API制限50の80%
@@ -389,7 +392,7 @@ export const useMarkerOptimization = (
       }
     }
 
-    return { optimized, clusters };
+    return { optimized, clusters, stats };
   }, [
     restaurants,
     viewportBounds,
@@ -403,6 +406,14 @@ export const useMarkerOptimization = (
 
   const optimizedMarkers = optimizedResult.optimized;
   const clusters = optimizedResult.clusters;
+
+  // パフォーマンス統計をuseEffect内で更新（useMemo外で安全に更新）
+  // stats オブジェクトを JSON 文字列化して依存関係を安定化
+  const statsKey = JSON.stringify(optimizedResult.stats);
+  useEffect(() => {
+    setPerformanceStats(optimizedResult.stats);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statsKey]);
 
   /**
    * マーカーリセット関数
@@ -419,23 +430,12 @@ export const useMarkerOptimization = (
     });
   }, []);
 
-  /**
-   * 設定更新関数
-   */
-  const updateConfig = useCallback(
-    (newConfig: Partial<MarkerOptimizationConfig>) => {
-      Object.assign(finalConfig, newConfig);
-    },
-    [finalConfig]
-  );
-
   return {
     optimizedMarkers,
     clusters, // Phase 4: クラスターデータを追加
     performanceStats,
     config: finalConfig,
     resetOptimization,
-    updateConfig,
     // ユーティリティ関数
     isValidCoordinates,
     calculateDistance,

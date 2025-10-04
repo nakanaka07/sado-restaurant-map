@@ -5,7 +5,7 @@
  * CircularMarkerとClusterMarkerのアニメーション制御
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { MarkerAnimation } from "../components/map/markers/constants";
 
 /**
@@ -255,9 +255,9 @@ export const useMarkerAnimationManager = (
   );
 
   /**
-   * 特定マーカーのアニメーション停止
+   * 特定マーカーのアニメーション停止（バッチ版）
    */
-  const stopMarkerAnimation = useCallback((markerId: string) => {
+  const stopBatchMarkerAnimation = useCallback((markerId: string) => {
     // 入力バリデーション
     if (!isValidMarkerId(markerId)) {
       console.warn(
@@ -472,6 +472,7 @@ export const useMarkerAnimationManager = (
     // アニメーション制御
     startMarkerAnimation,
     stopMarkerAnimation,
+    stopBatchMarkerAnimation,
     stopAllAnimations,
     setGlobalAnimation,
 
@@ -489,76 +490,6 @@ export const useMarkerAnimationManager = (
 
     // 設定
     config: finalConfig,
-  };
-};
-
-/**
- * 軽量アニメーション Hook（シンプル用途）
- */
-export const useSimpleMarkerAnimation = () => {
-  const [currentAnimation, setCurrentAnimation] =
-    useState<MarkerAnimation>("none");
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const animate = useCallback(
-    (animation: MarkerAnimation, duration: number = 2000) => {
-      // 入力バリデーション
-      if (!isValidMarkerAnimation(animation)) {
-        console.warn("Invalid animation provided to animate:", animation);
-        return;
-      }
-
-      if (duration <= 0) {
-        console.warn("Invalid duration provided to animate:", duration);
-        return;
-      }
-
-      try {
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-        }
-
-        setCurrentAnimation(animation);
-
-        if (animation !== "none") {
-          timerRef.current = setTimeout(() => {
-            setCurrentAnimation("none");
-            timerRef.current = null;
-          }, duration);
-        }
-      } catch (error) {
-        console.error("Error in animate:", error);
-      }
-    },
-    []
-  );
-
-  const stop = useCallback(() => {
-    try {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      setCurrentAnimation("none");
-    } catch (error) {
-      console.error("Error in stop:", error);
-    }
-  }, []);
-
-  // クリーンアップ関数
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, []);
-
-  return {
-    currentAnimation,
-    animate,
-    stop,
   };
 };
 

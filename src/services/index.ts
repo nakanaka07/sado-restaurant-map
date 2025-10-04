@@ -33,7 +33,7 @@ export {
   displayABTestResults,
   monitoringSystem,
   performStatisticalAnalysis,
-  runPhase3DeploymentTests,
+  // runPhase3DeploymentTests, // 未使用 - コメントアウト
   shouldProceedToNextPhase,
   startABTestMonitoring,
   stopABTestMonitoring,
@@ -55,8 +55,6 @@ export {
   type StatisticalRecommendation,
   type StatisticalTestConfig,
   type StatisticalTestResult,
-  type TestResult,
-  type TestSuite,
 } from "./abtest";
 
 // Re-export types for convenience

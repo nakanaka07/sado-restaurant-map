@@ -444,31 +444,4 @@ export const useOfflineMarkers = (
   };
 };
 
-/**
- * 軽量版オフラインHook
- */
-export const useSimpleOfflineMarkers = (restaurants: Restaurant[]) => {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  return {
-    isOffline,
-    markers: isOffline
-      ? restaurants.slice(0, 50).map(r => ({ ...r, isOfflineMode: true }))
-      : restaurants,
-  };
-};
-
 export default useOfflineMarkers;

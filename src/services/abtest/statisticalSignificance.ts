@@ -702,6 +702,7 @@ export const statisticalAnalyzer = new StatisticalSignificanceAnalyzer();
 
 /**
  * A/Bテストの統計分析を実行
+ * @deprecated 直接 statisticalAnalyzer.analyzeABTest() を使用してください
  */
 export function performStatisticalAnalysis() {
   return statisticalAnalyzer.analyzeABTest();
@@ -731,7 +732,7 @@ export function applyMultipleComparisonCorrection(pValues: number[]): number[] {
 
 export default {
   statisticalAnalyzer,
-  performStatisticalAnalysis,
+  // performStatisticalAnalysis, // deprecated - 直接statisticalAnalyzer.analyzeABTest()を使用
   calculateSampleSize,
   applyMultipleComparisonCorrection,
 };

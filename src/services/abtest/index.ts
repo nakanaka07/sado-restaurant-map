@@ -47,9 +47,9 @@ export {
   type PerformanceMetrics,
 } from "./abTestAnalytics";
 
-// Phase 3 デプロイメントテスト
-export {
-  runPhase3DeploymentTests,
-  type TestResult,
-  type TestSuite,
-} from "./phase3DeploymentTest";
+// Phase 3 デプロイメントテスト - 注意: 現在未使用（将来の機能拡張用）
+// export {
+//   runPhase3DeploymentTests,
+//   type TestResult,
+//   type TestSuite,
+// } from "./phase3DeploymentTest";

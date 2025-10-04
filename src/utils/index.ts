@@ -80,7 +80,6 @@ export {
 export {
   calculateBusinessStatus,
   formatBusinessHoursForDisplay,
-  generateGoogleMapsUrl as generateBusinessGoogleMapsUrl,
   mapCategoryToCuisineType,
   organizeDetailedHours,
 } from "./businessHours";
