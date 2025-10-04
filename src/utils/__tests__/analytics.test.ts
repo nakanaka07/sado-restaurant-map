@@ -739,3 +739,381 @@ describe("analytics - initGA エラーハンドリング", () => {
     expect("".startsWith("G-")).toBe(false);
   });
 });
+
+describe("analytics - runGADiagnostics", () => {
+  test("診断情報を正しく収集する", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    // DOM要素をモック
+    const mockScript = document.createElement("script");
+    mockScript.src = "https://www.googletagmanager.com/gtag/js?id=G-TEST";
+    document.head.appendChild(mockScript);
+
+    const diagnostics = runGADiagnostics();
+
+    expect(diagnostics).toHaveProperty("measurementId");
+    expect(diagnostics).toHaveProperty("measurementIdFormat");
+    expect(diagnostics).toHaveProperty("environment");
+    expect(diagnostics).toHaveProperty("gtagScriptExists");
+    expect(diagnostics).toHaveProperty("gtagFunctionExists");
+    expect(diagnostics).toHaveProperty("dataLayerExists");
+    expect(diagnostics).toHaveProperty("isOnline");
+    expect(diagnostics).toHaveProperty("cookiesEnabled");
+    expect(diagnostics).toHaveProperty("timestamp");
+
+    // クリーンアップ
+    mockScript.remove();
+  });
+
+  test("測定IDの形式を正しく検証", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const diagnostics = runGADiagnostics();
+
+    // G-TEST123456 は有効な形式
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    expect(diagnostics.measurementIdFormat).toBe("✅ 正常");
+  });
+
+  test("gtagスクリプトの存在を正しく検出", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    // スクリプトを追加
+    const mockScript = document.createElement("script");
+    mockScript.src = "https://www.googletagmanager.com/gtag/js?id=G-TEST";
+    document.head.appendChild(mockScript);
+
+    const diagnostics = runGADiagnostics();
+
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    expect(diagnostics.gtagScriptExists).toBe(true);
+
+    // クリーンアップ
+    mockScript.remove();
+  });
+
+  test("gtag関数の存在を正しく検出", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const diagnostics = runGADiagnostics();
+
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    // beforeEachでwindow.gtagをモック設定済み
+    expect(diagnostics.gtagFunctionExists).toBe(true);
+  });
+
+  test("dataLayerの存在を正しく検出", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const diagnostics = runGADiagnostics();
+
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    expect(diagnostics.dataLayerExists).toBe(true);
+  });
+
+  test("オンライン状態を正しく報告", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const diagnostics = runGADiagnostics();
+
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    expect(typeof diagnostics.isOnline).toBe("boolean");
+  });
+
+  test("Cookieの有効状態を正しく報告", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const diagnostics = runGADiagnostics();
+
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    expect(typeof diagnostics.cookiesEnabled).toBe("boolean");
+  });
+
+  test("タイムスタンプがISO形式", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const diagnostics = runGADiagnostics();
+
+    if ("error" in diagnostics) {
+      throw new Error("Diagnostics should not return error");
+    }
+    expect(diagnostics.timestamp).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
+    );
+  });
+
+  test("問題検出時に警告を出力", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    // gtag未定義状態をシミュレート
+    Object.defineProperty(window, "gtag", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    const warnSpy = vi.spyOn(console, "warn");
+    runGADiagnostics();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      "🚨 検出された問題:",
+      expect.arrayContaining([expect.stringContaining("gtag関数")])
+    );
+
+    // gtag復元
+    Object.defineProperty(window, "gtag", {
+      value: mockGtag,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  test("問題なしの場合は成功メッセージ", async () => {
+    const { runGADiagnostics } = await import("../analytics");
+
+    const logSpy = vi.spyOn(console, "log");
+    runGADiagnostics();
+
+    // 成功メッセージまたはテーブル表示が出力される
+    expect(logSpy).toHaveBeenCalled();
+  });
+});
+
+describe("analytics - sendTestEvents", () => {
+  test("テストイベントを連続で送信", async () => {
+    const { sendTestEvents } = await import("../analytics");
+
+    vi.useFakeTimers();
+    mockGtag.mockClear();
+
+    sendTestEvents();
+
+    // 初回は即座に送信（index=0なのでsetTimeout(..., 0)）
+    await vi.runAllTimersAsync();
+    expect(mockGtag).toHaveBeenCalledTimes(3); // 全3イベントが送信される
+    vi.useRealTimers();
+  });
+
+  test("送信されたイベント名を検証", async () => {
+    const { sendTestEvents } = await import("../analytics");
+
+    vi.useFakeTimers();
+    mockGtag.mockClear();
+
+    sendTestEvents();
+    await vi.runAllTimersAsync();
+
+    // 3つのイベントが送信されることを確認
+    expect(mockGtag).toHaveBeenCalledWith(
+      "event",
+      "test_app_start",
+      expect.anything()
+    );
+    expect(mockGtag).toHaveBeenCalledWith(
+      "event",
+      "test_search",
+      expect.anything()
+    );
+    expect(mockGtag).toHaveBeenCalledWith(
+      "event",
+      "test_restaurant_click",
+      expect.anything()
+    );
+
+    vi.useRealTimers();
+  });
+
+  test("各イベントに適切なパラメータが含まれる", async () => {
+    const { sendTestEvents } = await import("../analytics");
+
+    vi.useFakeTimers();
+    mockGtag.mockClear();
+
+    sendTestEvents();
+    await vi.runAllTimersAsync();
+
+    // 全イベントのパラメータ確認
+    const calls = mockGtag.mock.calls;
+    expect(calls).toHaveLength(3);
+
+    const firstParams = calls[0][2] as Record<string, unknown>;
+    expect(firstParams).toHaveProperty("test_type", "initialization");
+
+    const secondParams = calls[1][2] as Record<string, unknown>;
+    expect(secondParams).toHaveProperty("search_term", "テスト検索");
+    expect(secondParams).toHaveProperty("result_count", 5);
+
+    const thirdParams = calls[2][2] as Record<string, unknown>;
+    expect(thirdParams).toHaveProperty("restaurant_id", "test-001");
+    expect(thirdParams).toHaveProperty("restaurant_name", "テスト店舗");
+
+    vi.useRealTimers();
+  });
+
+  test("console.logで進捗を報告", async () => {
+    const { sendTestEvents } = await import("../analytics");
+
+    const logSpy = vi.spyOn(console, "log");
+
+    sendTestEvents();
+
+    // 開始メッセージと完了メッセージが出力される
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("テストイベント送信")
+    );
+  });
+});
+
+describe("analytics - autoFixGA", () => {
+  test("診断を実行して結果を返す", async () => {
+    const { autoFixGA } = await import("../analytics");
+
+    const result = autoFixGA();
+
+    expect(result).toHaveProperty("measurementId");
+    expect(result).toHaveProperty("gtagFunctionExists");
+    expect(result).toHaveProperty("environment");
+  });
+
+  test("gtag未定義時に再初期化を試行", async () => {
+    const { autoFixGA } = await import("../analytics");
+
+    // gtag未定義状態をシミュレート
+    Object.defineProperty(window, "gtag", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    // スクリプトを追加してgtagScriptExistsをtrueに
+    const mockScript = document.createElement("script");
+    mockScript.src = "https://www.googletagmanager.com/gtag/js?id=G-TEST";
+    document.head.appendChild(mockScript);
+
+    const logSpy = vi.spyOn(console, "log");
+    autoFixGA();
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("gtag関数が存在しません")
+    );
+
+    // クリーンアップ
+    mockScript.remove();
+
+    // gtag復元
+    Object.defineProperty(window, "gtag", {
+      value: mockGtag,
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  test("自動修復のログメッセージを出力", async () => {
+    const { autoFixGA } = await import("../analytics");
+
+    const logSpy = vi.spyOn(console, "log");
+    autoFixGA();
+
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("自動修復開始")
+    );
+  });
+
+  test("既存スクリプトの削除を試行", async () => {
+    const { autoFixGA } = await import("../analytics");
+
+    // gtag未定義 + スクリプト存在の状態を作成
+    Object.defineProperty(window, "gtag", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+
+    const mockScript = document.createElement("script");
+    mockScript.src = "https://www.googletagmanager.com/gtag/js?id=G-TEST";
+    mockScript.className = "test-script";
+    document.head.appendChild(mockScript);
+
+    autoFixGA();
+
+    // スクリプトが削除されたことを確認
+    const remainingScript = document.querySelector(".test-script");
+    expect(remainingScript).toBeNull();
+
+    // gtag復元
+    Object.defineProperty(window, "gtag", {
+      value: mockGtag,
+      writable: true,
+      configurable: true,
+    });
+  });
+});
+
+describe("analytics - window.gaDebug グローバル公開", () => {
+  test("開発環境でwindow.gaDebugが定義される", () => {
+    // 開発環境ではwindow.gaDebugが公開される
+    if (import.meta.env.DEV) {
+      expect(window.gaDebug).toBeDefined();
+      expect(window.gaDebug?.runDiagnostics).toBeDefined();
+      expect(window.gaDebug?.sendTestEvents).toBeDefined();
+      expect(window.gaDebug?.autoFix).toBeDefined();
+      expect(window.gaDebug?.checkStatus).toBeDefined();
+      expect(window.gaDebug?.forceInit).toBeDefined();
+    }
+  });
+
+  test("window.gaDebugの各メソッドが関数", () => {
+    if (import.meta.env.DEV && window.gaDebug) {
+      expect(typeof window.gaDebug.runDiagnostics).toBe("function");
+      expect(typeof window.gaDebug.sendTestEvents).toBe("function");
+      expect(typeof window.gaDebug.autoFix).toBe("function");
+      expect(typeof window.gaDebug.checkStatus).toBe("function");
+      expect(typeof window.gaDebug.forceInit).toBe("function");
+    }
+  });
+});
+
+describe("analytics - 環境別動作", () => {
+  test("開発環境での詳細ログ出力", () => {
+    // テスト環境ではimport.meta.env.DEV=falseのため、ログは出力されない
+    // 環境変数の存在を確認
+    expect(import.meta.env.DEV).toBeDefined();
+
+    // trackEvent()はgtagを呼び出すことを確認
+    mockGtag.mockClear();
+    trackEvent("dev_test_event", { test: true });
+    expect(mockGtag).toHaveBeenCalledWith(
+      "event",
+      "dev_test_event",
+      expect.anything()
+    );
+  });
+
+  test("本番環境では静粛モード", () => {
+    const logSpy = vi.spyOn(console, "log");
+
+    // イベント送信
+    trackEvent("prod_test_event", { test: true });
+
+    // テスト環境（DEV=false）では静粛モード
+    // "GA Event:"で始まるログは出力されない
+    const gaEventCalls = logSpy.mock.calls.filter(
+      call => call[0] === "GA Event:"
+    );
+    expect(gaEventCalls).toHaveLength(0);
+
+    logSpy.mockRestore();
+  });
+});

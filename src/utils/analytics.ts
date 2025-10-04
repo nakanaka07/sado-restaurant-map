@@ -209,6 +209,10 @@ export const trackPageView = (pageName: string) => {
 
 // デバッグ用：Google Analytics状態確認（開発環境限定）
 export const checkGAStatus = async () => {
+  // テスト環境やSSR環境での安全性チェック
+  if (typeof window === "undefined") {
+    return { error: "ブラウザ環境でのみ利用可能" };
+  }
   if (!import.meta.env.DEV) {
     return { error: "開発環境でのみ利用可能" };
   }

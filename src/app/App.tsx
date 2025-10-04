@@ -211,6 +211,30 @@ function App() {
   // セキュリティ強化: APIキーのバリデーション
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
+  // ヘルパー: GA状態チェック（ネスト削減）
+  const scheduleGAStatusCheck = useCallback(() => {
+    if (!import.meta.env.DEV || typeof checkGAStatus !== "function") {
+      return;
+    }
+
+    setTimeout(() => {
+      const result = checkGAStatus();
+      // Promise型ガード: thenableチェック
+      const isPromiseLike = (value: unknown): value is PromiseLike<unknown> => {
+        return (
+          value !== null &&
+          typeof value === "object" &&
+          "catch" in value &&
+          typeof (value as { catch: unknown }).catch === "function"
+        );
+      };
+
+      if (isPromiseLike(result)) {
+        void result.catch(console.warn);
+      }
+    }, 3000);
+  }, []);
+
   // 初期化処理（エラーハンドリング強化）
   useEffect(() => {
     const initializeApp = async () => {
@@ -227,11 +251,7 @@ function App() {
         await initGA();
 
         // 開発環境でのみデバッグ情報を表示
-        if (import.meta.env.DEV) {
-          setTimeout(() => {
-            checkGAStatus().catch(console.warn);
-          }, 3000);
-        }
+        scheduleGAStatusCheck();
 
         setIsInitialized(true);
       } catch (error) {
@@ -250,7 +270,7 @@ function App() {
     return () => {
       // No cleanup needed for this effect
     };
-  }, [apiKey]);
+  }, [apiKey, scheduleGAStatusCheck]);
 
   // データロード完了時の統計表示（開発環境のみ）
   useEffect(() => {
