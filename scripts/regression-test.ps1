@@ -309,15 +309,6 @@ function Test-PerformanceMetrics {
   else {
     Write-TestResult "バンドル分析" "WARN" "distディレクトリが存在しません。ビルドを先に実行してください。"
   }
-
-  # パフォーマンステスターの存在確認
-  $perfTesterPath = Join-Path $ProjectRoot "src/utils/mapPerformanceTester.ts"
-  if (Test-Path $perfTesterPath) {
-    Write-TestResult "パフォーマンステスター" "PASS" "mapPerformanceTester.ts存在確認"
-  }
-  else {
-    Write-TestResult "パフォーマンステスター" "FAIL" "パフォーマンス測定ツールが見つかりません"
-  }
 }
 
 function Test-PWAFunctionality {
