@@ -17,22 +17,6 @@ export type {
 } from "./core.types";
 
 // ==============================
-// インターフェース分離 (Phase C2)
-// ==============================
-export type {
-  ICacheProvider,
-  IDataSource,
-  IErrorHandler,
-  IFilterStateManager,
-  IMapPointProvider,
-  IMapStateManager,
-  IRestaurantDataSource,
-  IRestaurantValidator,
-  IValidationResult,
-  IValidator,
-} from "./interfaces.types";
-
-// ==============================
 // 飲食店・マップポイント関連型
 // ==============================
 export type {

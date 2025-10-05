@@ -14,16 +14,6 @@ export {
   type SheetRestaurantData,
 } from "./sheets/sheetsService";
 
-// Abstract Services (Phase C2: Dependency Inversion)
-export {
-  AbstractDataService,
-  MapDataService,
-  ParkingService,
-  RestaurantService,
-  ServiceFactory,
-  ToiletService,
-} from "./abstractions/AbstractDataService";
-
 // A/B Test Services
 export {
   abTestAnalytics,
