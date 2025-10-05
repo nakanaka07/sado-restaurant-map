@@ -200,19 +200,6 @@ python scripts/test/system-test.py
 
 ---
 
-#### `test/html/` - テスト用HTMLファイル
-
-**目的**: マーカー表示のビジュアルテスト
-**ファイル**:
-
-- `circular-marker-integration-test.html`: 統合テスト
-
-**使用方法**: ブラウザで直接開いて目視確認
-
-**注意**: `circular-marker-demo.html`と`test-circular-marker.html`は削除済み。デモが必要な場合は開発サーバーで確認してください。
-
----
-
 ## 🔄 実行頻度ガイド
 
 | スクリプト                 | 頻度               | タイミング         |

@@ -333,6 +333,7 @@ src/components/map/markers/SVGMarker.tsx
    ```
 
 3. **コンポーネント分割**
+
    ```
    App.tsx (100行)
    ├─ MapViewContainer.tsx (地図表示ロジック)
