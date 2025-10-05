@@ -84,6 +84,7 @@ export function UnifiedMarker({
 - [x] Import参照更新 (6ファイル)
 - [x] 型定義統一 (MarkerType簡略化)
 - [x] パフォーマンスベンチマーク実行
+- [x] **legacy/ ディレクトリ完全削除** (2025-10-05) ✅
 
 ## 成功指標
 
@@ -112,13 +113,14 @@ export function UnifiedMarker({
 - [x] ファイル削減: 5ファイル (-8.62%)
 - [x] Quality Gates全通過 (394 tests, 0 errors)
 
-### Phase 4目標 (残タスク)
+### Phase 4-7達成状況 ✅ (2025-10-05時点)
 
-- [ ] バンドルサイズ最終目標: -14% (現在-9.31%、あと-4.69%)
-- [ ] Tree-shaking最適化
-- [ ] 動的import追加 (Google Maps等)
-- [ ] E2Eテスト導入 (Playwright)
-- [ ] legacy/ディレクトリ完全削除検討
+- [x] **バンドルサイズ最終目標: -14%** → **-48.88%達成** 🎉 (目標の3.5倍)
+- [x] Tree-shaking最適化 (Phase 4完了)
+- [x] 動的import追加 (Phase 4.5完了: APIProvider, IntegratedMapView)
+- [x] 画像最適化 (Phase 5-7完了: SVG置換, PNG最適化, WebP/AVIF)
+- [x] legacy/ディレクトリ完全削除 (2025-10-05) ✅
+- [ ] E2Eテスト導入 (Playwright) - Phase 9検討
 
 ## 参考リンク
 
