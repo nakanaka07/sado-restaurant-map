@@ -151,7 +151,7 @@ describe("useMarkerOptimization", () => {
 #### 📄 作成ファイル
 
 ```
-docs/unified-marker-design.md    ← 新規作成
+docs/design/unified-marker-design.md    ← 新規作成
 ```
 
 #### 🏗️ アーキテクチャ設計
@@ -200,8 +200,8 @@ scripts/quick-actions.ps1        ← 新規作成
 📝 作成されたファイル:
    1. public/offline.html
    2. src/hooks/map/useMarkerOptimization.test.ts
-   3. docs/unified-marker-design.md
-   4. docs/AUTO_PRIORITY_REPORT.md
+   3. docs/design/unified-marker-design.md
+   4. docs/reports/analysis/AUTO_PRIORITY_REPORT.md
 ```
 
 ---
@@ -645,12 +645,12 @@ workbox: {
 
 ## 📚 関連ドキュメント
 
-- **優先順位レポート**: `docs/AUTO_PRIORITY_REPORT.md`
-- **UnifiedMarker設計**: `docs/unified-marker-design.md`
-- **PWA実装仕様**: `docs/pwa-implementation-notes.md`
-- **コラボ指針**: `docs/COLLAB_PROMPT.md`
-- **用語集**: `docs/SHARED_GLOSSARY.md`
-- **タスク管理**: `docs/TASKS.md`
+- **優先順位レポート**: `docs/reports/analysis/AUTO_PRIORITY_REPORT.md`
+- **UnifiedMarker設計**: `docs/design/unified-marker-design.md`
+- **PWA実装仕様**: `docs/design/pwa-implementation-notes.md`
+- **コラボ指針**: `docs/guidelines/COLLAB_PROMPT.md`
+- **用語集**: `docs/guidelines/SHARED_GLOSSARY.md`
+- **タスク管理**: `docs/tasks/TASKS.md`
 
 ---
 

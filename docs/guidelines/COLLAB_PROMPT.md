@@ -1,7 +1,10 @@
 # Master Collaboration Prompt (AI <-> Dev)
 
 > 運用目的: Copilot Chat へ最初に与えるシステム的前提テンプレ & 継続開発の行動規範。
-> 更新は `docs/SHARED_GLOSSARY.md` のワークフローに準拠。
+
+## Copilot Collaboration Prompt (議論・レビュー・提案時の指針)
+
+> 更新は `docs/guidelines/SHARED_GLOSSARY.md` のワークフローに準拠。
 
 ## 1. コンテキスト
 

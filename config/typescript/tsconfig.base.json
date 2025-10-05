@@ -54,7 +54,7 @@
     "esModuleInterop": true,
     "preserveWatchOutput": true,
     "pretty": true,
-    // TS 6.x での非推奨警告を一時抑制 (TS7 移行タスク: docs/TASKS.md に追加検討)
+    // TS 6.x での非推奨警告を一時抑制 (TS7 移行タスク: docs/tasks/TASKS.md に追加検討)
     "ignoreDeprecations": "6.0"
   }
 }

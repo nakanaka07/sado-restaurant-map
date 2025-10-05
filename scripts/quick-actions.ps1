@@ -207,7 +207,7 @@ export function UnifiedMarker({
 - [React Component Patterns](https://kentcdodds.com/blog/compound-components-with-react-hooks)
 "@
 
-$designDoc | Out-File -FilePath "$projectRoot/docs/unified-marker-design.md" -Encoding UTF8
+$designDoc | Out-File -FilePath "$projectRoot/docs/design/unified-marker-design.md" -Encoding UTF8
 Write-Host "   ✅ unified-marker-design.md 作成完了`n" -ForegroundColor Green
 
 # サマリー
@@ -217,8 +217,8 @@ Write-Host "✨ クイックアクション完了！`n" -ForegroundColor Green
 Write-Host "📝 作成されたファイル:" -ForegroundColor White
 Write-Host "   1. public/offline.html" -ForegroundColor Gray
 Write-Host "   2. src/hooks/map/useMarkerOptimization.test.ts" -ForegroundColor Gray
-Write-Host "   3. docs/unified-marker-design.md" -ForegroundColor Gray
-Write-Host "   4. docs/AUTO_PRIORITY_REPORT.md`n" -ForegroundColor Gray
+Write-Host "   3. docs/design/unified-marker-design.md" -ForegroundColor Gray
+Write-Host "   4. docs/reports/analysis/AUTO_PRIORITY_REPORT.md`n" -ForegroundColor Gray
 
 Write-Host "🎯 次のステップ:" -ForegroundColor White
 Write-Host "   1. vite.config.ts に navigateFallback 追加" -ForegroundColor Yellow

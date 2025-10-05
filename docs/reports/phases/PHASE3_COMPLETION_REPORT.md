@@ -228,9 +228,9 @@ if (process.env.NODE_ENV === "development") {
 
 ### 更新
 
-- ✅ `docs/IMPLEMENTATION_SUMMARY.md` (Phase 3セクション追加)
-- ✅ `docs/unified-marker-design.md` (Phase 3チェックリスト更新)
-- ✅ `docs/performance-benchmark.json` (最新ベンチマーク)
+- ✅ `docs/reports/summaries/IMPLEMENTATION_SUMMARY.md` (Phase 3セクション追加)
+- ✅ `docs/design/unified-marker-design.md` (Phase 3チェックリスト更新)
+- ✅ `docs/data/performance-benchmark.json` (最新ベンチマーク)
 
 ---
 

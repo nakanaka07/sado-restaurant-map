@@ -10,7 +10,7 @@
 
 **Continuous Improvement**: Regularly review and update instructions. Suggest improvements when patterns change or new tools emerge. Flag when current practices may be outdated.
 
-**Task Visibility**: Convert ad-hoc ideas into actionable tasks. Maintain task awareness across chat sessions. Use `docs/TASKS.md` for persistent task tracking.
+**Task Visibility**: Convert ad-hoc ideas into actionable tasks. Maintain task awareness across chat sessions. Use `docs/tasks/TASKS.md` for persistent task tracking.
 
 ## 1. Project Overview
 
@@ -70,11 +70,11 @@ Always: 最小差分 / 破壊的変更時 README or Glossary 更新提案。検�
 
 **Key Documentation References**:
 
-- `docs/SHARED_GLOSSARY.md`: 専門用語・概念定義
-- `docs/COLLAB_PROMPT.md`: AI協働の詳細ガイドライン
-- `docs/pwa-implementation-notes.md`: PWA実装の詳細仕様
-- `docs/ab-test-marker-sync.md`: ABテスト・マーカー同期仕様
-- `docs/TASKS.md`: 現在のタスク状況・優先度
+- `docs/guidelines/SHARED_GLOSSARY.md`: 専門用語・概念定義
+- `docs/guidelines/COLLAB_PROMPT.md`: AI協働の詳細ガイドライン
+- `docs/design/pwa-implementation-notes.md`: PWA実装の詳細仕様
+- `docs/design/ab-test-marker-sync.md`: ABテスト・マーカー同期仕様
+- `docs/tasks/TASKS.md`: 現在のタスク状況・優先度
 
 ## 12. Common Pitfalls
 

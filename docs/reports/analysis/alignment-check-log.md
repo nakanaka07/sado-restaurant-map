@@ -88,11 +88,11 @@
 
 ### 更新ファイル
 
-1. `docs/PHASE7_WEBP_AVIF_COMPLETION.md`
-2. `docs/TASKS.md`
-3. `docs/PHASE8_TASK1_CHECKLIST.md`
-4. `docs/QUICK_FIX_CHECKGASTATUS.md`
-5. `docs/PHASE3_COMPLETION_REPORT.md`
+1. `docs/reports/phases/PHASE7_WEBP_AVIF_COMPLETION.md`
+2. `docs/tasks/TASKS.md`
+3. `docs/reports/phase8/PHASE8_TASK1_CHECKLIST.md`
+4. `docs/reports/summaries/QUICK_FIX_CHECKGASTATUS.md`
+5. `docs/reports/phases/PHASE3_COMPLETION_REPORT.md`
 6. `docs/ACTIONABLE_TASKS.md`
 
 ### 新規ファイル

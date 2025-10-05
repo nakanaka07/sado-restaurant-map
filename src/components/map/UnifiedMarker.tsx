@@ -10,7 +10,7 @@
  *
  * A/Bテスト統合: `variant` propで動的切替
  *
- * @see docs/unified-marker-design.md
+ * @see docs/design/unified-marker-design.md
  */
 
 import type { MapPoint } from "@/types";

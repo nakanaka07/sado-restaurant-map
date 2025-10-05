@@ -245,6 +245,6 @@ main push → CI (size-limit) → metrics/size-limit.json 自動更新
 **関連ファイル**:
 
 - `metrics/size-limit.json`: 詳細メトリクス
-- `docs/TASKS.md`: Phase 8タスク一覧
-- `docs/PHASE8_TASK1_CHECKLIST.md`: 実装チェックリスト
-- `docs/PHASE8_JAVASCRIPT_OPTIMIZATION_PLAN.md`: Phase 8計画書
+- `docs/tasks/TASKS.md`: Phase 8タスク一覧
+- `docs/reports/phase8/PHASE8_TASK1_CHECKLIST.md`: 実装チェックリスト
+- `docs/reports/phase8/PHASE8_JAVASCRIPT_OPTIMIZATION_PLAN.md`: Phase 8計画書

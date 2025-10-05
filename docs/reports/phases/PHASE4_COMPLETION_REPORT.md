@@ -312,11 +312,11 @@ Phase 5 (legacy removal): 2-4 weeks
 
 ## 📚 References
 
-- **Phase 3 Completion Report**: `docs/PHASE3_COMPLETION_REPORT.md`
+- **Phase 3 Completion Report**: `docs/reports/phases/PHASE3_COMPLETION_REPORT.md`
 - **Benchmark Script**: `scripts/benchmark-performance.js`
-- **Performance Data**: `docs/performance-benchmark.json`
+- **Performance Data**: `docs/data/performance-benchmark.json`
 - **Copilot Instructions**: `.github/copilot-instructions.md`
-- **Shared Glossary**: `docs/SHARED_GLOSSARY.md`
+- **Shared Glossary**: `docs/guidelines/SHARED_GLOSSARY.md`
 
 ---
 
