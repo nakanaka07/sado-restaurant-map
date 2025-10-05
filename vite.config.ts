@@ -296,6 +296,38 @@ export default defineConfig(({ mode }) => {
       sourcemap: !isProduction ? true : "hidden",
       minify: "terser",
       cssMinify: "esbuild",
+      terserOptions: {
+        compress: {
+          // 本番環境でconsole.logを削除
+          drop_console: isProduction,
+          drop_debugger: isProduction,
+          // 純粋関数として扱い、未使用なら削除
+          pure_funcs: isProduction
+            ? ["console.log", "console.info", "console.debug", "console.trace"]
+            : [],
+          // デッドコード除去
+          dead_code: true,
+          // 未使用変数除去
+          unused: true,
+          // 条件式の最適化 (import.meta.env.DEV など)
+          conditionals: true,
+          // 不要なブロック削除
+          evaluate: true,
+          // 短縮記法の使用
+          collapse_vars: true,
+          reduce_vars: true,
+        },
+        mangle: {
+          // Safari 10+ 対応
+          safari10: true,
+          // トップレベル変数も短縮 (aggressive)
+          toplevel: false,
+        },
+        format: {
+          // コメント削除 (ライセンスコメントは保持)
+          comments: /^!/,
+        },
+      },
       rollupOptions: {
         input: "index.html",
         output: {

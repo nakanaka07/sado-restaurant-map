@@ -215,9 +215,10 @@ Based on Lighthouse findings, the next priority is **Task 2: Reduce unused JavaS
 
 ### Proposed Actions
 
-1. **Dynamic Imports for Dashboard** (Task 1.2.4 - deferred)
-   - Lazy load `RestaurantDashboard` component
-   - Reduce initial bundle size by ~30-40 KB
+1. **Dynamic Imports for Dashboard** (Task 1.2.4 - skipped)
+   - **Status**: ⏭️ Skipped - Dashboard component does not exist in current SPA
+   - **Future**: Will implement when Dashboard page is added
+   - Proceed directly to Task 2
 
 2. **Lazy Load Marker Icons**
    - Defer non-visible marker icon loading

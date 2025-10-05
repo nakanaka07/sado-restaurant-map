@@ -37,13 +37,13 @@ AC:
 
 ## 3. Active (作業中)
 
-- **(P0 perf) Phase 8 Task 2: Unused JavaScript削減** [Issue #TBD] - 378 KiB削減、TBT <8,000ms目標（開始準備中）
+- **(P0 perf) Phase 8 Task 2: Unused JavaScript削減** [Issue #TBD] - 378 KiB削減、TBT <8,000ms目標、開始準備完了
 
 ## 4. Backlog (優先度付き候補)
 
 ### Phase 8: JavaScript 最適化 (進行中)
 
-- (P1 perf) **Dashboard遅延化** [Issue #TBD] – React.lazy + Suspense、初期ロード高速化（Phase 8 Task 1.2.4、Task 2統合予定）
+- (P3 perf) **Dashboard遅延化** [Issue #TBD] – React.lazy + Suspense、初期ロード高速化(Task 1.2.4スキップ: Dashboard未実装のため将来対応)
 - (P1 perf) **Long Tasks分割** [Issue #TBD] – processInChunks実装、623 POI分割処理、TBT -2,000ms（Phase 8 Task 3）
 - (P1 perf) **Google Maps API遅延化** [Issue #TBD] – useGoogleMapsLoader + Intersection Observer、TBT -5,000ms（Phase 8 Task 4）
 - (P2 perf) **その他最適化** [Issue #TBD] – Terser強化、Render Blocking解消（Phase 8 Task 5）
@@ -66,50 +66,45 @@ AC:
 
 ## 6. Done (最近 7 件のみ保持)
 
-1. **(P2 refactor) Legacy Code & Docs Cleanup** ✅ (2025-10-05)
+1. **(P0 perf) Phase 8 Task 1.2.4: Dashboard遅延化** ⏭️ (2025-10-05)
+   - ステータス: スキップ (Dashboard未実装)
+   - 理由: 現在は単一ページSPA、Dashboard不要
+   - 対応: 将来Dashboard実装時に再検討
+   - Task 2に直接進行
+2. **(P2 refactor) Legacy Code & Docs Cleanup** ✅ (2025-10-05)
    - legacy/ ディレクトリ完全削除: 11ファイル (推定 -30~40 KB)
    - 古いドキュメントアーカイブ: ACTIONABLE_TASKS.md, AUTO_PRIORITY_REPORT.md
    - コードベース整理: -2,000行程度
    - 参照0件確認済み、品質ゲート全通過
-2. **(P0 perf) Phase 8 Task 1.2: LoadingSpinner/ErrorBoundary** ✅ (2025-10-05)
+3. **(P0 perf) Phase 8 Task 1.2: LoadingSpinner/ErrorBoundary** ✅ (2025-10-05)
    - LoadingSpinner: 16テスト全通過、WCAG AA準拠
    - ErrorBoundary: React 19互換、GA連携、本番対応
    - App.tsx統合完了、UX改善
-3. **(P0 perf) Phase 8 Task 1.1: manualChunks最適化** ✅ (2025-10-05)
+4. **(P0 perf) Phase 8 Task 1.1: manualChunks最適化** ✅ (2025-10-05)
    - チャンク分離: markers, data-processing, ui-components (6チャンク)
    - バンドルサイズ: +5.17 KB (+0.29%) ※分割オーバーヘッド
    - TBT改善: -0.8% (Mobile), +10.6% (Desktop) - 期待外れ
    - 教訓: チャンク分割だけでは不十分、Unused JS削減が必要
-4. **(P1 perf) Phase 6: PNG Auto-Optimization (vite-plugin-image-optimizer)** ✅ (2025-10-05)
+5. **(P1 perf) Phase 6: PNG Auto-Optimization (vite-plugin-image-optimizer)** ✅ (2025-10-05)
    - 残り17 PNGを自動最適化: 平均51%削減
    - 総削減量: -594.73 KB (-25.17%)
    - Baseline比累積: -48.88% (目標-14%を大幅超過)
    - vite.config.ts: ViteImageOptimizer設定追加
    - Quality Gates: 416 tests passing, 0 errors
    - vite-plugin-image-optimizer導入完了
-5. **(P1 perf) Phase 5: Image Optimization (ICOOON-MONO SVG)** ✅ (2025-10-04)
+6. **(P1 perf) Phase 5: Image Optimization (ICOOON-MONO SVG)** ✅ (2025-10-04)
    - 6アイコンPNG→SVG置換: cafe/ramen/bar/fastfood/japanese/steak (-773 KB)
    - 総削減量: -788.20 KB (-25.01%)
    - Baseline比累積: -31.69%
    - getCuisineIconUrl: SVG優先ロジック追加
    - テスト環境: 画像モック設定追加 (fileMock.ts)
-6. **(P1 perf) Phase 4.5: Selective Optimization** ✅ (2025-01-XX)
+7. **(P1 perf) Phase 4.5: Selective Optimization** ✅ (2025-01-XX)
    - 選択的動的Importロールバック: CustomMapControls, FilterPanel インライン化
    - Barrel Export確認: hooks/utils/services/components 全て最適化済み
    - チャンク数削減: 59 → 55 files (-4 files)
    - 総バンドル: -3.59 KB (-0.11%) 削減達成
    - 累積削減: -8.91% (Phase 4: -8.80% → Phase 4.5: -8.91%)
    - Quality Gates全通過 (394 tests, 0 errors)
-7. **(P0 refactor) UnifiedMarker Phase 4: Bundle Optimization** ✅ (2025-01-XX)
-   - Tree-shaking最適化: 3 barrel files最適化 (sideEffects設定)
-   - 動的Import実装: APIProvider/IntegratedMapView/CustomMapControls/FilterPanel
-   - App chunk: -67.07% (-80.34 KB) 削減達成
-   - 総バンドル: +0.57% (+17.75 KB) ※チャンク分割オーバーヘッド
-   - 累積削減: -8.80% (Phase 3: -9.31% → Phase 4: -8.80%)
-   - 10ファイルをlegacy/へ移行 + deprecation warnings
-   - バンドルサイズ: -322.21 KB (-9.31%)
-   - App chunk: -14.07 KB (-10.51%)
-   - 5ファイル削減 (58→53 files)
 
 ## 7. Retrospect メモ (任意)
 
