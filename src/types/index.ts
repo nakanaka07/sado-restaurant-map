@@ -20,20 +20,14 @@ export type {
 // インターフェース分離 (Phase C2)
 // ==============================
 export type {
-  IAnalyticsEvent,
-  IAnalyticsProvider,
   ICacheProvider,
-  IConfigProvider,
   IDataSource,
   IErrorHandler,
   IFilterStateManager,
-  IMapPointFactory,
   IMapPointProvider,
   IMapStateManager,
   IRestaurantDataSource,
   IRestaurantValidator,
-  ITypeGuard,
-  IUtility,
   IValidationResult,
   IValidator,
 } from "./interfaces.types";

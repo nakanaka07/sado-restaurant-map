@@ -4,8 +4,8 @@
  * Phase C2: モジュール結合度最適化
  */
 
-import type { Restaurant, MapPoint, Parking, Toilet } from "./restaurant.types";
 import type { LatLngLiteral } from "./core.types";
+import type { MapPoint, Restaurant } from "./restaurant.types";
 
 // ==============================
 // データアクセス抽象化
@@ -85,34 +85,6 @@ export interface IMapStateManager {
 }
 
 // ==============================
-// 分析・トラッキング抽象化
-// ==============================
-
-/**
- * 分析イベントインターフェース
- */
-export interface IAnalyticsEvent {
-  /** イベント名 */
-  readonly eventName: string;
-  /** プロパティ */
-  readonly properties: Record<string, unknown>;
-  /** タイムスタンプ */
-  readonly timestamp: Date;
-}
-
-/**
- * 分析プロバイダーインターフェース
- */
-export interface IAnalyticsProvider {
-  /** イベント送信 */
-  track(event: IAnalyticsEvent): void;
-  /** ページビュー記録 */
-  pageView(path: string): void;
-  /** ユーザープロパティ設定 */
-  setUserProperties(properties: Record<string, unknown>): void;
-}
-
-// ==============================
 // バリデーション抽象化
 // ==============================
 
@@ -180,62 +152,4 @@ export interface ICacheProvider<T> {
   delete(key: string): Promise<void>;
   /** キャッシュクリア */
   clear(): Promise<void>;
-}
-
-// ==============================
-// ファクトリーパターン
-// ==============================
-
-/**
- * マップポイントファクトリーインターフェース
- */
-export interface IMapPointFactory {
-  /** 飲食店マップポイント作成 */
-  createRestaurantPoint(restaurant: Restaurant): MapPoint;
-  /** 駐車場マップポイント作成 */
-  createParkingPoint(parking: Parking): MapPoint;
-  /** トイレマップポイント作成 */
-  createToiletPoint(toilet: Toilet): MapPoint;
-}
-
-// ==============================
-// 設定・環境抽象化
-// ==============================
-
-/**
- * 設定プロバイダーインターフェース
- */
-export interface IConfigProvider {
-  /** API設定取得 */
-  getApiConfig(): Record<string, string>;
-  /** 機能フラグ取得 */
-  getFeatureFlags(): Record<string, boolean>;
-  /** 環境情報取得 */
-  getEnvironment(): "development" | "staging" | "production";
-}
-
-// ==============================
-// 型ガード・ユーティリティ
-// ==============================
-
-/**
- * 型ガード関数インターフェース
- */
-export interface ITypeGuard<T> {
-  /** 型チェック */
-  is(value: unknown): value is T;
-  /** 配列型チェック */
-  isArray(value: unknown): value is T[];
-}
-
-/**
- * 汎用ユーティリティインターフェース
- */
-export interface IUtility {
-  /** 深いクローン */
-  deepClone<T>(obj: T): T;
-  /** オブジェクトマージ */
-  mergeObjects<T>(target: T, source: Partial<T>): T;
-  /** 安全なプロパティアクセス */
-  safeGet<T>(obj: Record<string, unknown>, path: string): T | undefined;
 }
