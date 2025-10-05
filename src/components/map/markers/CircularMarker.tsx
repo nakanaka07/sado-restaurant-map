@@ -191,8 +191,9 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           style={{
             width: computedIconSize,
             height: computedIconSize,
-            filter: "brightness(0) saturate(100%) invert(100%)",
             pointerEvents: "none",
+            // Use filter to convert any color to black for visibility on colored backgrounds
+            filter: "brightness(0) saturate(100%)",
           }}
         />
       )}
@@ -328,7 +329,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
 
         /* アイコンのホバー効果（控えめなグロー） */
         .circular-marker.interactive:hover .icon-image {
-          filter: brightness(0) saturate(100%) invert(100%) drop-shadow(0 0 3px rgba(255,255,255,0.8));
+          filter: brightness(0) saturate(100%) drop-shadow(0 0 3px rgba(0,0,0,0.8));
           transition: filter 0.25s ease;
         }
 

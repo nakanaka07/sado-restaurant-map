@@ -1,5 +1,19 @@
 import type { IcooonMarkerCategory } from "../../../types/icooonMarker.types";
 
+// Note: Reference SVGs from public/icons/ directory.
+// In dev: /icons/*.svg, in production: /sado-restaurant-map/icons/*.svg (handled by vite base config)
+// Vite automatically prepends the base path to public assets.
+const iconInternational = "/icons/earth-icon12.svg";
+const iconGeneral = "/icons/fork-knife.svg";
+const iconFastfood = "/icons/hamburger-icon7.svg";
+const iconJapanese = "/icons/ochawan-hashi.svg";
+const iconParking = "/icons/parking-icon.svg";
+const iconNoodles = "/icons/ramen-icon.svg";
+const iconYakiniku = "/icons/steak-icon2.svg";
+const iconCafe = "/icons/tea-icon.svg";
+const iconToilet = "/icons/toilet-pictogram.svg";
+const iconIzakaya = "/icons/wine-bottle.svg";
+
 export const CIRCULAR_MARKER_COLORS: Record<IcooonMarkerCategory, string> = {
   japanese: "#E53E3E",
   noodles: "#FF8C00",
@@ -25,16 +39,16 @@ export type MarkerSize = keyof typeof MARKER_SIZES;
 export type MarkerAnimation = "none" | "attention" | "subtle" | "loading";
 
 export const ICON_PATH_MAP: Record<IcooonMarkerCategory, string> = {
-  japanese: getIconPath("ochawan-hashi.svg"),
-  noodles: getIconPath("ramen-icon.svg"),
-  yakiniku: getIconPath("steak-icon2.svg"),
-  international: getIconPath("earth-icon12.svg"),
-  cafe: getIconPath("tea-icon.svg"),
-  izakaya: getIconPath("wine-bottle.svg"),
-  fastfood: getIconPath("hamburger-icon7.svg"),
-  general: getIconPath("fork-knife.svg"),
-  parking: getIconPath("parking-icon.svg"),
-  toilet: getIconPath("toilet-pictogram.svg"),
+  japanese: iconJapanese,
+  noodles: iconNoodles,
+  yakiniku: iconYakiniku,
+  international: iconInternational,
+  cafe: iconCafe,
+  izakaya: iconIzakaya,
+  fastfood: iconFastfood,
+  general: iconGeneral,
+  parking: iconParking,
+  toilet: iconToilet,
 };
 
 export const ARIA_LABEL_MAP: Record<IcooonMarkerCategory, string> = {
@@ -49,8 +63,3 @@ export const ARIA_LABEL_MAP: Record<IcooonMarkerCategory, string> = {
   parking: "駐車場",
   toilet: "トイレ",
 };
-
-function getIconPath(fileName: string): string {
-  const baseUrl = import.meta.env.PROD ? "/sado-restaurant-map" : "";
-  return `${baseUrl}/icons/${fileName}`;
-}

@@ -123,10 +123,31 @@ export function EnhancedMapContainer({
     }
   }, [onCloseInfoWindow]);
 
+  // 入力配列の重複（type+id）を描画前に排除してキー重複を根本解消
+  const dedupedPoints = useMemo(() => {
+    const seen = new Set<string>();
+    const out: MapPoint[] = [];
+    for (const p of mapPoints) {
+      const k = `${p.type}-${p.id}`;
+      if (!seen.has(k)) {
+        seen.add(k);
+        out.push(p);
+      }
+    }
+    if (import.meta.env.DEV && out.length !== mapPoints.length) {
+      console.debug(
+        "[EnhancedMapContainer] Duplicates removed:",
+        mapPoints.length - out.length
+      );
+    }
+    return out;
+  }, [mapPoints]);
+
   // マーカーコンポーネントを選択 (UnifiedMarkerに統一)
   const renderMarker = useCallback(
-    (point: MapPoint, index: number) => {
-      const key = `${selectedMarkerType}-${point.id}-${index}`;
+    (point: MapPoint, _index: number) => {
+      // point.id が外部データ由来で重複する可能性に備え、type を含む複合キーにする
+      const key = `${selectedMarkerType}-${point.type}-${point.id}`;
 
       switch (selectedMarkerType) {
         case "circular-icooon":
@@ -421,7 +442,7 @@ export function EnhancedMapContainer({
         {/* マーカー表示 */}
         {selectedMarkerType === "circular-icooon" ? (
           <CircularMarkerContainer
-            points={[...mapPoints]}
+            points={[...dedupedPoints]}
             markerSize="medium"
             onPointClick={handleMarkerClick}
             showInfoWindow={!!selectedPoint}
@@ -430,7 +451,7 @@ export function EnhancedMapContainer({
           />
         ) : (
           <>
-            {mapPoints.map((point, index) => renderMarker(point, index))}
+            {dedupedPoints.map((point, index) => renderMarker(point, index))}
             {/* 選択されたポイントのInfoWindow */}
             {selectedPoint && (
               <InfoWindow

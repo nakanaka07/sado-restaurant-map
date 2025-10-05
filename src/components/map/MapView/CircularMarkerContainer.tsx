@@ -161,7 +161,7 @@ export const CircularMarkerContainer: React.FC<
 
         return (
           <AdvancedMarker
-            key={point.id} // 安定したキー: index 依存を排除し再マウントによる state 喪失を防止
+            key={`${point.type}-${point.id}`} // 複合キーにして重複IDによる警告を回避
             position={point.coordinates}
             // AdvancedMarker 自体にもフォールバック onClick を付与（ボタンが何らかでイベント阻害された場合の保険）
             onClick={handleClick}
