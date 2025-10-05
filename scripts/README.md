@@ -205,11 +205,11 @@ python scripts/test/system-test.py
 **目的**: マーカー表示のビジュアルテスト
 **ファイル**:
 
-- `circular-marker-demo.html`: CircularMarkerデモ（219行）
 - `circular-marker-integration-test.html`: 統合テスト
-- `test-circular-marker.html`: SVG表示テスト（172行）
 
 **使用方法**: ブラウザで直接開いて目視確認
+
+**注意**: `circular-marker-demo.html`と`test-circular-marker.html`は削除済み。デモが必要な場合は開発サーバーで確認してください。
 
 ---
 

@@ -38,7 +38,6 @@ export default defineConfig({
         "data-platform/",
         "src/**/*.test.{ts,tsx}",
         "src/**/__tests__/",
-        "src/test-circular-marker.tsx",
         "src/main.tsx",
         "src/vite-env.d.ts",
       ],
