@@ -14,7 +14,6 @@ export default tseslint.config(
       "tools",
       "scripts",
       "config/**",
-      "config/accessibility.config.ts",
       "config/**.config.ts",
       "../*.config.js",
       "vitest.config.ts",

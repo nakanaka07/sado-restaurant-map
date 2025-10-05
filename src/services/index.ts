@@ -5,12 +5,12 @@
 
 // Sheets Service
 export {
-  SheetsApiError,
   checkDataFreshness,
   fetchAllMapPoints,
   fetchParkingsFromSheets,
   fetchRestaurantsFromSheets,
   fetchToiletsFromSheets,
+  SheetsApiError,
   type SheetRestaurantData,
 } from "./sheets/sheetsService";
 
