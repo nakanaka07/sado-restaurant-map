@@ -1,4 +1,3 @@
-import ABTestDashboard from "@/components/dashboard/ABTestDashboardSimple";
 import {
   createMarkerInteraction,
   useABTestIntegration,
@@ -9,11 +8,25 @@ import type { Restaurant } from "@/types";
 import type { MigrationConfig } from "@/types/migration";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
 import { Map } from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { OptimizedRestaurantMarker } from "./legacy/OptimizedRestaurantMarker";
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MarkerMigrationSystem } from "./migration/MarkerMigration";
 import { OptimizedInfoWindow } from "./OptimizedInfoWindow";
+
+// Phase 8 Task 2.2: ABTestDashboard dynamic import (開発環境のみ使用)
+const ABTestDashboard = lazy(() =>
+  import("@/components/dashboard/ABTestDashboardSimple").then(module => ({
+    default: module.default,
+  }))
+);
 
 interface RestaurantMapProps {
   readonly restaurants: readonly Restaurant[];
@@ -229,7 +242,23 @@ export default function RestaurantMap({
               >
                 × 閉じる
               </button>
-              <ABTestDashboard />
+              <Suspense
+                fallback={
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
+                  >
+                    ダッシュボードを読み込み中...
+                  </div>
+                }
+              >
+                <ABTestDashboard />
+              </Suspense>
             </div>
           </div>
         )}

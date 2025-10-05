@@ -10,9 +10,11 @@
  */
 
 import type { ABTestVariant, UserSegment } from "@/config/abTestConfig";
-import { abTestAnalytics } from "@/services/abtest";
 import type { Restaurant } from "@/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+// Phase 8 Task 2.3: ABテスト分析を dynamic import (本番環境では不要)
+type ABTestAnalytics = typeof import("@/services/abtest").abTestAnalytics;
 
 // ==============================
 // A/Bテスト統合フック型定義
@@ -57,6 +59,22 @@ export function useABTestIntegration(
   const [totalInteractions, setTotalInteractions] = useState(0);
   const [sessionDuration, setSessionDuration] = useState(0);
 
+  // Phase 8 Task 2.3: ABテスト分析の遅延読み込み
+  const abTestAnalyticsRef = useRef<ABTestAnalytics | null>(null);
+
+  // ABテスト分析モジュールを動的読み込み
+  useEffect(() => {
+    if (options.enableTracking || options.enableDashboard) {
+      import("@/services/abtest")
+        .then(module => {
+          abTestAnalyticsRef.current = module.abTestAnalytics;
+        })
+        .catch(error => {
+          console.warn("ABテスト分析モジュールの読み込みに失敗:", error);
+        });
+    }
+  }, [options.enableTracking, options.enableDashboard]);
+
   // セッション時間の更新
   useEffect(() => {
     const updateSessionDuration = () => {
@@ -71,9 +89,12 @@ export function useABTestIntegration(
 
   // セッション開始追跡
   const trackSessionStart = useCallback(() => {
-    if (!options.enableTracking) return;
+    if (!options.enableTracking || !abTestAnalyticsRef.current) return;
 
-    abTestAnalytics.trackSessionStart(options.variant, options.segment);
+    abTestAnalyticsRef.current.trackSessionStart(
+      options.variant,
+      options.segment
+    );
 
     if (options.debugMode) {
       console.log("📊 A/Bテストセッション開始:", {
@@ -87,13 +108,13 @@ export function useABTestIntegration(
   // マーカーインタラクション追跡
   const trackMarkerInteraction = useCallback(
     (interaction: ABTestMarkerInteraction) => {
-      if (!options.enableTracking) return;
+      if (!options.enableTracking || !abTestAnalyticsRef.current) return;
 
       // インタラクション数更新
       setTotalInteractions(prev => prev + 1);
 
       // A/Bテスト分析サービスに送信
-      abTestAnalytics.trackMarkerClick(
+      abTestAnalyticsRef.current.trackMarkerClick(
         options.variant,
         options.segment,
         "restaurant", // マーカータイプ
@@ -103,7 +124,7 @@ export function useABTestIntegration(
       );
 
       // 詳細イベント追跡
-      abTestAnalytics.trackABTestEvent(
+      abTestAnalyticsRef.current.trackABTestEvent(
         options.variant,
         options.segment,
         "marker_clicked",
@@ -137,9 +158,9 @@ export function useABTestIntegration(
   // エラー追跡
   const trackError = useCallback(
     (error: Error, context: string) => {
-      if (!options.enableTracking) return;
+      if (!options.enableTracking || !abTestAnalyticsRef.current) return;
 
-      abTestAnalytics.trackError(
+      abTestAnalyticsRef.current.trackError(
         options.variant,
         options.segment,
         error.name || "UnknownError",
@@ -180,8 +201,8 @@ export function useABTestIntegration(
 
     // ページ離脱時のセッション終了追跡
     const handleBeforeUnload = () => {
-      if (options.enableTracking) {
-        abTestAnalytics.trackABTestEvent(
+      if (options.enableTracking && abTestAnalyticsRef.current) {
+        abTestAnalyticsRef.current.trackABTestEvent(
           options.variant,
           options.segment,
           "session_ended",
@@ -240,7 +261,8 @@ export function createMarkerInteraction(
 /**
  * A/Bテスト統計情報をコンソールに出力
  */
-export function logABTestStats(): void {
+export async function logABTestStats(): Promise<void> {
+  const { abTestAnalytics } = await import("@/services/abtest");
   const data = abTestAnalytics.generateDashboardData();
 
   console.group("📊 A/Bテスト統計サマリー");

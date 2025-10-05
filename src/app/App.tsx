@@ -18,6 +18,7 @@ import {
 } from "@/utils/districtUtils";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
+import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { CustomMapControls } from "../components/map/CustomMapControls";
 import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
@@ -546,11 +547,7 @@ function App() {
 
   // 初期化中の表示
   if (!isInitialized) {
-    return (
-      <output className="loading-container" aria-live="polite">
-        <span>読み込み中...</span>
-      </output>
-    );
+    return <LoadingSpinner message="アプリケーションを初期化中..." />;
   }
 
   return (
@@ -560,13 +557,7 @@ function App() {
       <div className="app">
         <main id="main-content" className="app-main">
           {/* Suspense: Google Maps関連の動的import用フォールバック */}
-          <Suspense
-            fallback={
-              <div className="loading-container" aria-live="polite">
-                <span>地図を読み込み中...</span>
-              </div>
-            }
-          >
+          <Suspense fallback={<LoadingSpinner message="地図を読み込み中..." />}>
             <APIProvider
               apiKey={apiKey}
               libraries={["maps", "marker", "geometry"]}

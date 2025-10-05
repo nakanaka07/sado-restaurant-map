@@ -1,0 +1,62 @@
+[
+  {
+    "Name": "react-vendor-CSRP",
+    "SizeKB": 179.25,
+    "SizeBytes": 183549
+  },
+  {
+    "Name": "data-processing-DQM",
+    "SizeKB": 35.96,
+    "SizeBytes": 36821
+  },
+  {
+    "Name": "ui-components-yqH6",
+    "SizeKB": 28.68,
+    "SizeBytes": 29366
+  },
+  {
+    "Name": "google-maps",
+    "SizeKB": 26.38,
+    "SizeBytes": 27013
+  },
+  {
+    "Name": "App-vnZw5Nw-.js",
+    "SizeKB": 21.43,
+    "SizeBytes": 21949
+  },
+  {
+    "Name": "IntegratedMapView",
+    "SizeKB": 19.67,
+    "SizeBytes": 20147
+  },
+  {
+    "Name": "markers",
+    "SizeKB": 15.53,
+    "SizeBytes": 15904
+  },
+  {
+    "Name": "workbox-window.prod.es5",
+    "SizeKB": 5.55,
+    "SizeBytes": 5687
+  },
+  {
+    "Name": "index",
+    "SizeKB": 2.97,
+    "SizeBytes": 3044
+  },
+  {
+    "Name": "PWABadge",
+    "SizeKB": 1.88,
+    "SizeBytes": 1921
+  },
+  {
+    "Name": "virtual_pwa-register",
+    "SizeKB": 0.83,
+    "SizeBytes": 845
+  },
+  {
+    "Name": "PWARegister",
+    "SizeKB": 0.76,
+    "SizeBytes": 778
+  }
+]

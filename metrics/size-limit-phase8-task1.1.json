@@ -1,0 +1,20 @@
+[
+  {
+    "name": "main",
+    "passed": true,
+    "size": 1287,
+    "sizeLimit": 200000
+  },
+  {
+    "name": "google-maps",
+    "passed": true,
+    "size": 8854,
+    "sizeLimit": 40000
+  },
+  {
+    "name": "app-bundle",
+    "passed": true,
+    "size": 6055,
+    "sizeLimit": 150000
+  }
+]

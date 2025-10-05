@@ -300,17 +300,14 @@ export default defineConfig(({ mode }) => {
         input: "index.html",
         output: {
           manualChunks: (id: string) => {
-            // React vendor libraries (highest priority)
+            // React vendor libraries including Google Maps (React components)
+            // Note: Google Maps must stay with React to avoid circular dependencies
             if (
               id.includes("node_modules/react") ||
-              id.includes("node_modules/react-dom")
+              id.includes("node_modules/react-dom") ||
+              id.includes("@vis.gl/react-google-maps")
             ) {
               return "react-vendor";
-            }
-
-            // Google Maps library (heavy dependency)
-            if (id.includes("@vis.gl/react-google-maps")) {
-              return "google-maps";
             }
 
             // Marker components (Phase 8 optimization)
@@ -324,8 +321,10 @@ export default defineConfig(({ mode }) => {
             }
 
             // Data processing & services (Phase 8 optimization)
+            // Note: ABテスト関連は除外 (dynamic import で遅延読み込み)
             if (
-              id.includes("src/services/") ||
+              (id.includes("src/services/") &&
+                !id.includes("src/services/abtest")) ||
               id.includes("src/utils/districtUtils") ||
               id.includes("src/utils/businessHours") ||
               id.includes("src/utils/dateUtils")

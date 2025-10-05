@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "../components/common/ErrorBoundary";
 import "../styles/App.css"; // App.cssを最優先で読み込み
 import "../styles/index.css";
 import { autoApplySuppression } from "./suppressLogs"; // log suppression
@@ -30,7 +31,9 @@ async function bootstrap(): Promise<void> {
 
   createRoot(rootElement).render(
     <StrictMode>
-      <App />
+      <ErrorBoundary boundaryName="RootBoundary">
+        <App />
+      </ErrorBoundary>
     </StrictMode>
   );
 }
