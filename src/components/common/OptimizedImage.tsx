@@ -57,7 +57,7 @@ export function OptimizedImage({
   className,
   style,
   ...rest
-}: OptimizedImageProps) {
+}: Readonly<OptimizedImageProps>) {
   const baseName = getBaseName(src);
 
   return (

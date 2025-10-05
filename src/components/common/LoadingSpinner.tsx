@@ -60,7 +60,7 @@ export function LoadingSpinner({
   className = "",
   style,
   ariaLabel,
-}: LoadingSpinnerProps) {
+}: Readonly<LoadingSpinnerProps>) {
   // サイズに応じたスピナーサイズ（px）
   const spinnerSize = {
     small: 24,
