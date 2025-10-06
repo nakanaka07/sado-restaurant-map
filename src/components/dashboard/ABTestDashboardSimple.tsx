@@ -233,33 +233,44 @@ const dashboardStyles = {
 // ==============================
 
 export const ABTestDashboard: React.FC = () => {
+  type Tab = "variants" | "performance" | "recommendations";
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>("variants");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("variants");
   const [autoRefresh, setAutoRefresh] = useState(true);
 
   // リアルタイムデータ更新
   useEffect(() => {
-    const loadDashboardData = () => {
+    const loadDashboardData = (refresh = false) => {
       try {
-        setIsLoading(true);
+        if (refresh) {
+          setIsRefreshing(true);
+        } else {
+          setIsLoading(true);
+        }
         const data = abTestAnalytics.generateDashboardData();
         setDashboardData(data);
       } catch (error) {
         console.error("ダッシュボードデータ読み込みエラー:", error);
       } finally {
-        setIsLoading(false);
+        if (refresh) {
+          setIsRefreshing(false);
+        } else {
+          setIsLoading(false);
+        }
       }
     };
 
-    loadDashboardData();
+    // 初回はローディングUI、以降はリフレッシュ表示
+    loadDashboardData(false);
 
-    let intervalId: NodeJS.Timeout | null = null;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
     if (autoRefresh) {
       intervalId = setInterval(() => {
-        loadDashboardData();
+        loadDashboardData(true);
       }, 30000);
     }
 
@@ -291,8 +302,8 @@ export const ABTestDashboard: React.FC = () => {
         <div>
           <h1 style={dashboardStyles.title}>A/Bテスト監視ダッシュボード</h1>
           <p style={dashboardStyles.subtitle}>
-            フェーズ: {dashboardData.currentPhase} | ロールアウト:{" "}
-            {dashboardData.rolloutPercentage}%
+            フェーズ: {CURRENT_AB_TEST_CONFIG.currentPhase} | ロールアウト:{" "}
+            {CURRENT_AB_TEST_CONFIG.rolloutPercentage}%
           </p>
         </div>
 
@@ -313,6 +324,11 @@ export const ABTestDashboard: React.FC = () => {
           >
             コンソール出力
           </button>
+          {isRefreshing && (
+            <span style={{ alignSelf: "center", color: "#64748b" }}>
+              更新中...
+            </span>
+          )}
         </div>
       </div>
 
@@ -345,7 +361,7 @@ export const ABTestDashboard: React.FC = () => {
           change="過去1時間"
           trend={
             dashboardData.realtimeMetrics.errorCount > 0
-              ? "positive"
+              ? "negative"
               : "neutral"
           }
         />
@@ -353,7 +369,7 @@ export const ABTestDashboard: React.FC = () => {
 
       {/* タブコンテンツ */}
       <div style={dashboardStyles.tabsContainer}>
-        <div style={dashboardStyles.tabsList}>
+        <div style={dashboardStyles.tabsList} role="tablist">
           {["variants", "performance", "recommendations"].map(tab => (
             <button
               key={tab}
@@ -361,7 +377,11 @@ export const ABTestDashboard: React.FC = () => {
                 ...dashboardStyles.tab,
                 ...(activeTab === tab ? dashboardStyles.tabActive : {}),
               }}
-              onClick={() => setActiveTab(tab)}
+              role="tab"
+              aria-selected={activeTab === tab}
+              id={`tab-${tab}`}
+              aria-controls={`panel-${tab}`}
+              onClick={() => setActiveTab(tab as Tab)}
             >
               {tab === "variants" && "バリアント比較"}
               {tab === "performance" && "パフォーマンス"}
@@ -370,7 +390,13 @@ export const ABTestDashboard: React.FC = () => {
           ))}
         </div>
 
-        <div style={dashboardStyles.tabContent}>
+        <div
+          style={dashboardStyles.tabContent}
+          role="tabpanel"
+          id={`panel-${activeTab}`}
+          aria-labelledby={`tab-${activeTab}`}
+          tabIndex={0}
+        >
           {activeTab === "variants" && (
             <VariantsTab variants={dashboardData.variants} />
           )}

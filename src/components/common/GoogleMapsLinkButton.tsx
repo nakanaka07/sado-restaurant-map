@@ -140,17 +140,9 @@ function getStyleConfig(
     textDecoration: "none",
     fontFamily: "inherit",
     lineHeight: "1",
-    outline: "none",
+    // フォーカス可視リングはCSS側の :focus-visible で付与する
     position: "relative" as const,
     userSelect: "none" as const,
-
-    // ホバー・フォーカス効果
-    ":hover": variantConfig.hover,
-    ":focus": {
-      outline: "2px solid #3b82f6",
-      outlineOffset: "2px",
-    },
-    ":active": variantConfig.active,
   };
 }
 

@@ -32,6 +32,10 @@ export interface OptimizedImageProps
   loading?: "lazy" | "eager";
   /** decoding属性 (デフォルト: "async") */
   decoding?: "async" | "sync" | "auto";
+  /** レスポンシブレイアウト向け sizes 属性 */
+  sizes?: string;
+  /** 幅違いの srcset（ベース名からの自動生成が難しいケース向け）。提供された場合は img にそのまま適用 */
+  imgSrcSet?: string;
 }
 
 /**
@@ -56,9 +60,22 @@ export function OptimizedImage({
   decoding = "async",
   className,
   style,
+  sizes,
+  imgSrcSet,
   ...rest
 }: Readonly<OptimizedImageProps>) {
   const baseName = getBaseName(src);
+
+  if (import.meta.env.DEV) {
+    if (width == null || height == null) {
+      // CLS 防止のため width/height 指定を推奨
+
+      console.warn(
+        "OptimizedImage: width/height の明示指定を推奨します (CLS 防止)",
+        { src }
+      );
+    }
+  }
 
   return (
     <picture>
@@ -78,6 +95,8 @@ export function OptimizedImage({
         decoding={decoding}
         className={className}
         style={style}
+        sizes={sizes}
+        srcSet={imgSrcSet}
         {...rest}
       />
     </picture>

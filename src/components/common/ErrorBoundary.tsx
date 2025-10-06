@@ -22,7 +22,7 @@ export interface ErrorBoundaryProps {
    * フォールバック UI（カスタムエラー表示）
    * 指定しない場合はデフォルト UI を使用
    */
-  fallback?: (error: Error, errorInfo: ErrorInfo) => ReactNode;
+  fallback?: (error: Error, errorInfo: ErrorInfo | null) => ReactNode;
 
   /**
    * エラー発生時のコールバック
@@ -275,7 +275,7 @@ export class ErrorBoundary extends Component<
                   color: "#d32f2f",
                 }}
               >
-                エラー詳細（開発環境のみ表示）
+                エラー詳細を表示
               </summary>
               <div style={{ marginTop: "0.5rem" }}>
                 <p style={{ marginBottom: "0.5rem" }}>
@@ -397,7 +397,8 @@ export class ErrorBoundary extends Component<
     const { hasError, error, errorInfo } = this.state;
     const { children, fallback } = this.props;
 
-    if (hasError && error && errorInfo) {
+    // errorInfo がまだ設定されていなくてもフォールバックを表示する
+    if (hasError && error) {
       // カスタムフォールバックがある場合はそれを使用
       if (fallback) {
         return fallback(error, errorInfo);

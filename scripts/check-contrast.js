@@ -44,3 +44,22 @@ Object.entries(colors).forEach(([category, color]) => {
 
 console.log("===============================");
 console.log("WCAG 2.2 AA準拠: 4.5:1以上必要");
+
+// 追加: バッジ/チップ配色検証（foreground on background）
+const pairs = [
+  // BusinessStatusBadge
+  { name: "status-open", fg: "#15803d", bg: "#dcfce7" },
+  { name: "status-closed", fg: "#dc2626", bg: "#fee2e2" },
+  { name: "status-unknown", fg: "#d97706", bg: "#fef3c7" },
+  // RestaurantCategoryChip（代表例）
+  { name: "chip-sushi", fg: "#d97706", bg: "#fef3c7" },
+  { name: "chip-seafood", fg: "#1d4ed8", bg: "#dbeafe" },
+  { name: "chip-ramen", fg: "#d63031", bg: "#ffeaa7" },
+];
+
+console.log("\n🔎 前景/背景のコントラストチェック:");
+pairs.forEach(({ name, fg, bg }) => {
+  const ratio = getContrastRatio(fg, bg);
+  const status = ratio >= 4.5 ? "✅ PASS" : "❌ FAIL";
+  console.log(`${name.padEnd(16)}: ${ratio.toFixed(2)}:1 ${status}`);
+});

@@ -19,7 +19,7 @@ export const BusinessStatusBadge = React.memo<BusinessStatusBadgeProps>(
     const sizeConfig = getSizeConfig(size);
 
     return (
-      <output
+      <span
         className={`business-status-badge ${className}`}
         style={{
           backgroundColor: config.background,
@@ -43,7 +43,7 @@ export const BusinessStatusBadge = React.memo<BusinessStatusBadgeProps>(
           </span>
         )}
         <span>{config.text}</span>
-      </output>
+      </span>
     );
   }
 );

@@ -653,8 +653,8 @@ class ABTestAnalyticsService {
 
 export const abTestAnalytics = new ABTestAnalyticsService();
 
-// 開発環境でのグローバル公開
-if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+// 開発環境でのグローバル公開（Vite: import.meta.env.DEV）
+if (typeof window !== "undefined" && import.meta.env.DEV) {
   // @ts-expect-error - 開発用のグローバル変数設定
   window.abTestAnalytics = abTestAnalytics;
 }

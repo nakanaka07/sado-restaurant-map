@@ -38,28 +38,7 @@ interface SkipLinkProps {
  */
 export function SkipLink({ href, children }: SkipLinkProps) {
   return (
-    <a
-      href={href}
-      className="skip-link"
-      style={{
-        position: "absolute",
-        top: "-40px",
-        left: "6px",
-        background: "#000",
-        color: "#fff",
-        padding: "8px",
-        textDecoration: "none",
-        borderRadius: "4px",
-        zIndex: 1000,
-        transition: "top 0.3s",
-      }}
-      onFocus={e => {
-        e.currentTarget.style.top = "6px";
-      }}
-      onBlur={e => {
-        e.currentTarget.style.top = "-40px";
-      }}
-    >
+    <a href={href} className="skip-link">
       {children}
     </a>
   );
@@ -322,12 +301,16 @@ interface FocusTrapProps {
  */
 export function FocusTrap({ children, isActive, onEscape }: FocusTrapProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = React.useRef<Element | null>(null);
 
   React.useEffect(() => {
     if (!isActive) return;
 
     const container = containerRef.current;
     if (!container) return;
+
+    // 現在のフォーカスを記録（解除時に復帰）
+    previouslyFocusedRef.current = document.activeElement;
 
     // フォーカス可能な要素を取得
     const focusableElements = container.querySelectorAll(
@@ -365,8 +348,20 @@ export function FocusTrap({ children, isActive, onEscape }: FocusTrapProps) {
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    // コンテナ基準で keydown を監視
+    container.addEventListener("keydown", handleKeyDown);
+    return () => {
+      container.removeEventListener("keydown", handleKeyDown);
+      // フォーカスを復帰
+      const prev = previouslyFocusedRef.current as HTMLElement | null;
+      if (prev && typeof prev.focus === "function") {
+        try {
+          prev.focus();
+        } catch {
+          // ignore
+        }
+      }
+    };
   }, [isActive, onEscape]);
 
   return <div ref={containerRef}>{children}</div>;

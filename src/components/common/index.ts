@@ -17,4 +17,6 @@ export { BusinessStatusBadge } from "./BusinessStatusBadge";
 export { DetailedBusinessHours } from "./DetailedBusinessHours";
 export { GoogleMapsLinkButton } from "./GoogleMapsLinkButton";
 export { LastUpdatedDisplay } from "./LastUpdatedDisplay";
+export { LoadingSpinner } from "./LoadingSpinner";
+export { OptimizedImage } from "./OptimizedImage";
 export { RestaurantCategoryChip } from "./RestaurantCategoryChip";
