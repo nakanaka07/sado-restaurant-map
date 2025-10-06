@@ -8,6 +8,7 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { memo, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { CompactModalFilter } from "../ui/CompactModalFilter";
+import { DEFAULT_CONTROL_POSITION } from "./constants";
 
 interface CustomMapControlsProps extends CompactModalFilterProps {
   readonly position?: google.maps.ControlPosition;
@@ -19,7 +20,7 @@ interface CustomMapControlsProps extends CompactModalFilterProps {
  */
 export const CustomMapControls = memo<CustomMapControlsProps>(
   function CustomMapControls({
-    position = google.maps?.ControlPosition?.BOTTOM_LEFT || 10,
+    position = DEFAULT_CONTROL_POSITION,
     ...filterProps
   }) {
     const map = useMap();
@@ -32,18 +33,22 @@ export const CustomMapControls = memo<CustomMapControlsProps>(
       // カスタムコントロール要素を作成
       const controlElement = document.createElement("div");
       controlElement.style.margin = "10px";
-      controlElement.style.zIndex = "1000";
+      controlElement.style.zIndex = "2147483646"; // below forced button but above map
       controlElementRef.current = controlElement;
 
       // React コンポーネントをカスタムコントロール内にレンダリング
       const reactRoot = createRoot(controlElement);
       reactRootRef.current = reactRoot;
 
+      const mergedClassName = [
+        "map-custom-filter-control",
+        filterProps.className ?? "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+
       reactRoot.render(
-        <CompactModalFilter
-          {...filterProps}
-          className="map-custom-filter-control"
-        />
+        <CompactModalFilter {...filterProps} className={mergedClassName} />
       );
 
       // Google Maps にカスタムコントロールを追加

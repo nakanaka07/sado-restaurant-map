@@ -7,7 +7,7 @@ import { DEFAULT_MAP_TYPE } from "@/config";
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
 import { ReactNode, useCallback } from "react";
-import { EnhancedPNGMarker } from "../legacy/MapView/EnhancedPNGMarker";
+import { UnifiedMarker } from "../UnifiedMarker";
 import { MapInfoWindow } from "./MapInfoWindow";
 
 interface MapContainerProps {
@@ -65,22 +65,22 @@ export function MapContainer({
         zoomControl={true}
         // コントロールの位置を調整してフィルターパネルとの重複を回避
         mapTypeControlOptions={{
-          position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1,
-          style: window.google?.maps?.MapTypeControlStyle?.DROPDOWN_MENU || 1, // 🎯 プルダウンメニュー形式に変更
+          position: window.google?.maps?.ControlPosition?.TOP_RIGHT ?? 1,
+          style: window.google?.maps?.MapTypeControlStyle?.DROPDOWN_MENU ?? 1, // 🎯 プルダウンメニュー形式に変更
         }}
         zoomControlOptions={{
-          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6,
+          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER ?? 6,
         }}
         fullscreenControlOptions={{
-          position: window.google?.maps?.ControlPosition?.TOP_RIGHT || 1,
+          position: window.google?.maps?.ControlPosition?.TOP_RIGHT ?? 1,
         }}
         streetViewControlOptions={{
-          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER || 6,
+          position: window.google?.maps?.ControlPosition?.RIGHT_CENTER ?? 6,
         }}
       >
         {/* マーカー表示 */}
         {mapPoints.map((point, index) => (
-          <EnhancedPNGMarker
+          <UnifiedMarker
             key={`${point.type}-${point.id}-${index}`}
             point={point}
             onClick={handleMarkerClick}

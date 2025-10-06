@@ -2,6 +2,7 @@ import { SADO_CENTER } from "@/config";
 import { useMapPoints } from "@/hooks";
 import type {
   CuisineType,
+  ExtendedMapFilters,
   MapPointType,
   PriceRange,
   SadoDistrict,
@@ -16,12 +17,43 @@ import {
   logUnknownAddressStats,
   testDistrictAccuracy,
 } from "@/utils/districtUtils";
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { CustomMapControls } from "../components/map/CustomMapControls";
+import { DEFAULT_CONTROL_POSITION } from "../components/map/constants";
 import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
+
+// ---- Idle helper & deferred GA initialization (to reduce nesting) ----
+const deferToIdle = (cb: () => void): void => {
+  const ric = (
+    window as unknown as {
+      requestIdleCallback?: (cb: () => void) => void;
+    }
+  ).requestIdleCallback;
+  if (typeof ric === "function") ric(cb);
+  else setTimeout(cb, 0);
+};
+
+async function initGADeferred(): Promise<void> {
+  return new Promise<void>(resolve => {
+    deferToIdle(() => {
+      void initGA()
+        .catch(err => {
+          console.warn("initGA failed (deferred):", err);
+        })
+        .finally(() => resolve());
+    });
+  });
+}
 
 // 動的import: 重量Google Maps関連コンポーネントのみ (Phase 4.5最適化)
 const APIProvider = lazy(() =>
@@ -67,15 +99,19 @@ function useIsMobile() {
       // テスト環境ではmatchMediaがundefinedの可能性があるためフォールバックを追加
       if (typeof window !== "undefined" && window.matchMedia) {
         const mobile = window.matchMedia("(max-width: 768px)").matches;
-        console.log("🔍 Mobile Detection Debug:", {
-          windowWidth: window.innerWidth,
-          mediaQueryMatches: mobile,
-          isMobile: mobile,
-        });
+        if (import.meta.env.DEV) {
+          console.log("🔍 Mobile Detection Debug:", {
+            windowWidth: window.innerWidth,
+            mediaQueryMatches: mobile,
+            isMobile: mobile,
+          });
+        }
         setIsMobile(mobile);
       } else {
         // テスト環境等でmatchMediaが利用できない場合のデフォルト値
-        console.log("⚠️ matchMedia not available, defaulting to desktop");
+        if (import.meta.env.DEV) {
+          console.log("⚠️ matchMedia not available, defaulting to desktop");
+        }
         setIsMobile(false);
       }
     };
@@ -131,6 +167,9 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false); // フルスクリーン状態管理
 
+  // 一度だけ生成される簡易ユーザーID（再レンダーで変わらない）
+  const userId = useMemo(() => `user_${Date.now()}`, []);
+
   // フルスクリーン要素の検出を関数化して複雑度を削減
   const getFullscreenElement = () => {
     return (
@@ -161,27 +200,12 @@ function App() {
       document.body.classList.toggle("fullscreen-active", isFullscreenActive);
 
       if (isFullscreenActive) {
-        console.log(
-          "🎯 フルスクリーンモードが有効になりました - カスタムコントロール配置"
-        );
-
-        // より確実な表示確保（補強策）
-        setTimeout(() => {
-          const filterBtn = document.querySelector(
-            ".filter-trigger-btn"
-          ) as HTMLElement;
-          if (filterBtn && filterBtn.style.display === "none") {
-            filterBtn.style.position = "fixed";
-            filterBtn.style.zIndex = "2147483647";
-            filterBtn.style.bottom = "20px";
-            filterBtn.style.left = "20px";
-            filterBtn.style.display = "flex";
-            filterBtn.style.visibility = "visible";
-            filterBtn.style.opacity = "1";
-            console.log("🔧 フィルターボタンの強制表示を適用しました");
-          }
-        }, 100);
-      } else {
+        if (import.meta.env.DEV) {
+          console.log(
+            "🎯 フルスクリーンモードが有効になりました - カスタムコントロール配置"
+          );
+        }
+      } else if (import.meta.env.DEV) {
         console.log("🔄 通常モードに戻りました");
       }
     };
@@ -190,6 +214,7 @@ function App() {
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
     document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
 
     // 初回実行
     handleFullscreenChange();
@@ -204,8 +229,13 @@ function App() {
         "mozfullscreenchange",
         handleFullscreenChange
       );
+      document.removeEventListener(
+        "MSFullscreenChange",
+        handleFullscreenChange
+      );
       // クリーンアップ時にクラスも削除
       document.documentElement.classList.remove("fullscreen-active");
+      document.body.classList.remove("fullscreen-active");
     };
   }, []);
 
@@ -238,6 +268,8 @@ function App() {
 
   // 初期化処理（エラーハンドリング強化）
   useEffect(() => {
+    let canceled = false;
+
     const initializeApp = async () => {
       try {
         // 🔧 開発環境でのログフィルタリング初期化
@@ -248,8 +280,10 @@ function App() {
           throw new Error("無効なGoogle Maps APIキーです");
         }
 
-        // Google Analytics初期化（エラーハンドリング付き）
-        await initGA();
+        // Google Analytics 初期化はアイドルタイムに遅延
+        await initGADeferred();
+
+        if (canceled) return;
 
         // 開発環境でのみデバッグ情報を表示
         scheduleGAStatusCheck();
@@ -267,11 +301,50 @@ function App() {
 
     void initializeApp();
 
-    // cleanup function (optional)
+    // cleanup function
     return () => {
-      // No cleanup needed for this effect
+      canceled = true;
     };
   }, [apiKey, scheduleGAStatusCheck]);
+
+  // 共通のフィルター更新ヘルパ（型/上限制約/サニタイズを集約）
+  const updateFiltersSafe = useCallback(
+    (partial: Partial<ExtendedMapFilters>) => {
+      try {
+        // 事前にサニタイズ/検証した partial を構築（不変）
+        let sanitizedPartial: Partial<ExtendedMapFilters> = { ...partial };
+
+        if (typeof partial.searchQuery === "string") {
+          const sq = sanitizeInput(partial.searchQuery);
+          if (sq.length > 100) {
+            setAppError("検索クエリは100文字以下で入力してください");
+            return;
+          }
+          sanitizedPartial = { ...sanitizedPartial, searchQuery: sq };
+        }
+
+        if (Array.isArray(sanitizedPartial.features)) {
+          if (sanitizedPartial.features.length > 20) {
+            setAppError("特徴フィルターは20個以下で選択してください");
+            return;
+          }
+        }
+        if (Array.isArray(sanitizedPartial.districts)) {
+          if (sanitizedPartial.districts.length > 10) {
+            setAppError("地区は10個以下で選択してください");
+            return;
+          }
+        }
+        // filters 全体は useMapPoints 側で保持しているためここでは使用しない
+        // Hook 側で部分更新をマージするため、部分のみ渡す
+        updateFilters(sanitizedPartial);
+      } catch (e) {
+        console.error("フィルター更新エラー:", e);
+        setAppError("フィルター設定中にエラーが発生しました");
+      }
+    },
+    [updateFilters]
+  );
 
   // データロード完了時の統計表示（開発環境のみ）
   useEffect(() => {
@@ -320,7 +393,7 @@ function App() {
           return;
         }
 
-        updateFilters({
+        updateFiltersSafe({
           cuisineTypes: cuisine ? [cuisine] : [],
         });
       } catch (error) {
@@ -330,7 +403,7 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handlePriceFilter = useCallback(
@@ -342,7 +415,7 @@ function App() {
           return;
         }
 
-        updateFilters({
+        updateFiltersSafe({
           priceRanges: price ? [price] : [],
         });
       } catch (error) {
@@ -352,7 +425,7 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handleDistrictFilter = useCallback(
@@ -371,9 +444,7 @@ function App() {
           return;
         }
 
-        updateFilters({
-          districts,
-        });
+        updateFiltersSafe({ districts });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -381,14 +452,14 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handleRatingFilter = useCallback(
     (minRating: number | undefined) => {
       try {
         if (typeof minRating === "number") {
-          updateFilters({
+          updateFiltersSafe({
             ...filters,
             minRating,
           });
@@ -396,28 +467,26 @@ function App() {
           // minRatingを除外したフィルターでリセット
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { minRating, ...filtersWithoutRating } = filters;
-          updateFilters(filtersWithoutRating);
+          updateFiltersSafe(filtersWithoutRating);
         }
       } catch (error) {
         console.error("評価フィルターエラー:", error);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [filters, updateFilters]
+    [filters, updateFiltersSafe]
   );
 
   const handleOpenNowFilter = useCallback(
     (openNow: boolean) => {
       try {
-        updateFilters({
-          openNow,
-        });
+        updateFiltersSafe({ openNow });
       } catch (error) {
         console.error("営業中フィルターエラー:", error);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handleSearchFilter = useCallback(
@@ -439,9 +508,7 @@ function App() {
           return;
         }
 
-        updateFilters({
-          searchQuery: sanitizedSearch,
-        });
+        updateFiltersSafe({ searchQuery: sanitizedSearch });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -449,7 +516,7 @@ function App() {
         setAppError("検索中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handleFeatureFilter = useCallback(
@@ -481,9 +548,7 @@ function App() {
           return;
         }
 
-        updateFilters({
-          features: sanitizedFeatures,
-        });
+        updateFiltersSafe({ features: sanitizedFeatures });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
@@ -491,44 +556,47 @@ function App() {
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handlePointTypeFilter = useCallback(
     (pointTypes: MapPointType[]) => {
       try {
-        updateFilters({
-          pointTypes,
-        });
+        updateFiltersSafe({ pointTypes });
       } catch (error) {
         console.error("ポイントタイプフィルターエラー:", error);
         setAppError("フィルター設定中にエラーが発生しました");
       }
     },
-    [updateFilters]
+    [updateFiltersSafe]
   );
 
   const handleResetFilters = useCallback(() => {
     try {
       // minRatingをundefinedで渡すとexactOptionalPropertyTypesエラーになるため除外
-      const resetFilters = {
-        cuisineTypes: [] as never[],
-        priceRanges: [] as never[],
-        districts: [] as never[],
-        features: [] as never[],
+      const defaultPointTypes: MapPointType[] = [
+        "restaurant",
+        "parking",
+        "toilet",
+      ];
+      const resetFilters: Partial<ExtendedMapFilters> = {
+        cuisineTypes: [] as CuisineType[],
+        priceRanges: [] as PriceRange[],
+        districts: [] as SadoDistrict[],
+        features: [] as string[],
         searchQuery: "",
         openNow: false,
-        pointTypes: ["restaurant", "parking", "toilet"] as const,
+        pointTypes: defaultPointTypes,
       };
 
-      updateFilters(resetFilters);
+      updateFiltersSafe(resetFilters);
       // エラー状態もリセット
       setAppError(null);
     } catch (error) {
       console.error("フィルターリセットエラー:", error);
       setAppError("フィルターのリセット中にエラーが発生しました");
     }
-  }, [updateFilters]);
+  }, [updateFiltersSafe]);
 
   // アプリケーションエラー表示
   if (appError) {
@@ -588,7 +656,7 @@ function App() {
                   center={SADO_CENTER}
                   loading={loading}
                   error={error}
-                  userId={`user_${Date.now()}`} // 簡易的なユーザーID生成
+                  userId={userId}
                   customControls={
                     isMobile || isFullscreen ? (
                       <CustomMapControls
@@ -605,10 +673,7 @@ function App() {
                         onFeatureFilter={handleFeatureFilter}
                         onPointTypeFilter={handlePointTypeFilter}
                         onResetFilters={handleResetFilters}
-                        position={
-                          window.google?.maps?.ControlPosition?.BOTTOM_LEFT ||
-                          10
-                        }
+                        position={DEFAULT_CONTROL_POSITION}
                       />
                     ) : null
                   }

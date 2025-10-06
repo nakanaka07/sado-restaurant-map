@@ -4,8 +4,10 @@
 // 直接 import すると "PWA module not available" エラーになる場合があるため遅延判定する。
 
 export async function registerPWA() {
-  if (!import.meta.env.PROD) {
-    // 開発では SW 未登録 (要求があれば ENABLE_PWA_DEV フラグで制御)。
+  // 本番または開発で ENABLE_PWA_DEV が有効な場合のみ登録を行う
+  const isPWAEnabled =
+    import.meta.env.PROD || import.meta.env.ENABLE_PWA_DEV === "true";
+  if (!isPWAEnabled) {
     return;
   }
   try {
