@@ -16,13 +16,9 @@ import type {
   PerformanceMetrics,
 } from "@/types/migration";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { OptimizedRestaurantMarker } from "../legacy/OptimizedRestaurantMarker";
-import { SVGMarkerTemplate } from "../legacy/templates/SVGMarkerTemplate";
-import { createMarkerDesignConfig } from "../v2/MarkerDesignSystem";
-import {
-  migrateCuisineToCategory,
-  type MigrationStatistics,
-} from "./CategoryMapper";
+import { UnifiedMarker } from "../UnifiedMarker";
+// Legacy markers/templates were removed after migration; keep migration fallback minimal.
+import { type MigrationStatistics } from "./CategoryMapper";
 import { useMigrationControl } from "./migrationUtils";
 
 // ==============================
@@ -42,7 +38,7 @@ export const MarkerMigrationSystem: React.FC<MarkerMigrationSystemProps> = ({
   restaurant,
   onClick,
   config,
-  className,
+  className: _className,
   onMigrationStateChange,
   onPerformanceMetric,
 }) => {
@@ -103,27 +99,27 @@ export const MarkerMigrationSystem: React.FC<MarkerMigrationSystemProps> = ({
   const renderMarker = useCallback(() => {
     try {
       if (migrationControl.isUsingNewSystem) {
-        // 新システム (v2)
-        const category = migrateCuisineToCategory(restaurant.cuisineType);
-        const markerConfig = createMarkerDesignConfig(category);
-
+        // 新システム (v2): 統一マーカーのSVG版で代替
+        // 将来的に MarkerDesignSystem と統合するまでの暫定実装
         return (
-          <SVGMarkerTemplate
-            config={markerConfig}
-            size="standard"
-            onClick={handleClick}
-            className={`marker-v2 ${className || ""}`}
-          />
-        );
-      } else {
-        // レガシーシステム
-        return (
-          <OptimizedRestaurantMarker
-            restaurant={restaurant}
-            onClick={handleClick}
+          <UnifiedMarker
+            point={restaurant}
+            onClick={() => handleClick()}
+            variant="svg"
+            size="medium"
           />
         );
       }
+
+      // レガシー相当: 既存のアイコン版で表示
+      return (
+        <UnifiedMarker
+          point={restaurant}
+          onClick={() => handleClick()}
+          variant="icon"
+          size="medium"
+        />
+      );
     } catch (error) {
       migrationControl.reportIssue(`レンダリングエラー: ${String(error)}`);
 
@@ -132,53 +128,28 @@ export const MarkerMigrationSystem: React.FC<MarkerMigrationSystemProps> = ({
         console.warn(
           "[Marker Migration] フォールバック: レガシーシステムに切り替え"
         );
+        // レガシー相当: 統一マーカーのアイコン版に切り替え
         return (
-          <OptimizedRestaurantMarker
-            restaurant={restaurant}
-            onClick={handleClick}
+          <UnifiedMarker
+            point={restaurant}
+            onClick={() => handleClick()}
+            variant="icon"
+            size="medium"
           />
         );
       }
 
       // 最終フォールバック: シンプルマーカー
       return (
-        <button
-          type="button"
-          style={{
-            width: "24px",
-            height: "30px",
-            backgroundColor: "#ff6b6b",
-            border: "none",
-            borderRadius: "50% 50% 50% 0",
-            transform: "rotate(-45deg)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "12px",
-            padding: 0,
-          }}
-          onClick={handleClick}
-          onKeyDown={e => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleClick();
-            }
-          }}
-          aria-label={`${restaurant.name} - 簡略マーカー`}
-          tabIndex={0}
-        >
-          📍
-        </button>
+        <UnifiedMarker
+          point={restaurant}
+          onClick={() => handleClick()}
+          variant="pin"
+          size="small"
+        />
       );
     }
-  }, [
-    migrationControl,
-    restaurant,
-    handleClick,
-    className,
-    config.enableFallback,
-  ]);
+  }, [migrationControl, restaurant, handleClick, config.enableFallback]);
 
   // デバッグ情報表示
   const debugInfo = config.debugMode && (

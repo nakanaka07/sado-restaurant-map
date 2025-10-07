@@ -4,7 +4,6 @@
 
 export { EnhancedMapContainer } from "./MapView/EnhancedMapContainer";
 export { MapView } from "./MapView/MapView";
-export { MapViewWithTesting } from "./MapView/MapViewWithTesting";
 export { RestaurantMap } from "./RestaurantMap";
 
 // Tree-shaking最適化: export * を個別exportに変換

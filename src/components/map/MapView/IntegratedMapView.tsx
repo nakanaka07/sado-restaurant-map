@@ -16,9 +16,7 @@ import {
   type ABTestVariant,
   classifyUser,
   CURRENT_AB_TEST_CONFIG,
-  deriveMarkerType,
   loadABTestState,
-  type MarkerType,
   saveABTestState,
   trackABTestEvent,
   type UserClassification,
@@ -56,9 +54,16 @@ export function IntegratedMapView({
     useState<UserClassification | null>(null);
   const [currentVariant, setCurrentVariant] =
     useState<ABTestVariant>("original");
-  const [markerType, setMarkerType] = useState<MarkerType | null>(null);
+  // EnhancedMapContainer と整合するローカル型
+  type LocalMarkerType = "circular-icooon" | "unified-marker";
+  const [markerType, setMarkerType] = useState<LocalMarkerType | null>(null);
   const [isUserOverride, setIsUserOverride] = useState(false);
   const [isABTestInfoCollapsed, setIsABTestInfoCollapsed] = useState(false);
+
+  const deriveLocalMarkerType = (_variant: ABTestVariant): LocalMarkerType => {
+    // 現状は Circular に統一。将来の段階で分岐する可能性あり。
+    return "circular-icooon";
+  };
 
   // ユーザー分類の実行
   useEffect(() => {
@@ -91,7 +96,7 @@ export function IntegratedMapView({
         setUserClassification(classification);
         setCurrentVariant(classification.variant);
         // 初期 markerType を variant から導出
-        const initialMarker = deriveMarkerType(classification.variant);
+        const initialMarker = deriveLocalMarkerType(classification.variant);
         setMarkerType(initialMarker);
 
         // 開発環境での分類結果表示
@@ -113,7 +118,7 @@ export function IntegratedMapView({
         };
         setUserClassification(fallbackClassification);
         setCurrentVariant("original");
-        setMarkerType(deriveMarkerType("original"));
+        setMarkerType(deriveLocalMarkerType("original"));
       }
     };
 
@@ -224,7 +229,7 @@ export function IntegratedMapView({
         onMarkerTypeChange={next => {
           setMarkerType(next);
           // override 判定: variant 由来 marker と異なる場合
-          const derived = deriveMarkerType(currentVariant);
+          const derived = deriveLocalMarkerType(currentVariant);
           const overridden = derived !== next;
           setIsUserOverride(overridden);
           if (overridden) {

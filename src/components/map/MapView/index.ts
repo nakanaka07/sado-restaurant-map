@@ -3,9 +3,9 @@
  * MapViewディレクトリの統一エクスポート
  */
 
-export { MapMarker } from "../legacy/MapView/MapMarker";
+// Note: legacy MapMarker was removed during migration; do not re-export non-existent modules.
+export { MapErrorBoundary } from "../MapErrorBoundary";
 export { MapContainer } from "./MapContainer";
-export { MapErrorBoundary } from "./MapErrorBoundary";
 export { MapErrorFallback } from "./MapErrorFallback";
 export { MapInfoWindow } from "./MapInfoWindow";
 export { MapView } from "./MapView";

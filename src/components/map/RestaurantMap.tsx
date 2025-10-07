@@ -16,10 +16,11 @@ import {
   useMemo,
   useState,
 } from "react";
-import { OptimizedRestaurantMarker } from "./legacy/OptimizedRestaurantMarker";
+// Legacy marker has been removed; keep only new migration system path usage
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MarkerMigrationSystem } from "./migration/MarkerMigration";
 import { OptimizedInfoWindow } from "./OptimizedInfoWindow";
+import { UnifiedMarker } from "./UnifiedMarker";
 
 // Phase 8 Task 2.2: ABTestDashboard dynamic import (開発環境のみ使用)
 const ABTestDashboard = lazy(() =>
@@ -338,10 +339,12 @@ export default function RestaurantMap({
                 />
               ))
             : optimizedRestaurants.map(restaurant => (
-                <OptimizedRestaurantMarker
+                <UnifiedMarker
                   key={restaurant.id}
-                  restaurant={restaurant}
-                  onClick={handleMarkerClick}
+                  point={restaurant}
+                  onClick={() => handleMarkerClick(restaurant)}
+                  variant="icon"
+                  size="medium"
                 />
               ))}
 
