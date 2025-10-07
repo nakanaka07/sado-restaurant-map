@@ -59,10 +59,10 @@ export default defineConfig({
       "@types": path.resolve(__dirname, "../src/types"),
       "@utils": path.resolve(__dirname, "../src/utils"),
       "@config": path.resolve(__dirname, "../src/config"),
-      // PWA virtual module mock
-      "virtual:pwa-register/react": path.resolve(
+      // PWA virtual module mock (base)
+      "virtual:pwa-register": path.resolve(
         __dirname,
-        "../src/test/mocks/pwa-register.ts"
+        "../src/test/mocks/pwa-register.base.ts"
       ),
       // Image file mocks for testing (SVG, PNG, etc.)
       "\\.(png|jpg|jpeg|gif|svg|webp)$": path.resolve(

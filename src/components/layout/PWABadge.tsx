@@ -15,15 +15,7 @@ import "../../styles/PWABadge.css";
  */
 
 // 🔧 PWA関連の型定義
-// Hook 版モジュールを使うと dynamic import で解決されない環境があったため
-// ベースの registerSW API に切り替え、状態管理はローカル実装する。
-type RegisterSWFn = (options?: {
-  immediate?: boolean;
-  onNeedRefresh?: () => void;
-  onOfflineReady?: () => void;
-  onRegistered?: (reg?: ServiceWorkerRegistration) => void;
-  onRegisterError?: (error: unknown) => void;
-}) => void;
+// 型は `src/types/pwa-register.d.ts` の宣言に依存するため、ここでは追加定義しない。
 
 // 有効時のみ SW 状態を監視するバッジコンポーネント
 function PWABadge() {
@@ -32,39 +24,115 @@ function PWABadge() {
   const [registration, setRegistration] = useState<
     ServiceWorkerRegistration | undefined
   >(undefined);
-  const [loaded, setLoaded] = useState(false);
+  // loaded フラグは不要（UIは常時レンダリングし、トーストのみ状態で切替）
 
+  // PWARegister が発火するカスタムイベントを購読し、UI 状態のみを管理
   useEffect(() => {
-    const init = async () => {
-      try {
-        const { registerSW } = (await import("virtual:pwa-register")) as {
-          registerSW: RegisterSWFn;
-        };
-        registerSW({
-          onOfflineReady: () => setOfflineReady(true),
-          onNeedRefresh: () => setNeedRefresh(true),
-          onRegistered: r => setRegistration(r),
-          onRegisterError: err => console.warn("[PWA] register error", err),
-        });
-      } catch (e) {
-        console.warn("[PWA] base module not available:", e);
-      } finally {
-        setLoaded(true);
+    // フォールバック取得はバックグラウンドで実施
+    const onRegistered = (e: Event) => {
+      const ce = e as CustomEvent<{ registration?: ServiceWorkerRegistration }>;
+      if (ce.detail?.registration) {
+        setRegistration(ce.detail.registration);
       }
     };
-    void init();
+    const onNeedRefresh = (e: Event) => {
+      const ce = e as CustomEvent<{ registration?: ServiceWorkerRegistration }>;
+      if (ce.detail?.registration) setRegistration(ce.detail.registration);
+      setNeedRefresh(true);
+    };
+    const onOfflineReady = () => setOfflineReady(true);
+    const onRegisterError = (e: Event) => {
+      const ce = e as CustomEvent<{ error?: unknown }>;
+      console.warn("[PWA] register error", ce.detail?.error);
+    };
+
+    window.addEventListener("pwa:registered", onRegistered as EventListener);
+    window.addEventListener("pwa:needRefresh", onNeedRefresh as EventListener);
+    window.addEventListener(
+      "pwa:offlineReady",
+      onOfflineReady as EventListener
+    );
+    window.addEventListener(
+      "pwa:registerError",
+      onRegisterError as EventListener
+    );
+    // jsdom では window/document どちらに紐付くかがケースで揺れるため両方購読
+    document.addEventListener("pwa:registered", onRegistered as EventListener);
+    document.addEventListener(
+      "pwa:needRefresh",
+      onNeedRefresh as EventListener
+    );
+    document.addEventListener(
+      "pwa:offlineReady",
+      onOfflineReady as EventListener
+    );
+    document.addEventListener(
+      "pwa:registerError",
+      onRegisterError as EventListener
+    );
+
+    // フォールバック: すでに登録済みの SW があれば取得
+    void (async () => {
+      try {
+        if ("serviceWorker" in navigator) {
+          const reg = await navigator.serviceWorker.getRegistration();
+          if (reg) setRegistration(reg);
+        }
+      } catch (err) {
+        // 取得失敗は致命ではないが、デバッグのために記録
+        console.debug("[PWA] getRegistration failed", err);
+      }
+    })();
+
+    return () => {
+      window.removeEventListener(
+        "pwa:registered",
+        onRegistered as EventListener
+      );
+      window.removeEventListener(
+        "pwa:needRefresh",
+        onNeedRefresh as EventListener
+      );
+      window.removeEventListener(
+        "pwa:offlineReady",
+        onOfflineReady as EventListener
+      );
+      window.removeEventListener(
+        "pwa:registerError",
+        onRegisterError as EventListener
+      );
+      document.removeEventListener(
+        "pwa:registered",
+        onRegistered as EventListener
+      );
+      document.removeEventListener(
+        "pwa:needRefresh",
+        onNeedRefresh as EventListener
+      );
+      document.removeEventListener(
+        "pwa:offlineReady",
+        onOfflineReady as EventListener
+      );
+      document.removeEventListener(
+        "pwa:registerError",
+        onRegisterError as EventListener
+      );
+    };
   }, []);
-
-  if (!loaded) return null;
-
-  // check for updates every hour
-  const period = 60 * 60 * 1000;
-  if (registration) {
-    // 登録済み SW の状態に応じて周期更新をセット
-    if (registration.active?.state === "activated") {
-      registerPeriodicSync(period, registration.active.scriptURL, registration);
-    }
-  }
+  // check for updates every hour（interval の二重登録を防ぐため useEffect で管理）
+  useEffect(() => {
+    if (!registration) return;
+    if (registration.active?.state !== "activated") return;
+    const period = 60 * 60 * 1000;
+    const id = registerPeriodicSync(
+      period,
+      registration.active.scriptURL,
+      registration
+    );
+    return () => {
+      if (id !== undefined) clearInterval(id);
+    };
+  }, [registration]);
 
   function close() {
     setOfflineReady(false);
@@ -72,10 +140,14 @@ function PWABadge() {
   }
 
   return (
-    <div className="PWABadge" role="alert" aria-labelledby="toast-message">
+    <div className="PWABadge-container">
       {(offlineReady || needRefresh) && (
-        <div className="PWABadge-toast">
-          <div className="PWABadge-message">
+        <div
+          className="PWABadge-toast"
+          role="alert"
+          aria-labelledby="toast-message"
+        >
+          <div className="PWABadge-toast-message">
             {offlineReady ? (
               <span id="toast-message">App ready to work offline</span>
             ) : (
@@ -94,11 +166,16 @@ function PWABadge() {
                     .then(() => location.reload())
                     .catch(console.error);
                 }}
+                type="button"
               >
                 Reload
               </button>
             )}
-            <button className="PWABadge-toast-button" onClick={() => close()}>
+            <button
+              className="PWABadge-toast-button"
+              onClick={() => close()}
+              type="button"
+            >
               Close
             </button>
           </div>
@@ -117,10 +194,10 @@ function registerPeriodicSync(
   period: number,
   swUrl: string,
   r: ServiceWorkerRegistration
-) {
-  if (period <= 0) return;
+): number | undefined {
+  if (period <= 0) return undefined;
 
-  setInterval(() => {
+  const id = setInterval(() => {
     void (async () => {
       if ("onLine" in navigator && !navigator.onLine) return;
 
@@ -134,5 +211,7 @@ function registerPeriodicSync(
 
       if (resp?.status === 200) await r.update();
     })();
-  }, period);
+  }, period) as unknown as number; // DOM タイプに合わせて number に統一
+
+  return id;
 }

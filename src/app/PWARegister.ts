@@ -12,12 +12,44 @@ export async function registerPWA() {
   }
   try {
     const { registerSW } = await import("virtual:pwa-register");
+    let currentReg: ServiceWorkerRegistration | undefined;
     registerSW({
       onRegistered(swReg: ServiceWorkerRegistration | undefined) {
-        if (swReg) console.log("[PWA] Service Worker registered");
+        currentReg = swReg;
+        if (swReg) {
+          console.log("[PWA] Service Worker registered");
+        }
+        window.dispatchEvent(
+          new CustomEvent("pwa:registered", { detail: { registration: swReg } })
+        );
+        document.dispatchEvent(
+          new CustomEvent("pwa:registered", { detail: { registration: swReg } })
+        );
+      },
+      onNeedRefresh() {
+        window.dispatchEvent(
+          new CustomEvent("pwa:needRefresh", {
+            detail: { registration: currentReg },
+          })
+        );
+        document.dispatchEvent(
+          new CustomEvent("pwa:needRefresh", {
+            detail: { registration: currentReg },
+          })
+        );
+      },
+      onOfflineReady() {
+        window.dispatchEvent(new CustomEvent("pwa:offlineReady"));
+        document.dispatchEvent(new CustomEvent("pwa:offlineReady"));
       },
       onRegisterError(err: unknown) {
         console.warn("[PWA] register error", err);
+        window.dispatchEvent(
+          new CustomEvent("pwa:registerError", { detail: { error: err } })
+        );
+        document.dispatchEvent(
+          new CustomEvent("pwa:registerError", { detail: { error: err } })
+        );
       },
     });
   } catch (e) {
