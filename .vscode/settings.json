@@ -54,7 +54,9 @@
   "testing.automaticallyOpenPeekView": "never",
   "testing.defaultGutterClickAction": "run",
   "vitest.enable": true,
-  "vitest.commandLine": "pnpm test",
+  "vitest.commandLine": "corepack pnpm test",
+  // パッケージマネージャの既定を pnpm に固定
+  "npm.packageManager": "pnpm",
   // === GitHub Copilot プロジェクト最適化 ===
   "github.copilot.chat.instructions": "docs/ai-assistant/copilot-instructions.md",
   "github.copilot.enable": {
@@ -107,10 +109,7 @@
   // 生産性ツール（最小限・重複回避）
   "mcp.servers.sequential-thinking": {
     "command": "npx",
-    "args": [
-      "-y",
-      "@modelcontextprotocol/server-sequential-thinking"
-    ],
+    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
     "description": "タスク分解・計画管理",
     "priority": "low",
     "enabled": true
@@ -126,16 +125,10 @@
   "mcp.toolOverlapHandling": "merge",
   // === ファイル形式別プロジェクト設定 ===
   "[typescript]": {
-    "editor.rulers": [
-      80,
-      120
-    ]
+    "editor.rulers": [80, 120]
   },
   "[typescriptreact]": {
-    "editor.rulers": [
-      80,
-      120
-    ]
+    "editor.rulers": [80, 120]
   },
   "[json]": {
     "editor.quickSuggestions": {
@@ -143,9 +136,7 @@
     }
   },
   "[markdown]": {
-    "editor.rulers": [
-      120
-    ]
+    "editor.rulers": [120]
   },
   // === Markdown Lint プロジェクト設定 ===
   "markdownlint.config": {
