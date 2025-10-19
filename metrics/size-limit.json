@@ -1,151 +1,19 @@
-{
-  "timestamp": "2025-01-15T00:00:00.000Z",
-  "phase": "Phase 8 Task 1.1 Complete (manualChunks Function)",
-  "summary": {
-    "totalBundleSize": "1800.85 KB",
-    "totalFiles": 65,
-    "changeFromPrevious": "+5.17 KB (+0.29%)",
-    "gzipSizes": {
-      "main": "1.26 KB",
-      "google-maps": "8.64 KB",
-      "app-bundle": "5.91 KB"
-    }
+[
+  {
+    "name": "main",
+    "passed": true,
+    "size": 1262,
+    "sizeLimit": 200000
   },
-  "chunks": {
-    "reactVendor": {
-      "file": "react-vendor-CSRP*.js",
-      "size": "179.25 KB",
-      "description": "React library vendor chunk (split by manualChunks)"
-    },
-    "dataProcessing": {
-      "file": "data-processing-DQM*.js",
-      "size": "35.96 KB",
-      "description": "Services layer (NEW: Phase 8 Task 1.1)"
-    },
-    "uiComponents": {
-      "file": "ui-components-yqH6*.js",
-      "size": "28.68 KB",
-      "description": "Common UI components (NEW: Phase 8 Task 1.1)"
-    },
-    "googleMaps": {
-      "file": "google-maps-*.js",
-      "size": "26.38 KB",
-      "description": "Google Maps vendor chunk"
-    },
-    "app": {
-      "file": "App-vnZw5Nw-.js",
-      "size": "21.43 KB",
-      "changeFromPrevious": "-44.99 KB (-67.7%)",
-      "description": "App component (reduced by chunk splitting)"
-    },
-    "integratedMapView": {
-      "file": "IntegratedMapView-*.js",
-      "size": "19.67 KB",
-      "changeFromPrevious": "-34.26 KB (-63.5%)",
-      "description": "Map view (lazy loaded, reduced by chunk splitting)"
-    },
-    "markers": {
-      "file": "markers-*.js",
-      "size": "15.53 KB",
-      "description": "Map markers components (NEW: Phase 8 Task 1.1)"
-    },
-    "workbox": {
-      "file": "workbox-window.prod.es5-*.js",
-      "size": "5.55 KB",
-      "description": "PWA service worker"
-    },
-    "index": {
-      "file": "index-*.js",
-      "size": "2.97 KB",
-      "description": "Main entry point"
-    },
-    "pwa": {
-      "file": "PWABadge-*.js + virtual_pwa-register-*.js + PWARegister-*.js",
-      "size": "3.47 KB",
-      "description": "PWA components"
-    }
+  {
+    "name": "google-maps",
+    "passed": true,
+    "size": 0
   },
-  "sizeLimitResults": [
-    {
-      "name": "main",
-      "passed": true,
-      "size": 1287,
-      "sizeLimit": 200000,
-      "usage": "0.64%",
-      "changeFromPrevious": "-47056 bytes (-97.3%)"
-    },
-    {
-      "name": "google-maps",
-      "passed": true,
-      "size": 8854,
-      "sizeLimit": 40000,
-      "usage": "22.14%",
-      "changeFromPrevious": "-3169 bytes (-26.4%)"
-    },
-    {
-      "name": "app-bundle",
-      "passed": true,
-      "size": 6055,
-      "sizeLimit": 150000,
-      "usage": "4.04%",
-      "changeFromPrevious": "-10667 bytes (-63.8%)"
-    }
-  ],
-  "baseline": {
-    "phase": "Phase 2 (Baseline)",
-    "totalBundleSize": "3459.48 KB",
-    "reference": "PHASE3_COMPLETION_REPORT.md"
-  },
-  "previousPhase": {
-    "phase": "Phase 7 (Post-WebP/AVIF)",
-    "totalBundleSize": "1795.68 KB",
-    "chunkCount": 7,
-    "reference": "PHASE7_SUMMARY.md"
-  },
-  "cumulativeReduction": {
-    "fromBaseline": "-1658.63 KB",
-    "percentage": "-47.94%",
-    "phases": [
-      "Phase 3: -322.21 KB (Legacy migration)",
-      "Phase 4: +17.75 KB (Initial dynamic import overhead)",
-      "Phase 4.5: -3.59 KB (Selective rollback)",
-      "Phase 5: -788.20 KB (ICOOON-MONO SVG)",
-      "Phase 6: -594.73 KB (PNG auto-optimization)",
-      "Phase 7: WebP/AVIF (reflected in previous size)",
-      "Phase 8 Task 1.1: +5.17 KB (manualChunks function overhead, acceptable for improved caching)"
-    ]
-  },
-  "phase8Task1.1Impact": {
-    "chunkCountChange": "7 → 10 chunks (+3 new chunks)",
-    "newChunks": [
-      "markers (15.53 KB): Map marker components",
-      "data-processing (35.96 KB): Services layer",
-      "ui-components (28.68 KB): Common UI components"
-    ],
-    "significantReductions": [
-      "App: 66.43 KB → 21.43 KB (-67.7%)",
-      "IntegratedMapView: 53.93 KB → 19.67 KB (-63.5%)"
-    ],
-    "sizeLimitImprovements": [
-      "main: 48.34 KB → 1.26 KB (-97.3%)",
-      "google-maps: 12.02 KB → 8.64 KB (-26.4%)",
-      "app-bundle: 16.72 KB → 5.91 KB (-63.8%)"
-    ],
-    "cachingBenefits": [
-      "React vendor separated into dedicated 179.25 KB chunk (better browser caching)",
-      "Services and UI split into separate chunks (parallel loading possible)",
-      "Markers isolated for lazy loading optimization"
-    ]
-  },
-  "notes": [
-    "Phase 8 Task 1.1: Converted manualChunks from object to function form",
-    "Added 3 new chunks: markers, data-processing, ui-components",
-    "App and IntegratedMapView chunks reduced by 63-67% through better splitting",
-    "Size-limit gzip sizes dramatically improved due to better chunk distribution",
-    "Small total size increase (+5.17 KB) is acceptable trade-off for improved caching strategy",
-    "PWA components are conditionally loaded in production",
-    "IntegratedMapView and APIProvider remain lazy loaded (Phase 4.5)",
-    "All PNG icons optimized with WebP/AVIF (Phase 7)",
-    "Size-limit checks passed with even more comfortable margins"
-  ]
-}
+  {
+    "name": "app-bundle",
+    "passed": true,
+    "size": 2695,
+    "sizeLimit": 150000
+  }
+]
