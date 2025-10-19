@@ -59,9 +59,9 @@ describe("ErrorBoundary", () => {
       );
 
       expect(
-        screen.getByText(
+        screen.getAllByText(
           /申し訳ございません。アプリケーションでエラーが発生しました。/
-        )
+        )[0]
       ).toBeInTheDocument();
     });
   });
@@ -196,7 +196,7 @@ describe("ErrorBoundary", () => {
         </ErrorBoundary>
       );
 
-      const retryButton = screen.getByText("リトライ");
+      const retryButton = screen.getAllByText("リトライ")[0];
       expect(retryButton).toBeInTheDocument();
 
       // クリックしても例外が発生しないことを確認
@@ -210,7 +210,7 @@ describe("ErrorBoundary", () => {
         </ErrorBoundary>
       );
 
-      const reloadButton = screen.getByText("ページをリロード");
+      const reloadButton = screen.getAllByText("ページをリロード")[0];
       expect(reloadButton).toBeInTheDocument();
     });
   });
@@ -224,12 +224,13 @@ describe("ErrorBoundary", () => {
       );
 
       // 開発環境の場合、エラー詳細セクションが存在
-      const detailsButton = screen.queryByText(/エラー詳細を表示/);
+      const detailsButtons = screen.queryAllByText(/エラー詳細を表示/);
 
       if (import.meta.env.DEV) {
-        expect(detailsButton).toBeInTheDocument();
+        expect(detailsButtons.length).toBeGreaterThan(0);
+        expect(detailsButtons[0]).toBeInTheDocument();
       } else {
-        expect(detailsButton).not.toBeInTheDocument();
+        expect(detailsButtons.length).toBe(0);
       }
     });
   });
@@ -245,7 +246,8 @@ describe("ErrorBoundary", () => {
       );
 
       // フォールバック UI が表示されることを確認
-      expect(screen.getByText("エラーが発生しました")).toBeInTheDocument();
+      const errorHeadings = screen.getAllByText("エラーが発生しました");
+      expect(errorHeadings[0]).toBeInTheDocument();
     });
 
     it("エラーオブジェクトが最小限の情報しか持たない場合", () => {

@@ -4,7 +4,7 @@
  */
 
 import { FilterPanel } from "@/components/restaurant";
-import { useModalFilter } from "@/hooks";
+import { useModalFilter } from "@/hooks/ui/useModalFilter";
 import type { CompactModalFilterProps } from "@/types";
 import { memo } from "react";
 import { FilterModal } from "./FilterModal";

@@ -1,5 +1,6 @@
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
+import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig, type PluginOption } from "vite";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import { VitePWA } from "vite-plugin-pwa";
@@ -225,39 +226,16 @@ export default defineConfig(({ mode }) => {
           ]
         : []),
       ...(shouldEnablePWA ? [VitePWA(createPWAConfig(isProduction))] : []),
+      // Bundle analysis: Use static import when ANALYZE=true
+      // Note: visualizer must be imported at top level for ESM compatibility
       ...(process.env.ANALYZE === "true"
         ? [
-            // Dynamically require visualizer only when ANALYZE is enabled so
-            // the dev server doesn't crash if the package is not installed.
-            ((): PluginOption => {
-              try {
-                // Dynamically require rollup-plugin-visualizer when ANALYZE is enabled
-                const { visualizer } = require("rollup-plugin-visualizer") as {
-                  visualizer: (options: {
-                    filename: string;
-                    open: boolean;
-                    gzipSize: boolean;
-                    brotliSize: boolean;
-                  }) => PluginOption;
-                };
-                return visualizer({
-                  filename: "dist/stats.html",
-                  open: true,
-                  gzipSize: true,
-                  brotliSize: true,
-                });
-              } catch (e: unknown) {
-                // If the package isn't installed, warn and continue without it.
-                // This prevents the dev server from failing on missing optional deps.
-                // Include the caught error in the log so the exception is handled and
-                // linters (e.g. Sonar S2486) won't complain about an unused variable.
-                console.warn(
-                  "rollup-plugin-visualizer is not installed. Set ANALYZE=true and install it if you want bundle analysis. Continuing without visualizer.",
-                  e
-                );
-                return {} as PluginOption;
-              }
-            })(),
+            visualizer({
+              filename: "dist/stats.html",
+              open: true,
+              gzipSize: true,
+              brotliSize: true,
+            }),
           ]
         : []),
     ] as PluginOption[],
@@ -316,6 +294,10 @@ export default defineConfig(({ mode }) => {
           // 短縮記法の使用
           collapse_vars: true,
           reduce_vars: true,
+          // Phase 8 Task 2.5: 複数パス圧縮で品質向上
+          passes: 2,
+          // インライン関数の最適化
+          inline: 2,
         },
         mangle: {
           // Safari 10+ 対応

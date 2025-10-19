@@ -15,7 +15,7 @@ import type {
   MigrationState,
   PerformanceMetrics,
 } from "@/types/migration";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type FC } from "react";
 import { UnifiedMarker } from "../UnifiedMarker";
 // Legacy markers/templates were removed after migration; keep migration fallback minimal.
 import { type MigrationStatistics } from "./CategoryMapper";
@@ -34,7 +34,7 @@ export interface MarkerMigrationSystemProps {
   readonly onPerformanceMetric?: (metrics: PerformanceMetrics) => void;
 }
 
-export const MarkerMigrationSystem: React.FC<MarkerMigrationSystemProps> = ({
+export const MarkerMigrationSystem: FC<MarkerMigrationSystemProps> = ({
   restaurant,
   onClick,
   config,
@@ -210,7 +210,7 @@ export interface MigrationDashboardProps {
   readonly onConfigChange: (config: MigrationConfig) => void;
 }
 
-export const MigrationDashboard: React.FC<MigrationDashboardProps> = ({
+export const MigrationDashboard: FC<MigrationDashboardProps> = ({
   config,
   restaurants,
   onConfigChange,

@@ -23,22 +23,22 @@ const parkingPoint: MapPoint = {
 
 // react-google-maps を最小モック: Map/AdvancedMarker/InfoWindow の DOM をシンプル化
 vi.mock("@vis.gl/react-google-maps", () => ({
-  Map: ({ children }: { children?: React.ReactNode }) => (
+  Map: ({ children }: { children?: ReactNode }) => (
     <div data-testid="mock-map">{children}</div>
   ),
   // Wrapper only; actual interactive element is CircularMarker's <button>
-  AdvancedMarker: ({ children }: { children?: React.ReactNode }) => (
+  AdvancedMarker: ({ children }: { children?: ReactNode }) => (
     <span data-testid="advanced-marker" style={{ display: "inline-block" }}>
       {children}
     </span>
   ),
-  InfoWindow: ({ children }: { children?: React.ReactNode }) => (
+  InfoWindow: ({ children }: { children?: ReactNode }) => (
     <div role="dialog">{children}</div>
   ),
 }));
 
 // Wrapper: CircularMarkerContainer を直接利用
-import React, { useState } from "react";
+import { useState, type ReactNode } from "react";
 function Wrapper() {
   const [selected, setSelected] = useState<MapPoint | null>(null);
   return (

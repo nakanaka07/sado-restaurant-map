@@ -140,9 +140,159 @@ DOM を操作/検証する Vitest テスト (`@testing-library/react` 使用) �
 - 自動バンドルサイズ監視 (bundlesize / size-limit)
 - Lighthouse CI 導入
 
+## 14. バンドル最適化ベストプラクティス (Last-Updated: 2025-10-19)
+
+Phase 8で確立された JavaScript最適化パターンを記録する。
+
+### 14.1. Barrel Exports排除戦略
+
+**問題**: Barrel exports (`export * from './module'`) はTree-shakingを阻害し、未使用コードがバンドルに混入する。
+
+**解決策**: 直接importに統一する。
+
+```typescript
+// ❌ Bad: Barrel export (src/hooks/index.ts)
+export * from "./map/useMapPoints";
+export * from "./ui/useModalFilter";
+
+// ✅ Good: Direct import
+import { useMapPoints } from "@/hooks/map/useMapPoints";
+import { useModalFilter } from "@/hooks/ui/useModalFilter";
+```
+
+**効果**: Phase 8 Task 2.2で -4 モジュール削減達成。
+
+### 14.2. React.lazy + Suspense パターン
+
+**適用条件**:
+
+- 初期表示不要なコンポーネント
+- 条件付きレンダリング（モーダル、パネル等）
+- 大きなチャンク（>10KB推奨）
+
+**実装パターン**:
+
+```typescript
+// App.tsx
+const FilterPanel = lazy(() => import('@/components/map/FilterPanel'));
+const CustomMapControls = lazy(() => import('@/components/map/CustomMapControls'));
+
+<Suspense fallback={null}>
+  {showFilter && <FilterPanel {...props} />}
+</Suspense>
+
+<Suspense fallback={null}>
+  {showControls && <CustomMapControls {...props} />}
+</Suspense>
+```
+
+**注意点**:
+
+- Suspense フォールバックは最小限（`null` or 軽量スピナー）
+- アクセシビリティ考慮（`role="status"`, `aria-live`）
+
+**効果**: Phase 8 Task 2.3で App.js -43% 削減達成。
+
+### 14.3. Terser 最適化設定
+
+**推奨設定**:
+
+```typescript
+// vite.config.ts
+terserOptions: {
+  compress: {
+    drop_console: true,      // console.log 削除
+    drop_debugger: true,     // debugger 削除
+    pure_funcs: ['console.log', 'console.info'],
+    dead_code: true,         // 到達不能コード削除
+    conditionals: true,      // 条件式最適化
+    passes: 2,               // 2パス圧縮（追加最適化）
+  },
+  mangle: {
+    safari10: true,          // Safari 10互換性
+  },
+  format: {
+    comments: false,         // コメント削除
+  },
+  inline: 2,                 // 小さい関数のインライン化
+}
+```
+
+**効果**: Phase 8 Task 2.5で追加 -1.07 KB削減達成。
+
+### 14.4. manualChunks 戦略
+
+**基本方針**:
+
+- React系ライブラリ: `react-vendor`（大きいがキャッシュ効果大）
+- 大規模データ処理: `data-processing`（>30KB推奨）
+- UI コンポーネント群: `ui-components`（再利用性高）
+- ページ/機能単位: 独立チャンク（10-20KB目安）
+
+**Phase 8 最終構成**:
+
+| チャンク            | サイズ (gzip)      | 用途                    |
+| ------------------- | ------------------ | ----------------------- |
+| `react-vendor`      | 203.56 KB (~65 KB) | React 19 + React Router |
+| `data-processing`   | 33.69 KB (~11 KB)  | データ処理ロジック      |
+| `ui-components`     | 33.23 KB (~11 KB)  | UI コンポーネント       |
+| `IntegratedMapView` | 21.15 KB (~7 KB)   | 地図ビュー              |
+| `markers`           | 15.35 KB (~5 KB)   | マーカーロジック        |
+| `App`               | 11.13 KB (~4 KB)   | アプリ本体              |
+| `CustomMapControls` | 8.64 KB (~3 KB)    | 地図コントロール        |
+| `index`             | 2.96 KB (~1 KB)    | エントリーポイント      |
+
+### 14.5. ESM Static Import パターン
+
+**問題**: 動的 `require()` はESMでビルドエラーを引き起こす。
+
+**解決策**: 静的importに統一する。
+
+```typescript
+// ❌ Bad: Dynamic require
+if (process.env.ANALYZE) {
+  plugins.push(require("rollup-plugin-visualizer")());
+}
+
+// ✅ Good: Static import + conditional push
+import { visualizer } from "rollup-plugin-visualizer";
+
+if (process.env.ANALYZE === "true") {
+  plugins.push(
+    visualizer({
+      /* ... */
+    })
+  );
+}
+```
+
+### 14.6. Bundle Analysis フロー
+
+**定期実行**（月次推奨）:
+
+```bash
+# Bundle可視化生成
+$env:ANALYZE='true'; pnpm build
+
+# dist/stats.html をブラウザで開く
+Start-Process "dist\stats.html"
+
+# 確認項目:
+# - 重複モジュール検出
+# - 大きすぎるチャンク（>100KB）
+# - 未使用依存の混入
+# - Tree-shakingの効き具合
+```
+
+**Phase 8達成指標**:
+
+- App.js: 19.56 KB → 11.13 KB (-43.1%)
+- 条件付き初期ロード: -78.7% 削減
+- モジュール数: 130 → 126 (-3.1%)
+
 ---
 
-Last Updated: 2025-10-02
+Last Updated: 2025-10-19
 
 ## 13. 参照ドキュメント
 

@@ -1,4 +1,4 @@
-import React from "react";
+import type { FC } from "react";
 
 /**
  * ToiletHistogram - マーカー内部用の軽量ヒストグラム描画
@@ -12,7 +12,7 @@ export interface ToiletHistogramProps {
   ariaLabel?: string; // アクセシビリティ用。省略時は aria-hidden
 }
 
-export const ToiletHistogram: React.FC<ToiletHistogramProps> = ({
+export const ToiletHistogram: FC<ToiletHistogramProps> = ({
   values,
   color = "#2196F3",
   glow = true,

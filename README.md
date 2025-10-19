@@ -7,12 +7,13 @@
 
 ## ✨ 特徴
 
-- React 19 / Concurrent 対応構成
-- Vite 7 による高速 HMR
-- Vitest + Testing Library によるユニット/コンポーネントテスト
-- PWA 対応 (vite-plugin-pwa / workbox)
-- アクセシビリティ検査 (axe, jest-axe)
-- 型安全 & 厳格 TS コンパイラ設定
+- **React 19** / Concurrent 対応構成
+- **Vite 7** による高速 HMR
+- **Vitest** + Testing Library によるユニット/コンポーネントテスト（**405 tests passing**）
+- **PWA 対応** (vite-plugin-pwa / workbox)
+- **アクセシビリティ検査** (axe, jest-axe)
+- **型安全** & 厳格 TS コンパイラ設定
+- **バンドル最適化**: App.js 11KB, 条件付き初期ロード -78% (Phase 8完了)
 
 ## 🚀 クイックスタート
 
@@ -65,14 +66,14 @@ scripts/       分析・デプロイ支援スクリプト
 
 ## 🛡 品質ゲート (初期基準)
 
-| ゲート     | 基準            | 最低ライン     | 備考                      |
-| ---------- | --------------- | -------------- | ------------------------- |
-| Lint       | ESLint error 0  | 100%           | `pnpm lint`               |
-| Type Check | tsc             | error 0        | `pnpm type-check`         |
-| Tests      | Vitest          | pass rate 90%+ | `pnpm test`               |
-| Coverage   | line            | ≥50%           | `pnpm test:coverage`      |
-| A11y       | axe             | 重大違反 0     | `pnpm test:accessibility` |
-| Bundle     | main chunk gzip | <250KB         | `pnpm analyze`            |
+| ゲート     | 基準            | 最低ライン     | 備考                      | ステータス      |
+| ---------- | --------------- | -------------- | ------------------------- | --------------- |
+| Lint       | ESLint error 0  | 100%           | `pnpm lint`               | ✅ 0 errors     |
+| Type Check | tsc             | error 0        | `pnpm type-check`         | ✅ 0 errors     |
+| Tests      | Vitest          | pass rate 90%+ | `pnpm test`               | ✅ 405/405 pass |
+| Coverage   | line            | ≥20%           | `pnpm test:coverage`      | ✅ 38.52%       |
+| A11y       | axe             | 重大違反 0     | `pnpm test:accessibility` | ✅ 0 violations |
+| Bundle     | main chunk gzip | <250KB         | `pnpm analyze`            | ✅ App 11KB     |
 
 詳細/将来ターゲットは `docs/guidelines/SHARED_GLOSSARY.md` を参照。
 

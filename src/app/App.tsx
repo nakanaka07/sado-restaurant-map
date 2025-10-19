@@ -1,5 +1,5 @@
 import { SADO_CENTER } from "@/config";
-import { useMapPoints } from "@/hooks";
+import { useMapPoints } from "@/hooks/map/useMapPoints";
 import type {
   CuisineType,
   ExtendedMapFilters,
@@ -27,9 +27,7 @@ import {
 } from "react";
 import { SkipLink } from "../components/common/AccessibilityComponents";
 import { LoadingSpinner } from "../components/common/LoadingSpinner";
-import { CustomMapControls } from "../components/map/CustomMapControls";
 import { DEFAULT_CONTROL_POSITION } from "../components/map/constants";
-import { FilterPanel } from "../components/restaurant";
 import { validateApiKey } from "../utils/securityUtils";
 
 // ---- Idle helper & deferred GA initialization (to reduce nesting) ----
@@ -64,6 +62,18 @@ const APIProvider = lazy(() =>
 const IntegratedMapView = lazy(() =>
   import("../components/map/MapView/IntegratedMapView").then(module => ({
     default: module.IntegratedMapView,
+  }))
+);
+
+// Phase 8 Task 2.3: FilterPanelとCustomMapControlsを動的import化して初期バンドル削減
+const FilterPanel = lazy(() =>
+  import("../components/restaurant").then(module => ({
+    default: module.FilterPanel,
+  }))
+);
+const CustomMapControls = lazy(() =>
+  import("../components/map/CustomMapControls").then(module => ({
+    default: module.CustomMapControls,
   }))
 );
 
@@ -633,21 +643,27 @@ function App() {
               <div className="app-content">
                 {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
                 {!isMobile && !isFullscreen && (
-                  <FilterPanel
-                    loading={loading}
-                    resultCount={filteredMapPoints.length}
-                    stats={stats}
-                    onCuisineFilter={handleCuisineFilter}
-                    onPriceFilter={handlePriceFilter}
-                    onDistrictFilter={handleDistrictFilter}
-                    onRatingFilter={handleRatingFilter}
-                    onOpenNowFilter={handleOpenNowFilter}
-                    onSearchFilter={handleSearchFilter}
-                    onSortChange={updateSortOrder}
-                    onFeatureFilter={handleFeatureFilter}
-                    onPointTypeFilter={handlePointTypeFilter}
-                    onResetFilters={handleResetFilters}
-                  />
+                  <Suspense
+                    fallback={
+                      <div style={{ width: "320px", height: "100%" }} />
+                    }
+                  >
+                    <FilterPanel
+                      loading={loading}
+                      resultCount={filteredMapPoints.length}
+                      stats={stats}
+                      onCuisineFilter={handleCuisineFilter}
+                      onPriceFilter={handlePriceFilter}
+                      onDistrictFilter={handleDistrictFilter}
+                      onRatingFilter={handleRatingFilter}
+                      onOpenNowFilter={handleOpenNowFilter}
+                      onSearchFilter={handleSearchFilter}
+                      onSortChange={updateSortOrder}
+                      onFeatureFilter={handleFeatureFilter}
+                      onPointTypeFilter={handlePointTypeFilter}
+                      onResetFilters={handleResetFilters}
+                    />
+                  </Suspense>
                 )}
 
                 {/* Fullscreen Map with A/B Testing Integration */}
@@ -659,22 +675,34 @@ function App() {
                   userId={userId}
                   customControls={
                     isMobile || isFullscreen ? (
-                      <CustomMapControls
-                        loading={loading}
-                        resultCount={filteredMapPoints.length}
-                        stats={stats}
-                        onCuisineFilter={handleCuisineFilter}
-                        onPriceFilter={handlePriceFilter}
-                        onDistrictFilter={handleDistrictFilter}
-                        onRatingFilter={handleRatingFilter}
-                        onOpenNowFilter={handleOpenNowFilter}
-                        onSearchFilter={handleSearchFilter}
-                        onSortChange={updateSortOrder}
-                        onFeatureFilter={handleFeatureFilter}
-                        onPointTypeFilter={handlePointTypeFilter}
-                        onResetFilters={handleResetFilters}
-                        position={DEFAULT_CONTROL_POSITION}
-                      />
+                      <Suspense
+                        fallback={
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              left: "10px",
+                            }}
+                          />
+                        }
+                      >
+                        <CustomMapControls
+                          loading={loading}
+                          resultCount={filteredMapPoints.length}
+                          stats={stats}
+                          onCuisineFilter={handleCuisineFilter}
+                          onPriceFilter={handlePriceFilter}
+                          onDistrictFilter={handleDistrictFilter}
+                          onRatingFilter={handleRatingFilter}
+                          onOpenNowFilter={handleOpenNowFilter}
+                          onSearchFilter={handleSearchFilter}
+                          onSortChange={updateSortOrder}
+                          onFeatureFilter={handleFeatureFilter}
+                          onPointTypeFilter={handlePointTypeFilter}
+                          onResetFilters={handleResetFilters}
+                          position={DEFAULT_CONTROL_POSITION}
+                        />
+                      </Suspense>
                     ) : null
                   }
                 />
