@@ -183,15 +183,20 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
           {customContent}
         </div>
       ) : (
-        <img
-          src={iconPath}
-          alt=""
+        <div
           aria-hidden="true"
           className="icon-image"
           style={{
             width: computedIconSize,
             height: computedIconSize,
+            minWidth: computedIconSize,
+            minHeight: computedIconSize,
             pointerEvents: "none",
+            backgroundImage: `url(${iconPath})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            flexShrink: 0,
           }}
         />
       )}
