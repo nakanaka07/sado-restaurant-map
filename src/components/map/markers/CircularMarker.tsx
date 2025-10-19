@@ -192,9 +192,6 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
             width: computedIconSize,
             height: computedIconSize,
             pointerEvents: "none",
-            // SVGs with currentColor need color property set + invert filter
-            color: "white",
-            filter: "invert(1)",
           }}
         />
       )}
@@ -330,7 +327,7 @@ export const CircularMarker: React.FC<CircularMarkerProps> = ({
 
         /* アイコンのホバー効果（控えめなグロー） */
         .circular-marker.interactive:hover .icon-image {
-          filter: invert(1) drop-shadow(0 0 3px rgba(255,255,255,0.8));
+          filter: drop-shadow(0 0 3px rgba(255,255,255,0.8));
           transition: filter 0.25s ease;
         }
 
