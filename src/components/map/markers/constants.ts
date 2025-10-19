@@ -1,18 +1,19 @@
 import type { IcooonMarkerCategory } from "../../../types/icooonMarker.types";
 
 // Note: Reference SVGs from public/icons/ directory.
-// In dev: /icons/*.svg, in production: /sado-restaurant-map/icons/*.svg (handled by vite base config)
-// Vite automatically prepends the base path to public assets.
-const iconInternational = "/icons/earth-icon12.svg";
-const iconGeneral = "/icons/fork-knife.svg";
-const iconFastfood = "/icons/hamburger-icon7.svg";
-const iconJapanese = "/icons/ochawan-hashi.svg";
-const iconParking = "/icons/parking-icon.svg";
-const iconNoodles = "/icons/ramen-icon.svg";
-const iconYakiniku = "/icons/steak-icon2.svg";
-const iconCafe = "/icons/tea-icon.svg";
-const iconToilet = "/icons/toilet-pictogram.svg";
-const iconIzakaya = "/icons/wine-bottle.svg";
+// Use import.meta.env.BASE_URL to ensure correct path in both dev and production
+// In dev: /icons/*.svg, in production: /sado-restaurant-map/icons/*.svg
+const BASE_URL = import.meta.env.BASE_URL;
+const iconInternational = `${BASE_URL}icons/earth-icon12.svg`;
+const iconGeneral = `${BASE_URL}icons/fork-knife.svg`;
+const iconFastfood = `${BASE_URL}icons/hamburger-icon7.svg`;
+const iconJapanese = `${BASE_URL}icons/ochawan-hashi.svg`;
+const iconParking = `${BASE_URL}icons/parking-icon.svg`;
+const iconNoodles = `${BASE_URL}icons/ramen-icon.svg`;
+const iconYakiniku = `${BASE_URL}icons/steak-icon2.svg`;
+const iconCafe = `${BASE_URL}icons/tea-icon.svg`;
+const iconToilet = `${BASE_URL}icons/toilet-pictogram.svg`;
+const iconIzakaya = `${BASE_URL}icons/wine-bottle.svg`;
 
 export const CIRCULAR_MARKER_COLORS: Record<IcooonMarkerCategory, string> = {
   japanese: "#E53E3E",
