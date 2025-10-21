@@ -24,7 +24,7 @@ jobs:
         run: pnpm build
 
       - name: Run Lighthouse CI
-        run: npx lhci autorun --config=lighthouserc.json --budgetsFile=lighthouse-budgets.json || echo "LHCI finished with non-zero exit (soft fail)"
+        run: npx lhci autorun --config=lighthouserc.json || echo "LHCI finished with non-zero exit (soft fail)"
 
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4

@@ -16,7 +16,6 @@ export default tseslint.config(
       "config/**",
       "config/**.config.ts",
       "../*.config.js",
-      "vitest.config.ts",
       ".vscode/**", // 開発者環境ローカル設定は lint 対象外
     ],
   },
