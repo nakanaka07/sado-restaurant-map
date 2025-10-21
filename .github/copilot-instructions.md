@@ -1,114 +1,393 @@
-# Copilot Repository Instructions
+# GitHub Copilot Repository Instructions
 
-(短く・再利用可能。AI は不足時のみ検索。空行で区切るが送信時統合される。)
+> **Last Updated**: 2025-01-21
+> **Philosophy**: Trust these instructions first. Search workspace only when information is incomplete or outdated.
 
 ## 0. Development Context & Partnership
 
-**Personal Developer Environment**: Individual development using VS Code Insiders. Copilot serves as primary coding partner, mentor, and collaborative assistant.
+**Environment**: Individual development using VS Code Insiders. Copilot serves as primary coding partner, mentor,
+and collaborative assistant.
 
-**Partnership Philosophy**: Maintain best practices, stay current with latest technologies, build sustainable development workflows. Prioritize clear communication, proactive suggestions, and continuous learning together.
+**Partnership Principles**:
 
-**Continuous Improvement**: Regularly review and update instructions. Suggest improvements when patterns change or new tools emerge. Flag when current practices may be outdated.
+- Maintain best practices and stay current with latest technologies
+- Build sustainable, maintainable workflows
+- Prioritize clear communication and proactive suggestions
+- Continuous learning and improvement together
 
-**Task Visibility**: Convert ad-hoc ideas into actionable tasks. Maintain task awareness across chat sessions. Use `docs/tasks/TASKS.md` for persistent task tracking.
+**Task Management**: Convert ad-hoc ideas into actionable tasks. Maintain awareness across sessions.
+Use `docs/tasks/TASKS.md` for persistent tracking.
+
+**Continuous Improvement**: Monthly review of these instructions. Propose updates when tools, patterns,
+or bottlenecks change.
 
 ## 1. Project Overview
 
-`sado-restaurant-map`: 佐渡島の飲食店/トイレ/駐車場等 POI を React 19 + TypeScript + Vite で表示する PWA。重点: パフォーマンス / アクセシビリティ / 型安全 / オフライン許容。フロント主体、`data-platform/` に Python ETL/整形コードを含む。
+**Project**: `sado-restaurant-map` - Interactive PWA map showing restaurants, toilets, parking, and POIs
+on Sado Island, Japan.
 
-**Production Environment**: https://nakanaka07.github.io/sado-restaurant-map/ (GitHub Pages deployment)
+**Tech Stack**:
 
-## 2. Tech Stack & Key Tools
+- Frontend: React 19 + TypeScript 5.7 (strict) + Vite 7
+- Testing: Vitest 3 + Testing Library + jest-axe
+- PWA: vite-plugin-pwa (Workbox) + offline support
+- Maps: Google Maps JavaScript API
+- CI/CD: GitHub Actions (lint, test, build, size-limit, Lighthouse CI)
 
-Frontend: React 19 (concurrent features), TypeScript 5.7 strict, Vite 7, vitest + Testing Library, vite-plugin-pwa (Workbox), axe / jest-axe。
-CI: GitHub Actions (`ci.yml` build+lint+test+size-limit, `coverage-badge.yml`, `lighthouse-ci.yml`).
-Performance: manualChunks (`react-vendor`, `google-maps`), size-limit, Lighthouse CI budgets, rollup-plugin-visualizer (ANALYZE flag)。
+**Key Priorities**: Performance, Accessibility (WCAG AA), Type Safety, Offline Support, Developer Experience
 
-## 3. Build & Validation (ALWAYS follow order)
+**Production**: <https://nakanaka07.github.io/sado-restaurant-map/> (GitHub Pages)
 
-1. `pnpm install` (必ず最初)
-2. `pnpm type-check` (早期失敗)
-3. `pnpm lint` (エラー 0)
-4. `pnpm test:run` or `pnpm test` (watch)
-5. Optional: `pnpm test:coverage` (line >=50% target)
-6. `pnpm build` → `pnpm preview`
-7. Bundle 分析: `ANALYZE=true pnpm build` or `pnpm analyze`
-8. Accessibility subset: `pnpm test:accessibility`
-   Never skip steps 1–4 for PR changes.
+## 2. Architecture & Structure
 
-## 4. Directory Landmarks
+**Directory Landmarks**:
 
-`src/components` UI / `src/pages` 画面 / `src/hooks` 再利用ロジック / `src/services` 外部 API & ドメイン操作 / `src/utils` 汎用 / `src/test` setup & a11y / `public` 静的 / `config` 各種設定 / `.github/workflows` CI / `data-platform` Python ETL。エイリアス: `@`, `@components`, `@hooks`, `@utils`, `@types`, `@data`, `@assets`, `@services`。
+```
+src/
+├── components/     # UI components (presentational + smart)
+├── pages/          # Page-level route components
+├── hooks/          # Custom React hooks for reusable logic
+├── services/       # External API clients & domain operations
+├── utils/          # Pure utility functions
+├── types/          # Shared TypeScript type definitions
+├── test/           # Test setup & accessibility utilities
+├── data/           # Static JSON data files
+├── assets/         # Images, SVGs, icons
+└── styles/         # Global styles
+public/             # Static assets (copied as-is)
+config/             # Configuration files (ESLint, PWA, TS, etc.)
+.github/workflows/  # CI/CD pipelines
+data-platform/      # Python ETL (independent environment)
+docs/               # Project documentation
+```
 
-## 5. Type & Lint Policies
+**Path Aliases**: `@`, `@components`, `@hooks`, `@utils`, `@types`, `@data`, `@assets`, `@services`
 
-Strict TS (exactOptionalPropertyTypes 等)。`@typescript-eslint/no-explicit-any` 禁止。未使用変数は `_` prefix を除きエラー。React Hooks exhaustive-deps 警告。優先: 小さく純粋な関数 + 明確境界。Public 型は `src/types/` へ抽出検討。
+**Data Platform**: Independent Python environment (`data-platform/`) for ETL scripts. Not imported by
+JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
-## 6. Testing Guidelines
+## 3. Build & Validation Workflow
 
-Unit/Component: vitest + jsdom。`src/test/setup.ts` を経由。アクセシビリティ: jest-axe / @axe-core/react。Coverage reporters: text/json/json-summary/html。大きな新ロジック → 最低: happy path + エッジ (空データ/エラー) 追加。Map 集約描画は将来 E2E (Playwright) 予定、現状はユニット差分でフォロー。
+**CRITICAL ORDER** (Never skip 1-4 for code changes):
 
-## 7. Performance & Bundle
+1. **`pnpm install`** - Always first after pulling/switching branches
+2. **`pnpm type-check`** - Fail fast on type errors
+3. **`pnpm lint`** - Zero errors required (warnings OK if documented)
+4. **`pnpm test:run`** or `pnpm test` - All tests must pass
+5. Optional: `pnpm test:coverage` - Target: line coverage ≥50%
+6. **`pnpm build`** → **`pnpm preview`** - Verify production build
+7. **Bundle Analysis**: `ANALYZE=true pnpm build` or `pnpm analyze`
+8. **`pnpm test:accessibility`** - A11y-focused test subset
 
-Main chunk gzip <250KB 目標 (Glossary 参照)。`react-vendor` / `google-maps` 手動分割済み。不要巨大依存を追加しない。画像は hashed ファイルネーミング済み。重い新機能は dynamic import (`import()` + Suspense) を検討。
+**Build Success Criteria**:
 
-## 8. PWA / Service Worker Notes
+- Main chunk (gzip): <250KB target (see `metrics/size-limit.json`)
+- No console errors in preview mode
+- All routes load correctly
+- Service worker registers without errors
+- Lighthouse CI passes (see `lighthouserc.json` budgets)
 
-Import 仮想モジュールは必ず静的文字列。`injectRegister:false` → 登録ラッパで `registerSW` 明示 (参照: `pwa-implementation-notes.md`)。API Keys を runtimeCaching キャッシュキーから除去（`cacheKeyWillBeUsed` 実装済）。開発で PWA 有効化必要なら `ENABLE_PWA_DEV=true`. Offline fallback まだ未実装。
+## 4. TypeScript & Linting Standards
 
-## 9. Accessibility Principles
+**TypeScript Config** (strict mode):
 
-WCAG AA コントラスト / キーボード操作全経路 / 余計な ARIA 付与禁止 / 視覚的フォーカスリング維持 (`outline` 無効化禁止)。インタラクティブ要素はネイティブ HTML 優先。新コンポーネント: role / aria-\* を必要最小に。
+- `exactOptionalPropertyTypes`: true
+- `noUncheckedIndexedAccess`: true
+- `@typescript-eslint/no-explicit-any`: **ERROR** (no exceptions)
+- Unused variables: error (except `_` prefix)
 
-## 10. CI & Quality Gates
+**Coding Standards**:
 
-CI で lint / type-check / tests / coverage artifact / size-limit / lighthouse (後続 workflow)。失敗時は原因最短修正。カバレッジ基準 line≥50% (将来段階的引き上げ)。Size baseline は `metrics/size-limit.json` 自動更新 (main push)。
+- Prefer small, pure functions with clear boundaries
+- Extract public types to `src/types/` for reusability
+- React Hooks: satisfy `exhaustive-deps` (no suppressions without explanation)
+- No nested ternaries >2 levels
+- Max function length: ~150 lines (refactor if exceeded)
+- Duplicate code >3 times: extract to utility/hook
+
+**Import Order** (ESLint enforced):
+
+1. React imports
+2. External dependencies
+3. Internal absolute (`@/*`)
+4. Relative imports
+5. Type imports (separate)
+
+## 5. Testing Strategy
+
+**Test Framework**: Vitest 3 + jsdom + Testing Library + jest-axe
+
+**Test Types**:
+
+| Layer         | Strategy             | Tools                | Priority                        |
+| ------------- | -------------------- | -------------------- | ------------------------------- |
+| Unit          | Logic/Hook isolation | Vitest               | High for utils, hooks, services |
+| Component     | User behavior-based  | Testing Library      | High for interactive components |
+| Accessibility | Automated + manual   | jest-axe, axe-core   | Required for all interactive UI |
+| Integration   | Future E2E           | Playwright (planned) | Critical user flows             |
+
+**Coverage**:
+
+- Reporters: text, json, json-summary, html
+- Target: ≥50% line coverage (gradually increasing)
+- Focus: Critical paths, calculations, data transformations
+
+**Test Requirements for New Code**:
+
+- Minimum: happy path + edge cases (empty data, errors)
+- Complex logic: boundary conditions
+- Interactive components: keyboard navigation, ARIA
+- Map/visualization: unit test logic, E2E for rendering (future)
+
+## 6. Performance & Bundle Optimization
+
+**Targets** (see `docs/guidelines/SHARED_GLOSSARY.md`):
+
+- Main chunk (gzip): <250KB
+- FCP: <1.5s (dev environment)
+- LCP: <3.0s
+- TTI: <4.0s
+
+**Current Optimizations**:
+
+- Manual code splitting: `react-vendor`, `google-maps`
+- Hashed filenames for assets (cache busting)
+- Dynamic imports for heavy features (`import()` + `<Suspense>`)
+
+**Monitoring**:
+
+- `size-limit`: Automated checks in CI (`metrics/size-limit.json` baseline)
+- Lighthouse CI: Performance budgets (`lighthouserc.json`)
+- Bundle analysis: `rollup-plugin-visualizer` (ANALYZE flag)
+
+**Guidelines**:
+
+- Avoid adding large dependencies without justification
+- Use dynamic imports for features >50KB
+- Optimize images (use AVIF format in `public/`)
+- Lazy-load non-critical Google Maps features
+
+## 7. PWA & Service Worker
+
+**Configuration**: `vite-plugin-pwa` with Workbox
+
+**Key Settings**:
+
+- `injectRegister: false` - Manual SW registration via wrapper
+- Static imports only for virtual modules (no dynamic strings)
+- API keys excluded from cache keys (`cacheKeyWillBeUsed` plugin)
+- Dev PWA: Enable with `ENABLE_PWA_DEV=true`
+
+**Caching Strategy**:
+
+- HTML/CSS/JS: pre-cache
+- API responses: `StaleWhileRevalidate`
+- Google Maps tiles: runtime cache
+- Static assets: `CacheFirst`
+
+**Known Limitations**:
+
+- Offline fallback page: Not yet implemented
+- Update prompts: Basic toast notification (needs UX improvement)
+
+**References**: See `docs/design/pwa-implementation-notes.md` for detailed specs
+
+## 8. Accessibility (a11y) Principles
+
+**WCAG AA Requirements**:
+
+- Color contrast: ≥4.5:1 for normal text, ≥3:1 for large text
+- Keyboard navigation: All interactive elements accessible via Tab/Enter/Space
+- Focus indicators: Visual focus ring required (never disable `outline`)
+- ARIA: Use native HTML first, minimal ARIA when necessary
+- Screen reader: Test with labels, roles, and live regions
+
+**Testing**:
+
+- Automated: jest-axe in component tests
+- Runtime: @axe-core/react in development
+- Manual: Keyboard navigation testing, screen reader testing
+
+**Common Patterns**:
+
+- Buttons: Use `<button>` not `<div onClick>`
+- Links: Use `<a href>` for navigation
+- Forms: Associate labels with inputs
+- Images: Provide alt text or `aria-label`
+- Interactive lists: Use semantic HTML with proper roles
+
+## 9. CI/CD & Quality Gates
+
+**GitHub Actions Workflows**:
+
+- `ci.yml`: Lint, type-check, tests, coverage, size-limit
+- `coverage-badge.yml`: Updates README badge
+- `lighthouse-ci.yml`: Performance budgets
+- `deploy.yml`: GitHub Pages deployment
+
+**Quality Gates** (all must pass):
+
+1. TypeScript compilation (zero errors)
+2. ESLint (zero errors, warnings documented)
+3. All tests passing
+4. Coverage ≥50% (line)
+5. Size limit check
+6. Lighthouse performance budget
+
+**Failure Response**:
+
+- Identify root cause immediately
+- Fix in smallest possible scope
+- Re-run validation workflow
+- Document if issue requires future work (TODO comment)
+
+**Metrics Baseline**: `metrics/size-limit.json` auto-updates on main push
+
+## 10. Diagnostic Protocols
+
+### 🔍 SVG/Image Display Issues
+
+**ALWAYS check in this order**:
+
+1. **File Physical Integrity**:
+
+   ```bash
+   # Check file exists and has content
+   ls -lh path/to/file.svg
+   # Verify SVG structure
+   head -n 5 path/to/file.svg
+   ```
+
+2. **SVG Validation** (CRITICAL):
+   - ✅ Has `xmlns="http://www.w3.org/2000/svg"` attribute
+   - ✅ Has valid `viewBox` attribute
+   - ✅ Opening `<svg>` and closing `</svg>` tags match
+   - ✅ No syntax errors in XML structure
+
+3. **Path Resolution**:
+   - Verify import path matches file system
+   - Check `public/` vs `src/assets/` placement
+   - Confirm Vite alias resolution (`@assets`)
+   - Inspect browser Network tab for 404s
+
+4. **Build Configuration**:
+   - Verify `vite.config.ts` handles SVGs correctly
+   - Check if SVG should be imported or referenced
+   - Confirm public directory files copied correctly
+
+5. **Browser Validation**:
+   - Open Network tab: Check if file downloaded
+   - View downloaded file content (should match source)
+   - Check console for CORS or CSP errors
+   - Verify Content-Type header
+
+**VS Code Display**:
+
+- VS Code SVG preview requires `xmlns` attribute
+- Preview failure ≠ runtime failure (browser may auto-correct)
+- Use "Open Preview" to verify rendering
+
+**Common Fixes**:
+
+```xml
+<!-- ❌ Missing xmlns (won't preview in VS Code) -->
+<svg viewBox="0 0 512 512">...</svg>
+
+<!-- ✅ Complete SVG -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">...</svg>
+```
+
+### 🔍 Build Failures
+
+1. Clear cache: `pnpm store prune` + `rm -rf node_modules`
+2. Reinstall: `pnpm install`
+3. Check for dynamic virtual module imports (use static strings)
+4. Verify all imports resolve correctly
+5. Check console for helpful error messages
+
+### 🔍 Test Failures
+
+1. Run single test: `pnpm test -- path/to/test.spec.ts`
+2. Check test isolation (no shared state)
+3. Verify mocks are properly cleaned up
+4. Check for timing issues (use `waitFor` from Testing Library)
 
 ## 11. AI Collaboration Rules
 
-Always: 最小差分 / 破壊的変更時 README or Glossary 更新提案。検索前に本ファイルと Glossary/COLLAB_PROMPT を参照。大量ファイル一括リネーム・自動整形は明示承認なしで行わない。失敗/不確実: 早期 Blocker 報告。
+**Search Strategy**:
 
-**Key Documentation References**:
+- Trust these instructions first
+- Only search workspace if:
+  - Undefined new API referenced
+  - Build failure not covered here
+  - Dependency version conflicts
 
-- `docs/guidelines/SHARED_GLOSSARY.md`: 専門用語・概念定義
-- `docs/guidelines/COLLAB_PROMPT.md`: AI協働の詳細ガイドライン
-- `docs/design/pwa-implementation-notes.md`: PWA実装の詳細仕様
-- `docs/design/ab-test-marker-sync.md`: ABテスト・マーカー同期仕様
-- `docs/tasks/TASKS.md`: 現在のタスク状況・優先度
+**Code Changes**:
 
-## 12. Common Pitfalls
+- Minimum diff principle
+- No unnecessary formatting changes
+- No bulk renames without explicit approval
+- Always test before committing
 
-- 動的生成した仮想モジュール文字列 (禁止) → 404 fetch 発生。
-- `ANALYZE=true` で visualizer 未インストール→ try/catch で無害化済 (追加入れ不要)。
-- 画像キャッシュキー query 差異 → plugins が query 削除処理済。
+**Failure Handling**:
 
-## 13. When to Refactor
+- Report blockers immediately
+- Provide alternative approaches
+- Explain tradeoffs clearly
 
-条件: 関数 >150行 / 重複 3回+ / hook 再レンダー > 想定回数 (dev tools)。Refactor 前後でテスト緑維持が必須。大規模再構成は段階PR。
+**Documentation Updates**:
 
-## 14. Search Strategy for Agent
+- Update instructions for breaking changes
+- Propose glossary updates for new concepts
+- Suggest improvements when patterns change
 
-Trust these instructions first. Only grep/search if: (a) 未定義の新規 API 参照が必要, (b) ビルド失敗メッセージがここで言及されない, (c) 依存バージョン不整合。過剰探索を避ける。
+## 12. Common Pitfalls & Solutions
 
-## 15. Future Work Markers
+| Issue                         | Cause                              | Solution                                 |
+| ----------------------------- | ---------------------------------- | ---------------------------------------- |
+| Dynamic virtual module import | String interpolation in import     | Use static string literals only          |
+| SVG not displaying            | Missing `xmlns` attribute          | Add `xmlns="http://www.w3.org/2000/svg"` |
+| Bundle analyzer failure       | Missing `rollup-plugin-visualizer` | Already handled by try/catch (ignore)    |
+| Image cache key mismatch      | Query params in URL                | Handled by `cacheKeyWillBeUsed` plugin   |
+| SW 404 errors                 | Virtual module path incorrect      | Verify static import path                |
 
-`// TODO(debt:reason)` コメントで技術的負債。週次棚卸し (手動)。
+## 13. Refactoring Triggers
 
-## 16. Task Management & Continuous Improvement
+**When to Refactor**:
 
-**Task Persistence**: Use `docs/TASKS.md` to track ideas, improvements, and pending work. Convert chat discussions into actionable items. Include priority levels and completion estimates.
+- Function >150 lines
+- Code duplication ≥3 instances
+- Hook causing excessive re-renders (check React DevTools)
+- Component complexity score >10 (mental model test)
 
-**Instruction Evolution**: Monthly review of these instructions. Propose updates when:
+**Refactoring Rules**:
 
-- New tools/frameworks emerge
-- Development patterns change
-- Performance bottlenecks identified
-- Collaboration friction observed
+- Tests must stay green before and after
+- Incremental PRs for large refactors
+- Document architectural decisions
 
-**Knowledge Gaps**: Proactively identify areas where documentation or automation could improve efficiency. Suggest when to create new scripts, configs, or documentation.
+## 14. Future Work Markers
 
-## 17. Python Subtree Quick Note
+Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
 
-`data-platform/` は独立Python環境 (requirements.txt)。Node ワークフローから独立。将来: matrix で pytest 追加予定。JavaScript 側から直接 import なし。
+## 15. Key Documentation References
 
-(End of instructions)
+- `docs/guidelines/SHARED_GLOSSARY.md`: Terms and concepts
+- `docs/guidelines/COLLAB_PROMPT.md`: AI collaboration details
+- `docs/design/pwa-implementation-notes.md`: PWA implementation specs
+- `docs/design/ab-test-marker-sync.md`: A/B test and marker sync specs
+- `docs/tasks/TASKS.md`: Current tasks and priorities
+
+## 16. Python Data Platform
+
+`data-platform/` is an independent Python environment:
+
+- Uses `requirements.txt` (not package.json)
+- Not imported by JavaScript side
+- Future: Add pytest to CI matrix
+- Run separately from Node workflows
+
+---
+
+**Version**: 2.0 (2025-01-21)
+**Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
