@@ -81,12 +81,10 @@ jobs:
           name: coverage-html
           path: coverage
           if-no-files-found: ignore
-      - name: Analyze bundle (ANALYZE flag build)
+
+      - name: Production build with analysis
         env:
           ANALYZE: true
-        run: pnpm analyze
-
-      - name: Production build (for size-limit)
         run: pnpm build
 
       - name: Run size-limit (json)
@@ -113,12 +111,21 @@ jobs:
             echo "size-limit.json not found" >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Upload dist stats
+      - name: Upload dist artifacts (for reuse)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-build
+          path: dist
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload bundle stats
         uses: actions/upload-artifact@v4
         with:
           name: bundle-stats
-          path: dist
+          path: dist/stats.html
           if-no-files-found: ignore
+          retention-days: 3
 
       - name: Compare bundle against baseline
         id: size-diff

@@ -17,11 +17,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Environment
-        uses: ./.github/actions/setup-env
+      - name: Download dist artifacts from CI
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-build
+          path: dist
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build (production)
-        run: pnpm build
+      - name: Verify dist exists
+        run: |
+          if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
+            echo "Error: dist directory is empty or missing"
+            exit 1
+          fi
+          echo "dist/ contents verified"
+          ls -lh dist/ | head -20
 
       - name: Run Lighthouse CI
         run: npx lhci autorun --config=lighthouserc.json || echo "LHCI finished with non-zero exit (soft fail)"
