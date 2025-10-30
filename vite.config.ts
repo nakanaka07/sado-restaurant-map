@@ -269,8 +269,14 @@ export default defineConfig(({ mode }) => {
         relativeSourcePath.includes("workbox") ||
         relativeSourcePath.includes("dev-dist"),
     },
+    preview: {
+      port: 4173,
+      host: "127.0.0.1",
+      strictPort: true,
+      open: false,
+    },
     build: {
-      target: "es2022",
+      target: "es2020",
       sourcemap: !isProduction ? true : "hidden",
       minify: "terser",
       cssMinify: "esbuild",
@@ -294,8 +300,8 @@ export default defineConfig(({ mode }) => {
           // 短縮記法の使用
           collapse_vars: true,
           reduce_vars: true,
-          // Phase 8 Task 2.5: 複数パス圧縮で品質向上
-          passes: 2,
+          // 1パスで十分な圧縮効果を実現
+          passes: 1,
           // インライン関数の最適化
           inline: 2,
         },

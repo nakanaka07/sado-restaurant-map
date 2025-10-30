@@ -7,9 +7,7 @@
   "packageManager": "pnpm@9.0.0",
   "sideEffects": [
     "*.css",
-    "*.scss",
-    "src/app/PWARegister.ts",
-    "src/app/suppressLogs.ts"
+    "*.scss"
   ],
   "scripts": {
     "dev": "vite",
@@ -79,19 +77,24 @@
   },
   "size-limit": [
     {
-      "name": "main",
-      "path": "dist/assets/index-*.js",
-      "limit": "200 KB"
+      "name": "react-vendor (React + Google Maps)",
+      "path": "dist/assets/react-vendor-*.js",
+      "limit": "250 KB"
     },
     {
-      "name": "google-maps",
-      "path": "dist/assets/google-maps-*.js",
+      "name": "data-processing",
+      "path": "dist/assets/data-processing-*.js",
       "limit": "40 KB"
     },
     {
-      "name": "app-bundle",
-      "path": "dist/assets/App-*.js",
-      "limit": "150 KB"
+      "name": "ui-components",
+      "path": "dist/assets/ui-components-*.js",
+      "limit": "40 KB"
+    },
+    {
+      "name": "markers",
+      "path": "dist/assets/markers-*.js",
+      "limit": "20 KB"
     }
   ],
   "lint-staged": {

@@ -34,19 +34,22 @@
   ],
   // === プロジェクトファイル管理 ===
   "files.exclude": {
-    "**/node_modules": true,
-    "**/dist": true,
-    "**/coverage": true,
-    "data-platform/htmlcov": true,
-    "**/htmlcov": true,
-    "**/.cache": true
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true,
+    "**/.cache/**": true,
+    "**/htmlcov/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true
   },
   "search.exclude": {
-    "**/node_modules": true,
-    "**/dist": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true,
     "**/pnpm-lock.yaml": true,
-    "data-platform/htmlcov": true,
-    "**/htmlcov": true
+    "**/htmlcov/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true
   },
   // === テスト・デバッグ設定 ===
   "debug.inlineValues": "auto",
@@ -65,7 +68,8 @@
     "markdown": true,
     "yaml": true,
     "json": true,
-    "jsonc": true
+    "jsonc": true,
+    "scminput": false
   },
   "github.copilot.editor.enableAutoCompletions": true,
   "github.copilot.advanced": {
@@ -125,18 +129,25 @@
   "mcp.toolOverlapHandling": "merge",
   // === ファイル形式別プロジェクト設定 ===
   "[typescript]": {
-    "editor.rulers": [80, 120]
+    "editor.rulers": [80, 120],
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescriptreact]": {
-    "editor.rulers": [80, 120]
+    "editor.rulers": [80, 120],
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[json]": {
-    "editor.quickSuggestions": {
-      "strings": true
-    }
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[markdown]": {
-    "editor.rulers": [120]
+    "editor.rulers": [120],
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   // === Markdown Lint プロジェクト設定 ===
   "markdownlint.config": {
@@ -152,7 +163,16 @@
   },
   // === プロジェクトセキュリティ設定 ===
   "security.workspace.trust.untrustedFiles": "prompt",
-  // === Python環境（data-platform用） ===
-  "python-envs.defaultEnvManager": "ms-python.python:system",
-  "python-envs.pythonProjects": []
+  // === Python環境（data-platform専用） ===
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "python.analysis.typeCheckingMode": "standard",
+  "python.defaultInterpreterPath": "${workspaceFolder}/data-platform/.venv/Scripts/python.exe",
+  "python.formatting.provider": "black",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["data-platform/tests"]
 }
