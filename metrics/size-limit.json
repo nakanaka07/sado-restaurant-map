@@ -1,19 +1,26 @@
 [
   {
-    "name": "main",
+    "name": "react-vendor (React + Google Maps)",
     "passed": true,
-    "size": 1262,
-    "sizeLimit": 200000
+    "size": 57427,
+    "sizeLimit": 250000
   },
   {
-    "name": "google-maps",
+    "name": "data-processing",
     "passed": true,
-    "size": 0
+    "size": 7551,
+    "sizeLimit": 40000
   },
   {
-    "name": "app-bundle",
+    "name": "ui-components",
     "passed": true,
-    "size": 2695,
-    "sizeLimit": 150000
+    "size": 4522,
+    "sizeLimit": 40000
+  },
+  {
+    "name": "markers",
+    "passed": true,
+    "size": 5,
+    "sizeLimit": 20000
   }
 ]
