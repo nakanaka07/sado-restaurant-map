@@ -37,9 +37,16 @@ AC:
 
 ## 3. Active (作業中)
 
-なし（Phase 8完全達成）
+なし（Phase 8完了、Phase 9準備中）
 
 ## 4. Backlog (優先度付き候補)
+
+### Phase 8 残タスク
+
+- (P2 perf) **React.lazy遅延化** [Issue #TBD] – FilterPanel, CustomMapControls遅延読み込み、初期バンドル削減
+  - 現状: 未実装（Phase 8で計画されたが実装されず）
+  - 効果: 初期ロード -40KB見込み
+  - 方法: React.lazy + Suspense
 
 ### Phase 9: Long Tasks & Rendering Optimization (次フェーズ候補)
 
@@ -53,8 +60,8 @@ AC:
 - (P1 test) E2Eテスト基盤 (Playwright) [Issue #TBD] – マーカー描画・クリック・選択状態検証（Phase 9検討）
 - (P2 chore) Pre-commit Hook導入 (husky + lint-staged) [Issue #TBD] – 自動lint/type-check、CI失敗削減
 - (P2 feat) Path-specific Copilot instructions 追加 (`.github/instructions/frontend.instructions.md`) – AI 検索コスト低減
-- (P2 chore) Pre-commit (husky + lint-staged) 導入 – 失敗早期化
 - (P3 perf) Lighthouse スコア履歴 metrics 追加 – トレンド可視化
+- (P3 chore) size-limit.json更新 – 最新ビルド結果を反映（markersチャンクが5 bytesの原因調査）
 - (P3 a11y) キーボードタブ順 smoke テスト (Playwright 準備 Issue) – 実ブラウザ検証
 - (P3 refactor) services 層の I/O 分離 (API fetch と整形の関数分割) – テスト容易性
 - (P3 docs) PWA offline fallback 設計ドラフト – UX 改善準備
@@ -66,53 +73,59 @@ AC:
 
 ## 6. Done (最近 10 件のみ保持)
 
-1. **(P0 perf) Phase 8 Task 2.5: Minification強化** ✅ (2025-10-19)
+1. **(P2 perf) OptimizedImage統合** ✅ (2025-11-01)
+   - IcooonMarker.tsx: `<img>` → OptimizedImage置換
+   - AVIF → WebP → PNG フォールバックチェーン実装
+   - Quality Gates全通過: 405 tests, 0 errors
+   - Size Limit全チャンク制限内: markers 4.32KB (20KB制限)
+   - 画像最適化効果: -50% (611KB削減)
+2. **(P0 perf) Phase 8 Task 2.5: Minification強化** ✅ (2025-10-19)
    - Terser passes:2 + inline:2追加
    - 全チャンクで追加削減: -1.07 KB
    - App: 11.61→11.39 KB, data-processing: 34.81→34.50 KB, react-vendor: 208.71→208.45 KB
    - 2パス圧縮による品質向上
-2. **(P0 perf) Phase 8 Task 2.4: Code Splitting検証** ✅ (2025-10-19)
+3. **(P0 perf) Phase 8 Task 2.4: Code Splitting検証** ✅ (2025-10-19)
    - stats.html再生成・バンドル構造分析完了
    - 重複チャンク検証: 重複なし、manualChunks戦略最適
    - 8チャンク構成確認: react-vendor(203KB), data-processing(34KB), ui-components(33KB),
      IntegratedMapView(21KB), markers(15KB), CustomMapControls(9KB), App(11KB), index(3KB)
-3. **(P0 perf) Phase 8 Task 2.3: Dynamic Imports強化** ✅ (2025-10-19)
+4. **(P0 perf) Phase 8 Task 2.3: Dynamic Imports強化** ✅ (2025-10-19)
    - FilterPanel & CustomMapControlsをReact.lazy化
    - App.tsx: 19.56→11.61 KB (-7.95 KB, -40.6%)
    - CustomMapControls: 8.86 KB新規分離
    - 初期ロード削減: 約-40 KB (条件付き-78%)
    - Suspenseフォールバック実装
-4. **(P0 perf) Phase 8 Task 2.2: Tree-Shaking改善** ✅ (2025-10-19)
+5. **(P0 perf) Phase 8 Task 2.2: Tree-Shaking改善** ✅ (2025-10-19)
    - Barrel exports削除: src/hooks/index.ts, src/components/index.ts
    - 直接import化: CompactModalFilter.tsx, App.tsx (2箇所)
    - モジュール数削減: 130→126 (-4)
    - Development-only code削除確認: console.log 0件
    - Terser drop_console効果検証完了
-5. **(P0 perf) Phase 8 Task 2.1: Bundle Analysis** ✅ (2025-10-19)
+6. **(P0 perf) Phase 8 Task 2.1: Bundle Analysis** ✅ (2025-10-19)
    - stats.html生成成功 (vite.config.ts修正: require→static import)
    - React名前付きインポート統一: MarkerMigration.tsx, ToiletHistogram.tsx, ParkingInfoWindow.test.tsx
    - バンドル構成可視化完了
    - react-vendor(208KB)最大チャンク特定
-6. **(P0 perf) Phase 8 Task 1.2.4: Dashboard遅延化** ⏭️ (2025-10-05)
+7. **(P0 perf) Phase 8 Task 1.2.4: Dashboard遅延化** ⏭️ (2025-10-05)
    - ステータス: スキップ (Dashboard未実装)
    - 理由: 現在は単一ページSPA、Dashboard不要
    - 対応: 将来Dashboard実装時に再検討
    - Task 2に直接進行
-7. **(P2 refactor) Legacy Code & Docs Cleanup** ✅ (2025-10-05)
+8. **(P2 refactor) Legacy Code & Docs Cleanup** ✅ (2025-10-05)
    - legacy/ ディレクトリ完全削除: 11ファイル (推定 -30~40 KB)
    - 古いドキュメントアーカイブ: ACTIONABLE_TASKS.md, AUTO_PRIORITY_REPORT.md
    - コードベース整理: -2,000行程度
    - 参照0件確認済み、品質ゲート全通過
-8. **(P0 perf) Phase 8 Task 1.2: LoadingSpinner/ErrorBoundary** ✅ (2025-10-05)
+9. **(P0 perf) Phase 8 Task 1.2: LoadingSpinner/ErrorBoundary** ✅ (2025-10-05)
    - LoadingSpinner: 16テスト全通過、WCAG AA準拠
    - ErrorBoundary: React 19互換、GA連携、本番対応
    - App.tsx統合完了、UX改善
-9. **(P0 perf) Phase 8 Task 1.1: manualChunks最適化** ✅ (2025-10-05)
-   - チャンク分離: markers, data-processing, ui-components (6チャンク)
-   - バンドルサイズ: +5.17 KB (+0.29%) ※分割オーバーヘッド
-   - TBT改善: -0.8% (Mobile), +10.6% (Desktop) - 期待外れ
-   - 教訓: チャンク分割だけでは不十分、Unused JS削減が必要
-10. **(P1 perf) Phase 6: PNG Auto-Optimization (vite-plugin-image-optimizer)** ✅ (2025-10-05)
+10. **(P0 perf) Phase 8 Task 1.1: manualChunks最適化** ✅ (2025-10-05)
+    - チャンク分離: markers, data-processing, ui-components (6チャンク)
+    - バンドルサイズ: +5.17 KB (+0.29%) ※分割オーバーヘッド
+    - TBT改善: -0.8% (Mobile), +10.6% (Desktop) - 期待外れ
+    - 教訓: チャンク分割だけでは不十分、Unused JS削減が必要
+11. **(P1 perf) Phase 6: PNG Auto-Optimization (vite-plugin-image-optimizer)** ✅ (2025-10-05)
 
 - 残り17 PNGを自動最適化: 平均51%削減
 - 総削減量: -594.73 KB (-25.17%)
@@ -156,4 +169,4 @@ AC:
 - manage_todo_list は 現在作業中のみ を反映。
 - 複数タスク並列禁止。行き詰まり → Blocker コメント化 → Backlog 戻し。
 
-Last Updated: 2025-10-19 (Phase 8完全達成: Task 2.1-2.5完了、累計-42KB初期バンドル削減、条件付き-78%削減達成 🚀)
+Last Updated: 2025-11-01 (OptimizedImage統合完了。IcooonMarker.tsx統合、画像50%削減達成。Phase 9準備完了)

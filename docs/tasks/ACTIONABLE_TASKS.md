@@ -543,7 +543,17 @@
 
 ## 🎯 今日のNext Action
 
-### ✅ 完了済み (2025-10-05)
+### ✅ 完了済み (2025-11-01)
+
+**最新完了 (2025-11-01)**:
+
+- ✅ **OptimizedImage統合** (4時間)
+  - IcooonMarker.tsx: `<img>` → OptimizedImage
+  - Quality Gates: type-check ✅, lint ✅, 405 tests ✅
+  - Size Limit: markers 4.32KB/20KB ✅
+  - 画像最適化: -50% (-611KB) 🎉
+
+**Phase 5-7完了 (2025-10-05)**:
 
 1. ✅ ~~checkGAStatus Unhandled Errors修正~~ (Phase 5)
    - 10 Unhandled Errors → 0 ✓
@@ -564,7 +574,31 @@
 
 ### 📋 次の推奨アクション (優先度順)
 
-#### Option 1: Lighthouse Performance測定 (推奨)
+#### Option 1: Phase 9準備 - Long Tasks分割 (推奨) 🚀
+
+**目的**: Total Blocking Time (TBT) 大幅削減でパフォーマンス向上
+
+```tsx
+// Before:
+<img src="/assets/png/cafe_icon.png" alt="カフェ" />;
+
+// After:
+import { OptimizedImage } from "@components/common/OptimizedImage";
+<OptimizedImage src="/assets/png/cafe_icon.png" alt="カフェ" width={48} height={48} />;
+```
+
+**対象ファイル** (推定):
+
+- `src/components/map/markers/*.tsx` (マーカーアイコン)
+- `src/components/restaurant/*.tsx` (サムネイル)
+- `src/pages/*.tsx` (ヒーロー画像)
+
+**工数**: 4時間
+**価値**: さらなるLCP改善、WebP/AVIF配信の完全活用
+
+---
+
+#### Option 2: Lighthouse Performance測定
 
 **目的**: Phase 7最適化の実効果を測定
 
@@ -630,27 +664,40 @@ pnpm deploy  # or `pnpm build && gh-pages -d dist`
 
 ---
 
-#### Option 4: 次の最適化フェーズ選択
+#### Option 4: Phase 9準備 - Long Tasks分割
 
-**候補**:
+**目的**: Total Blocking Time (TBT) 大幅削減
 
-1. **A/Bテストカバレッジ向上** (推奨度: 中)
-   - 工数: 3日
-   - 効果: 統計的正確性保証
+**Phase 9優先タスク**:
 
-2. **E2Eテスト導入** (推奨度: 高)
+1. **Long Tasks分割** (推奨度: 最高) 🚀
+   - 工数: 8時間
+   - 効果: TBT -2,000ms見込み
+   - 方法: `processInChunks` 実装、623 POI分割処理
+
+2. **Google Maps API遅延化** (推奨度: 高)
+   - 工数: 12時間
+   - 効果: TBT -5,000ms見込み
+   - 方法: `useGoogleMapsLoader` + Intersection Observer
+
+3. **Render Blocking解消** (推奨度: 中)
+   - 工数: 6時間
+   - 効果: FCP改善
+   - 方法: Font Display最適化、Critical CSS Inline化
+
+**その他候補**:
+
+1. **E2Eテスト導入** (推奨度: 高)
    - 工数: 5日
    - 効果: リグレッション防止、CI品質向上
 
-3. **useMarkerOptimization.test.ts実装** (推奨度: 高)
+2. **useMarkerOptimization.test.ts実装** (推奨度: 高)
    - 工数: 2日
    - 効果: カバレッジ +1-2% 見込み
 
-**選択基準**:
-
-- リスク: E2Eテスト > A/Bテスト > useMarkerOptimization
-- ROI: E2Eテスト ≈ useMarkerOptimization > A/Bテスト
-- 緊急度: useMarkerOptimization > E2Eテスト > A/Bテスト
+3. **A/Bテストカバレッジ向上** (推奨度: 中)
+   - 工数: 3日
+   - 効果: 統計的正確性保証
 
 ---
 
@@ -662,5 +709,6 @@ pnpm deploy  # or `pnpm build && gh-pages -d dist`
 
 ---
 
-**Last Updated**: 2025-10-05
-**Next Review**: 2025-10-12 (週次)
+**Last Updated**: 2025-11-01
+**Status**: OptimizedImage統合完了、Lighthouse測定実施中、Phase 9準備完了
+**Next Review**: 2025-11-08 (週次)

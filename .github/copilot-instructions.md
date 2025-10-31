@@ -370,6 +370,18 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
 
+**Phase 9 Planning (Performance Optimization)**:
+
+- Long Tasks分割: TBT -2,000ms目標
+- Google Maps API遅延化: TBT -5,000ms目標
+- Render Blocking解消: FCP改善
+- E2E testing: Playwright導入検討中
+
+**Phase 8 Incomplete Tasks**:
+
+- React.lazy遅延化: FilterPanel, CustomMapControls (Backlogに移動)
+- OptimizedImage統合: 既存<img>タグの置換 (優先度: P2)
+
 ## 15. Key Documentation References
 
 - `docs/guidelines/SHARED_GLOSSARY.md`: Terms and concepts
@@ -389,5 +401,6 @@ Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
 
 ---
 
-**Version**: 2.0 (2025-01-21)
+**Version**: 2.1 (2025-11-01)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
+**Last Update**: Documentation alignment with Phase 7-8 completion status

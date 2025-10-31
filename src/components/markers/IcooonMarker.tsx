@@ -9,6 +9,7 @@ import {
   getIcooonMarkerStats,
 } from "../../config/icooonMarkerConfig";
 import type { IcooonMarkerCategory } from "../../types/icooonMarker.types";
+import { OptimizedImage } from "../common/OptimizedImage";
 
 // ==============================
 // Props 型定義
@@ -162,13 +163,15 @@ export const IcooonMarker: FC<IcooonMarkerProps> = ({
       >
         {/* ICOOON MONOアイコン表示 */}
         {!hasIconError && (
-          <img
+          <OptimizedImage
             src={config.iconPath}
             alt=""
+            width={Math.floor(sizeConfig.width * 0.6)}
+            height={Math.floor(sizeConfig.height * 0.6)}
+            loading="eager"
+            decoding="sync"
             role="presentation"
             style={{
-              width: `${Math.floor(sizeConfig.width * 0.6)}px`,
-              height: `${Math.floor(sizeConfig.height * 0.6)}px`,
               filter: "brightness(0) saturate(100%)",
               display: isIconLoaded ? "block" : "none",
             }}
