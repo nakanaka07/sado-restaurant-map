@@ -61,7 +61,7 @@ AC:
 - (P2 chore) Pre-commit Hook導入 (husky + lint-staged) [Issue #TBD] – 自動lint/type-check、CI失敗削減
 - (P2 feat) Path-specific Copilot instructions 追加 (`.github/instructions/frontend.instructions.md`) – AI 検索コスト低減
 - (P3 perf) Lighthouse スコア履歴 metrics 追加 – トレンド可視化
-- (P3 chore) size-limit.json更新 – 最新ビルド結果を反映（markersチャンクが5 bytesの原因調査）
+
 - (P3 a11y) キーボードタブ順 smoke テスト (Playwright 準備 Issue) – 実ブラウザ検証
 - (P3 refactor) services 層の I/O 分離 (API fetch と整形の関数分割) – テスト容易性
 - (P3 docs) PWA offline fallback 設計ドラフト – UX 改善準備
