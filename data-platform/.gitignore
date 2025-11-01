@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+config/.env
+
+# Service account keys (NEVER commit these!)
+config/service-account.json
+
+# Data files (may contain sensitive information)
+data/*.txt
+!data/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# Model files (large binary files)
+models/
+*.pkl
+*.joblib
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
