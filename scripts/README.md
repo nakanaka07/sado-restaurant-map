@@ -238,25 +238,89 @@ python scripts/test/system-test.py
 
 ---
 
-## 📝 スクリプト追加ガイドライン
+## � 共通ライブラリ (`lib/common.ps1`)
+
+全スクリプトで使用可能なヘルパー関数を提供します。
+
+### 使用方法
+
+```powershell
+# スクリプトの先頭に追加
+. (Join-Path $PSScriptRoot "lib/common.ps1")
+
+# カラー出力
+Write-Success "成功メッセージ"
+Write-Error "エラーメッセージ"
+Write-Warning "警告メッセージ"
+Write-Info "情報メッセージ"
+
+# テスト結果管理
+$results = New-TestResult
+Add-TestResult -TestResults $results -TestName "テスト名" -Status "PASS"
+$summary = Get-TestSummary -TestResults $results
+
+# 環境確認
+Test-Prerequisites
+Test-NodeVersion -MinVersion "20.19.0"
+
+# ビルド・テスト
+Invoke-TypeScriptCheck -Verbose
+Invoke-LintCheck
+Invoke-TestSuite
+
+# レポート保存
+Save-JsonReport -Data $results -FilePath "logs/report.json"
+```
+
+### 主要関数
+
+| 関数                               | 説明                           |
+| ---------------------------------- | ------------------------------ |
+| `Write-Success/Error/Warning/Info` | カラー出力                     |
+| `New-TestResult`                   | テスト結果ハッシュテーブル作成 |
+| `Add-TestResult`                   | テスト結果追加                 |
+| `Get-TestSummary`                  | 成功率計算                     |
+| `Test-Prerequisites`               | Node.js/pnpm/Git確認           |
+| `Invoke-TypeScriptCheck`           | TypeScript型チェック           |
+| `Invoke-LintCheck`                 | ESLint実行                     |
+| `Invoke-TestSuite`                 | テストスイート実行             |
+| `Save-JsonReport`                  | JSONレポート保存               |
+| `Show-ScriptHelp`                  | ヘルプ表示                     |
+
+---
+
+## スクリプト追加ガイドライン
 
 新規スクリプトを追加する際は、以下を含めてください：
 
-1. **ファイル先頭コメント**
-
-   ```powershell
-   # ==========================================
-   # スクリプト名・目的
-   # ==========================================
-   ```
-
-2. **パラメータ定義**
+1. **ヘルプオプション** (必須)
 
    ```powershell
    param(
-     [switch]$DryRun,
-     [switch]$Verbose
+     [switch]$Help
    )
+
+   if ($Help) {
+     @"
+   🎯 スクリプト名
+   ==================
+
+   目的: スクリプトの説明
+
+   パラメータ:
+     -Help : このヘルプを表示
+
+   使用例:
+     .\scripts\script-name.ps1
+   "@
+     exit 0
+   }
+   ```
+
+2. **共通ライブラリの読み込み**
+
+   ```powershell
+   . (Join-Path $PSScriptRoot "lib/common.ps1")
    ```
 
 3. **エラーハンドリング**
@@ -267,6 +331,45 @@ python scripts/test/system-test.py
    ```
 
 4. **このREADME.mdへの追記**
+
+---
+
+## 🔄 最近の改善 (2025-11-01)
+
+### ✅ 実装済み
+
+1. **共通ライブラリ作成** (`lib/common.ps1`)
+   - カラー出力関数の統一
+   - テスト結果管理の標準化
+   - 環境確認・ビルド関数の共通化
+
+2. **ヘルプオプション追加**
+   - 全スクリプトに`-Help`オプション実装
+   - 使用方法・パラメータ説明を統一
+
+3. **regression-test.ps1 強化**
+   - カバレッジ閾値チェック追加 (50%基準)
+   - 詳細カバレッジ情報表示 (statements/branches/functions)
+
+4. **run-security-tests.ps1 強化**
+   - CSPヘッダー詳細検証
+   - `unsafe-inline`/`unsafe-eval`検出
+   - `Referrer-Policy`/`Permissions-Policy`チェック追加
+
+### 📋 使用例
+
+```powershell
+# ヘルプ表示
+.\scripts\setup-dev.ps1 -Help
+.\scripts\regression-test.ps1 -Help
+
+# カバレッジ付きリグレッションテスト
+pnpm test:coverage
+.\scripts\regression-test.ps1 -Detailed
+
+# セキュリティテスト (詳細モード)
+.\scripts\run-security-tests.ps1 -Verbose -Json
+```
 
 ---
 
@@ -294,4 +397,4 @@ pnpm build
 
 ---
 
-Last Updated: 2025-10-02
+Last Updated: 2025-11-01

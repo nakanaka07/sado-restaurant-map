@@ -7,10 +7,41 @@ param(
   [string]$TargetUrl = "http://localhost:5173",
   [switch]$SkipDependencyCheck,
   [switch]$Verbose,
-  [switch]$Json
+  [switch]$Json,
+  [switch]$Help
 )
 
 $ErrorActionPreference = "Stop"
+
+# ヘルプ表示
+if ($Help) {
+  @"
+🔒 セキュリティテストスクリプト
+================================
+
+目的: 脆弱性検出とセキュリティ設定確認
+
+パラメータ:
+  -TargetUrl             : テスト対象URL (デフォルト: http://localhost:5173)
+  -SkipDependencyCheck   : 依存関係チェックをスキップ
+  -Verbose               : 詳細ログ出力
+  -Json                  : JSON形式レポート生成
+  -Help                  : このヘルプを表示
+
+使用例:
+  .\scripts\run-security-tests.ps1
+  .\scripts\run-security-tests.ps1 -TargetUrl https://example.com
+  .\scripts\run-security-tests.ps1 -Json -Verbose
+
+チェック項目:
+  - 依存関係脆弱性 (npm audit)
+  - 静的コード解析 (ESLint/TypeScript)
+  - 設定ファイル (.env/.gitignore)
+  - Webセキュリティヘッダー (CSP/HSTS等)
+
+"@
+  exit 0
+}
 
 $reportDir = "logs/security-tests"
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -312,12 +343,30 @@ function Test-WebSecurityHeaders {
       "X-XSS-Protection"          = "1; mode=block"
       "Strict-Transport-Security" = "HTTPS使用時"
       "Content-Security-Policy"   = "CSP設定"
+      "Referrer-Policy"           = "strict-origin-when-cross-origin"
+      "Permissions-Policy"        = "権限ポリシー"
     }
 
     foreach ($header in $securityHeaders.Keys) {
       if ($response.Headers.ContainsKey($header)) {
-        $webResult.headers[$header] = $response.Headers[$header]
+        $headerValue = $response.Headers[$header]
+        $webResult.headers[$header] = $headerValue
         Write-Host "  ✅ $header`: 設定済み" -ForegroundColor Green
+
+        # CSPの詳細検証
+        if ($header -eq "Content-Security-Policy" -and $Verbose) {
+          Write-Host "     CSP詳細: $headerValue" -ForegroundColor Gray
+
+          # 危険なディレクティブチェック
+          if ($headerValue -match "'unsafe-inline'") {
+            Write-Host "     ⚠️  unsafe-inline 検出（XSSリスク）" -ForegroundColor Yellow
+            $webResult.findings += "CSP: unsafe-inline使用中"
+          }
+          if ($headerValue -match "'unsafe-eval'") {
+            Write-Host "     ⚠️  unsafe-eval 検出（高リスク）" -ForegroundColor Yellow
+            $webResult.findings += "CSP: unsafe-eval使用中"
+          }
+        }
       }
       else {
         $webResult.headers[$header] = $null

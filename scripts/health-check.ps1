@@ -6,10 +6,41 @@
 param(
   [switch]$Verbose,
   [switch]$Json,
-  [switch]$Quick
+  [switch]$Quick,
+  [switch]$Help
 )
 
 $ErrorActionPreference = "Stop"
+
+# ヘルプ表示
+if ($Help) {
+  @"
+🏥 プロジェクトヘルスチェックスクリプト
+========================================
+
+目的: プロジェクト全体の健全性診断
+
+パラメータ:
+  -Verbose  : 詳細ログ出力
+  -Json     : JSON形式レポート生成
+  -Quick    : ビルドシステムチェックをスキップ
+  -Help     : このヘルプを表示
+
+使用例:
+  .\scripts\health-check.ps1
+  .\scripts\health-check.ps1 -Json
+  .\scripts\health-check.ps1 -Quick
+
+チェック項目:
+  - システムリソース (CPU/メモリ/ディスク)
+  - 開発環境 (Node.js/pnpm/Git)
+  - プロジェクト構造
+  - 依存関係
+  - ビルドシステム
+
+"@
+  exit 0
+}
 
 # 結果を格納するハッシュテーブル
 $healthResult = @{

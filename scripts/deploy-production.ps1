@@ -6,10 +6,39 @@
 param(
   [switch]$SkipBuild,
   [switch]$DryRun,
-  [switch]$Verbose
+  [switch]$Verbose,
+  [switch]$Help
 )
 
 $ErrorActionPreference = "Stop"
+
+# ヘルプ表示
+if ($Help) {
+  @"
+🚀 GitHub Pages デプロイスクリプト
+====================================
+
+目的: GitHub Pagesへの本番デプロイ自動化
+
+パラメータ:
+  -SkipBuild  : ビルドをスキップ（既存distを使用）
+  -DryRun     : デプロイコマンドを表示のみ（実行しない）
+  -Verbose    : 詳細ログ出力
+  -Help       : このヘルプを表示
+
+使用例:
+  .\scripts\deploy-production.ps1
+  .\scripts\deploy-production.ps1 -DryRun
+  .\scripts\deploy-production.ps1 -SkipBuild
+
+前提条件:
+  - mainブランチ推奨
+  - 全テストパス
+  - gh-pagesパッケージインストール済み
+
+"@
+  exit 0
+}
 
 Write-Host "🚀 GitHub Pages デプロイ開始" -ForegroundColor Green
 Write-Host "==============================" -ForegroundColor Blue

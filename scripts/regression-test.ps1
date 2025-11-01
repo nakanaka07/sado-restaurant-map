@@ -10,8 +10,42 @@
 param(
   [switch]$Detailed = $false,  # 詳細ログ出力
   [switch]$AutoFix = $false,   # 自動修復試行
-  [switch]$CI = $false         # CI環境での実行
+  [switch]$CI = $false,        # CI環境での実行
+  [switch]$Help = $false       # ヘルプ表示
 )
+
+# ヘルプ表示
+if ($Help) {
+  @"
+🧪 リグレッションテストスクリプト
+===================================
+
+目的: マーカー刷新後の全機能動作検証
+
+パラメータ:
+  -Detailed  : 詳細ログ出力
+  -AutoFix   : 自動修復試行（実験的）
+  -CI        : CI環境での実行
+  -Help      : このヘルプを表示
+
+使用例:
+  .\scripts\regression-test.ps1
+  .\scripts\regression-test.ps1 -Detailed
+  .\scripts\regression-test.ps1 -CI
+
+テスト対象:
+  - プロジェクト構造
+  - ビルドシステム
+  - マーカーシステム統合
+  - アプリケーション機能
+  - アクセシビリティ
+  - パフォーマンス
+  - PWA機能
+  - セキュリティ設定
+
+"@
+  exit 0
+}
 
 # ================================================================================================
 # 設定・初期化
@@ -308,6 +342,38 @@ function Test-PerformanceMetrics {
   }
   else {
     Write-TestResult "バンドル分析" "WARN" "distディレクトリが存在しません。ビルドを先に実行してください。"
+  }
+
+  # カバレッジ閾値チェック
+  $coverageSummary = Join-Path $ProjectRoot "coverage/coverage-summary.json"
+  if (Test-Path $coverageSummary) {
+    try {
+      $coverage = Get-Content $coverageSummary -Raw | ConvertFrom-Json
+      $lineCoverage = $coverage.total.lines.pct
+
+      Write-Host "テストカバレッジ確認中..." -ForegroundColor Gray
+
+      $threshold = 50.0
+      if ($lineCoverage -ge $threshold) {
+        Write-TestResult "カバレッジ閾値" "PASS" "行カバレッジ: $lineCoverage% (≥${threshold}%)"
+      }
+      else {
+        Write-TestResult "カバレッジ閾値" "WARN" "行カバレッジ: $lineCoverage% (<${threshold}%)"
+      }
+
+      # 詳細カバレッジ情報
+      if ($Detailed) {
+        Write-Host "   Statements: $($coverage.total.statements.pct)%" -ForegroundColor Gray
+        Write-Host "   Branches: $($coverage.total.branches.pct)%" -ForegroundColor Gray
+        Write-Host "   Functions: $($coverage.total.functions.pct)%" -ForegroundColor Gray
+      }
+    }
+    catch {
+      Write-TestResult "カバレッジ閾値" "WARN" "カバレッジ情報の読み込みエラー: $($_.Exception.Message)"
+    }
+  }
+  else {
+    Write-TestResult "カバレッジ閾値" "WARN" "カバレッジレポートが見つかりません。pnpm test:coverage を実行してください。"
   }
 }
 

@@ -6,11 +6,40 @@
 param(
   [switch]$Clean,
   [switch]$SkipInstall,
-  [switch]$Verbose
+  [switch]$Verbose,
+  [switch]$Help
 )
 
 # エラーハンドリング設定
 $ErrorActionPreference = "Stop"
+
+# ヘルプ表示
+if ($Help) {
+  @"
+🚀 開発環境セットアップスクリプト
+=====================================
+
+目的: プロジェクトクローン後の初回開発環境構築
+
+パラメータ:
+  -Clean        : node_modules等をクリーンアップ後セットアップ
+  -SkipInstall  : 依存関係インストールをスキップ
+  -Verbose      : 詳細ログ出力
+  -Help         : このヘルプを表示
+
+使用例:
+  .\scripts\setup-dev.ps1
+  .\scripts\setup-dev.ps1 -Clean
+  .\scripts\setup-dev.ps1 -Verbose
+
+前提条件:
+  - Node.js 20.19+
+  - Git
+  - インターネット接続
+
+"@
+  exit 0
+}
 
 Write-Host "🚀 佐渡飲食店マップ 開発環境セットアップ開始" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Blue
