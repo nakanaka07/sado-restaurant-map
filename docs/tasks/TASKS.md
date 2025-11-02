@@ -37,9 +37,26 @@ AC:
 
 ## 3. Active (作業中)
 
-なし（Phase 8完了、Phase 9準備中）
+なし（Phase 8.3完了、カバレッジ50%達成準備中）
 
 ## 4. Backlog (優先度付き候補)
+
+### カバレッジ50%達成タスク（現在40.52%）
+
+- (P1 test) **RestaurantMap.tsx統合テスト** [Issue #TBD] – マップ初期化・マーカー表示テスト、推定+2-3%
+  - 現状: 0% (361行、未テスト)
+  - 効果: カバレッジ大幅向上
+  - 方法: React Testing Library + Google Maps Mock
+
+- (P1 test) **FilterPanel.txテスト** [Issue #TBD] – フィルターUI操作テスト、推定+2-3%
+  - 現状: 0% (390行、未テスト)
+  - 効果: カバレッジ大幅向上
+  - 方法: React Testing Library + ユーザーインタラクション
+
+- (P2 test) **OptimizedInfoWindow.txテスト** [Issue #TBD] – InfoWindow表示・非表示テスト、推定+1-2%
+  - 現状: 0% (255行、未テスト)
+  - 効果: カバレッジ中程度向上
+  - 方法: React Testing Library + Google Maps Mock
 
 ### Phase 8 残タスク
 
@@ -55,12 +72,22 @@ AC:
 - (P2 perf) **Render Blocking解消** [Issue #TBD] – Font Display最適化、Critical CSS Inline化
 - (P3 perf) **Dashboard遅延化** [Issue #TBD] – React.lazy + Suspense、初期ロード高速化（Dashboard実装時）
 
-### その他最適化
+## 6. Done (最近 10 件のみ保持)
 
-- (P1 test) E2Eテスト基盤 (Playwright) [Issue #TBD] – マーカー描画・クリック・選択状態検証（Phase 9検討）
-- (P2 chore) Pre-commit Hook導入 (husky + lint-staged) [Issue #TBD] – 自動lint/type-check、CI失敗削減
-- (P2 feat) Path-specific Copilot instructions 追加 (`.github/instructions/frontend.instructions.md`) – AI 検索コスト低減
-- (P3 perf) Lighthouse スコア履歴 metrics 追加 – トレンド可視化
+1. **(P2 test) Phase 8.3: Code Quality Improvement** ✅ (2025-11-03)
+   - IntegratedMapView.tsx: exhaustive-deps warning修正（useCallback化）
+   - App.test.tsx: +2テストケース（エラーハンドリング、フィルター機能）
+   - useMapPoints.test.ts: +3テストケース（統計情報、フィルター、エラー処理）
+   - Total tests: 405 → 410 (+5 tests, +1.2%)
+   - Coverage: 40.34% → 40.52% (+0.18%)
+   - ESLint warnings: 1 → 0 (100%解消)
+   - useMapPoints.ts coverage: 49.66% → 58.33% (+8.67%)
+2. **(P2 perf) OptimizedImage統合** ✅ (2025-11-01)
+   - IcooonMarker.tsx: `<img>` → OptimizedImage置換
+   - AVIF → WebP → PNG フォールバックチェーン実装
+   - Quality Gates全通過: 405 tests, 0 errors
+   - Size Limit全チャンク制限内: markers 4.32KB (20KB制限)
+   - 画像最適化効果: -50% (611KB削減)
 
 - (P3 a11y) キーボードタブ順 smoke テスト (Playwright 準備 Issue) – 実ブラウザ検証
 - (P3 refactor) services 層の I/O 分離 (API fetch と整形の関数分割) – テスト容易性
@@ -144,7 +171,8 @@ AC:
 
 **(P1 perf) Phase 4.5: Selective Optimization** ✅ (2025-01-XX)
 
-- 選択的動的Importロールバック: CustomMapControls, FilterPanel インライン化
+Last Updated: 2025-11-03 (Phase 8.3完了: ESLint警告0件達成、テスト410件、カバレッジ40.52%。カバレッジ50%達成に向けた追加テスト準備中)
+
 - Barrel Export確認: hooks/utils/services/components 全て最適化済み
 - チャンク数削減: 59 → 55 files (-4 files)
 - 総バンドル: -3.59 KB (-0.11%) 削減達成

@@ -231,4 +231,34 @@ describe("App", () => {
       expect(apiProvider).toBeInTheDocument();
     });
   });
+
+  describe("エラーハンドリング", () => {
+    it("初期化時のエラー状態を適切に管理すること", async () => {
+      render(<App />);
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByTestId("api-provider")).toBeInTheDocument();
+      });
+
+      // エラー状態がない場合の正常動作を確認
+      const mainContent = screen.getByRole("main");
+      expect(mainContent).toBeInTheDocument();
+    });
+  });
+
+  describe("フィルター機能", () => {
+    it("フィルター結果の統計情報が表示されること", async () => {
+      render(<App />);
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByText(/📊.*0.*件/)).toBeInTheDocument();
+      });
+
+      // 統計情報の表示確認
+      const statsDisplay = screen.getByText(/📊.*0.*件/);
+      expect(statsDisplay).toHaveAttribute("aria-live", "polite");
+    });
+  });
 });

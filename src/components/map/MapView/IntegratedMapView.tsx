@@ -60,10 +60,13 @@ export function IntegratedMapView({
   const [isUserOverride, setIsUserOverride] = useState(false);
   const [isABTestInfoCollapsed, setIsABTestInfoCollapsed] = useState(false);
 
-  const deriveLocalMarkerType = (_variant: ABTestVariant): LocalMarkerType => {
-    // 現状は Circular に統一。将来の段階で分岐する可能性あり。
-    return "circular-icooon";
-  };
+  const deriveLocalMarkerType = useCallback(
+    (_variant: ABTestVariant): LocalMarkerType => {
+      // 現状は Circular に統一。将来の段階で分岐する可能性あり。
+      return "circular-icooon";
+    },
+    []
+  );
 
   // ユーザー分類の実行
   useEffect(() => {
@@ -123,7 +126,7 @@ export function IntegratedMapView({
     };
 
     initializeABTest();
-  }, [userId, forceVariant]);
+  }, [userId, forceVariant, deriveLocalMarkerType]);
 
   // マーカークリックハンドラー（A/Bテストイベント追加）
   const handleMarkerClick = useCallback(
