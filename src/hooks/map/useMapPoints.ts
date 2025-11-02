@@ -61,7 +61,9 @@ export function useMapPoints() {
         });
       });
 
-      console.log(`✅ 統合マップポイント取得完了: ${mapPoints.length}件`);
+      if (import.meta.env.DEV) {
+        console.log(`✅ 統合マップポイント取得完了: ${mapPoints.length}件`);
+      }
     } catch (error) {
       let errorMessage: string;
       if (error instanceof SheetsApiError) {

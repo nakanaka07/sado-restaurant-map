@@ -3,11 +3,6 @@
  * カバレッジ目標: 0% → 50%+
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
 import type { MapPoint, Parking, Restaurant, Toilet } from "@/types";
 import { describe, expect, test, vi } from "vitest";
 import {
@@ -312,9 +307,9 @@ describe("hybridMarkerUtils", () => {
 
     test("単一カテゴリのポイント群から統計を生成", () => {
       const points = [
-        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
-        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
-        createMockMapPoint("restaurant", { cuisineType: "寿司" as any }), // 和食にマッピング
+        createMockMapPoint("restaurant", { cuisineType: "寿司" }),
+        createMockMapPoint("restaurant", { cuisineType: "寿司" }),
+        createMockMapPoint("restaurant", { cuisineType: "寿司" }),
       ];
 
       const stats = getCategoryStatistics(points);
@@ -328,25 +323,25 @@ describe("hybridMarkerUtils", () => {
 
     test("複数カテゴリの混在ポイント群から統計を生成", () => {
       const points = [
-        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
-        createMockMapPoint("restaurant", { cuisineType: "ラーメン" as any }), // 麺類
-        createMockMapPoint("restaurant", { cuisineType: "カフェ" as any }),
+        createMockMapPoint("restaurant", { cuisineType: "寿司" }),
+        createMockMapPoint("restaurant", { cuisineType: "ラーメン" }),
+        createMockMapPoint("restaurant", { cuisineType: "カフェ" }),
         createMockMapPoint("parking"),
         createMockMapPoint("toilet"),
-        createMockMapPoint("restaurant", { cuisineType: "和食" as any }),
+        createMockMapPoint("restaurant", { cuisineType: "寿司" }),
       ];
 
       const stats = getCategoryStatistics(points);
 
-      expect(stats.length).toBeGreaterThanOrEqual(4); // 和食, 麺類, カフェ・軽食, 駐車場, トイレ等
+      expect(stats.length).toBeGreaterThanOrEqual(4);
 
       // 和食カテゴリの検証
-      const wadaStats = stats.find((s: any) => s.category === "和食");
-      expect(wadaStats).toBeDefined();
-      expect(wadaStats?.count).toBe(2);
+      const japaneseStats = stats.find(s => s.category === "和食");
+      expect(japaneseStats).toBeDefined();
+      expect(japaneseStats?.count).toBe(2);
 
       // 駐車場カテゴリの検証
-      const parkingStats = stats.find((s: any) => s.category === "駐車場");
+      const parkingStats = stats.find(s => s.category === "駐車場");
       expect(parkingStats).toBeDefined();
       expect(parkingStats?.count).toBe(1);
     });
@@ -354,7 +349,8 @@ describe("hybridMarkerUtils", () => {
     test("全てのカテゴリ設定が正しく取得される", () => {
       const points = [
         createMockMapPoint("restaurant", {
-          cuisineType: "存在しないカテゴリ" as any,
+          // @ts-expect-error - テスト目的で不正な値を設定
+          cuisineType: "存在しないカテゴリ",
         }),
       ];
 
@@ -370,7 +366,8 @@ describe("hybridMarkerUtils", () => {
       // HYBRID_MARKER_CONFIGSに存在しない架空のカテゴリを作成
       const points = [
         createMockMapPoint("restaurant", {
-          cuisineType: "架空の料理ジャンル999" as any,
+          // @ts-expect-error - テスト目的で不正な値を設定
+          cuisineType: "架空の料理ジャンル999",
         }),
       ];
 
@@ -388,7 +385,7 @@ describe("hybridMarkerUtils", () => {
     test("大量のポイントでもパフォーマンス良く統計生成", () => {
       const largePoints = Array.from({ length: 1000 }, (_, i) =>
         createMockMapPoint("restaurant", {
-          cuisineType: (i % 2 === 0 ? "和食" : "ラーメン") as any,
+          cuisineType: i % 2 === 0 ? "寿司" : "ラーメン",
         })
       );
 
@@ -398,25 +395,25 @@ describe("hybridMarkerUtils", () => {
 
       expect(duration).toBeLessThan(50); // 50ms以内
       expect(stats).toHaveLength(2); // 和食と麺類
-      expect(stats.find((s: any) => s.category === "和食")?.count).toBe(500);
-      expect(stats.find((s: any) => s.category === "麺類")?.count).toBe(500);
+      expect(stats.find(s => s.category === "和食")?.count).toBe(500);
+      expect(stats.find(s => s.category === "麺類")?.count).toBe(500);
     });
   });
 
   describe("filterPointsByHybridCategories", () => {
     const testPoints = [
       createMockMapPoint("restaurant", {
-        cuisineType: "和食" as any,
+        cuisineType: "寿司",
         id: "r1",
       }),
       createMockMapPoint("restaurant", {
-        cuisineType: "ラーメン" as any,
+        cuisineType: "ラーメン",
         id: "r2",
       }),
       createMockMapPoint("parking", { id: "p1" }),
       createMockMapPoint("toilet", { id: "t1" }),
       createMockMapPoint("restaurant", {
-        cuisineType: "カフェ" as any,
+        cuisineType: "カフェ",
         id: "r3",
       }),
     ];
@@ -441,8 +438,8 @@ describe("hybridMarkerUtils", () => {
       ]);
 
       expect(filtered).toHaveLength(2);
-      expect(filtered.map((p: any) => p.id)).toContain("r1");
-      expect(filtered.map((p: any) => p.id)).toContain("p1");
+      expect(filtered.map(p => p.id)).toContain("r1");
+      expect(filtered.map(p => p.id)).toContain("p1");
     });
 
     test("全施設タイプをフィルタリング", () => {
@@ -453,7 +450,7 @@ describe("hybridMarkerUtils", () => {
 
       expect(filtered).toHaveLength(2);
       expect(
-        filtered.every((p: any) => p.type === "parking" || p.type === "toilet")
+        filtered.every(p => p.type === "parking" || p.type === "toilet")
       ).toBe(true);
     });
 
@@ -516,15 +513,17 @@ describe("hybridMarkerUtils", () => {
       expect(debugInfo.length).toBeGreaterThan(0);
 
       // 各カテゴリが必要なプロパティを持つことを確認
-      debugInfo.forEach((info: any) => {
-        expect(info.category).toBeDefined();
-        expect(info.id).toBeDefined();
-        expect(info.primary).toBeDefined();
-        expect(info.secondary).toBeDefined();
-        expect(info.iconSource).toBeDefined();
-        expect(info.contrastRatio).toBeDefined();
-        expect(typeof info.isWcagCompliant).toBe("boolean");
-      });
+      debugInfo.forEach(
+        (info: ReturnType<typeof getDebugCategoryInfo>[number]) => {
+          expect(info.category).toBeDefined();
+          expect(info.id).toBeDefined();
+          expect(info.primary).toBeDefined();
+          expect(info.secondary).toBeDefined();
+          expect(info.iconSource).toBeDefined();
+          expect(info.contrastRatio).toBeDefined();
+          expect(typeof info.isWcagCompliant).toBe("boolean");
+        }
+      );
     });
 
     test("WCAG準拠フラグが正しく設定される", () => {
@@ -532,18 +531,18 @@ describe("hybridMarkerUtils", () => {
 
       // コントラスト比4.5以上はWCAG準拠
       const compliantCategories = debugInfo.filter(
-        (info: any) => info.isWcagCompliant
+        info => info.isWcagCompliant
       );
       expect(compliantCategories.length).toBeGreaterThan(0);
 
-      compliantCategories.forEach((info: any) => {
+      compliantCategories.forEach(info => {
         expect(info.contrastRatio).toBeGreaterThanOrEqual(4.5);
       });
     });
 
     test("主要10カテゴリが全て含まれる", () => {
       const debugInfo = getDebugCategoryInfo();
-      const categories = debugInfo.map((info: any) => info.category);
+      const categories = debugInfo.map(info => info.category);
 
       const expectedCategories = [
         "和食",
@@ -562,7 +561,7 @@ describe("hybridMarkerUtils", () => {
     test("各カテゴリにアイコンソース情報が含まれる", () => {
       const debugInfo = getDebugCategoryInfo();
 
-      debugInfo.forEach((info: any) => {
+      debugInfo.forEach(info => {
         expect(["icooon-mono", "phosphor", "fallback"]).toContain(
           info.iconSource
         );
@@ -629,14 +628,14 @@ describe("hybridMarkerUtils", () => {
       const largePoints = Array.from({ length: 5000 }, (_, i) => {
         let cuisineType: string;
         if (i % 3 === 0) {
-          cuisineType = "和食";
+          cuisineType = "寿司";
         } else if (i % 3 === 1) {
           cuisineType = "ラーメン";
         } else {
           cuisineType = "カフェ";
         }
         return createMockMapPoint("restaurant", {
-          cuisineType: cuisineType as any,
+          cuisineType,
           id: `r${i}`,
         });
       });

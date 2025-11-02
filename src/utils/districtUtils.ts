@@ -650,6 +650,8 @@ export const logUnknownAddressStats = (): void => {
     return;
   }
 
+  if (!import.meta.env.DEV) return;
+
   console.group("📍 地区判定統計（佐渡市公式データ v2.0.0 準拠）");
   console.log(`未判定住所数: ${unknownAddresses.size}`);
   console.log("未判定住所一覧:");

@@ -317,6 +317,15 @@ function App() {
     };
   }, [apiKey, scheduleGAStatusCheck]);
 
+  // 汎用フィルターエラーハンドラ
+  const handleFilterError = useCallback((error: unknown, context: string) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (import.meta.env.DEV) {
+      console.error(`${context}エラー:`, errorMessage);
+    }
+    setAppError("フィルター設定中にエラーが発生しました");
+  }, []);
+
   // 共通のフィルター更新ヘルパ（型/上限制約/サニタイズを集約）
   const updateFiltersSafe = useCallback(
     (partial: Partial<ExtendedMapFilters>) => {
@@ -349,11 +358,10 @@ function App() {
         // Hook 側で部分更新をマージするため、部分のみ渡す
         updateFilters(sanitizedPartial);
       } catch (e) {
-        console.error("フィルター更新エラー:", e);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(e, "フィルター更新");
       }
     },
-    [updateFilters]
+    [updateFilters, handleFilterError]
   );
 
   // データロード完了時の統計表示（開発環境のみ）
@@ -397,82 +405,66 @@ function App() {
   const handleCuisineFilter = useCallback(
     (cuisine: CuisineType | "") => {
       try {
-        // 型ガード：料理タイプのバリデーション
         if (cuisine !== "" && typeof cuisine !== "string") {
-          console.warn("無効な料理タイプが指定されました");
+          if (import.meta.env.DEV) {
+            console.warn("無効な料理タイプが指定されました");
+          }
           return;
         }
-
-        updateFiltersSafe({
-          cuisineTypes: cuisine ? [cuisine] : [],
-        });
+        updateFiltersSafe({ cuisineTypes: cuisine ? [cuisine] : [] });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error(`料理タイプフィルターエラー: ${errorMessage}`);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "料理タイプフィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handlePriceFilter = useCallback(
     (price: PriceRange | "") => {
       try {
-        // 型ガード：価格範囲のバリデーション
         if (price !== "" && typeof price !== "string") {
-          console.warn("無効な価格範囲が指定されました");
+          if (import.meta.env.DEV) {
+            console.warn("無効な価格範囲が指定されました");
+          }
           return;
         }
-
-        updateFiltersSafe({
-          priceRanges: price ? [price] : [],
-        });
+        updateFiltersSafe({ priceRanges: price ? [price] : [] });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error(`価格フィルターエラー: ${errorMessage}`);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "価格フィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handleDistrictFilter = useCallback(
     (districts: SadoDistrict[]) => {
       try {
-        // 型ガード：地区配列のバリデーション
         if (!Array.isArray(districts)) {
-          console.warn("地区フィルターは配列である必要があります");
+          if (import.meta.env.DEV) {
+            console.warn("地区フィルターは配列である必要があります");
+          }
           return;
         }
-
-        // 地区数の制限チェック
         if (districts.length > 10) {
-          console.warn("選択できる地区数が多すぎます");
+          if (import.meta.env.DEV) {
+            console.warn("選択できる地区数が多すぎます");
+          }
           setAppError("地区は10個以下で選択してください");
           return;
         }
-
         updateFiltersSafe({ districts });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error(`地区フィルターエラー: ${errorMessage}`);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "地区フィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handleRatingFilter = useCallback(
     (minRating: number | undefined) => {
       try {
         if (typeof minRating === "number") {
-          updateFiltersSafe({
-            ...filters,
-            minRating,
-          });
+          updateFiltersSafe({ ...filters, minRating });
         } else {
           // minRatingを除外したフィルターでリセット
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -480,11 +472,10 @@ function App() {
           updateFiltersSafe(filtersWithoutRating);
         }
       } catch (error) {
-        console.error("評価フィルターエラー:", error);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "評価フィルター");
       }
     },
-    [filters, updateFiltersSafe]
+    [filters, updateFiltersSafe, handleFilterError]
   );
 
   const handleOpenNowFilter = useCallback(
@@ -492,81 +483,73 @@ function App() {
       try {
         updateFiltersSafe({ openNow });
       } catch (error) {
-        console.error("営業中フィルターエラー:", error);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "営業中フィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handleSearchFilter = useCallback(
     (search: string) => {
       try {
-        // 型ガード：検索クエリのバリデーション（型安全性強化）
         if (typeof search !== "string") {
-          console.warn("検索クエリは文字列である必要があります");
+          if (import.meta.env.DEV) {
+            console.warn("検索クエリは文字列である必要があります");
+          }
           return;
         }
-
-        // セキュリティ: 検索クエリのサニタイズ・バリデーション
         const sanitizedSearch = sanitizeInput(search);
-
-        // 不適切なクエリの検出
         if (sanitizedSearch.length > 100) {
-          console.warn("検索クエリが長すぎます");
+          if (import.meta.env.DEV) {
+            console.warn("検索クエリが長すぎます");
+          }
           setAppError("検索クエリは100文字以下で入力してください");
           return;
         }
-
         updateFiltersSafe({ searchQuery: sanitizedSearch });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error(`検索フィルターエラー: ${errorMessage}`);
-        setAppError("検索中にエラーが発生しました");
+        handleFilterError(error, "検索フィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handleFeatureFilter = useCallback(
     (features: string[]) => {
       try {
-        // 型ガード：特徴配列のバリデーション（型安全性強化）
         if (!Array.isArray(features)) {
-          console.warn("特徴フィルターは配列である必要があります");
+          if (import.meta.env.DEV) {
+            console.warn("特徴フィルターは配列である必要があります");
+          }
           return;
         }
-
-        // セキュリティ: 特徴フィルターの検証・サニタイズ
         const sanitizedFeatures = features
           .filter((feature): feature is string => typeof feature === "string")
           .map(feature => {
             const sanitized = sanitizeInput(feature);
             if (sanitized.length > 50) {
-              console.warn(`特徴アイテムが長すぎます: ${feature}`);
+              if (import.meta.env.DEV) {
+                console.warn(`特徴アイテムが長すぎます: ${feature}`);
+              }
               return sanitized.slice(0, 50);
             }
             return sanitized;
           })
           .filter(feature => feature.length > 0);
 
-        // 特徴数の制限チェック
         if (sanitizedFeatures.length > 20) {
-          console.warn("特徴フィルターの数が多すぎます");
+          if (import.meta.env.DEV) {
+            console.warn("特徴フィルターの数が多すぎます");
+          }
           setAppError("特徴フィルターは20個以下で選択してください");
           return;
         }
-
         updateFiltersSafe({ features: sanitizedFeatures });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        console.error(`特徴フィルターエラー: ${errorMessage}`);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "特徴フィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handlePointTypeFilter = useCallback(
@@ -574,16 +557,14 @@ function App() {
       try {
         updateFiltersSafe({ pointTypes });
       } catch (error) {
-        console.error("ポイントタイプフィルターエラー:", error);
-        setAppError("フィルター設定中にエラーが発生しました");
+        handleFilterError(error, "ポイントタイプフィルター");
       }
     },
-    [updateFiltersSafe]
+    [updateFiltersSafe, handleFilterError]
   );
 
   const handleResetFilters = useCallback(() => {
     try {
-      // minRatingをundefinedで渡すとexactOptionalPropertyTypesエラーになるため除外
       const defaultPointTypes: MapPointType[] = [
         "restaurant",
         "parking",
@@ -598,15 +579,12 @@ function App() {
         openNow: false,
         pointTypes: defaultPointTypes,
       };
-
       updateFiltersSafe(resetFilters);
-      // エラー状態もリセット
       setAppError(null);
     } catch (error) {
-      console.error("フィルターリセットエラー:", error);
-      setAppError("フィルターのリセット中にエラーが発生しました");
+      handleFilterError(error, "フィルターリセット");
     }
-  }, [updateFiltersSafe]);
+  }, [updateFiltersSafe, handleFilterError]);
 
   // アプリケーションエラー表示
   if (appError) {
