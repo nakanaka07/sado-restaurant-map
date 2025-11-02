@@ -1,0 +1,2678 @@
+{
+  "cid_to_place_id": {
+    "10379995094735024660": {
+      "place_id": "ChIJcwKek-xg818RPaVtz9Hh5tw",
+      "store_name": "長三郎鮨",
+      "last_updated": "2025-11-02T18:07:15.758627",
+      "refresh_due": "2026-11-02T18:07:15.758651"
+    },
+    "9867684745575651684": {
+      "place_id": "ChIJGSRiibZd818RZNmTr_4O8Yg",
+      "store_name": "ma_ma",
+      "last_updated": "2025-11-02T18:24:01.602056",
+      "refresh_due": "2026-11-02T18:24:01.602064"
+    },
+    "8416518954523348407": {
+      "place_id": "ChIJvxJLFfRc818Rt820gWV7zXQ",
+      "store_name": "ショッピングプラザ キング 両津店",
+      "last_updated": "2025-11-02T18:24:03.714672",
+      "refresh_due": "2026-11-02T18:24:03.714688"
+    },
+    "7946522700936946412": {
+      "place_id": "ChIJPclDGfRc818R7OrZevTsw24",
+      "store_name": "中沢仲助商店",
+      "last_updated": "2025-11-02T18:24:05.759889",
+      "refresh_due": "2026-11-02T18:24:05.759912"
+    },
+    "16203117374242340545": {
+      "place_id": "ChIJUcxGr_Zc818Rwc52Lit2j-A",
+      "store_name": "田中餅店・菓子店",
+      "last_updated": "2025-11-02T18:24:07.703355",
+      "refresh_due": "2026-11-02T18:24:07.703364"
+    },
+    "12219298688616195805": {
+      "place_id": "ChIJZar-HvRc818R3X4c7BGalKk",
+      "store_name": "ハーティウッズ",
+      "last_updated": "2025-11-02T18:24:09.929719",
+      "refresh_due": "2026-11-02T18:24:09.929735"
+    },
+    "17547779949426764979": {
+      "place_id": "ChIJk_shPFxd818Rs3zqqg9GKfM",
+      "store_name": "CHERRY(チェリー)",
+      "last_updated": "2025-11-02T18:24:12.009633",
+      "refresh_due": "2026-11-02T18:24:12.009655"
+    },
+    "4975264153166274067": {
+      "place_id": "ChIJXxFncPZc818RExokmLrz2UQ",
+      "store_name": "大阪屋 両津店",
+      "last_updated": "2025-11-02T18:24:14.116191",
+      "refresh_due": "2026-11-02T18:24:14.116207"
+    },
+    "11284644509976716517": {
+      "place_id": "ChIJlx05UPZc818R5Qiqs8syi5w",
+      "store_name": "はなしこう",
+      "last_updated": "2025-11-02T18:24:16.226255",
+      "refresh_due": "2026-11-02T18:24:16.226279"
+    },
+    "5696967649906802702": {
+      "place_id": "ChIJMcx9B1xd818RDjQROHV1NU8",
+      "store_name": "佐渡アウトドアベース",
+      "last_updated": "2025-11-02T18:24:18.374751",
+      "refresh_due": "2026-11-02T18:24:18.374768"
+    },
+    "7675901652079700357": {
+      "place_id": "ChIJx2mWQfZc818RhXnKfiSZXGo",
+      "store_name": "トロピカーナ",
+      "last_updated": "2025-11-02T18:24:20.465628",
+      "refresh_due": "2026-11-02T18:24:20.465644"
+    },
+    "16563008351093339217": {
+      "place_id": "ChIJjehXY_xc818RURSd44IajeU",
+      "store_name": "ショッピングプラザ キング 佐渡サンモールタウン店",
+      "last_updated": "2025-11-02T18:25:14.281454",
+      "refresh_due": "2026-11-02T18:25:14.281461"
+    },
+    "7243976830639146151": {
+      "place_id": "ChIJjehXY_xc818Rp6hMdKsIjWQ",
+      "store_name": "あるこーいりす",
+      "last_updated": "2025-11-02T18:25:16.468982",
+      "refresh_due": "2026-11-02T18:25:16.468992"
+    },
+    "12815542749554522048": {
+      "place_id": "ChIJq6o63lhc818RwKtVeHpj57E",
+      "store_name": "maSanicoffee(マサニコーヒー)",
+      "last_updated": "2025-11-02T18:25:18.540463",
+      "refresh_due": "2026-11-02T18:25:18.540478"
+    },
+    "2113117162090485176": {
+      "place_id": "ChIJ4Ta3sLJd818RuHmSmWscRR0",
+      "store_name": "珈琲 花園",
+      "last_updated": "2025-11-02T18:25:20.636705",
+      "refresh_due": "2026-11-02T18:25:20.636720"
+    },
+    "8189134043102142435": {
+      "place_id": "ChIJTzoiYy9Z818R47ntfJndf3E",
+      "store_name": "茶房 げんざ",
+      "last_updated": "2025-11-02T18:25:22.501769",
+      "refresh_due": "2026-11-02T18:25:22.501780"
+    },
+    "15040242976549411046": {
+      "place_id": "ChIJGX0sKFRd818R5o6RkMzDh9A",
+      "store_name": "かふぇすみよし",
+      "last_updated": "2025-11-02T18:25:24.781672",
+      "refresh_due": "2026-11-02T18:25:24.781689"
+    },
+    "9313372549242606025": {
+      "place_id": "ChIJBVNL6eBd818RyVWCCPMeEIE",
+      "store_name": "caMoco cafe 湖ASOBi",
+      "last_updated": "2025-11-02T18:25:26.872558",
+      "refresh_due": "2026-11-02T18:25:26.872573"
+    },
+    "8093071406816666586": {
+      "place_id": "ChIJaW-NDBNd818R2sHmErhiW3A",
+      "store_name": "アートサロン和(やわらぎ)",
+      "last_updated": "2025-11-02T18:25:28.704672",
+      "refresh_due": "2026-11-02T18:25:28.704692"
+    },
+    "10381242734838423418": {
+      "place_id": "ChIJicRDCc9J818Rer8SqpqyEZA",
+      "store_name": "佐渡発酵 株式会社",
+      "last_updated": "2025-11-02T18:25:30.720450",
+      "refresh_due": "2026-11-02T18:25:30.720457"
+    },
+    "6913947945479196255": {
+      "place_id": "ChIJX07UVQZH818R02PLP3enDDQ",
+      "store_name": "エーコープ 佐渡高千店",
+      "last_updated": "2025-11-02T18:25:32.895051",
+      "refresh_due": "2026-11-02T18:25:32.895066"
+    },
+    "6913948086244460505": {
+      "place_id": "ChIJ2ccXHCdH818RyhF9NeodE6A",
+      "store_name": "金子菓子店",
+      "last_updated": "2025-11-02T18:25:34.925687",
+      "refresh_due": "2026-11-02T18:25:34.925702"
+    },
+    "6913947919292979393": {
+      "place_id": "ChIJwVgCPQBH818RbJowD-aJ9bs",
+      "store_name": "高千カフェ",
+      "last_updated": "2025-11-02T18:25:36.757580",
+      "refresh_due": "2026-11-02T18:25:36.757594"
+    },
+    "6913981952867347115": {
+      "place_id": "ChIJq6oeTPRl818R2aDkkiIGFR8",
+      "store_name": "ガシマシネマ",
+      "last_updated": "2025-11-02T18:25:38.918143",
+      "refresh_due": "2026-11-02T18:25:38.918158"
+    },
+    "6913981115801172979": {
+      "place_id": "ChIJ83sWZzFl818RkQmO7Efvo0s",
+      "store_name": "cafe 丘の上の雲の向こう",
+      "last_updated": "2025-11-02T18:25:40.782116",
+      "refresh_due": "2026-11-02T18:25:40.782133"
+    },
+    "6913981500084383215": {
+      "place_id": "ChIJ7-0m4Ipl818RTDrUR5uPJYA",
+      "store_name": "ショッピングプラザ キング 相川店",
+      "last_updated": "2025-11-02T18:25:42.936144",
+      "refresh_due": "2026-11-02T18:25:42.936155"
+    },
+    "6913981502395034617": {
+      "place_id": "ChIJ-avgaYtl818Rlq5NACfYOpw",
+      "store_name": "珈琲の家 カフェ・ド・カトレア",
+      "last_updated": "2025-11-02T18:25:45.026186",
+      "refresh_due": "2026-11-02T18:25:45.026195"
+    },
+    "6913981474149542917": {
+      "place_id": "ChIJBaxQ1oRl818RgDdcOrmOUK8",
+      "store_name": "コロンビア",
+      "last_updated": "2025-11-02T18:25:47.151507",
+      "refresh_due": "2026-11-02T18:25:47.151522"
+    },
+    "6913983149357139885": {
+      "place_id": "ChIJrQd44Apn818RqT6MHmwq2qw",
+      "store_name": "こども服 oto／Mr.Tono café",
+      "last_updated": "2025-11-02T18:25:49.278938",
+      "refresh_due": "2026-11-02T18:25:49.278950"
+    },
+    "6913982878071870005": {
+      "place_id": "ChIJNVKbtstm818RJuOIt2WPQHw",
+      "store_name": "ローソン 佐渡中興店",
+      "last_updated": "2025-11-02T18:25:51.373890",
+      "refresh_due": "2026-11-02T18:25:51.373899"
+    },
+    "6913984179823924709": {
+      "place_id": "ChIJ5VUTzfpn818R4iDSqVzApOE",
+      "store_name": "森のコーヒー屋",
+      "last_updated": "2025-11-02T18:25:53.387232",
+      "refresh_due": "2026-11-02T18:25:53.387240"
+    },
+    "6913983103325911859": {
+      "place_id": "ChIJMzvLKABn818Rib7AMul81sM",
+      "store_name": "二宮萬友荘 ばんゆうそう",
+      "last_updated": "2025-11-02T18:25:55.462381",
+      "refresh_due": "2026-11-02T18:25:55.462395"
+    },
+    "6913983144752637013": {
+      "place_id": "ChIJVeQEzgln818RMnrNejAm4nE",
+      "store_name": "ドッグツアーズtarokich(ドッグラン&カフェ)",
+      "last_updated": "2025-11-02T18:25:57.384506",
+      "refresh_due": "2026-11-02T18:25:57.384514"
+    },
+    "6913980936987019173": {
+      "place_id": "ChIJZZ2BDe3mAGAR8N1-K5WFqxU",
+      "store_name": "韓国家庭料理アリラン",
+      "last_updated": "2025-11-02T18:25:59.314993",
+      "refresh_due": "2026-11-02T18:25:59.315006"
+    },
+    "6913980905199022717": {
+      "place_id": "ChIJfbI4XgBl818Rs-nln_NCiGQ",
+      "store_name": "御菓子処しまや",
+      "last_updated": "2025-11-02T18:26:01.590357",
+      "refresh_due": "2026-11-02T18:26:01.590365"
+    },
+    "6913982732677028553": {
+      "place_id": "ChIJyRpm3Klm818RlB8F_CCCLb0",
+      "store_name": "ケーキハウスバニラ",
+      "last_updated": "2025-11-02T18:26:03.588163",
+      "refresh_due": "2026-11-02T18:26:03.588170"
+    },
+    "6913981972156174519": {
+      "place_id": "ChIJt9DSyfhl818R0VBSnbXbgRg",
+      "store_name": "池田菓子舗",
+      "last_updated": "2025-11-02T18:26:05.645669",
+      "refresh_due": "2026-11-02T18:26:05.645682"
+    },
+    "6913982733406574947": {
+      "place_id": "ChIJYxniB6pm818RaAx1Odh6oLY",
+      "store_name": "ショッピングプラザ キング 東大通店",
+      "last_updated": "2025-11-02T18:26:07.670388",
+      "refresh_due": "2026-11-02T18:26:07.670396"
+    },
+    "6913980903731832617": {
+      "place_id": "ChIJKSfFBgBl818RZDhxk4EkRrE",
+      "store_name": "喫茶デイリー",
+      "last_updated": "2025-11-02T18:26:09.648098",
+      "refresh_due": "2026-11-02T18:26:09.648108"
+    },
+    "6913979811406861117": {
+      "place_id": "ChIJPdMgswFk818Rqnk-I3ziAWI",
+      "store_name": "喜昇堂パン工房・ピュイダムール",
+      "last_updated": "2025-11-02T18:26:11.686483",
+      "refresh_due": "2026-11-02T18:26:11.686498"
+    },
+    "6913979828994085695": {
+      "place_id": "ChIJP5NoywVk818RSmlEe3MxavM",
+      "store_name": "モンブラン",
+      "last_updated": "2025-11-02T18:26:13.594392",
+      "refresh_due": "2026-11-02T18:26:13.594399"
+    },
+    "6913979873237127101": {
+      "place_id": "ChIJvc9_GBBk818RKWqYStAdN-Y",
+      "store_name": "アンブレラ",
+      "last_updated": "2025-11-02T18:26:15.740485",
+      "refresh_due": "2026-11-02T18:26:15.740502"
+    },
+    "6913979830037587247": {
+      "place_id": "ChIJLyWbCQZk818RKXBYeZfUogA",
+      "store_name": "ラブマーケットカフェ",
+      "last_updated": "2025-11-02T18:26:17.831250",
+      "refresh_due": "2026-11-02T18:26:17.831272"
+    },
+    "6913979868782226933": {
+      "place_id": "ChIJ9W33Dg9k818RN6qd4lq-MII",
+      "store_name": "コーヒーハウスらるご",
+      "last_updated": "2025-11-02T18:26:19.735545",
+      "refresh_due": "2026-11-02T18:26:19.735553"
+    },
+    "6913981908784112893": {
+      "place_id": "ChIJ_eSNCOpl818Rk7dhSgyIom8",
+      "store_name": "MERROWS SADO(メローズ サド)",
+      "last_updated": "2025-11-02T18:26:21.863135",
+      "refresh_due": "2026-11-02T18:26:21.863149"
+    },
+    "6913981688363819037": {
+      "place_id": "ChIJHSB7trZl818R7CxvFtq41bc",
+      "store_name": "へにゃもにゃ",
+      "last_updated": "2025-11-02T18:26:23.892413",
+      "refresh_due": "2026-11-02T18:26:23.892421"
+    },
+    "6913973207866834497": {
+      "place_id": "ChIJQX54MQBe818RAjGXne8tn0I",
+      "store_name": "トキのもり売店",
+      "last_updated": "2025-11-02T18:26:25.794722",
+      "refresh_due": "2026-11-02T18:26:25.794730"
+    },
+    "6913975284027964371": {
+      "place_id": "ChIJ0ztRluNf818Ru3svHVDZpNg",
+      "store_name": "トキのむらフード",
+      "last_updated": "2025-11-02T18:26:27.913937",
+      "refresh_due": "2026-11-02T18:26:27.913961"
+    },
+    "6913977267957859687": {
+      "place_id": "ChIJZwXBgbFh818RSscOGOw4egs",
+      "store_name": "新穂青木おやつ店",
+      "last_updated": "2025-11-02T18:26:29.934768",
+      "refresh_due": "2026-11-02T18:26:29.934776"
+    },
+    "6913976489241670165": {
+      "place_id": "ChIJFfKmMvxg818R_4kosG_KyTA",
+      "store_name": "島の駅 佐渡特選",
+      "last_updated": "2025-11-02T18:26:31.815394",
+      "refresh_due": "2026-11-02T18:26:31.815405"
+    },
+    "6913978959825061575": {
+      "place_id": "ChIJx8blbDtj818RMrvDo0c33fU",
+      "store_name": "詩茶香愛茶華(しっちゃかめっちゃか)",
+      "last_updated": "2025-11-02T18:26:33.800281",
+      "refresh_due": "2026-11-02T18:26:33.800289"
+    },
+    "6913977933839618213": {
+      "place_id": "ChIJpVBmi0xi818Rgf7GTx4tbjQ",
+      "store_name": "ガレージカフェ レンスポルト",
+      "last_updated": "2025-11-02T18:26:35.773414",
+      "refresh_due": "2026-11-02T18:26:35.773422"
+    },
+    "6913977936291037183": {
+      "place_id": "ChIJ__-DHU1i818RCN4BanKU7uM",
+      "store_name": "くりくりや",
+      "last_updated": "2025-11-02T18:26:37.944236",
+      "refresh_due": "2026-11-02T18:26:37.944243"
+    },
+    "6913979512325461029": {
+      "place_id": "ChIJJdR8ELxj818RrlvPsMvhiS8",
+      "store_name": "わたぼうし",
+      "last_updated": "2025-11-02T18:26:39.984954",
+      "refresh_due": "2026-11-02T18:26:39.984970"
+    },
+    "6913978200215862969": {
+      "place_id": "ChIJuT6pkIpi818RZS4aqPtsr4Y",
+      "store_name": "(有)真野観光センター",
+      "last_updated": "2025-11-02T18:26:42.024827",
+      "refresh_due": "2026-11-02T18:26:42.024842"
+    },
+    "6913979118385188479": {
+      "place_id": "ChIJf07RV2Bj818R3H_ZVj7fUTA",
+      "store_name": "Crescentmoon/KITCHENしろ",
+      "last_updated": "2025-11-02T18:26:43.861978",
+      "refresh_due": "2026-11-02T18:26:43.861985"
+    },
+    "6914295577883137615": {
+      "place_id": "ChIJT1bHzzGD9F8RTTAbXBQ32NE",
+      "store_name": "学校蔵Cafe",
+      "last_updated": "2025-11-02T18:26:46.036164",
+      "refresh_due": "2026-11-02T18:26:46.036178"
+    },
+    "6913977582607772881": {
+      "place_id": "ChIJ0axZxPph818RrDBshhUgaTk",
+      "store_name": "馬川亭 ものづくりの拠点",
+      "last_updated": "2025-11-02T18:26:47.916766",
+      "refresh_due": "2026-11-02T18:26:47.916774"
+    },
+    "6913976507449922811": {
+      "place_id": "ChIJ-9TybwBh818RhQ9R6e4ON0I",
+      "store_name": "Comolaine コモレーヌ",
+      "last_updated": "2025-11-02T18:26:50.067148",
+      "refresh_due": "2026-11-02T18:26:50.067168"
+    },
+    "6913976507501177437": {
+      "place_id": "ChIJXeoAcwBh818RpKS_6cmdDvA",
+      "store_name": "犬と暮らす小さなカフェ",
+      "last_updated": "2025-11-02T18:26:52.017617",
+      "refresh_due": "2026-11-02T18:26:52.017649"
+    },
+    "6913977789512177443": {
+      "place_id": "ChIJI1fQ8Cpi818RAw1-7h1n7qQ",
+      "store_name": "さっこりHOUSE三の宮",
+      "last_updated": "2025-11-02T18:26:54.098769",
+      "refresh_due": "2026-11-02T18:26:54.098793"
+    },
+    "6914293522338775499": {
+      "place_id": "ChIJy4HJN1OB9F8RtozsTR-NHew",
+      "store_name": "JA佐渡 Aコープ羽茂店",
+      "last_updated": "2025-11-02T18:26:56.126145",
+      "refresh_due": "2026-11-02T18:26:56.126160"
+    },
+    "6914300016541321241": {
+      "place_id": "ChIJGUhsRDuH9F8RWrwA1royUKI",
+      "store_name": "スーパー たんぽぽ",
+      "last_updated": "2025-11-02T18:26:58.023251",
+      "refresh_due": "2026-11-02T18:26:58.023266"
+    },
+    "6914300009693156361": {
+      "place_id": "ChIJCZQ9rDmH9F8R9qL5-JA7OCs",
+      "store_name": "高津屋庄平",
+      "last_updated": "2025-11-02T18:27:00.174900",
+      "refresh_due": "2026-11-02T18:27:00.174909"
+    },
+    "6914299914753530037": {
+      "place_id": "ChIJtdhlkSOH9F8R08w5Hii8xDA",
+      "store_name": "喜八屋ゴローカフェ",
+      "last_updated": "2025-11-02T18:27:02.238924",
+      "refresh_due": "2026-11-02T18:27:02.238932"
+    },
+    "6914299771380643373": {
+      "place_id": "ChIJLTa1LwKH9F8RnD8uQgbjvXY",
+      "store_name": "Kaffa 佐渡(カファ さど)",
+      "last_updated": "2025-11-02T18:27:04.071235",
+      "refresh_due": "2026-11-02T18:27:04.071245"
+    },
+    "6914300006171903831": {
+      "place_id": "ChIJV4db2jiH9F8R9yHw68gX_LM",
+      "store_name": "カフェ日和山・南書店",
+      "last_updated": "2025-11-02T18:27:06.150482",
+      "refresh_due": "2026-11-02T18:27:06.150491"
+    },
+    "6914300033322276827": {
+      "place_id": "ChIJ21elLD-H9F8R2T1IIIQxeUY",
+      "store_name": "山本屋みやげ店(みやげ店のみ営業)",
+      "last_updated": "2025-11-02T18:27:08.319042",
+      "refresh_due": "2026-11-02T18:27:08.319050"
+    },
+    "6914322655715661737": {
+      "place_id": "ChIJqRdeXNKb9F8RvrOC-XEH514",
+      "store_name": "はまのかふぇ CoMaDo",
+      "last_updated": "2025-11-02T18:27:10.328282",
+      "refresh_due": "2026-11-02T18:27:10.328298"
+    },
+    "6914297246595198857": {
+      "place_id": "ChIJia_EVraE9F8RuMO44oMn9F0",
+      "store_name": "エーコープ 佐渡赤泊店",
+      "last_updated": "2025-11-02T18:27:12.187838",
+      "refresh_due": "2026-11-02T18:27:12.187847"
+    },
+    "6914297252046001423": {
+      "place_id": "ChIJD1Wpm7eE9F8RNbK46WAcFOc",
+      "store_name": "(株)北雪酒造",
+      "last_updated": "2025-11-02T18:27:14.398520",
+      "refresh_due": "2026-11-02T18:27:14.398535"
+    },
+    "6914296776685440387": {
+      "place_id": "ChIJg8327UiE9F8Rh7MVd7v4HV4",
+      "store_name": "後藤ブロイラー",
+      "last_updated": "2025-11-02T18:27:16.239267",
+      "refresh_due": "2026-11-02T18:27:16.239274"
+    },
+    "6913972068582192307": {
+      "place_id": "ChIJs3TQ7vZc818R1ajZtoPku6Q",
+      "store_name": "Club Ray's",
+      "last_updated": "2025-11-02T18:27:18.304492",
+      "refresh_due": "2026-11-02T18:27:18.304549"
+    },
+    "6913979913795386987": {
+      "place_id": "ChIJa771iRlk818RHNUCnTrXA8I",
+      "store_name": "CoCoカラオケスタジオ",
+      "last_updated": "2025-11-02T18:27:20.289945",
+      "refresh_due": "2026-11-02T18:27:20.289959"
+    },
+    "6913977191111578245": {
+      "place_id": "ChIJhdJbnZ9h818RkfA0hmbJwzA",
+      "store_name": "喫茶 スナック花音",
+      "last_updated": "2025-11-02T18:27:22.457284",
+      "refresh_due": "2026-11-02T18:27:22.457291"
+    },
+    "498854198932706027": {
+      "place_id": "ChIJjxHySCc1818R65IYOkBJ7AY",
+      "store_name": "大野亀ロッジカフェ·食事",
+      "last_updated": "2025-11-02T18:27:24.301319",
+      "refresh_due": "2026-11-02T18:27:24.301331"
+    },
+    "11887133536525610886": {
+      "place_id": "ChIJdY2Zhjdh818Rhu89gviU96Q",
+      "store_name": "慶幸屋台湾料理店",
+      "last_updated": "2025-11-02T18:27:26.299908",
+      "refresh_due": "2026-11-02T18:27:26.299932"
+    },
+    "17232257260313300169": {
+      "place_id": "ChIJkbRw_s5L818Rycweh61GJe8",
+      "store_name": "メレパレカイコ",
+      "last_updated": "2025-11-02T18:27:28.307189",
+      "refresh_due": "2026-11-02T18:27:28.307196"
+    },
+    "1369465412683572568": {
+      "place_id": "ChIJqd-DmtJP818RWCUwf4lRARM",
+      "store_name": "うんすけ",
+      "last_updated": "2025-11-02T18:27:30.335975",
+      "refresh_due": "2026-11-02T18:27:30.335983"
+    },
+    "15141356859768739688": {
+      "place_id": "ChIJmRNEVBxd818RaJfwc9fnINI",
+      "store_name": "四季彩 味よし",
+      "last_updated": "2025-11-02T18:27:32.515896",
+      "refresh_due": "2026-11-02T18:27:32.515919"
+    },
+    "13011674134163848006": {
+      "place_id": "ChIJTwia1dBm818RRnv5q6_AkrQ",
+      "store_name": "かとうレストラン",
+      "last_updated": "2025-11-02T18:27:34.327997",
+      "refresh_due": "2026-11-02T18:27:34.328007"
+    },
+    "13343443214351248282": {
+      "place_id": "ChIJod7Y2eJd818RmqsAKOhuLbk",
+      "store_name": "キッチンよろこんで原黒店",
+      "last_updated": "2025-11-02T18:27:36.361202",
+      "refresh_due": "2026-11-02T18:27:36.361210"
+    },
+    "16937462117123100060": {
+      "place_id": "ChIJ17FDPjJj818RnA3Clw70Des",
+      "store_name": "LA PAGODEラ パゴッド",
+      "last_updated": "2025-11-02T18:27:38.404028",
+      "refresh_due": "2026-11-02T18:27:38.404035"
+    },
+    "8490523287138358468": {
+      "place_id": "ChIJy2dEML9n818RxFQQ5_Fl1HU",
+      "store_name": "佐渡うどん 蒼囲あおい",
+      "last_updated": "2025-11-02T18:27:40.345699",
+      "refresh_due": "2026-11-02T18:27:40.345717"
+    },
+    "8439728380593379101": {
+      "place_id": "ChIJj5iWyA9k818RHRcNHj_wH3U",
+      "store_name": "レストラン SEISUKE Next Door",
+      "last_updated": "2025-11-02T18:27:42.507486",
+      "refresh_due": "2026-11-02T18:27:42.507493"
+    },
+    "196894154881832250": {
+      "place_id": "ChIJ6XZMbBBk818ROhUV0DCCuwI",
+      "store_name": "りきすし さわた",
+      "last_updated": "2025-11-02T18:27:44.577486",
+      "refresh_due": "2026-11-02T18:27:44.577493"
+    },
+    "13099013943153813253": {
+      "place_id": "ChIJtVBxj1hd818RBWeSnccLybU",
+      "store_name": "フカマル商店 Aコープ加茂店",
+      "last_updated": "2025-11-02T18:27:46.573297",
+      "refresh_due": "2026-11-02T18:27:46.573312"
+    },
+    "13906689385781340": {
+      "place_id": "ChIJk5wUUfpc818RXFjXcA9oMQA",
+      "store_name": "ほっともっと 佐渡両津店",
+      "last_updated": "2025-11-02T18:27:48.458026",
+      "refresh_due": "2026-11-02T18:27:48.458033"
+    },
+    "3162249023192456380": {
+      "place_id": "ChIJ5VdxsZJc818RvFy2druQ4is",
+      "store_name": "夢喰の家",
+      "last_updated": "2025-11-02T18:27:50.607105",
+      "refresh_due": "2026-11-02T18:27:50.607113"
+    },
+    "13625514259728606679": {
+      "place_id": "ChIJIy6GX41c818R16UkNQeNF70",
+      "store_name": "みかわ mikawaカフェ",
+      "last_updated": "2025-11-02T18:27:52.496499",
+      "refresh_due": "2026-11-02T18:27:52.496514"
+    },
+    "6408632286827753369": {
+      "place_id": "ChIJ1dfu3fJc818Rma93SBwJ8Fg",
+      "store_name": "割烹ふじはら",
+      "last_updated": "2025-11-02T18:27:54.689056",
+      "refresh_due": "2026-11-02T18:27:54.689072"
+    },
+    "16784636006885373816": {
+      "place_id": "ChIJX0knmodh818ReDei-oQB7-g",
+      "store_name": "まちの洋食屋 ル アッシュ",
+      "last_updated": "2025-11-02T18:27:56.684945",
+      "refresh_due": "2026-11-02T18:27:56.684959"
+    },
+    "18124390562895004966": {
+      "place_id": "ChIJZ2PN_hBk818RJoXMlzDFhvs",
+      "store_name": "FRENCH La Plage",
+      "last_updated": "2025-11-02T18:27:58.596938",
+      "refresh_due": "2026-11-02T18:27:58.596946"
+    },
+    "2489000945133757413": {
+      "place_id": "ChIJFc2xWkZj818R5SNPHCy1iiI",
+      "store_name": "じんのびcafe&restaurant",
+      "last_updated": "2025-11-02T18:28:00.554026",
+      "refresh_due": "2026-11-02T18:28:00.554038"
+    },
+    "1372849073829224457": {
+      "place_id": "ChIJY29JU4-H9F8RCaDQf_VWDRM",
+      "store_name": "オリジヌ",
+      "last_updated": "2025-11-02T18:28:02.740665",
+      "refresh_due": "2026-11-02T18:28:02.740682"
+    },
+    "1465803710984694798": {
+      "place_id": "ChIJo6L_nU1i818RDiyxf7WUVxQ",
+      "store_name": "レストラン こさど",
+      "last_updated": "2025-11-02T18:28:04.755678",
+      "refresh_due": "2026-11-02T18:28:04.755695"
+    },
+    "15115439744005067253": {
+      "place_id": "ChIJbcyLaQBl818R9VE-tVzUxNE",
+      "store_name": "クラブレストランILE RICHE",
+      "last_updated": "2025-11-02T18:28:06.645282",
+      "refresh_due": "2026-11-02T18:28:06.645297"
+    },
+    "17659029108429100637": {
+      "place_id": "ChIJ6QpCdPpd818RXRYznml5EfU",
+      "store_name": "のりば食堂 しおさい 両津店",
+      "last_updated": "2025-11-02T18:28:08.629031",
+      "refresh_due": "2026-11-02T18:28:08.629039"
+    },
+    "13394290965857356813": {
+      "place_id": "ChIJfZb8lVlc818RDcwm3qoU4rk",
+      "store_name": "味処 天國",
+      "last_updated": "2025-11-02T18:28:10.619045",
+      "refresh_due": "2026-11-02T18:28:10.619056"
+    },
+    "17736932193368362475": {
+      "place_id": "ChIJFV2CwyFn818R603pBts9JvY",
+      "store_name": "味彩 たびのホテル佐渡",
+      "last_updated": "2025-11-02T18:28:12.626111",
+      "refresh_due": "2026-11-02T18:28:12.626126"
+    },
+    "11641373481260157151": {
+      "place_id": "ChIJ503VrrBn818R3wgqqIB3jqE",
+      "store_name": "欧風食堂 Kubo屋",
+      "last_updated": "2025-11-02T18:28:14.741020",
+      "refresh_due": "2026-11-02T18:28:14.741034"
+    },
+    "3309688838589822417": {
+      "place_id": "ChIJeSXQ_1hc818R0bU4lXZg7i0",
+      "store_name": "お食事処 いさりび",
+      "last_updated": "2025-11-02T18:28:16.614252",
+      "refresh_due": "2026-11-02T18:28:16.614267"
+    },
+    "15703515381485998396": {
+      "place_id": "ChIJp3xV7PZc818RPBFb5gkY7tk",
+      "store_name": "創作料理 男の台所タロー",
+      "last_updated": "2025-11-02T18:28:18.854387",
+      "refresh_due": "2026-11-02T18:28:18.854395"
+    },
+    "8289971572303283899": {
+      "place_id": "ChIJ3-01tgph818Ru0Y5DTnlC3M",
+      "store_name": "食祭 新倉",
+      "last_updated": "2025-11-02T18:28:20.671780",
+      "refresh_due": "2026-11-02T18:28:20.671792"
+    },
+    "5297226313669544213": {
+      "place_id": "ChIJE5O89t9k818RFQkgMUSHg0k",
+      "store_name": "御食事処 夫婦岩佐渡めおと岩観光",
+      "last_updated": "2025-11-02T18:28:22.800696",
+      "refresh_due": "2026-11-02T18:28:22.800718"
+    },
+    "4919105778659110377": {
+      "place_id": "ChIJ7cIEYIJh818R6S2MpaQsREQ",
+      "store_name": "味心 神楽",
+      "last_updated": "2025-11-02T18:28:24.893415",
+      "refresh_due": "2026-11-02T18:28:24.893423"
+    },
+    "168127529703765259": {
+      "place_id": "ChIJt_EjHgBd818RC_X09BhPVQI",
+      "store_name": "タカノ食堂",
+      "last_updated": "2025-11-02T18:28:26.944190",
+      "refresh_due": "2026-11-02T18:28:26.944205"
+    },
+    "3556259100584339243": {
+      "place_id": "ChIJFbKKrABj818RK2eUY89eWjE",
+      "store_name": "夕食堂",
+      "last_updated": "2025-11-02T18:28:28.997576",
+      "refresh_due": "2026-11-02T18:28:28.997591"
+    },
+    "11693282593476403648": {
+      "place_id": "ChIJR7y4d_Zc818RwGFrqpDiRqI",
+      "store_name": "鴨湖庵",
+      "last_updated": "2025-11-02T18:28:31.055260",
+      "refresh_due": "2026-11-02T18:28:31.055282"
+    },
+    "17730404070845686019": {
+      "place_id": "ChIJV9tWCvBc818RA6HlDpAMD_Y",
+      "store_name": "よし坊",
+      "last_updated": "2025-11-02T18:28:33.064234",
+      "refresh_due": "2026-11-02T18:28:33.064242"
+    },
+    "3530172790810957928": {
+      "place_id": "ChIJLYfzpvZc818RaFgJGHOx_TA",
+      "store_name": "おんでこ",
+      "last_updated": "2025-11-02T18:28:35.138586",
+      "refresh_due": "2026-11-02T18:28:35.138604"
+    },
+    "13423534084456194228": {
+      "place_id": "ChIJ2w4nJjld818RtCBc_iD5Sbo",
+      "store_name": "真夜",
+      "last_updated": "2025-11-02T18:28:37.008808",
+      "refresh_due": "2026-11-02T18:28:37.008816"
+    },
+    "12581974942045869931": {
+      "place_id": "ChIJ_94VWW9d818Ra5eCMYwnnK4",
+      "store_name": "ラーメン よつば",
+      "last_updated": "2025-11-02T18:28:39.018092",
+      "refresh_due": "2026-11-02T18:28:39.018109"
+    },
+    "7450567235622481215": {
+      "place_id": "ChIJecd1u_Zc818RPy1xDm27ZWc",
+      "store_name": "酔連",
+      "last_updated": "2025-11-02T18:28:41.160138",
+      "refresh_due": "2026-11-02T18:28:41.160154"
+    },
+    "8791265131405232368": {
+      "place_id": "ChIJEzlt5N9l818R8MivEw_ZAHo",
+      "store_name": "憩カフェバー&ゲストハウス",
+      "last_updated": "2025-11-02T18:28:43.190079",
+      "refresh_due": "2026-11-02T18:28:43.190086"
+    },
+    "2425223548992791183": {
+      "place_id": "ChIJU4kgcItl818Rj6Kg6vcfqCE",
+      "store_name": "パーラーつるや",
+      "last_updated": "2025-11-02T18:28:45.002364",
+      "refresh_due": "2026-11-02T18:28:45.002387"
+    },
+    "7424725761600505809": {
+      "place_id": "ChIJNb9s_81m818R0cfjBr7sCWc",
+      "store_name": "食彩創房 亶ZHËN",
+      "last_updated": "2025-11-02T18:28:47.167712",
+      "refresh_due": "2026-11-02T18:28:47.167725"
+    },
+    "6816652124298451972": {
+      "place_id": "ChIJMy4PgK9d818RBJw4qv2cmV4",
+      "store_name": "鰻 伊豆榮 佐渡天の川荘店",
+      "last_updated": "2025-11-02T18:28:49.206482",
+      "refresh_due": "2026-11-02T18:28:49.206499"
+    },
+    "5418924222388587430": {
+      "place_id": "ChIJ___jm_Zc818Rpks7nN7iM0s",
+      "store_name": "ホテル天の川荘／伊豆栄",
+      "last_updated": "2025-11-02T18:28:51.209720",
+      "refresh_due": "2026-11-02T18:28:51.209727"
+    },
+    "518623741697038253": {
+      "place_id": "ChIJ3w2x7fZc818RrZfvl4uFMgc",
+      "store_name": "居酒屋 長運",
+      "last_updated": "2025-11-02T18:28:53.239041",
+      "refresh_due": "2026-11-02T18:28:53.239061"
+    },
+    "4606598705838809653": {
+      "place_id": "ChIJiRnYk_Zc818RNeJLvB3t7T8",
+      "store_name": "天下一",
+      "last_updated": "2025-11-02T18:28:55.197175",
+      "refresh_due": "2026-11-02T18:28:55.197184"
+    },
+    "4137768520678042166": {
+      "place_id": "ChIJdfiqmvZc818RNurO9YtObDk",
+      "store_name": "酒処 銀太郎",
+      "last_updated": "2025-11-02T18:28:57.143016",
+      "refresh_due": "2026-11-02T18:28:57.143031"
+    },
+    "1051187665322660354": {
+      "place_id": "ChIJA-KH3_ld818RAlLUt5yRlg4",
+      "store_name": "りんか亭",
+      "last_updated": "2025-11-02T18:28:59.344930",
+      "refresh_due": "2026-11-02T18:28:59.344937"
+    },
+    "9621484102184057973": {
+      "place_id": "ChIJ7zz9QPZc818Rdby_atBghoU",
+      "store_name": "居酒屋 ほたる",
+      "last_updated": "2025-11-02T18:29:01.545807",
+      "refresh_due": "2026-11-02T18:29:01.545822"
+    },
+    "8048881320066599724": {
+      "place_id": "ChIJ05JqfvZc818RLMvYcepes28",
+      "store_name": "ゆっ子",
+      "last_updated": "2025-11-02T18:29:03.581032",
+      "refresh_due": "2026-11-02T18:29:03.581047"
+    },
+    "18109402344019408301": {
+      "place_id": "ChIJl6lUGMxl818RrTXn8XuFUfs",
+      "store_name": "アガン佐渡店",
+      "last_updated": "2025-11-02T18:29:05.428336",
+      "refresh_due": "2026-11-02T18:29:05.428351"
+    },
+    "8954799930512271598": {
+      "place_id": "ChIJHSWZjzRi818R7mjgnBfXRXw",
+      "store_name": "ファミリーレストランたいがあ",
+      "last_updated": "2025-11-02T18:29:07.543459",
+      "refresh_due": "2026-11-02T18:29:07.543467"
+    },
+    "18100143015798026457": {
+      "place_id": "ChIJmXaigoxl818R2bBomCygMPs",
+      "store_name": "炙り屋ちゃらくらげぇ",
+      "last_updated": "2025-11-02T18:29:09.451297",
+      "refresh_due": "2026-11-02T18:29:09.451409"
+    },
+    "6334562753167459238": {
+      "place_id": "ChIJbYfU1JJg818RpoP3FUPj6Fc",
+      "store_name": "なっちゃん",
+      "last_updated": "2025-11-02T18:29:11.633865",
+      "refresh_due": "2026-11-02T18:29:11.633882"
+    },
+    "17478345852915161998": {
+      "place_id": "ChIJ-6FQZIxl818Rjhtu8PKOj_I",
+      "store_name": "居酒屋おるふぇ",
+      "last_updated": "2025-11-02T18:29:13.498467",
+      "refresh_due": "2026-11-02T18:29:13.498477"
+    },
+    "4161196141844446433": {
+      "place_id": "ChIJ5_Es_MJj818R4TxdE9iJvzk",
+      "store_name": "ちゃらくらもん",
+      "last_updated": "2025-11-02T18:29:15.692042",
+      "refresh_due": "2026-11-02T18:29:15.692058"
+    },
+    "11303478742616620964": {
+      "place_id": "ChIJZ4gdr_Rn818RpL_XKwcG3pw",
+      "store_name": "もつ焼 でん 佐渡金井店",
+      "last_updated": "2025-11-02T18:29:17.754254",
+      "refresh_due": "2026-11-02T18:29:17.754279"
+    },
+    "16937979438474688518": {
+      "place_id": "ChIJO5xxZItl818RBngn247KD-s",
+      "store_name": "古民家食堂 持田家",
+      "last_updated": "2025-11-02T18:29:19.772809",
+      "refresh_due": "2026-11-02T18:29:19.772831"
+    },
+    "2051504559646363562": {
+      "place_id": "ChIJT-v3KwJk818Rqs_QFIdoeBw",
+      "store_name": "彩食美酒ねまれ",
+      "last_updated": "2025-11-02T18:29:21.796656",
+      "refresh_due": "2026-11-02T18:29:21.796671"
+    },
+    "1480854190697941541": {
+      "place_id": "ChIJnS4Krw9k818RJQqzYAoNjRQ",
+      "store_name": "居酒屋 かっ八",
+      "last_updated": "2025-11-02T18:29:23.707216",
+      "refresh_due": "2026-11-02T18:29:23.707228"
+    },
+    "11904941951315667089": {
+      "place_id": "ChIJRZlE8VKB9F8RkejQL6HZNqU",
+      "store_name": "炭火串焼 えん萬",
+      "last_updated": "2025-11-02T18:29:25.657667",
+      "refresh_due": "2026-11-02T18:29:25.657676"
+    },
+    "15902147261877298586": {
+      "place_id": "ChIJTQBjXYxl818RmqUldq7Gr9w",
+      "store_name": "金福きんぷく",
+      "last_updated": "2025-11-02T18:29:27.734977",
+      "refresh_due": "2026-11-02T18:29:27.734985"
+    },
+    "3965245260533460731": {
+      "place_id": "ChIJo7odpQ9k818R--5lQY5hBzc",
+      "store_name": "焼とりやじま Yakitori Yajima",
+      "last_updated": "2025-11-02T18:29:29.972524",
+      "refresh_due": "2026-11-02T18:29:29.972531"
+    },
+    "12221285624458005711": {
+      "place_id": "ChIJ2SyUhR9v818Rz0xoOIa6mqk",
+      "store_name": "北沢Terraceきたざわてらす",
+      "last_updated": "2025-11-02T18:29:32.007336",
+      "refresh_due": "2026-11-02T18:29:32.007347"
+    },
+    "12329558405974819543": {
+      "place_id": "ChIJl617zlRj818R14KPoQtkG6s",
+      "store_name": "MANOCAMINOマノカミーノ",
+      "last_updated": "2025-11-02T18:29:34.064624",
+      "refresh_due": "2026-11-02T18:29:34.064631"
+    },
+    "11892697002531778554": {
+      "place_id": "ChIJyTile19d818R-m9C4elYC6U",
+      "store_name": "kaneto",
+      "last_updated": "2025-11-02T18:29:36.149940",
+      "refresh_due": "2026-11-02T18:29:36.149951"
+    },
+    "16001329200943732633": {
+      "place_id": "ChIJnbxikfZc818RmRdWLCEkEN4",
+      "store_name": "いしはら寿し",
+      "last_updated": "2025-11-02T18:29:38.061109",
+      "refresh_due": "2026-11-02T18:29:38.061139"
+    },
+    "9611782624089845048": {
+      "place_id": "ChIJ79HznKBd818ROK0lB1_pY4U",
+      "store_name": "八千夜",
+      "last_updated": "2025-11-02T18:29:40.098596",
+      "refresh_due": "2026-11-02T18:29:40.098605"
+    },
+    "5271604328361571410": {
+      "place_id": "ChIJn8eDpvNc818RUjRn3DSAKEk",
+      "store_name": "焼肉九兵衛",
+      "last_updated": "2025-11-02T18:29:42.029575",
+      "refresh_due": "2026-11-02T18:29:42.029585"
+    },
+    "5196328506205101586": {
+      "place_id": "ChIJ9X9nYw9k818REl6XvD4RHUg",
+      "store_name": "焼肉康",
+      "last_updated": "2025-11-02T18:29:44.077707",
+      "refresh_due": "2026-11-02T18:29:44.077721"
+    },
+    "4669654861425522237": {
+      "place_id": "ChIJkQsqWKFp818RPbbxBlvyzUA",
+      "store_name": "万楽",
+      "last_updated": "2025-11-02T18:29:46.087419",
+      "refresh_due": "2026-11-02T18:29:46.087428"
+    },
+    "12848986605145273186": {
+      "place_id": "ChIJNxqqGoNh818RYrNvkz3FULI",
+      "store_name": "焼肉の家",
+      "last_updated": "2025-11-02T18:29:48.258087",
+      "refresh_due": "2026-11-02T18:29:48.258096"
+    },
+    "9478900034453567988": {
+      "place_id": "ChIJiSmQRBpk818R9PkKJ1zRi4M",
+      "store_name": "牛角 佐和田店",
+      "last_updated": "2025-11-02T18:29:50.302422",
+      "refresh_due": "2026-11-02T18:29:50.302430"
+    },
+    "12472304090072418159": {
+      "place_id": "ChIJB2XcYgZk818RbwdrI32GFq0",
+      "store_name": "焼肉 多来福",
+      "last_updated": "2025-11-02T18:29:52.189122",
+      "refresh_due": "2026-11-02T18:29:52.189131"
+    },
+    "6356359357135353672": {
+      "place_id": "ChIJPwCuAEBe818RSHfIaihTNlg",
+      "store_name": "蕎麦 茂左衛門",
+      "last_updated": "2025-11-02T18:29:54.163966",
+      "refresh_due": "2026-11-02T18:29:54.163974"
+    },
+    "18440560524602380362": {
+      "place_id": "ChIJZTkwiIdd818RShAESBgI6v8",
+      "store_name": "鉄板のみせ 拓",
+      "last_updated": "2025-11-02T18:29:56.315387",
+      "refresh_due": "2026-11-02T18:29:56.315396"
+    },
+    "18134949450275843998": {
+      "place_id": "ChIJi39EqA9k818Rnm9bI3FIrPs",
+      "store_name": "海の見えるレストラン[らぶじゃん]",
+      "last_updated": "2025-11-02T18:29:58.327615",
+      "refresh_due": "2026-11-02T18:29:58.327627"
+    },
+    "9566733685468495366": {
+      "place_id": "ChIJAVv0dABd818RBv4cp5ndw4Q",
+      "store_name": "星奈",
+      "last_updated": "2025-11-02T18:30:00.156171",
+      "refresh_due": "2026-11-02T18:30:00.156179"
+    },
+    "2273992533397624487": {
+      "place_id": "ChIJs7YYqJ5h818Rp1YONynYjh8",
+      "store_name": "四季菜割烹 伝",
+      "last_updated": "2025-11-02T18:30:02.296430",
+      "refresh_due": "2026-11-02T18:30:02.296439"
+    },
+    "9639898171618687972": {
+      "place_id": "ChIJV7DEeEBl818R5PtEDlDMx4U",
+      "store_name": "オケサとオサケの店BUNZO",
+      "last_updated": "2025-11-02T18:30:04.277515",
+      "refresh_due": "2026-11-02T18:30:04.277524"
+    },
+    "2203907423052151574": {
+      "place_id": "ChIJJ2WOSQBd818RFrve3B_alR4",
+      "store_name": "中国菜館 ファンタオ",
+      "last_updated": "2025-11-02T18:30:06.267760",
+      "refresh_due": "2026-11-02T18:30:06.267768"
+    },
+    "14795772967043799297": {
+      "place_id": "ChIJAbqYds9d818RARn5RR8lVc0",
+      "store_name": "麺処ときわときわ丸船内食堂",
+      "last_updated": "2025-11-02T18:30:08.414657",
+      "refresh_due": "2026-11-02T18:30:08.414667"
+    },
+    "2822208261876924754": {
+      "place_id": "ChIJqbxikfZc818RUsFYI3Z_Kic",
+      "store_name": "スナックF",
+      "last_updated": "2025-11-02T18:30:10.326172",
+      "refresh_due": "2026-11-02T18:30:10.326181"
+    },
+    "12926518785298399268": {
+      "place_id": "ChIJHTm9MgJk818RJAAg_Fg4ZLM",
+      "store_name": "ベースボーズ",
+      "last_updated": "2025-11-02T18:30:12.263259",
+      "refresh_due": "2026-11-02T18:30:12.263269"
+    },
+    "10934883091269665649": {
+      "place_id": "ChIJkeLeIadl818RccONazyCwJc",
+      "store_name": "海の見える海鮮居酒屋[幸之助]",
+      "last_updated": "2025-11-02T18:30:14.435599",
+      "refresh_due": "2026-11-02T18:30:14.435607"
+    },
+    "9010370140298167338": {
+      "place_id": "ChIJA9IVESZl818RKkRCU-dDC30",
+      "store_name": "いわみ亭",
+      "last_updated": "2025-11-02T18:30:16.314034",
+      "refresh_due": "2026-11-02T18:30:16.314042"
+    },
+    "17531564972671816937": {
+      "place_id": "ChIJz_JLEw9k818R6dTI2HShTPM",
+      "store_name": "割烹 松山",
+      "last_updated": "2025-11-02T18:30:18.299088",
+      "refresh_due": "2026-11-02T18:30:18.299105"
+    },
+    "17385476693232574718": {
+      "place_id": "ChIJ_2E4tMVl818R_uD1tvCeRfE",
+      "store_name": "おうちごはん マンマ クゥ",
+      "last_updated": "2025-11-02T18:30:20.278665",
+      "refresh_due": "2026-11-02T18:30:20.278675"
+    },
+    "9487662180674912247": {
+      "place_id": "ChIJq6pOaxtk818R9z8JTHzyqoM",
+      "store_name": "歌留多",
+      "last_updated": "2025-11-02T18:30:22.462563",
+      "refresh_due": "2026-11-02T18:30:22.462578"
+    },
+    "4534793971691298784": {
+      "place_id": "ChIJgdRVihpj818R4B8-RBfT7j4",
+      "store_name": "長浜荘 魚道場",
+      "last_updated": "2025-11-02T18:30:24.290678",
+      "refresh_due": "2026-11-02T18:30:24.290698"
+    },
+    "3405425954103843691": {
+      "place_id": "ChIJfwz_wKtm818Ra1tBz9yAQi8",
+      "store_name": "吉野家 佐渡佐和田店",
+      "last_updated": "2025-11-02T18:30:26.466174",
+      "refresh_due": "2026-11-02T18:30:26.466189"
+    },
+    "5277360621629217778": {
+      "place_id": "ChIJkXnuakVc818R8hvYU4bzPEk",
+      "store_name": "スタミナ道場みなと",
+      "last_updated": "2025-11-02T18:30:28.297401",
+      "refresh_due": "2026-11-02T18:30:28.297420"
+    },
+    "8761269930740376380": {
+      "place_id": "ChIJT8a-W3FZ818RPGMXM5VIlnk",
+      "store_name": "しなしな屋",
+      "last_updated": "2025-11-02T18:30:30.370791",
+      "refresh_due": "2026-11-02T18:30:30.370807"
+    },
+    "10218163778532265464": {
+      "place_id": "ChIJIR8Ja_5c818R-M0thNE1zo0",
+      "store_name": "讃岐うどん おけさ",
+      "last_updated": "2025-11-02T18:30:32.305111",
+      "refresh_due": "2026-11-02T18:30:32.305131"
+    },
+    "1213797251628128824": {
+      "place_id": "ChIJHUCRAFlc818RONqjXCtG2BA",
+      "store_name": "すしの魚秀",
+      "last_updated": "2025-11-02T18:30:34.356550",
+      "refresh_due": "2026-11-02T18:30:34.356558"
+    },
+    "12440836414059040436": {
+      "place_id": "ChIJtYC0bOld818RtM674M26pqw",
+      "store_name": "麺や INABA",
+      "last_updated": "2025-11-02T18:30:36.349561",
+      "refresh_due": "2026-11-02T18:30:36.349571"
+    },
+    "14296437342099399026": {
+      "place_id": "ChIJU6Z2zgFk818RcuF2UQQmZ8Y",
+      "store_name": "廻転寿司 佐渡弁慶 佐渡本店",
+      "last_updated": "2025-11-02T18:30:38.802117",
+      "refresh_due": "2026-11-02T18:30:38.802125"
+    },
+    "15717907892153956381": {
+      "place_id": "ChIJGydjjSVd818RHTglbPM5Ido",
+      "store_name": "龍金",
+      "last_updated": "2025-11-02T18:30:40.990274",
+      "refresh_due": "2026-11-02T18:30:40.990282"
+    },
+    "4753613967939505253": {
+      "place_id": "ChIJuexk-Vhc818RZYxe1rc6-EE",
+      "store_name": "きさらぎ 本店",
+      "last_updated": "2025-11-02T18:30:43.177283",
+      "refresh_due": "2026-11-02T18:30:43.177293"
+    },
+    "14903055519102256249": {
+      "place_id": "ChIJR3_Hnrpd818RecQD7AhK0s4",
+      "store_name": "あきつ丸",
+      "last_updated": "2025-11-02T18:30:45.285076",
+      "refresh_due": "2026-11-02T18:30:45.285085"
+    },
+    "11709997724529057914": {
+      "place_id": "ChIJ81r0YVFi818ReuAvY-NEgqI",
+      "store_name": "La Barque de Dionysos",
+      "last_updated": "2025-11-02T18:30:47.382476",
+      "refresh_due": "2026-11-02T18:30:47.382484"
+    },
+    "204994535259243365": {
+      "place_id": "ChIJTXgUKdhd818RZQMGl3FJ2AI",
+      "store_name": "進栄",
+      "last_updated": "2025-11-02T18:30:49.326021",
+      "refresh_due": "2026-11-02T18:30:49.326029"
+    },
+    "9468372384305160866": {
+      "place_id": "ChIJtwXYBQ9k818RUR__Z7pIHFQ",
+      "store_name": "赤ちょうちん",
+      "last_updated": "2025-11-02T18:30:51.372573",
+      "refresh_due": "2026-11-02T18:30:51.372582"
+    },
+    "13976066701100299839": {
+      "place_id": "ChIJpcqAxNBm818RP7Y_xJ329ME",
+      "store_name": "のがた",
+      "last_updated": "2025-11-02T18:30:53.269570",
+      "refresh_due": "2026-11-02T18:30:53.269579"
+    },
+    "2850640896456047710": {
+      "place_id": "ChIJSU-2otFm818RXrx2v8qCjyc",
+      "store_name": "食い処 ひきの",
+      "last_updated": "2025-11-02T18:30:55.323987",
+      "refresh_due": "2026-11-02T18:30:55.324002"
+    },
+    "13587870805539171682": {
+      "place_id": "ChIJ--t1-0xi818RYi0QioHQkbw",
+      "store_name": "ながい",
+      "last_updated": "2025-11-02T18:30:57.523712",
+      "refresh_due": "2026-11-02T18:30:57.523727"
+    },
+    "6060799163979734865": {
+      "place_id": "ChIJtwXYBQ9k818RUR__Z7pIHFQ",
+      "store_name": "やきにく屋 赤ちょうちん 河原田諏訪町",
+      "last_updated": "2025-11-02T18:30:59.413766",
+      "refresh_due": "2026-11-02T18:30:59.413774"
+    },
+    "1192852318826085896": {
+      "place_id": "ChIJH2-NdZ9h818RCD4hLd3cjRA",
+      "store_name": "和食Dining中堀亭",
+      "last_updated": "2025-11-02T18:31:01.443822",
+      "refresh_due": "2026-11-02T18:31:01.443839"
+    },
+    "18422887333847591768": {
+      "place_id": "ChIJT6qtagBn818RWGsH52s-q_8",
+      "store_name": "されどおにぎり 金井店",
+      "last_updated": "2025-11-02T18:31:03.369411",
+      "refresh_due": "2026-11-02T18:31:03.369427"
+    },
+    "9564746362099407222": {
+      "place_id": "ChIJEUIxvOhp818Rdhml3yPOvIQ",
+      "store_name": "海小屋camping style cafe & restaurant & Vacation Rental",
+      "last_updated": "2025-11-02T18:31:05.648866",
+      "refresh_due": "2026-11-02T18:31:05.648884"
+    },
+    "1806785124380674242": {
+      "place_id": "ChIJxzmjY6Fp818RwogrdH_9Ehk",
+      "store_name": "食堂 尖閣湾",
+      "last_updated": "2025-11-02T18:31:07.583932",
+      "refresh_due": "2026-11-02T18:31:07.583947"
+    },
+    "12478830341671823558": {
+      "place_id": "ChIJd5uyF8qH9F8Rxii3fxS2La0",
+      "store_name": "魚留",
+      "last_updated": "2025-11-02T18:31:09.855919",
+      "refresh_due": "2026-11-02T18:31:09.855929"
+    },
+    "6787937523966415517": {
+      "place_id": "ChIJX2fmufVi818RnRKQyTaZM14",
+      "store_name": "お食事処 夕鶴",
+      "last_updated": "2025-11-02T18:31:11.737894",
+      "refresh_due": "2026-11-02T18:31:11.737902"
+    },
+    "10434178349917645682": {
+      "place_id": "ChIJ90JHvHpl818RcqvpNe2lzZA",
+      "store_name": "古民家空間 京町亭",
+      "last_updated": "2025-11-02T18:31:13.743946",
+      "refresh_due": "2026-11-02T18:31:13.743955"
+    },
+    "11508505661851592792": {
+      "place_id": "ChIJnQD3XVtv818RWGg8vuxstp8",
+      "store_name": "佐渡金山ラーメン茶屋",
+      "last_updated": "2025-11-02T18:31:15.738945",
+      "refresh_due": "2026-11-02T18:31:15.738961"
+    },
+    "8027817995988815540": {
+      "place_id": "ChIJEyEyO_Rl818RtM5mJO-JaG8",
+      "store_name": "そば処 與左エ門よざえもん~yozaemon~",
+      "last_updated": "2025-11-02T18:31:17.933575",
+      "refresh_due": "2026-11-02T18:31:17.933590"
+    },
+    "10805341886738238512": {
+      "place_id": "ChIJlaEMaotl818RMIyuYzJJ9JU",
+      "store_name": "銀寿司",
+      "last_updated": "2025-11-02T18:31:19.965675",
+      "refresh_due": "2026-11-02T18:31:19.965690"
+    },
+    "12449698148190768744": {
+      "place_id": "ChIJQeOxEYtl818RaM6_I4E2xqw",
+      "store_name": "ひのき",
+      "last_updated": "2025-11-02T18:31:22.017876",
+      "refresh_due": "2026-11-02T18:31:22.017891"
+    },
+    "8795863343216417749": {
+      "place_id": "ChIJS2wiQ4tl818R1VtLsRsvEXo",
+      "store_name": "磯の家",
+      "last_updated": "2025-11-02T18:31:24.121392",
+      "refresh_due": "2026-11-02T18:31:24.121406"
+    },
+    "8202589307798458633": {
+      "place_id": "ChIJpbhHZItl818RCZG-KYRz1XE",
+      "store_name": "板前の店 竹屋",
+      "last_updated": "2025-11-02T18:31:26.137479",
+      "refresh_due": "2026-11-02T18:31:26.137494"
+    },
+    "17768130648361163293": {
+      "place_id": "ChIJp5XG95hg818RHVpMYq8UlfY",
+      "store_name": "レストラン デビンコ へんじんもっこ",
+      "last_updated": "2025-11-02T18:31:28.175171",
+      "refresh_due": "2026-11-02T18:31:28.175186"
+    },
+    "286953430501034281": {
+      "place_id": "ChIJsdmAv0Nj818RKQkY7J92-wM",
+      "store_name": "おけさ横丁",
+      "last_updated": "2025-11-02T18:31:30.053525",
+      "refresh_due": "2026-11-02T18:31:30.053541"
+    },
+    "11917880890428658233": {
+      "place_id": "ChIJRV3xycSG9F8ROZJqtYbRZKU",
+      "store_name": "炭火焼酒場 灯",
+      "last_updated": "2025-11-02T18:31:32.241566",
+      "refresh_due": "2026-11-02T18:31:32.241582"
+    },
+    "13840555076125982658": {
+      "place_id": "ChIJl9fGXwVk818Rwv-35oKHE8A",
+      "store_name": "龍の隠れ家",
+      "last_updated": "2025-11-02T18:31:34.116408",
+      "refresh_due": "2026-11-02T18:31:34.116417"
+    },
+    "6944845758112863862": {
+      "place_id": "ChIJQXpLYoxl818RdhYy8GsMYWA",
+      "store_name": "割烹 中庄",
+      "last_updated": "2025-11-02T18:31:36.260592",
+      "refresh_due": "2026-11-02T18:31:36.260607"
+    },
+    "9320664222188752643": {
+      "place_id": "ChIJlYp2OwNl818RA89AIrqmWYE",
+      "store_name": "ラーメン関口 佐渡本店",
+      "last_updated": "2025-11-02T18:31:38.183279",
+      "refresh_due": "2026-11-02T18:31:38.183294"
+    },
+    "2575207539342009042": {
+      "place_id": "ChIJS7r-iI5l818R0mJj7Zz5vCM",
+      "store_name": "食事処 とみ食堂",
+      "last_updated": "2025-11-02T18:31:40.195942",
+      "refresh_due": "2026-11-02T18:31:40.195957"
+    },
+    "15328461381667607410": {
+      "place_id": "ChIJjeOcNYVl818RclOXt2miudQ",
+      "store_name": "寿司 初",
+      "last_updated": "2025-11-02T18:31:42.142350",
+      "refresh_due": "2026-11-02T18:31:42.142357"
+    },
+    "2447741165466161126": {
+      "place_id": "ChIJnRu9KgBl818R5g-2DZ8f-CE",
+      "store_name": "媼と翁",
+      "last_updated": "2025-11-02T18:31:44.113872",
+      "refresh_due": "2026-11-02T18:31:44.113881"
+    },
+    "4063256129415053786": {
+      "place_id": "ChIJ60LtBw9k818R2oE28euVYzg",
+      "store_name": "しまちゃん",
+      "last_updated": "2025-11-02T18:31:46.337080",
+      "refresh_due": "2026-11-02T18:31:46.337095"
+    },
+    "14457576371198356161": {
+      "place_id": "ChIJq7qRM0t7818RwepbLhyho8g",
+      "store_name": "手打ちそば 徳平 稲鯨",
+      "last_updated": "2025-11-02T18:31:48.283382",
+      "refresh_due": "2026-11-02T18:31:48.283397"
+    },
+    "675666425750109865": {
+      "place_id": "ChIJOcKetkx7818RqT5-zQhzYAk",
+      "store_name": "すし角",
+      "last_updated": "2025-11-02T18:31:50.361276",
+      "refresh_due": "2026-11-02T18:31:50.361291"
+    },
+    "8024379149997624859": {
+      "place_id": "ChIJFz2aBwBd818RG86oalJSXG8",
+      "store_name": "かき家 みうら 民泊 チャーター船 要予約",
+      "last_updated": "2025-11-02T18:31:52.465527",
+      "refresh_due": "2026-11-02T18:31:52.465542"
+    },
+    "6165108374851940154": {
+      "place_id": "ChIJ_y7vUABd818ROu_VHGfdjlU",
+      "store_name": "東栄館居酒屋さとみ跡",
+      "last_updated": "2025-11-02T18:31:54.614609",
+      "refresh_due": "2026-11-02T18:31:54.614626"
+    },
+    "4448043852486238873": {
+      "place_id": "ChIJLdCVIxtd818RmWLNLFGguj0",
+      "store_name": "雪山食堂 しまの縁えにし",
+      "last_updated": "2025-11-02T18:31:56.461473",
+      "refresh_due": "2026-11-02T18:31:56.461483"
+    },
+    "15576408087756922572": {
+      "place_id": "ChIJ9QmsxWFn818RzN5F46CEKtg",
+      "store_name": "樋口食堂",
+      "last_updated": "2025-11-02T18:31:58.544069",
+      "refresh_due": "2026-11-02T18:31:58.544084"
+    },
+    "13291648109296221705": {
+      "place_id": "ChIJewTLhGpn818RCf4Xgohrdbg",
+      "store_name": "椿屋 陶芸館 椿茶屋",
+      "last_updated": "2025-11-02T18:32:00.467632",
+      "refresh_due": "2026-11-02T18:32:00.467647"
+    },
+    "2875918236916728541": {
+      "place_id": "ChIJD1VpUddm818R3UJ9MmZQ6Sc",
+      "store_name": "割烹 石山",
+      "last_updated": "2025-11-02T18:32:02.686104",
+      "refresh_due": "2026-11-02T18:32:02.686119"
+    },
+    "2745957903429223130": {
+      "place_id": "ChIJK8hlzdBm818R2kITGiqaGyY",
+      "store_name": "司すし",
+      "last_updated": "2025-11-02T18:32:04.513973",
+      "refresh_due": "2026-11-02T18:32:04.513993"
+    },
+    "4231821481489312180": {
+      "place_id": "ChIJL4pGvdFm818RtKkJXTdzujo",
+      "store_name": "駅馬車",
+      "last_updated": "2025-11-02T18:32:06.712784",
+      "refresh_due": "2026-11-02T18:32:06.712798"
+    },
+    "13810265006811448203": {
+      "place_id": "ChIJP6P9fSdn818RiwMBkdrqp78",
+      "store_name": "居酒屋 銀",
+      "last_updated": "2025-11-02T18:32:08.750217",
+      "refresh_due": "2026-11-02T18:32:08.750233"
+    },
+    "5058546916535100045": {
+      "place_id": "ChIJnQ1MdNFm818RjeK4h56RM0Y",
+      "store_name": "こなもん屋 纏まとい",
+      "last_updated": "2025-11-02T18:32:10.862641",
+      "refresh_due": "2026-11-02T18:32:10.862656"
+    },
+    "15931865917756733302": {
+      "place_id": "ChIJgbSmH2Nn818RdvcKPaRbGd0",
+      "store_name": "麺や 龍美",
+      "last_updated": "2025-11-02T18:32:12.764998",
+      "refresh_due": "2026-11-02T18:32:12.765013"
+    },
+    "12227005833030523776": {
+      "place_id": "ChIJQ3yCbgBn818RgNtpEAYNr6k",
+      "store_name": "ちぐさ食堂",
+      "last_updated": "2025-11-02T18:32:14.879586",
+      "refresh_due": "2026-11-02T18:32:14.879601"
+    },
+    "11012269616056539102": {
+      "place_id": "ChIJZTePi9Fm818R3pfgy95w05g",
+      "store_name": "クッチーナ",
+      "last_updated": "2025-11-02T18:32:16.843831",
+      "refresh_due": "2026-11-02T18:32:16.843846"
+    },
+    "7374080177557344904": {
+      "place_id": "ChIJW5z-b75n818RiBKOGNr-VWY",
+      "store_name": "かないサロン旦！",
+      "last_updated": "2025-11-02T18:32:18.931914",
+      "refresh_due": "2026-11-02T18:32:18.931934"
+    },
+    "5882412242081110353": {
+      "place_id": "ChIJMVmiiQFn818RUVmnj8SGolE",
+      "store_name": "りょうこのギーザ餃子",
+      "last_updated": "2025-11-02T18:32:20.993390",
+      "refresh_due": "2026-11-02T18:32:20.993406"
+    },
+    "442110467369237397": {
+      "place_id": "ChIJ6frfcdJm818RlXsGryCxIgY",
+      "store_name": "三代目ラーメン",
+      "last_updated": "2025-11-02T18:32:22.854207",
+      "refresh_due": "2026-11-02T18:32:22.854222"
+    },
+    "17524870505067018966": {
+      "place_id": "ChIJE3zgWc5l818R1no9pd_YNPM",
+      "store_name": "山下食堂",
+      "last_updated": "2025-11-02T18:32:25.108415",
+      "refresh_due": "2026-11-02T18:32:25.108430"
+    },
+    "7280854365867689256": {
+      "place_id": "ChIJR8n-pERj818RKEXlWnjKCmU",
+      "store_name": "ortomareオルトマーレ",
+      "last_updated": "2025-11-02T18:32:26.959999",
+      "refresh_due": "2026-11-02T18:32:26.960014"
+    },
+    "4484030579673406058": {
+      "place_id": "ChIJ-b0tqT6H9F8RahpsBw56Oj4",
+      "store_name": "小木家",
+      "last_updated": "2025-11-02T18:32:29.122552",
+      "refresh_due": "2026-11-02T18:32:29.122566"
+    },
+    "18206471250468690447": {
+      "place_id": "ChIJd_0MzbVm818RD1qM6SNhqvw",
+      "store_name": "すしや まるいし",
+      "last_updated": "2025-11-02T18:32:31.160574",
+      "refresh_due": "2026-11-02T18:32:31.160589"
+    },
+    "15748378691869216886": {
+      "place_id": "ChIJ0-9Z4alm818RdhAyVft6jdo",
+      "store_name": "やじま 東大通店",
+      "last_updated": "2025-11-02T18:32:33.200451",
+      "refresh_due": "2026-11-02T18:32:33.200466"
+    },
+    "3904098913524206033": {
+      "place_id": "ChIJ0WWfkM1m818R0UmZ7EYlLjY",
+      "store_name": "手打そば 徳平 中興",
+      "last_updated": "2025-11-02T18:32:35.061226",
+      "refresh_due": "2026-11-02T18:32:35.061241"
+    },
+    "2674835220653317013": {
+      "place_id": "ChIJS5tbu9Jm818RlZu-F3bsHiU",
+      "store_name": "割烹 一休",
+      "last_updated": "2025-11-02T18:32:37.281962",
+      "refresh_due": "2026-11-02T18:32:37.281977"
+    },
+    "15801323681797876680": {
+      "place_id": "ChIJFeVGh8Vm818RyKuHaiuUSds",
+      "store_name": "中国料理 金華楼",
+      "last_updated": "2025-11-02T18:32:39.145128",
+      "refresh_due": "2026-11-02T18:32:39.145136"
+    },
+    "11560017602109480300": {
+      "place_id": "ChIJqUtu7lKB9F8RbJ3_8sJubaA",
+      "store_name": "T&M Bread Delivery SADO Island・マーカスのパン屋",
+      "last_updated": "2025-11-02T18:32:41.347393",
+      "refresh_due": "2026-11-02T18:32:41.347409"
+    },
+    "204054953208101016": {
+      "place_id": "ChIJa_qDn_Jn818RmLigGOby1AI",
+      "store_name": "麺処 若",
+      "last_updated": "2025-11-02T18:32:43.382759",
+      "refresh_due": "2026-11-02T18:32:43.382774"
+    },
+    "6901552355506883772": {
+      "place_id": "ChIJ3aLkLABn818RvIy_JE09x18",
+      "store_name": "麺屋 成",
+      "last_updated": "2025-11-02T18:32:45.278937",
+      "refresh_due": "2026-11-02T18:32:45.278952"
+    },
+    "2254103898517017186": {
+      "place_id": "ChIJp6aPdLFm818RYhLujY0vSB8",
+      "store_name": "いちばんどり",
+      "last_updated": "2025-11-02T18:32:47.456694",
+      "refresh_due": "2026-11-02T18:32:47.456709"
+    },
+    "8525377504818403739": {
+      "place_id": "ChIJD-XmAK5m818Rm5nO1qs5UHY",
+      "store_name": "はなまるうどん 佐渡佐和田店",
+      "last_updated": "2025-11-02T18:32:49.498310",
+      "refresh_due": "2026-11-02T18:32:49.498321"
+    },
+    "11522408645003776271": {
+      "place_id": "ChIJL6roB65m818RDxFXQp3R558",
+      "store_name": "ミスタードーナツ 佐渡佐和田ショップ",
+      "last_updated": "2025-11-02T18:32:51.512939",
+      "refresh_due": "2026-11-02T18:32:51.512954"
+    },
+    "4949416106948043742": {
+      "place_id": "ChIJzS_Z4K1m818R3iM85Lnbr0Q",
+      "store_name": "チャイニーズレストラン 昴",
+      "last_updated": "2025-11-02T18:32:53.384256",
+      "refresh_due": "2026-11-02T18:32:53.384265"
+    },
+    "14701474885406279901": {
+      "place_id": "ChIJq6rWlBtk818R3cj3OoQhBsw",
+      "store_name": "かえる食堂",
+      "last_updated": "2025-11-02T18:32:55.615633",
+      "refresh_due": "2026-11-02T18:32:55.615652"
+    },
+    "5381735890370120155": {
+      "place_id": "ChIJ333m7qtm818R20l7VEfEr0o",
+      "store_name": "ほっともっと 佐渡佐和田店",
+      "last_updated": "2025-11-02T18:32:57.691219",
+      "refresh_due": "2026-11-02T18:32:57.691234"
+    },
+    "11913847366287701348": {
+      "place_id": "ChIJfwz_wKtm818RZDXNrw59VqU",
+      "store_name": "つぼ八 佐渡佐和田店",
+      "last_updated": "2025-11-02T18:32:59.717887",
+      "refresh_due": "2026-11-02T18:32:59.717902"
+    },
+    "5886146816179364597": {
+      "place_id": "ChIJHQpVGhpk818R9eIq2lfLr1E",
+      "store_name": "日本料理なかむら",
+      "last_updated": "2025-11-02T18:33:01.680721",
+      "refresh_due": "2026-11-02T18:33:01.680736"
+    },
+    "9030278049128227071": {
+      "place_id": "ChIJL9kRVQBl818R_6BLjQr-UX0",
+      "store_name": "されどおにぎり 佐和田店",
+      "last_updated": "2025-11-02T18:33:03.573567",
+      "refresh_due": "2026-11-02T18:33:03.573577"
+    },
+    "199683860135931371": {
+      "place_id": "ChIJtb86GKpm818R6-3HrmlrxQI",
+      "store_name": "池袋 大勝軒 佐渡店",
+      "last_updated": "2025-11-02T18:33:05.550047",
+      "refresh_due": "2026-11-02T18:33:05.550067"
+    },
+    "9960287706480679810": {
+      "place_id": "ChIJ7aYdaw9k818Rgpt4reUMOoo",
+      "store_name": "蛇の目寿司 佐和田店",
+      "last_updated": "2025-11-02T18:33:07.582041",
+      "refresh_due": "2026-11-02T18:33:07.582056"
+    },
+    "4651771054075118352": {
+      "place_id": "ChIJsdBF5wFk818REIOXpiBpjkA",
+      "store_name": "モスバーガー佐渡佐和田店",
+      "last_updated": "2025-11-02T18:33:09.584975",
+      "refresh_due": "2026-11-02T18:33:09.584983"
+    },
+    "16277629513552847687": {
+      "place_id": "ChIJzWKL3DiB9F8RR2O7zMzB5eE",
+      "store_name": "T's Cafe",
+      "last_updated": "2025-11-02T18:33:11.663490",
+      "refresh_due": "2026-11-02T18:33:11.663505"
+    },
+    "18026370020530874113": {
+      "place_id": "ChIJq6o99TAoil8RuQBWrhhHZI0",
+      "store_name": "こうめ",
+      "last_updated": "2025-11-02T18:33:13.603678",
+      "refresh_due": "2026-11-02T18:33:13.603692"
+    },
+    "9637255967916477257": {
+      "place_id": "ChIJra3fVgBl818RScssET5pvoU",
+      "store_name": "旬彩亭和奏",
+      "last_updated": "2025-11-02T18:33:15.554163",
+      "refresh_due": "2026-11-02T18:33:15.554183"
+    },
+    "12726195998680045848": {
+      "place_id": "ChIJvVxRkgRk818RGFlSo9WHnLA",
+      "store_name": "トマト&オニオン 佐渡店",
+      "last_updated": "2025-11-02T18:33:17.769421",
+      "refresh_due": "2026-11-02T18:33:17.769436"
+    },
+    "15908656821560532804": {
+      "place_id": "ChIJU6Z2zgFk818RRN-1bhfnxtw",
+      "store_name": "ミニレストラン マンモス",
+      "last_updated": "2025-11-02T18:33:19.814247",
+      "refresh_due": "2026-11-02T18:33:19.814262"
+    },
+    "17191471104225247807": {
+      "place_id": "ChIJI-7bfQNk818RPwK9jeJflO4",
+      "store_name": "Un Grand Pas アングランパ",
+      "last_updated": "2025-11-02T18:33:21.810398",
+      "refresh_due": "2026-11-02T18:33:21.810413"
+    },
+    "4326092162611619539": {
+      "place_id": "ChIJ9TwBnAFk818R0yYRuuZdCTw",
+      "store_name": "大まるラーメン",
+      "last_updated": "2025-11-02T18:33:23.901049",
+      "refresh_due": "2026-11-02T18:33:23.901064"
+    },
+    "11196119948128338447": {
+      "place_id": "ChIJnWr7PwRk818RD8La8sWbYJs",
+      "store_name": "カフェ ドール",
+      "last_updated": "2025-11-02T18:33:25.958609",
+      "refresh_due": "2026-11-02T18:33:25.958625"
+    },
+    "18446381337388070729": {
+      "place_id": "ChIJCfakMgJk818RSTdp3he2_v8",
+      "store_name": "拉麺 餃子 恵比寿",
+      "last_updated": "2025-11-02T18:33:27.860673",
+      "refresh_due": "2026-11-02T18:33:27.860687"
+    },
+    "11931296479511130881": {
+      "place_id": "ChIJ01vukQ9k818RATMh8-56lKU",
+      "store_name": "居酒屋いしちゃん",
+      "last_updated": "2025-11-02T18:33:29.843311",
+      "refresh_due": "2026-11-02T18:33:29.843319"
+    },
+    "2106754096092115195": {
+      "place_id": "ChIJ_csfEw9k818R-3CrNrCxPB0",
+      "store_name": "スナック アリス",
+      "last_updated": "2025-11-02T18:33:31.850840",
+      "refresh_due": "2026-11-02T18:33:31.850847"
+    },
+    "16487543200169429701": {
+      "place_id": "ChIJt2VHdcFl818RxYoBkS-Fz-Q",
+      "store_name": "HIGHER BAR",
+      "last_updated": "2025-11-02T18:33:33.853975",
+      "refresh_due": "2026-11-02T18:33:33.853984"
+    },
+    "9143593023452745169": {
+      "place_id": "ChIJIaykLgJk818R0Q2k9WiR5H4",
+      "store_name": "喰いもんやあんとん",
+      "last_updated": "2025-11-02T18:33:36.023952",
+      "refresh_due": "2026-11-02T18:33:36.023967"
+    },
+    "2769356790317992648": {
+      "place_id": "ChIJGYbxhwZk818RyEo4_1O7biY",
+      "store_name": "おもいやり",
+      "last_updated": "2025-11-02T18:33:37.899960",
+      "refresh_due": "2026-11-02T18:33:37.899970"
+    },
+    "9204158262695990927": {
+      "place_id": "ChIJbQ4POQBl818Rj5Z4mCy9u38",
+      "store_name": "ラーメン トッキチ特吉",
+      "last_updated": "2025-11-02T18:33:40.090924",
+      "refresh_due": "2026-11-02T18:33:40.090939"
+    },
+    "5183323172420840542": {
+      "place_id": "ChIJT8eCMwdk818RXuwxgPbc7kc",
+      "store_name": "よねやま",
+      "last_updated": "2025-11-02T18:33:42.151489",
+      "refresh_due": "2026-11-02T18:33:42.151505"
+    },
+    "14886550021785332150": {
+      "place_id": "ChIJP4JIMQRk818RtimZW1-ml84",
+      "store_name": "居酒屋 杏庵",
+      "last_updated": "2025-11-02T18:33:44.225998",
+      "refresh_due": "2026-11-02T18:33:44.226013"
+    },
+    "10367962620850690484": {
+      "place_id": "ChIJt316KXZl818RtFlVZBJn4o8",
+      "store_name": "とんかつ 中堀",
+      "last_updated": "2025-11-02T18:33:46.259007",
+      "refresh_due": "2026-11-02T18:33:46.259022"
+    },
+    "6702187161700429315": {
+      "place_id": "ChIJBzNFEAZk818RA25Wv7bzAl0",
+      "store_name": "ちよぼ家 無隅庵",
+      "last_updated": "2025-11-02T18:33:48.287865",
+      "refresh_due": "2026-11-02T18:33:48.287880"
+    },
+    "17502451414622671964": {
+      "place_id": "ChIJxSbIaQBl818RXBQeY9Qy5fI",
+      "store_name": "三光亭",
+      "last_updated": "2025-11-02T18:33:50.144989",
+      "refresh_due": "2026-11-02T18:33:50.145004"
+    },
+    "17999253426507713841": {
+      "place_id": "ChIJbfhtIAZk818RMY05laAxyvk",
+      "store_name": "くいものや 丸美亭",
+      "last_updated": "2025-11-02T18:33:52.155408",
+      "refresh_due": "2026-11-02T18:33:52.155417"
+    },
+    "562751476834047391": {
+      "place_id": "ChIJscVGnghk818RnxWFkXxLzwc",
+      "store_name": "福寿司",
+      "last_updated": "2025-11-02T18:33:54.219454",
+      "refresh_due": "2026-11-02T18:33:54.219463"
+    },
+    "8276965831531233714": {
+      "place_id": "ChIJ40hmQgZk818RsgF3DpKw3XI",
+      "store_name": "お食事処 いとう",
+      "last_updated": "2025-11-02T18:33:56.390806",
+      "refresh_due": "2026-11-02T18:33:56.390815"
+    },
+    "7103847904228483507": {
+      "place_id": "ChIJC24o-MJj818RsyHx9QfwlWI",
+      "store_name": "三崎そば",
+      "last_updated": "2025-11-02T18:33:58.447591",
+      "refresh_due": "2026-11-02T18:33:58.447603"
+    },
+    "6488382939470430050": {
+      "place_id": "ChIJFZ98agBf818RYv_WEehdC1o",
+      "store_name": "ぎょうざらーめん伝次郎",
+      "last_updated": "2025-11-02T18:34:00.462372",
+      "refresh_due": "2026-11-02T18:34:00.462386"
+    },
+    "15917658224232080701": {
+      "place_id": "ChIJcwKek-xg818RPaVtz9Hh5tw",
+      "store_name": "鮨 長三郎",
+      "last_updated": "2025-11-02T18:34:02.476380",
+      "refresh_due": "2026-11-02T18:34:02.476389"
+    },
+    "512392617126782500": {
+      "place_id": "ChIJj0lbTwBh818RJOZf2V5iHAc",
+      "store_name": "団子屋「御縁GOEN」",
+      "last_updated": "2025-11-02T18:34:04.559580",
+      "refresh_due": "2026-11-02T18:34:04.559588"
+    },
+    "595056886968946376": {
+      "place_id": "ChIJ2yl158IpG2AR54E8lSFhxvk",
+      "store_name": "さわやか",
+      "last_updated": "2025-11-02T18:34:06.491180",
+      "refresh_due": "2026-11-02T18:34:06.491198"
+    },
+    "1024050754606216697": {
+      "place_id": "ChIJF7zHOUdh818R-TVGVLwoNg4",
+      "store_name": "呑々元茂 ぐいぐいがんも",
+      "last_updated": "2025-11-02T18:34:08.592475",
+      "refresh_due": "2026-11-02T18:34:08.592490"
+    },
+    "9692124161205330080": {
+      "place_id": "ChIJrWk6D1Fi818RoOCf05JXgYY",
+      "store_name": "炭火焼 登貴",
+      "last_updated": "2025-11-02T18:34:10.455801",
+      "refresh_due": "2026-11-02T18:34:10.455816"
+    },
+    "14183089885663793191": {
+      "place_id": "ChIJg8lDgFJi818RJxBtFBt11MQ",
+      "store_name": "たつみ",
+      "last_updated": "2025-11-02T18:34:12.502816",
+      "refresh_due": "2026-11-02T18:34:12.502830"
+    },
+    "839716010391577164": {
+      "place_id": "ChIJ_6_ChlJi818RTCKZL0NFpws",
+      "store_name": "割烹ごしま",
+      "last_updated": "2025-11-02T18:34:14.732846",
+      "refresh_due": "2026-11-02T18:34:14.732858"
+    },
+    "11226367162160567233": {
+      "place_id": "ChIJiRnYk_Zc818RwdOwQnQRzJs",
+      "store_name": "スナック とき",
+      "last_updated": "2025-11-02T18:34:16.877014",
+      "refresh_due": "2026-11-02T18:34:16.877021"
+    },
+    "3236455090836070318": {
+      "place_id": "ChIJCViYM4qD9F8Rrt_J9MEy6iw",
+      "store_name": "こめっこ食堂",
+      "last_updated": "2025-11-02T18:34:18.973378",
+      "refresh_due": "2026-11-02T18:34:18.973386"
+    },
+    "14474383631787517419": {
+      "place_id": "ChIJl6wUQqBh818R62VsezlX38g",
+      "store_name": "中国料理 味里",
+      "last_updated": "2025-11-02T18:34:20.843382",
+      "refresh_due": "2026-11-02T18:34:20.843390"
+    },
+    "1191531755660607514": {
+      "place_id": "ChIJKSiDgp9h818RGoC_mtEriRA",
+      "store_name": "扇寿司",
+      "last_updated": "2025-11-02T18:34:22.890677",
+      "refresh_due": "2026-11-02T18:34:22.890685"
+    },
+    "4156835263133158988": {
+      "place_id": "ChIJC-JfMgBh818RTI7e4KULsDk",
+      "store_name": "居酒屋 天狗",
+      "last_updated": "2025-11-02T18:34:25.098080",
+      "refresh_due": "2026-11-02T18:34:25.098096"
+    },
+    "10648645360904881697": {
+      "place_id": "ChIJ7Sh08p9h818RIcbYa4mWx5M",
+      "store_name": "いちりん",
+      "last_updated": "2025-11-02T18:34:27.060408",
+      "refresh_due": "2026-11-02T18:34:27.060422"
+    },
+    "12988663907732150194": {
+      "place_id": "ChIJTRGE69Bm818RstdP1wEBQbQ",
+      "store_name": "テルロード",
+      "last_updated": "2025-11-02T18:34:29.120859",
+      "refresh_due": "2026-11-02T18:34:29.120873"
+    },
+    "16592828317034846868": {
+      "place_id": "ChIJORsaucCE9F8RlJrnF3GRReY",
+      "store_name": "赤泊観光センター",
+      "last_updated": "2025-11-02T18:34:31.028473",
+      "refresh_due": "2026-11-02T18:34:31.028488"
+    },
+    "14422596572436457996": {
+      "place_id": "ChIJmdS_WlKZ9F8RDGrXHitbJ8g",
+      "store_name": "晴ればい処 松前",
+      "last_updated": "2025-11-02T18:34:33.160045",
+      "refresh_due": "2026-11-02T18:34:33.160060"
+    },
+    "16375918374620073794": {
+      "place_id": "ChIJPwpoPbOB9F8RQo8Flv_yQuM",
+      "store_name": "パルフェ庄三",
+      "last_updated": "2025-11-02T18:34:36.073289",
+      "refresh_due": "2026-11-02T18:34:36.073304"
+    },
+    "14024557608092891831": {
+      "place_id": "ChIJY-r5p1KB9F8Rt_pg2tY8ocI",
+      "store_name": "りか亭",
+      "last_updated": "2025-11-02T18:34:38.219949",
+      "refresh_due": "2026-11-02T18:34:38.219964"
+    },
+    "6742621577448912649": {
+      "place_id": "ChIJe_VhqySH9F8RCfe5ypmakl0",
+      "store_name": "串しげ",
+      "last_updated": "2025-11-02T18:34:40.054011",
+      "refresh_due": "2026-11-02T18:34:40.054032"
+    },
+    "18374937081558050854": {
+      "place_id": "ChIJUaobXDuH9F8RJqhrzOvjAP8",
+      "store_name": "かっさい",
+      "last_updated": "2025-11-02T18:34:42.245238",
+      "refresh_due": "2026-11-02T18:34:42.245253"
+    },
+    "16594043341492179099": {
+      "place_id": "ChIJM_KnTTiH9F8Rm9ATBYDiSeY",
+      "store_name": "魚料理の店 魚晴",
+      "last_updated": "2025-11-02T18:34:44.319445",
+      "refresh_due": "2026-11-02T18:34:44.319460"
+    },
+    "2022437405733932196": {
+      "place_id": "ChIJxQn431GH9F8RpMw77RokERw",
+      "store_name": "のらねこ",
+      "last_updated": "2025-11-02T18:34:46.228860",
+      "refresh_due": "2026-11-02T18:34:46.228867"
+    },
+    "17861361150755469608": {
+      "place_id": "ChIJoc3_aTmH9F8RKPm9Q1VN4Pc",
+      "store_name": "や志満",
+      "last_updated": "2025-11-02T18:34:48.205088",
+      "refresh_due": "2026-11-02T18:34:48.205095"
+    },
+    "2814761057638515612": {
+      "place_id": "ChIJd48_DjyH9F8RnIMlyEQKECc",
+      "store_name": "こすぎや",
+      "last_updated": "2025-11-02T18:34:50.201545",
+      "refresh_due": "2026-11-02T18:34:50.201553"
+    },
+    "13912204264078548763": {
+      "place_id": "ChIJV-8a8jiH9F8RG58TcxEUEsE",
+      "store_name": "稲よし",
+      "last_updated": "2025-11-02T18:34:52.377199",
+      "refresh_due": "2026-11-02T18:34:52.377214"
+    },
+    "12106858810435173075": {
+      "place_id": "ChIJJcBEPQCH9F8RL5D-FRnxFyo",
+      "store_name": "十千万とちまん",
+      "last_updated": "2025-11-02T18:34:54.577512",
+      "refresh_due": "2026-11-02T18:34:54.577526"
+    },
+    "8255986757126423697": {
+      "place_id": "ChIJl5Mbh0iH9F8RkYTZqDYok3I",
+      "store_name": "山びこ",
+      "last_updated": "2025-11-02T18:34:56.480095",
+      "refresh_due": "2026-11-02T18:34:56.480110"
+    },
+    "11470581669829084821": {
+      "place_id": "ChIJz44HvjiH9F8RlQZFRUGxL58",
+      "store_name": "まつはま",
+      "last_updated": "2025-11-02T18:34:58.492532",
+      "refresh_due": "2026-11-02T18:34:58.492547"
+    },
+    "1499783524581880149": {
+      "place_id": "ChIJEwqbwDiH9F8RVbGvXitN0BQ",
+      "store_name": "中華そば 与三郎",
+      "last_updated": "2025-11-02T18:35:00.423050",
+      "refresh_due": "2026-11-02T18:35:00.423057"
+    },
+    "9471385070864671530": {
+      "place_id": "ChIJ1y13LT-H9F8RKqPTV4oecYM",
+      "store_name": "栄寿司",
+      "last_updated": "2025-11-02T18:35:02.692060",
+      "refresh_due": "2026-11-02T18:35:02.692075"
+    },
+    "10338921479246765914": {
+      "place_id": "ChIJ77RO-XSH9F8RWt8os046e48",
+      "store_name": "小木番所そば",
+      "last_updated": "2025-11-02T18:35:04.754321",
+      "refresh_due": "2026-11-02T18:35:04.754336"
+    },
+    "797090701323359633": {
+      "place_id": "ChIJN92qeAB99F8RkVUlCsXVDws",
+      "store_name": "菜の花",
+      "last_updated": "2025-11-02T18:35:06.825602",
+      "refresh_due": "2026-11-02T18:35:06.825617"
+    },
+    "5636907147010412809": {
+      "place_id": "ChIJ6SgvpXJ99F8RCZFqQS9ROk4",
+      "store_name": "たこぼうし不定期営業",
+      "last_updated": "2025-11-02T18:35:08.737161",
+      "refresh_due": "2026-11-02T18:35:08.737176"
+    },
+    "8764577106599699545": {
+      "place_id": "ChIJn6GLGRR99F8RWWRlFXEIonk",
+      "store_name": "よしかわ屋12月~3月は冬休み",
+      "last_updated": "2025-11-02T18:35:10.842763",
+      "refresh_due": "2026-11-02T18:35:10.842777"
+    },
+    "14360427359103812833": {
+      "place_id": "ChIJY_N2uPJc818RE9TqjCacgeY",
+      "store_name": "春日",
+      "last_updated": "2025-11-02T18:35:13.032835",
+      "refresh_due": "2026-11-02T18:35:13.032851"
+    },
+    "147539243886928412": {
+      "place_id": "ChIJ95bkfgCF9F8RHGJPHikqDAI",
+      "store_name": "憩いの場 三益",
+      "last_updated": "2025-11-02T18:35:14.888858",
+      "refresh_due": "2026-11-02T18:35:14.888866"
+    },
+    "9951907821098560141": {
+      "place_id": "ChIJWd8rPgCF9F8RjeoCkm9HHIo",
+      "store_name": "cafe bar カサブランカ",
+      "last_updated": "2025-11-02T18:35:17.072223",
+      "refresh_due": "2026-11-02T18:35:17.072237"
+    },
+    "17573792556896417821": {
+      "place_id": "ChIJOQ7k8MCE9F8RHfg2djin4vM",
+      "store_name": "優遊飯店",
+      "last_updated": "2025-11-02T18:35:19.025756",
+      "refresh_due": "2026-11-02T18:35:19.025771"
+    },
+    "17633441048918922484": {
+      "place_id": "ChIJSwZ2vvZc818R9JSaQDWRtvQ",
+      "store_name": "スナックハッピー",
+      "last_updated": "2025-11-02T18:35:20.995579",
+      "refresh_due": "2026-11-02T18:35:20.995594"
+    },
+    "2534582868317417382": {
+      "place_id": "ChIJ4RpUQ_Zc818Rpq_Zn7ClLCM",
+      "store_name": "スナックすみれ",
+      "last_updated": "2025-11-02T18:35:22.962272",
+      "refresh_due": "2026-11-02T18:35:22.962285"
+    },
+    "1216499399174029878": {
+      "place_id": "ChIJc8e1PPZc818RNoI-HcLf4RA",
+      "store_name": "スナック野菊",
+      "last_updated": "2025-11-02T18:35:24.963723",
+      "refresh_due": "2026-11-02T18:35:24.963737"
+    },
+    "16636867701148588778": {
+      "place_id": "ChIJ_T65cw9k818R6pohPgcH4uY",
+      "store_name": "スナック愛",
+      "last_updated": "2025-11-02T18:35:27.166593",
+      "refresh_due": "2026-11-02T18:35:27.166608"
+    },
+    "13609017982157401654": {
+      "place_id": "ChIJXyvCrw9k818RNi5lSMDx3Lw",
+      "store_name": "チャップリン",
+      "last_updated": "2025-11-02T18:35:29.046815",
+      "refresh_due": "2026-11-02T18:35:29.046830"
+    },
+    "6915093064472727028": {
+      "place_id": "ChIJWdEaog9k818R9A2qIIFY918",
+      "store_name": "和風スナック ふじの",
+      "last_updated": "2025-11-02T18:35:31.036692",
+      "refresh_due": "2026-11-02T18:35:31.036709"
+    },
+    "5240601591075057276": {
+      "place_id": "ChIJ07eugtuG9F8RfC5glWFbukg",
+      "store_name": "スナック五月",
+      "last_updated": "2025-11-02T18:35:33.381502",
+      "refresh_due": "2026-11-02T18:35:33.381518"
+    },
+    "15969537067287403869": {
+      "place_id": "ChIJfY4j5atm818RXV0ZO1oxn90",
+      "store_name": "コルディアinHearts",
+      "last_updated": "2025-11-02T18:35:35.248949",
+      "refresh_due": "2026-11-02T18:35:35.248958"
+    },
+    "18352648326930138592": {
+      "place_id": "ChIJFyv981hc818RK0JxllwHDr8",
+      "store_name": "ローズ",
+      "last_updated": "2025-11-02T18:35:37.271073",
+      "refresh_due": "2026-11-02T18:35:37.271088"
+    },
+    "4487370778211586680": {
+      "place_id": "ChIJv3siX_5c818ReBLFmvJXRj4",
+      "store_name": "スナック糸",
+      "last_updated": "2025-11-02T18:35:39.275152",
+      "refresh_due": "2026-11-02T18:35:39.275167"
+    },
+    "5304745862917208899": {
+      "place_id": "ChIJg2sfbItl818RQzvnrkE-nkk",
+      "store_name": "Aラブ",
+      "last_updated": "2025-11-02T18:35:41.463094",
+      "refresh_due": "2026-11-02T18:35:41.463109"
+    },
+    "12002093225532484920": {
+      "place_id": "ChIJb1SFCtFm818RLe-brSCpq6c",
+      "store_name": "マルコ",
+      "last_updated": "2025-11-02T18:35:43.407868",
+      "refresh_due": "2026-11-02T18:35:43.407883"
+    },
+    "1317842029234183316": {
+      "place_id": "ChIJG9WD6A9k818RlFyV5lfqSRI",
+      "store_name": "スナック川",
+      "last_updated": "2025-11-02T18:35:45.385896",
+      "refresh_due": "2026-11-02T18:35:45.385911"
+    },
+    "1551303472678161971": {
+      "place_id": "ChIJq4Z6pw9k818RM87PC0pWhxU",
+      "store_name": "マリオン",
+      "last_updated": "2025-11-02T18:35:47.612382",
+      "refresh_due": "2026-11-02T18:35:47.612397"
+    },
+    "14540018063461691430": {
+      "place_id": "ChIJPUC2CQ9k818RJrBldGSFyMk",
+      "store_name": "スナック あげつ",
+      "last_updated": "2025-11-02T18:35:49.656063",
+      "refresh_due": "2026-11-02T18:35:49.656078"
+    },
+    "11017097133544092738": {
+      "place_id": "ChIJt3RKGlKo9V8RnBIufQAcKnQ",
+      "store_name": "胡蝶",
+      "last_updated": "2025-11-02T18:35:51.732621",
+      "refresh_due": "2026-11-02T18:35:51.732636"
+    },
+    "18154649961808380244": {
+      "place_id": "ChIJq1ogSD-H9F8RVMEl6_NF8vs",
+      "store_name": "六花",
+      "last_updated": "2025-11-02T18:35:53.622447",
+      "refresh_due": "2026-11-02T18:35:53.622462"
+    },
+    "9064508919471402392": {
+      "place_id": "ChIJQb79ZABl818RmO1zINaay30",
+      "store_name": "福ふく食堂",
+      "last_updated": "2025-11-02T18:35:55.627783",
+      "refresh_due": "2026-11-02T18:35:55.627798"
+    },
+    "14460153688757324254": {
+      "place_id": "ChIJCwGENW5d818R3knvryrJrMg",
+      "store_name": "ふわりと",
+      "last_updated": "2025-11-02T18:35:57.779025",
+      "refresh_due": "2026-11-02T18:35:57.779040"
+    },
+    "3165547132583813157": {
+      "place_id": "ChIJK0EPr5Nc818RJSBqZVhI7is",
+      "store_name": "エーコープ 佐渡加茂店",
+      "last_updated": "2025-11-02T18:35:59.808517",
+      "refresh_due": "2026-11-02T18:35:59.808532"
+    },
+    "14494114462657362651": {
+      "place_id": "ChIJXcAfWwBd818R2zqLiE9wJck",
+      "store_name": "御食事処 満るか(まるか)",
+      "last_updated": "2025-11-02T18:36:01.944083",
+      "refresh_due": "2026-11-02T18:36:01.944099"
+    },
+    "6818279487814235995": {
+      "place_id": "ChIJ7VUXofZc818RW_d_whFln14",
+      "store_name": "エリーゼ",
+      "last_updated": "2025-11-02T18:36:03.995422",
+      "refresh_due": "2026-11-02T18:36:03.995437"
+    },
+    "13738033022634621870": {
+      "place_id": "ChIJaSoLKgBd818Rrvu4Mj9Mp74",
+      "store_name": "再会",
+      "last_updated": "2025-11-02T18:36:06.163357",
+      "refresh_due": "2026-11-02T18:36:06.163373"
+    },
+    "16119415054280182526": {
+      "place_id": "ChIJGep6j_Zc818R_kp0aZaqs98",
+      "store_name": "惣菜しらつゆ",
+      "last_updated": "2025-11-02T18:36:08.197544",
+      "refresh_due": "2026-11-02T18:36:08.197558"
+    },
+    "2857842528604952712": {
+      "place_id": "ChIJv64LfABd818RiJiAZaMYqSc",
+      "store_name": "ジャック",
+      "last_updated": "2025-11-02T18:36:10.300110",
+      "refresh_due": "2026-11-02T18:36:10.300125"
+    },
+    "17765502625665859532": {
+      "place_id": "ChIJh_NZZJ9d818RzD8VK4O-i_Y",
+      "store_name": "Cafe&Bar ミモザ",
+      "last_updated": "2025-11-02T18:36:12.319093",
+      "refresh_due": "2026-11-02T18:36:12.319108"
+    },
+    "1424545571152915153": {
+      "place_id": "ChIJWefhM0Z3A2AR0ZEq5XH6w9M",
+      "store_name": "小枡屋",
+      "last_updated": "2025-11-02T18:36:14.569371",
+      "refresh_due": "2026-11-02T18:36:14.569388"
+    },
+    "5466108552696073585": {
+      "place_id": "ChIJT1VdijiH9F8RcY0sm8SE20s",
+      "store_name": "エーコープ 佐渡小木店",
+      "last_updated": "2025-11-02T18:36:16.584285",
+      "refresh_due": "2026-11-02T18:36:16.584300"
+    },
+    "2028006017073574059": {
+      "place_id": "ChIJTVLjRvZc818Rq3AGSrrsJBw",
+      "store_name": "星座",
+      "last_updated": "2025-11-02T18:36:18.776358",
+      "refresh_due": "2026-11-02T18:36:18.776373"
+    },
+    "14492312307798205628": {
+      "place_id": "ChIJib7Ze_xc818RvGRVqEIJH8k",
+      "store_name": "四季",
+      "last_updated": "2025-11-02T18:36:20.639360",
+      "refresh_due": "2026-11-02T18:36:20.639369"
+    },
+    "12319901629614745739": {
+      "place_id": "ChIJ3QJXkFhc818Ri2jxLEIV-ao",
+      "store_name": "SUN the BAR(さんざバル)",
+      "last_updated": "2025-11-02T18:36:22.651426",
+      "refresh_due": "2026-11-02T18:36:22.651457"
+    },
+    "2943673839502994890": {
+      "place_id": "ChIJi7VB5ypd818Ryq0vwsIH2ig",
+      "store_name": "t0ki brewery トキブルワリー",
+      "last_updated": "2025-11-02T18:36:24.616345",
+      "refresh_due": "2026-11-02T18:36:24.616361"
+    },
+    "6952034843962485831": {
+      "place_id": "ChIJ_XyVAFlc818RR6yFbNuWemA",
+      "store_name": "カフェテラス ロータリー(2階)",
+      "last_updated": "2025-11-02T18:36:26.898266",
+      "refresh_due": "2026-11-02T18:36:26.898281"
+    },
+    "483308869825218659": {
+      "place_id": "ChIJIX3z3P1c818RY0i6PtsOtQY",
+      "store_name": "フレッシュ・マツヤ 両津店",
+      "last_updated": "2025-11-02T18:36:28.886193",
+      "refresh_due": "2026-11-02T18:36:28.886208"
+    },
+    "873413461264187730": {
+      "place_id": "ChIJVwmpvrld818RUkGyXOr8Hgw",
+      "store_name": "おにCafe",
+      "last_updated": "2025-11-02T18:36:30.787967",
+      "refresh_due": "2026-11-02T18:36:30.787976"
+    },
+    "1624876502241940641": {
+      "place_id": "ChIJxYoqbv5c818RoZQC4JG4jBY",
+      "store_name": "ローソン 佐渡両津店",
+      "last_updated": "2025-11-02T18:36:32.783866",
+      "refresh_due": "2026-11-02T18:36:32.783881"
+    },
+    "9217566973738989786": {
+      "place_id": "ChIJVVVxPE9c818R2rgVa1Ng638",
+      "store_name": "ローソン 佐渡原黒店",
+      "last_updated": "2025-11-02T18:36:34.972819",
+      "refresh_due": "2026-11-02T18:36:34.972834"
+    },
+    "4724787823011809285": {
+      "place_id": "ChIJ-foSwT5bXI8RTuMeP02KSvY",
+      "store_name": "ベリーズ",
+      "last_updated": "2025-11-02T18:36:36.999012",
+      "refresh_due": "2026-11-02T18:36:36.999028"
+    },
+    "1185740282270635744": {
+      "place_id": "ChIJp6lfTgNB818R4NacIIGYdBA",
+      "store_name": "お惣菜ひろ",
+      "last_updated": "2025-11-02T18:36:39.052162",
+      "refresh_due": "2026-11-02T18:36:39.052175"
+    },
+    "934705652943328493": {
+      "place_id": "ChIJewsKGr9p818R7ZQ8zda9-Aw",
+      "store_name": "あげしま海かふぇ",
+      "last_updated": "2025-11-02T18:36:40.997516",
+      "refresh_due": "2026-11-02T18:36:40.997531"
+    },
+    "14072630172575569205": {
+      "place_id": "ChIJ_QIw2A9p818RNZXP-5QGTMM",
+      "store_name": "魚処 新龍館",
+      "last_updated": "2025-11-02T18:36:42.916500",
+      "refresh_due": "2026-11-02T18:36:42.916508"
+    },
+    "17795072418396416134": {
+      "place_id": "ChIJ2x2eQABl818RhqjeChXM9PY",
+      "store_name": "中庭Cafe",
+      "last_updated": "2025-11-02T18:36:45.182393",
+      "refresh_due": "2026-11-02T18:36:45.182408"
+    },
+    "13431931367373194924": {
+      "place_id": "ChIJ-cpscF5v818RrMa0x2nOZ7o",
+      "store_name": "山本喜助菓子店・菓子舗きすけ",
+      "last_updated": "2025-11-02T18:36:47.230751",
+      "refresh_due": "2026-11-02T18:36:47.230765"
+    },
+    "3418975327727220832": {
+      "place_id": "ChIJ_duYphd99F8RUv8TdfLZ0e0",
+      "store_name": "SABO YAJURO (旧 cafe nano 宿根木)",
+      "last_updated": "2025-11-02T18:36:49.312090",
+      "refresh_due": "2026-11-02T18:36:49.312105"
+    },
+    "13048397929536388803": {
+      "place_id": "ChIJxUWPj0Vk818Rw371lcg4FbU",
+      "store_name": "金由屋",
+      "last_updated": "2025-11-02T18:36:51.360439",
+      "refresh_due": "2026-11-02T18:36:51.360454"
+    },
+    "8913849704059547139": {
+      "place_id": "ChIJ82bcd5pl818RA66wBxRbtHs",
+      "store_name": "へたっぴ",
+      "last_updated": "2025-11-02T18:36:53.440797",
+      "refresh_due": "2026-11-02T18:36:53.440812"
+    },
+    "4022082534360348469": {
+      "place_id": "ChIJq6pej45l818RNffZTcFO0Tc",
+      "store_name": "ローソン 佐渡相川店",
+      "last_updated": "2025-11-02T18:36:55.544196",
+      "refresh_due": "2026-11-02T18:36:55.544211"
+    },
+    "18342285271932302740": {
+      "place_id": "ChIJq6oWUI5l818RlHVn8kXjjP4",
+      "store_name": "SPORTS BAR SUSHIKA(スポーツバースシカ)",
+      "last_updated": "2025-11-02T18:36:57.416030",
+      "refresh_due": "2026-11-02T18:36:57.416037"
+    },
+    "14509521845590746858": {
+      "place_id": "ChIJB8B03CJn818R6uY0az4tXMk",
+      "store_name": "サボウコーヒー",
+      "last_updated": "2025-11-02T18:36:59.398496",
+      "refresh_due": "2026-11-02T18:36:59.398505"
+    },
+    "8969748586200783122": {
+      "place_id": "ChIJ2ziUE9Fm818RElkPvdDyenw",
+      "store_name": "エーコープ 佐渡金井店",
+      "last_updated": "2025-11-02T18:37:01.505373",
+      "refresh_due": "2026-11-02T18:37:01.505388"
+    },
+    "5331253774551069962": {
+      "place_id": "ChIJP9OJRNFm818RCrWTzw9r_Ek",
+      "store_name": "SHIMAYA CAFE",
+      "last_updated": "2025-11-02T18:37:03.599634",
+      "refresh_due": "2026-11-02T18:37:03.599651"
+    },
+    "11449573671332196273": {
+      "place_id": "ChIJP6P9fSdn818Rsa9rdZcO5Z4",
+      "store_name": "コロッケ屋高野・高野コロッケ店",
+      "last_updated": "2025-11-02T18:37:05.706138",
+      "refresh_due": "2026-11-02T18:37:05.706153"
+    },
+    "4288802797554155825": {
+      "place_id": "ChIJ8aL2HBVn818RMcHq22vjhDs",
+      "store_name": "地酒BAR 東雲(しののめ)",
+      "last_updated": "2025-11-02T18:37:07.569403",
+      "refresh_due": "2026-11-02T18:37:07.569411"
+    },
+    "83889071981448804": {
+      "place_id": "ChIJVzOv2vVc818RVo_RBUODGQc",
+      "store_name": "オアシス",
+      "last_updated": "2025-11-02T18:37:09.731828",
+      "refresh_due": "2026-11-02T18:37:09.731843"
+    },
+    "15341549063674700137": {
+      "place_id": "ChIJz-pciMln818RaaGOJJch6NQ",
+      "store_name": "佐渡乳業直売所 みるく・ぽっと",
+      "last_updated": "2025-11-02T18:37:11.768344",
+      "refresh_due": "2026-11-02T18:37:11.768359"
+    },
+    "3387787517677123275": {
+      "place_id": "ChIJ8z2btstm818Ry7alTczWAy8",
+      "store_name": "パン屋カフェ クレアーレ",
+      "last_updated": "2025-11-02T18:37:13.793810",
+      "refresh_due": "2026-11-02T18:37:13.793825"
+    },
+    "9515526871804783004": {
+      "place_id": "ChIJXyLccLpm818RnKmbREbxDYQ",
+      "store_name": "おうちdeカフェ",
+      "last_updated": "2025-11-02T18:37:15.853859",
+      "refresh_due": "2026-11-02T18:37:15.853874"
+    },
+    "8713179427730559865": {
+      "place_id": "ChIJ93L-EMpm818ReRMfboZu63g",
+      "store_name": "フレッシュ・マツヤ 金井店",
+      "last_updated": "2025-11-02T18:37:17.693467",
+      "refresh_due": "2026-11-02T18:37:17.693481"
+    },
+    "4811457945948022712": {
+      "place_id": "ChIJG6pHDqpm818RuGf2d4K7xUI",
+      "store_name": "しまふうみ coffee & tea 22(トゥートゥー)",
+      "last_updated": "2025-11-02T18:37:19.931216",
+      "refresh_due": "2026-11-02T18:37:19.931231"
+    },
+    "8597632137372115583": {
+      "place_id": "ChIJ9QQfhcti818RfyKMceDsUHc",
+      "store_name": "しまふうみ",
+      "last_updated": "2025-11-02T18:37:21.993589",
+      "refresh_due": "2026-11-02T18:37:21.993604"
+    },
+    "11479159313192898379": {
+      "place_id": "ChIJ0dm_yK1m818RS8_6fpMqTp8",
+      "store_name": "タリーズコーヒー 佐渡佐和田店",
+      "last_updated": "2025-11-02T18:37:24.043605",
+      "refresh_due": "2026-11-02T18:37:24.043620"
+    },
+    "13241109314708688868": {
+      "place_id": "ChIJW6zVEQBl818R5M9Tb8Tewbc",
+      "store_name": "しまやバイパス店",
+      "last_updated": "2025-11-02T18:37:26.086415",
+      "refresh_due": "2026-11-02T18:37:26.086431"
+    },
+    "9895867000700939955": {
+      "place_id": "ChIJM3ugqBtk818Rsy5KSZsuVYk",
+      "store_name": "カラオケ ビッグエコー 佐渡店",
+      "last_updated": "2025-11-02T18:37:27.951293",
+      "refresh_due": "2026-11-02T18:37:27.951304"
+    },
+    "6929844966112607206": {
+      "place_id": "ChIJMcX0Qxpk818R5rur4UfBK2A",
+      "store_name": "マルイ 佐渡店",
+      "last_updated": "2025-11-02T18:37:30.178997",
+      "refresh_due": "2026-11-02T18:37:30.179012"
+    },
+    "16064423653411817075": {
+      "place_id": "ChIJ02kMUhln818Rc4b-JjNM8N4",
+      "store_name": "イブ",
+      "last_updated": "2025-11-02T18:37:32.070927",
+      "refresh_due": "2026-11-02T18:37:32.070936"
+    },
+    "3024256072208418986": {
+      "place_id": "ChIJW6n0lEB3A2ARiOOlRUDXKdk",
+      "store_name": "ぱちぱち屋",
+      "last_updated": "2025-11-02T18:37:34.122188",
+      "refresh_due": "2026-11-02T18:37:34.122203"
+    },
+    "1921735232670371647": {
+      "place_id": "ChIJM-bKJxtk818RP4-rJwNgqxo",
+      "store_name": "ローソン 佐渡佐和田店",
+      "last_updated": "2025-11-02T18:37:36.245845",
+      "refresh_due": "2026-11-02T18:37:36.245859"
+    },
+    "11281680944175868894": {
+      "place_id": "ChIJU6Z2zgFk818R3mvluguVkJw",
+      "store_name": "たい夢",
+      "last_updated": "2025-11-02T18:37:38.142149",
+      "refresh_due": "2026-11-02T18:37:38.142164"
+    },
+    "3807361953164447630": {
+      "place_id": "ChIJBysNwwNk818Rjk-0LYZ31jQ",
+      "store_name": "シェ・モリタニ",
+      "last_updated": "2025-11-02T18:37:40.091691",
+      "refresh_due": "2026-11-02T18:37:40.091705"
+    },
+    "16086983752670945953": {
+      "place_id": "ChIJlfoVD6xm818RoaJulX1yQN8",
+      "store_name": "自遊空間 新潟佐渡店",
+      "last_updated": "2025-11-02T18:37:42.114029",
+      "refresh_due": "2026-11-02T18:37:42.114045"
+    },
+    "7837342899715563205": {
+      "place_id": "ChIJ_Zu9PwRk818Rxd554NfVw2w",
+      "store_name": "スポーツカフェ・ヴァルゴ",
+      "last_updated": "2025-11-02T18:37:44.273122",
+      "refresh_due": "2026-11-02T18:37:44.273138"
+    },
+    "6927496352115893352": {
+      "place_id": "ChIJWe3OzQFk818RaKSukjppI2A",
+      "store_name": "フレッシュ・マツヤ 佐和田店",
+      "last_updated": "2025-11-02T18:37:46.134187",
+      "refresh_due": "2026-11-02T18:37:46.134202"
+    },
+    "17601568040732795153": {
+      "place_id": "ChIJJzc83Q9k818RESG_PeBURfQ",
+      "store_name": "のんのん",
+      "last_updated": "2025-11-02T18:37:48.230619",
+      "refresh_due": "2026-11-02T18:37:48.230634"
+    },
+    "18413813615185630940": {
+      "place_id": "ChIJ04EpiQ9k818R3BZkJewBi_8",
+      "store_name": "おけさぽてとの店 プチドール",
+      "last_updated": "2025-11-02T18:37:50.144496",
+      "refresh_due": "2026-11-02T18:37:50.144505"
+    },
+    "9173104975759940955": {
+      "place_id": "ChIJbyPMNsll818RWx2Kz19qTX8",
+      "store_name": "酔処 アリの巣",
+      "last_updated": "2025-11-02T18:37:52.317630",
+      "refresh_due": "2026-11-02T18:37:52.317645"
+    },
+    "2430673088452346436": {
+      "place_id": "ChIJswkOkgVk818RRMJNskt8uyE",
+      "store_name": "大阪屋 佐和田店",
+      "last_updated": "2025-11-02T18:37:54.383395",
+      "refresh_due": "2026-11-02T18:37:54.383411"
+    },
+    "9745390285837970298": {
+      "place_id": "ChIJFb2uAQZk818Reivq6NSUPoc",
+      "store_name": "café TRAIN",
+      "last_updated": "2025-11-02T18:37:56.441916",
+      "refresh_due": "2026-11-02T18:37:56.441931"
+    },
+    "4641110030345609768": {
+      "place_id": "ChIJgQ239JRj818RKKJAovuIaEA",
+      "store_name": "BAKERY パンピーノ",
+      "last_updated": "2025-11-02T18:37:58.305744",
+      "refresh_due": "2026-11-02T18:37:58.305759"
+    },
+    "15803680362212373779": {
+      "place_id": "ChIJvY9ylpNf818REzV81Y7zUds",
+      "store_name": "たまりば・子ども未来舎 りぜむ",
+      "last_updated": "2025-11-02T18:38:00.327874",
+      "refresh_due": "2026-11-02T18:38:00.327884"
+    },
+    "13978474662196381390": {
+      "place_id": "ChIJq6qqqpNg818RzoYD5qSE_cE",
+      "store_name": "okameパン",
+      "last_updated": "2025-11-02T18:38:02.485664",
+      "refresh_due": "2026-11-02T18:38:02.485679"
+    },
+    "9700731389454120619": {
+      "place_id": "ChIJXUtggphh818Rq_bkUc3rn4Y",
+      "store_name": "ジェラート直売所 マッテラート",
+      "last_updated": "2025-11-02T18:38:04.357578",
+      "refresh_due": "2026-11-02T18:38:04.357586"
+    },
+    "10167011176061283262": {
+      "place_id": "ChIJMdLCLJhg818RviuPKMx6GI0",
+      "store_name": "フルーツ&カフェさいとう",
+      "last_updated": "2025-11-02T18:38:06.539976",
+      "refresh_due": "2026-11-02T18:38:06.539991"
+    },
+    "3039317229253370726": {
+      "place_id": "ChIJJ_y2hDFh818RZiNfwerSLSo",
+      "store_name": "六丸亭",
+      "last_updated": "2025-11-02T18:38:08.656433",
+      "refresh_due": "2026-11-02T18:38:08.656447"
+    },
+    "12484725942784055082": {
+      "place_id": "ChIJO0RNJ-1g818RKle_GRmoQq0",
+      "store_name": "ホルモン・焼肉 まき",
+      "last_updated": "2025-11-02T18:38:10.738276",
+      "refresh_due": "2026-11-02T18:38:10.738291"
+    },
+    "12330437172130729262": {
+      "place_id": "ChIJNV5d_Otg818RLs0fUkeDHqs",
+      "store_name": "JA佐渡Aコープ佐渡新穂店",
+      "last_updated": "2025-11-02T18:38:12.832444",
+      "refresh_due": "2026-11-02T18:38:12.832459"
+    },
+    "12309172820005016148": {
+      "place_id": "ChIJxaz0V-5g818RVNJKh3b30qo",
+      "store_name": "へんじんもっこ(ソーセージ・サラミ製造直売所)",
+      "last_updated": "2025-11-02T18:38:14.853116",
+      "refresh_due": "2026-11-02T18:38:14.853129"
+    },
+    "16674506707398890751": {
+      "place_id": "ChIJOUvqhUpi818R_xRhS4G_Z-c",
+      "store_name": "ローソン 佐渡真野店",
+      "last_updated": "2025-11-02T18:38:16.920181",
+      "refresh_due": "2026-11-02T18:38:16.920196"
+    },
+    "15555727718536224768": {
+      "place_id": "ChIJl_falYZj818RAKAMNvEL4dc",
+      "store_name": "里山カフェ パンプキン",
+      "last_updated": "2025-11-02T18:38:18.773959",
+      "refresh_due": "2026-11-02T18:38:18.773974"
+    },
+    "13926582694397765386": {
+      "place_id": "ChIJAcSHf0ti818RCmeuoiwpRcE",
+      "store_name": "ボヌール",
+      "last_updated": "2025-11-02T18:38:21.003813",
+      "refresh_due": "2026-11-02T18:38:21.003828"
+    },
+    "11652460911439827016": {
+      "place_id": "ChIJ67aVR79j818RSNB-KXbbtaE",
+      "store_name": "風文堂",
+      "last_updated": "2025-11-02T18:38:22.870472",
+      "refresh_due": "2026-11-02T18:38:22.870480"
+    },
+    "13748746992512102707": {
+      "place_id": "ChIJ66L0glFi818RM3Fns4tczb4",
+      "store_name": "フレッシュ・マツヤ 真野店",
+      "last_updated": "2025-11-02T18:38:24.853728",
+      "refresh_due": "2026-11-02T18:38:24.853750"
+    },
+    "264233077948094496": {
+      "place_id": "ChIJ09olFFFi818RIBgBnZW-qgM",
+      "store_name": "喫茶 シルビア",
+      "last_updated": "2025-11-02T18:38:26.882657",
+      "refresh_due": "2026-11-02T18:38:26.882665"
+    },
+    "14130428472466854835": {
+      "place_id": "ChIJ7aYdaw9k818Rgpt4reUMOoo",
+      "store_name": "蛇の目寿司",
+      "last_updated": "2025-11-02T18:38:29.052743",
+      "refresh_due": "2026-11-02T18:38:29.052758"
+    },
+    "5427238505626888345": {
+      "place_id": "ChIJp4iQPxCD9F8RmWg2h6psUUs",
+      "store_name": "cafe 米こころ",
+      "last_updated": "2025-11-02T18:38:30.902821",
+      "refresh_due": "2026-11-02T18:38:30.902840"
+    },
+    "434992785323099165": {
+      "place_id": "ChIJT6uCbwFh818RHYQKMaJnCQY",
+      "store_name": "ローソン 佐渡畑野店",
+      "last_updated": "2025-11-02T18:38:33.130579",
+      "refresh_due": "2026-11-02T18:38:33.130598"
+    },
+    "3207120058021121689": {
+      "place_id": "ChIJWSHh4AZh818RmQ5hYrP6gSw",
+      "store_name": "有限会社ナカガワ製パン所",
+      "last_updated": "2025-11-02T18:38:35.226272",
+      "refresh_due": "2026-11-02T18:38:35.226287"
+    },
+    "9204975616626516045": {
+      "place_id": "ChIJ7zusl3Zh818RTeAno42kvn8",
+      "store_name": "トトロ",
+      "last_updated": "2025-11-02T18:38:37.086236",
+      "refresh_due": "2026-11-02T18:38:37.086244"
+    },
+    "14586166014305205222": {
+      "place_id": "ChIJLYEbDZ9h818R5nuJjbV4bMo",
+      "store_name": "JA佐渡Aコープ佐渡畑野店",
+      "last_updated": "2025-11-02T18:38:39.079500",
+      "refresh_due": "2026-11-02T18:38:39.079515"
+    },
+    "2861913428030262196": {
+      "place_id": "ChIJ6yGa0FSZ9F8RtAuqhxmPtyc",
+      "store_name": "あたりきしゃりき堂 佐渡 松ヶ崎店",
+      "last_updated": "2025-11-02T18:38:41.298708",
+      "refresh_due": "2026-11-02T18:38:41.298722"
+    },
+    "7425617409420522655": {
+      "place_id": "ChIJoQnCUwCb9F8Rn3R39rAXDWc",
+      "store_name": "パン・お菓子工房 六蔵",
+      "last_updated": "2025-11-02T18:38:43.329644",
+      "refresh_due": "2026-11-02T18:38:43.329659"
+    },
+    "5800130757797494490": {
+      "place_id": "ChIJUXHLWL6D9F8R2j5WnTE0flA",
+      "store_name": "里山カフェ山里(駐車場は大滝楽舎駐車場で検索)",
+      "last_updated": "2025-11-02T18:38:45.178020",
+      "refresh_due": "2026-11-02T18:38:45.178039"
+    },
+    "9398717705519148963": {
+      "place_id": "ChIJl2LxVQCD9F8Ro6-k5fTzboI",
+      "store_name": "おいしいドーナツ タガヤス堂",
+      "last_updated": "2025-11-02T18:38:47.361144",
+      "refresh_due": "2026-11-02T18:38:47.361159"
+    },
+    "9789764852134358061": {
+      "place_id": "ChIJBw7GtqOD9F8RLawSvkM73Ic",
+      "store_name": "ちょぼくり",
+      "last_updated": "2025-11-02T18:38:49.213585",
+      "refresh_due": "2026-11-02T18:38:49.213600"
+    },
+    "6368719197870730843": {
+      "place_id": "ChIJQ9MWpTGD9F8RW65LF148Ylg",
+      "store_name": "和食旬",
+      "last_updated": "2025-11-02T18:38:51.444592",
+      "refresh_due": "2026-11-02T18:38:51.444607"
+    },
+    "10150546113025685437": {
+      "place_id": "ChIJJTKwilOB9F8RvTce7-j73Yw",
+      "store_name": "和泉商店食料品",
+      "last_updated": "2025-11-02T18:38:53.524406",
+      "refresh_due": "2026-11-02T18:38:53.524421"
+    },
+    "3419740168996301228": {
+      "place_id": "ChIJr7sWgVSB9F8RrKkorZBbdS8",
+      "store_name": "和泉商店",
+      "last_updated": "2025-11-02T18:38:55.467829",
+      "refresh_due": "2026-11-02T18:38:55.467844"
+    },
+    "6516525058615726031": {
+      "place_id": "ChIJr0y-fziB9F8Rz8-4yANZb1o",
+      "store_name": "ティーハウス 一里塚",
+      "last_updated": "2025-11-02T18:38:57.575225",
+      "refresh_due": "2026-11-02T18:38:57.575240"
+    },
+    "1779456694021955646": {
+      "place_id": "ChIJm74A41KB9F8RPqBebG_msRg",
+      "store_name": "サウンドハウス",
+      "last_updated": "2025-11-02T18:38:59.478834",
+      "refresh_due": "2026-11-02T18:38:59.478849"
+    },
+    "2997750417065415710": {
+      "place_id": "ChIJAdxnqbOG9F8RHpR2Hh8mmik",
+      "store_name": "ローソン 佐渡羽茂店",
+      "last_updated": "2025-11-02T18:39:01.728245",
+      "refresh_due": "2026-11-02T18:39:01.728260"
+    },
+    "1854357058405520316": {
+      "place_id": "ChIJcbUExM-H9F8RvNP_eOv_uxk",
+      "store_name": "KURU&CHOPPER",
+      "last_updated": "2025-11-02T18:39:03.762608",
+      "refresh_due": "2026-11-02T18:39:03.762623"
+    },
+    "764216111300400": {
+      "place_id": "ChIJq2J-szmH9F8RMH_Y7Qy3AgA",
+      "store_name": "かわしま屋 鮮魚仕出し料理処",
+      "last_updated": "2025-11-02T18:39:05.784703",
+      "refresh_due": "2026-11-02T18:39:05.784718"
+    },
+    "6045383682061262470": {
+      "place_id": "ChIJt6pzZW2H9F8Rhl401G2E5VM",
+      "store_name": "山羊Cafe",
+      "last_updated": "2025-11-02T18:39:07.826315",
+      "refresh_due": "2026-11-02T18:39:07.826329"
+    },
+    "956144888086510591": {
+      "place_id": "ChIJq1cEZvqNGGARe3m0Oxv5kr0",
+      "store_name": "はなゆめ",
+      "last_updated": "2025-11-02T18:39:09.919457",
+      "refresh_due": "2026-11-02T18:39:09.919472"
+    },
+    "7181469630294013419": {
+      "place_id": "ChIJk2tYtft99F8R6zXuZpS0qWM",
+      "store_name": "茶房 やました",
+      "last_updated": "2025-11-02T18:39:11.775728",
+      "refresh_due": "2026-11-02T18:39:11.775742"
+    },
+    "17136717692491005778": {
+      "place_id": "ChIJ_duYphd99F8RUv8TdfLZ0e0",
+      "store_name": "cafe nano",
+      "last_updated": "2025-11-02T18:39:14.031009",
+      "refresh_due": "2026-11-02T18:39:14.031024"
+    },
+    "10612337826870573186": {
+      "place_id": "ChIJh_APKZ599F8RgrgP5waZRpM",
+      "store_name": "お料理 あなぐち",
+      "last_updated": "2025-11-02T18:39:16.056256",
+      "refresh_due": "2026-11-02T18:39:16.056270"
+    },
+    "2223235054694797729": {
+      "place_id": "ChIJm0VqDgCF9F8RoZFHx4CE2h4",
+      "store_name": "たい焼き屋 縁(ゆかり)",
+      "last_updated": "2025-11-02T18:39:18.132034",
+      "refresh_due": "2026-11-02T18:39:18.132049"
+    },
+    "12528835334109960782": {
+      "place_id": "ChIJWdSpmfZc818RTpr8Eltd360",
+      "store_name": "トム",
+      "last_updated": "2025-11-02T18:39:20.124191",
+      "refresh_due": "2026-11-02T18:39:20.124205"
+    },
+    "11394301844140141176": {
+      "place_id": "ChIJdfiqmvZc818ReCqNWyixIJ4",
+      "store_name": "スナックさくら",
+      "last_updated": "2025-11-02T18:39:22.279359",
+      "refresh_due": "2026-11-02T18:39:22.279373"
+    },
+    "1888742988606421061": {
+      "place_id": "ChIJqcjejfZc818RRTjlu70pNho",
+      "store_name": "モナリザ",
+      "last_updated": "2025-11-02T18:39:24.149131",
+      "refresh_due": "2026-11-02T18:39:24.149141"
+    },
+    "5478402480769256107": {
+      "place_id": "ChIJU8FDj_Zc818Rq8reygcyB0w",
+      "store_name": "Pub オデオン",
+      "last_updated": "2025-11-02T18:39:26.275235",
+      "refresh_due": "2026-11-02T18:39:26.275249"
+    },
+    "16001908728915972716": {
+      "place_id": "ChIJZ6p8X_Zc818RbFJCCzUzEt4",
+      "store_name": "スナックうさぎ",
+      "last_updated": "2025-11-02T18:39:28.402371",
+      "refresh_due": "2026-11-02T18:39:28.402386"
+    },
+    "12709447459254882626": {
+      "place_id": "ChIJd_0MzbVm818RD1qM6SNhqvw",
+      "store_name": "紫",
+      "last_updated": "2025-11-02T18:39:30.498295",
+      "refresh_due": "2026-11-02T18:39:30.498309"
+    },
+    "105750607918642599": {
+      "place_id": "ChIJA77al09d818Rp7XFG56zdwE",
+      "store_name": "スナックC音(しおん)",
+      "last_updated": "2025-11-02T18:39:32.364936",
+      "refresh_due": "2026-11-02T18:39:32.364943"
+    },
+    "12264541240470865533": {
+      "place_id": "ChIJ776MOPZc818RfQZlI0dnNKo",
+      "store_name": "スナック風花",
+      "last_updated": "2025-11-02T18:39:34.546251",
+      "refresh_due": "2026-11-02T18:39:34.546265"
+    },
+    "16054634497539000736": {
+      "place_id": "ChIJs-SMOvZc818RoEmLsAOFzd4",
+      "store_name": "Serina",
+      "last_updated": "2025-11-02T18:39:36.410442",
+      "refresh_due": "2026-11-02T18:39:36.410456"
+    },
+    "6977870395551534984": {
+      "place_id": "ChIJGxq-NI5l818RiE-Qhydg1mA",
+      "store_name": "Night Spot J1",
+      "last_updated": "2025-11-02T18:39:38.401054",
+      "refresh_due": "2026-11-02T18:39:38.401068"
+    },
+    "4692129062950624100": {
+      "place_id": "ChIJW4F_8o9l818RZFt11YXKHUE",
+      "store_name": "スナック あっぷる",
+      "last_updated": "2025-11-02T18:39:40.444071",
+      "refresh_due": "2026-11-02T18:39:40.444086"
+    },
+    "8099884663050983930": {
+      "place_id": "ChIJufa7hexg818R-tnJni-SaHA",
+      "store_name": "のろま",
+      "last_updated": "2025-11-02T18:39:42.597102",
+      "refresh_due": "2026-11-02T18:39:42.597117"
+    },
+    "11906457882561355820": {
+      "place_id": "ChIJLdnAng9k818RLCA4b1w8PKU",
+      "store_name": "Vogue",
+      "last_updated": "2025-11-02T18:39:44.719520",
+      "refresh_due": "2026-11-02T18:39:44.719535"
+    },
+    "10630858040863295460": {
+      "place_id": "ChIJnWXxbwZk818R5AdDPxBliJM",
+      "store_name": "シャトル",
+      "last_updated": "2025-11-02T18:39:46.598926",
+      "refresh_due": "2026-11-02T18:39:46.598936"
+    },
+    "6740752723385025710": {
+      "place_id": "ChIJZW6jJQZk818RroQcTOP2i10",
+      "store_name": "アブロード",
+      "last_updated": "2025-11-02T18:39:48.761379",
+      "refresh_due": "2026-11-02T18:39:48.761394"
+    },
+    "17703266157304940483": {
+      "place_id": "ChIJJRI0k55h818RwwdbLsairvU",
+      "store_name": "フレンズ",
+      "last_updated": "2025-11-02T18:39:50.658748",
+      "refresh_due": "2026-11-02T18:39:50.658762"
+    },
+    "11740631794790417120": {
+      "place_id": "ChIJrTz7clJi818R4MIjr2ka76I",
+      "store_name": "スナック エミーレ",
+      "last_updated": "2025-11-02T18:39:52.587118",
+      "refresh_due": "2026-11-02T18:39:52.587138"
+    },
+    "1118792376792431412": {
+      "place_id": "ChIJl_vVUzuH9F8RNLsgNL2_hg8",
+      "store_name": "スナック京",
+      "last_updated": "2025-11-02T18:39:54.688680",
+      "refresh_due": "2026-11-02T18:39:54.688695"
+    },
+    "17521612858367573171": {
+      "place_id": "ChIJk_shPFxd818Rs3zqqg9GKfM",
+      "store_name": "CHERRY（チェリー）",
+      "last_updated": "2025-11-02T18:39:56.671278",
+      "refresh_due": "2026-11-02T18:39:56.671292"
+    }
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_full_update": "2025-11-02T18:07:15.758627"
+  }
+}

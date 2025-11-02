@@ -63,8 +63,21 @@ class PlacesAPIAdapter(APIClient):
             time.sleep(self.config.request_delay - elapsed)
         self.last_request_time = time.time()
 
-    def _build_field_mask(self, category: str, api_type: str = 'details') -> str:
-        """カテゴリに応じたフィールドマスクを構築"""
+    def _build_field_mask(self, category: str, api_type: str = 'details', id_only: bool = False) -> str:
+        """カテゴリに応じたフィールドマスクを構築
+
+        Args:
+            category: カテゴリ名
+            api_type: 'details' または 'search'
+            id_only: Trueの場合はID onlyフィールド（無料SKU）
+        """
+        # ID onlyモード: 無料SKU適用
+        if id_only:
+            if api_type == 'search':
+                return 'places.id,places.name'
+            else:
+                return 'id,name'
+
         base_fields = [
             "id",
             "shortFormattedAddress",
@@ -135,53 +148,179 @@ class PlacesAPIAdapter(APIClient):
         """
         CID (Customer ID) から Place詳細を取得
 
+        ⚠️ 重要な制限:
+        Google Places API (New) v1では、CIDからの直接検索は**サポートされていません**。
+        この実装は互換性のために残されていますが、常にNoneを返します。
+
+        代替案:
+        1. 事前にCIDをPlace IDに変換してデータを保存
+        2. 店舗名での検索にフォールバック
+        3. 旧Places API v1 (Nearby Search)を使用
+
         Args:
             cid: Google Maps CID (Customer ID)
 
         Returns:
-            Place詳細データまたはNone
+            None (CIDからの直接取得は不可能)
         """
-        try:
-            # CIDをPlace IDに変換してから詳細取得
-            place_id = self._convert_cid_to_place_id(cid)
-            if place_id:
-                return self.fetch_place_details(place_id)
+        self._logger.warning(
+            "CID-based search is not supported by Places API (New) v1",
+            cid=cid,
+            recommendation="Use Place ID or store name search instead"
+        )
+        return None
 
-            # 代替方法：CIDから直接検索
-            search_query = f"cid:{cid}"
-            places = self.search_places(search_query)
+    def search_text_id_only(self, text_query: str) -> Optional[str]:
+        """Text Search (ID only) - 無料SKU
 
-            if places and len(places) > 0:
-                return places[0]
-
-            return None
-
-        except Exception as e:
-            self._logger.error("Failed to fetch place by CID", cid=cid, error=str(e))
-            return None
-
-    def _convert_cid_to_place_id(self, cid: str) -> Optional[str]:
-        """
-        CIDをPlace IDに変換（簡易実装）
+        店舗名からPlace IDのみを取得します。
+        Text Search Essentials (ID only) SKUが適用され、**完全無料**です。
 
         Args:
-            cid: Google Maps CID
+            text_query: 検索クエリ（店舗名など）
 
         Returns:
-            Place ID or None
+            Place ID（見つからない場合はNone）
         """
+        self._wait_for_rate_limit()
+
+        request_body = {
+            "textQuery": text_query,
+            "languageCode": self.config.language_code,
+            "maxResultCount": 1,  # 最初の1件のみ取得
+            "locationBias": self._build_location_bias()
+        }
+
+        field_mask = self._build_field_mask('', 'search', id_only=True)
+        headers = {
+            'Content-Type': CONTENT_TYPE_JSON,
+            'X-Goog-Api-Key': self.config.api_key,
+            'X-Goog-FieldMask': field_mask
+        }
+
+        self._logger.debug("Text Search ID Only リクエスト",
+                          query=text_query,
+                          field_mask=field_mask,
+                          url='https://places.googleapis.com/v1/places:searchText')
+
         try:
-            # CIDを使ったFind Place検索
-            search_query = f"cid:{cid}"
-            places = self.search_places(search_query)
+            response = requests.post(
+                'https://places.googleapis.com/v1/places:searchText',
+                headers=headers,
+                json=request_body,
+                timeout=self._timeout
+            )
 
-            if places and len(places) > 0:
-                return places[0].get('id')
+            self._logger.debug("API レスポンス",
+                             status_code=response.status_code,
+                             headers=dict(response.headers))
 
+            response.raise_for_status()
+
+            data = response.json()
+            places = data.get('places', [])
+
+            if places:
+                place_id = places[0].get('id')
+                self._logger.info("Place ID取得成功（無料SKU）",
+                                query=text_query,
+                                place_id=place_id)
+                return place_id
+            else:
+                self._logger.warning("Place ID取得失敗: 結果なし", query=text_query)
+                return None
+
+        except requests.exceptions.HTTPError as e:
+            error_detail = "Unknown error"
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_detail = e.response.json()
+                except:
+                    error_detail = e.response.text
+
+            self._logger.error(
+                "Text Search (ID only) HTTP error",
+                query=text_query,
+                status_code=e.response.status_code if hasattr(e, 'response') else None,
+                error=str(e),
+                response_body=error_detail
+            )
+            return None
+        except requests.exceptions.RequestException as e:
+            self._logger.error(
+                "Text Search (ID only) request failed",
+                query=text_query,
+                error=str(e)
+            )
             return None
 
-        except Exception as e:
-            self._logger.warning("CID to Place ID conversion failed", cid=cid, error=str(e))
+    def refresh_place_id(self, old_place_id: str) -> Optional[str]:
+        """Place ID更新 - 無料SKU
+
+        12ヶ月以上経過したPlace IDを更新します。
+        Place Details Essentials (ID Refresh) SKUが適用され、**完全無料**です。
+
+        Args:
+            old_place_id: 更新対象のPlace ID
+
+        Returns:
+            新しいPlace ID（更新失敗時はNone）
+        """
+        self._wait_for_rate_limit()
+
+        headers = {
+            'Content-Type': CONTENT_TYPE_JSON,
+            'X-Goog-Api-Key': self.config.api_key,
+            'X-Goog-FieldMask': 'id'  # ID Refresh = 無料
+        }
+
+        try:
+            response = requests.get(
+                f'https://places.googleapis.com/v1/places/{old_place_id}',
+                headers=headers,
+                timeout=self._timeout
+            )
+
+            if response.status_code == 404:
+                self._logger.warning("Place ID更新失敗: 場所が見つかりません",
+                                   old_place_id=old_place_id)
+                return None
+
+            response.raise_for_status()
+            data = response.json()
+            new_place_id = data.get('id')
+
+            if new_place_id:
+                self._logger.info("Place ID更新成功（無料SKU）",
+                                old_id=old_place_id,
+                                new_id=new_place_id)
+                return new_place_id
+            else:
+                self._logger.warning("Place ID更新失敗: IDなし", old_place_id=old_place_id)
+                return None
+
+        except requests.exceptions.HTTPError as e:
+            error_detail = "Unknown error"
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_detail = e.response.json()
+                except:
+                    error_detail = e.response.text
+
+            self._logger.error(
+                "Place ID Refresh HTTP error",
+                old_place_id=old_place_id,
+                status_code=e.response.status_code if hasattr(e, 'response') else None,
+                error=str(e),
+                response_body=error_detail
+            )
+            return None
+        except requests.exceptions.RequestException as e:
+            self._logger.error(
+                "Place ID Refresh request failed",
+                old_place_id=old_place_id,
+                error=str(e)
+            )
             return None
 
     def _get_place_details(self, place_id: str, category: str = 'restaurants') -> Optional[Dict]:
@@ -204,13 +343,28 @@ class PlacesAPIAdapter(APIClient):
             )
 
             if response.status_code == 404:
+                self._logger.warning("Place not found", place_id=place_id, status_code=404)
                 return None
 
             response.raise_for_status()
             return response.json()
 
+        except requests.exceptions.HTTPError as e:
+            self._logger.error(
+                "Place Details API HTTP error",
+                place_id=place_id,
+                status_code=e.response.status_code if hasattr(e, 'response') else None,
+                response_text=e.response.text[:200] if hasattr(e, 'response') else None,
+                error=str(e)
+            )
+            return None
         except requests.exceptions.RequestException as e:
-            self._logger.error("Place Details API request failed", error=str(e))
+            self._logger.error(
+                "Place Details API request failed",
+                place_id=place_id,
+                error_type=type(e).__name__,
+                error=str(e)
+            )
             return None
 
     def search_places(self, query: str, location: Optional[str] = None) -> List[PlaceData]:
@@ -373,38 +527,23 @@ class PlacesAPIAdapter(APIClient):
     def _get_place_details_from_cid(self, cid_url: str, category: str) -> Tuple[str, Optional[Dict]]:
         """
         CID URLからPlace詳細を取得
-        """
-        self._wait_for_rate_limit()
 
+        Note: CID URLを使用してText Searchを実行します。
+        """
         try:
             cid = cid_url.split('cid=')[1].split('&')[0].split('#')[0].strip()
         except (IndexError, AttributeError):
+            self._logger.error("Invalid CID URL format", cid_url=cid_url)
             return 'INVALID_CID', None
 
-        place_id = f"ChIJ{cid}"
+        # Text Search APIを使用してCIDから検索
+        status, places = self._search_text(cid_url, category)
 
-        headers = {
-            'Content-Type': CONTENT_TYPE_JSON,
-            'X-Goog-Api-Key': self.config.api_key,
-            'X-Goog-FieldMask': self._build_field_mask(category, 'details')
-        }
-
-        try:
-            response = requests.get(
-                f'https://places.googleapis.com/v1/places/{place_id}',
-                headers=headers,
-                timeout=self._timeout
-            )
-
-            if response.status_code == 404:
-                return 'NOT_FOUND', None
-
-            response.raise_for_status()
-            place = response.json()
-
-            return 'OK', place
-
-        except requests.exceptions.RequestException:
+        if status == 'OK' and places:
+            return 'OK', places[0]
+        elif status == 'ZERO_RESULTS':
+            return 'NOT_FOUND', None
+        else:
             return 'REQUEST_FAILED', None
 
     def batch_search(self, queries: List[str]) -> Dict[str, List[PlaceData]]:

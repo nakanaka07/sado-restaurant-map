@@ -30,6 +30,9 @@ from shared.error_handler import ErrorHandler, ErrorSeverity, ErrorCategory
 from shared.performance_monitor import PerformanceMonitor
 from shared.async_processor import OptimizedAsyncProcessor, OptimizedBatchConfig, ProcessingResult as AsyncProcessingResult
 
+# コスト最適化: Place IDキャッシュシステム
+from infrastructure.storage.place_id_cache import PlaceIdCache
+
 
 # 定数定義
 class ProcessorConstants:
@@ -61,6 +64,12 @@ class DataProcessor:
         # Phase 2改善: 新しいコンポーネント
         self._error_handler = ErrorHandler("DataProcessor")
         self._performance_monitor = PerformanceMonitor("DataProcessor")
+
+        # コスト最適化: Place IDキャッシュシステム (65%コスト削減)
+        cache_path = getattr(config, 'place_id_cache_path', None)
+        self._place_id_cache = PlaceIdCache(cache_path)
+        self._logger.info("Place IDキャッシュ初期化完了",
+                         cache_path=self._place_id_cache.cache_file_path)
 
         # 非同期処理設定
         self._enable_async = enable_async
@@ -382,25 +391,35 @@ class DataProcessor:
             raise  # 非同期プロセッサでハンドリングするため再発生
 
     async def _process_cid_url_async(self, query_data: QueryData) -> Optional[Dict[str, Any]]:
-        """CID URLの非同期処理"""
+        """CID URLの非同期処理
+
+        Note: Google Places API (New) v1ではCIDからの直接取得は不可能。
+        店舗名を使用してText Searchを実行します。
+        """
         cid = query_data.get('cid')
         store_name = query_data.get('store_name', '')
+        cid_url = query_data.get('url', '')
 
-        if cid:
+        # 店舗名が利用可能な場合はText Searchで検索
+        if store_name:
+            self._logger.debug("CID非同期処理: 店舗名で検索", store_name=store_name, cid=cid)
+
             try:
-                # API呼び出しを非同期実行
+                # 同期版のsearch_by_nameを非同期実行
                 loop = asyncio.get_event_loop()
-                place_data = await loop.run_in_executor(
+                result = await loop.run_in_executor(
                     None,
-                    self._api_client.fetch_place_details,
-                    cid
+                    self.search_by_name,
+                    store_name,
+                    query_data,
+                    'CID URL検索'
                 )
 
-                if place_data:
-                    # 同期版と同じフォーマット処理 (型キャストでPlaceDataとして扱う)
-                    from typing import cast
-                    place_data_typed = cast(PlaceData, place_data)
-                    return self.format_result(place_data_typed, query_data, store_name)
+                if result and cid_url:
+                    # 元のCID URLを保持
+                    result['original_cid_url'] = cid_url
+
+                return result
 
             except Exception as e:
                 self._error_handler.handle_error(
@@ -412,6 +431,13 @@ class DataProcessor:
                         "query_data": query_data
                     }
                 )
+        else:
+            # 店舗名がない場合は警告
+            self._logger.warning(
+                "CID非同期処理失敗: 店舗名なし",
+                cid=cid,
+                recommendation="データファイルに店舗名を追加してください"
+            )
 
         return None
 
@@ -490,27 +516,86 @@ class DataProcessor:
             return [q for q in queries if q.get('type') in ['cid_url', 'store_name']]
 
     def process_cid_url(self, query_data: QueryData) -> Optional[Dict[str, Any]]:
-        """CID URLから直接店舗情報を取得"""
+        """CID URLから店舗情報を取得 - コスト最適化版 (65%削減)
+
+        最適化フロー:
+        1. キャッシュからPlace ID取得 (無料)
+        2. キャッシュあり & 更新不要 → 直接Place Details取得 ($17/1000)
+        3. キャッシュあり & 12ヶ月以上経過 → ID Refresh (無料) → キャッシュ更新
+        4. キャッシュなし → Text Search ID Only (無料) → キャッシュ保存
+        5. Place Details取得 ($17/1000)
+
+        従来コスト: $32 (Text Search Pro) + $17 (Place Details Pro) = $49/1000
+        最適化後: $0 (Text Search ID Only) + $17 (Place Details Pro) = $17/1000
+        """
         cid = query_data.get('cid')
         store_name = query_data.get('store_name', '')
+        cid_url = query_data.get('url', '')
 
-        if cid:
-            try:
-                # CIDから直接Place詳細を取得
-                place_data = self._api_client.fetch_place_details(cid)
-                if place_data:
-                    # 生データを保存 (型キャストでPlaceDataとして扱う)
-                    from typing import cast
-                    place_data_typed = cast(PlaceData, place_data)
-                    self.raw_places_data.append(place_data_typed)
-                    return self.format_result(place_data_typed, query_data, 'CID直接取得')
-            except Exception as e:
-                self._logger.warning("CID直接取得失敗", cid=cid, error=str(e))
+        if not store_name:
+            self._logger.warning(
+                "CID処理失敗: 店舗名なし",
+                cid=cid,
+                recommendation="データファイルに店舗名を追加してください"
+            )
+            return None
 
-        # CID取得失敗時は店舗名検索にフォールバック
-        if store_name:
-            return self.search_by_name(store_name, query_data, 'CID URL検索（フォールバック）')
+        place_id = None
 
+        # Step 1: キャッシュからPlace ID取得 (無料)
+        cached_place_id = self._place_id_cache.get(cid)
+
+        if cached_place_id:
+            # Step 2: 更新判定 (12ヶ月以上経過しているか)
+            if self._place_id_cache.needs_refresh(cid):
+                self._logger.info("Place ID更新が必要", cid=cid, old_place_id=cached_place_id)
+
+                # Step 3: ID Refresh (無料SKU)
+                new_place_id = self._api_client.refresh_place_id(cached_place_id)
+
+                if new_place_id:
+                    self._place_id_cache.update(cid, new_place_id)
+                    place_id = new_place_id
+                    self._logger.info("Place ID更新成功", cid=cid, new_place_id=new_place_id)
+                else:
+                    # 更新失敗時は古いIDを使用 (フォールバック)
+                    place_id = cached_place_id
+                    self._logger.warning("Place ID更新失敗、古いIDを使用", cid=cid)
+            else:
+                # Step 2-alt: キャッシュが新しいのでそのまま使用
+                place_id = cached_place_id
+                self._logger.debug("キャッシュからPlace ID取得", cid=cid, place_id=place_id)
+        else:
+            # Step 4: キャッシュなし → Text Search ID Only (無料SKU)
+            self._logger.info("Text Search ID Only実行", store_name=store_name, cid=cid)
+            place_id = self._api_client.search_text_id_only(store_name)
+
+            if place_id:
+                # キャッシュに保存
+                self._place_id_cache.save(cid, place_id, store_name)
+                self._logger.info("Place IDキャッシュ保存成功", cid=cid, place_id=place_id)
+            else:
+                self._logger.warning("Text Search ID Only失敗", store_name=store_name, cid=cid)
+                return None
+
+        # Step 5: Place Details取得 (Pro SKU: $17/1000)
+        if place_id:
+            place_data = self._api_client.fetch_place_details(place_id)
+
+            if place_data:
+                # 生データを保存
+                self.raw_places_data.append(place_data)
+                result = self.format_result(place_data, query_data, 'CID URL検索 (最適化版)')
+            else:
+                result = None
+
+            if result:
+                # 元のCID URLを保持
+                if cid_url:
+                    result['original_cid_url'] = cid_url
+                return result
+
+        self._logger.warning("CID処理失敗", cid=cid, store_name=store_name)
         return None
 
     def process_maps_url(self, query_data: QueryData) -> Optional[Dict[str, Any]]:

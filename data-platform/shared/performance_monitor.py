@@ -243,9 +243,9 @@ class PerformanceMonitor:
             if rate_limited:
                 self._api_metrics.rate_limit_hits += 1
 
-            # メトリクス記録 - メモリ効率化
-            labels = {"endpoint": endpoint}
-            self._record_measurement(f"api.request.{endpoint}", duration, success, labels)
+        # メトリクス記録 - メモリ効率化（ロックの外で実行）
+        labels = {"endpoint": endpoint}
+        self._record_measurement(f"api.request.{endpoint}", duration, success, labels)
 
     def record_metric(
         self,
