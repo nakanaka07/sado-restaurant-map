@@ -85,6 +85,7 @@ jobs:
       - name: Production build with analysis
         env:
           ANALYZE: true
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
         run: pnpm build
 
       - name: Run size-limit (json)
