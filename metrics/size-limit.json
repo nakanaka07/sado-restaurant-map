@@ -8,13 +8,13 @@
   {
     "name": "data-processing",
     "passed": true,
-    "size": 7551,
+    "size": 7556,
     "sizeLimit": 40000
   },
   {
     "name": "ui-components",
     "passed": true,
-    "size": 4522,
+    "size": 4519,
     "sizeLimit": 40000
   },
   {
