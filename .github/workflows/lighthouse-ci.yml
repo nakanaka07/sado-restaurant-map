@@ -56,7 +56,9 @@ jobs:
           if [ -f lh-scores.json ]; then
             echo "perf=$(jq '.performance' lh-scores.json)" >> $GITHUB_OUTPUT
             echo "acc=$(jq '.accessibility' lh-scores.json)" >> $GITHUB_OUTPUT
-          fi      - name: Post PR comment (if applicable)
+          fi
+
+      - name: Post PR comment (if applicable)
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
