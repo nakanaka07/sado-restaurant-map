@@ -10,9 +10,10 @@
 interface ImportMetaEnv {
   // === 必須環境変数 ===
   readonly VITE_GOOGLE_MAPS_API_KEY: string;
-  readonly VITE_BASE_URL: string;
+  readonly VITE_GOOGLE_MAPS_MAP_ID: string;
 
   // === オプション環境変数 ===
+  readonly VITE_BASE_URL?: string;
   readonly VITE_APP_NAME?: string;
   readonly VITE_APP_VERSION?: string;
   readonly VITE_GA_MEASUREMENT_ID?: string;
@@ -41,7 +42,8 @@ interface ImportMeta {
 // === 環境変数バリデーション関数 ===
 export interface EnvConfig {
   googleMapsApiKey: string;
-  baseUrl: string;
+  googleMapsMapId: string;
+  baseUrl?: string;
   appName: string;
   appVersion: string;
   gaTrackingId?: string;
@@ -64,7 +66,7 @@ export const getEnvConfig = (): EnvConfig => {
   // 必須環境変数の検証
   const requiredEnvVars = [
     "VITE_GOOGLE_MAPS_API_KEY",
-    "VITE_BASE_URL",
+    "VITE_GOOGLE_MAPS_MAP_ID",
   ] as const;
 
   for (const envVar of requiredEnvVars) {
@@ -75,7 +77,8 @@ export const getEnvConfig = (): EnvConfig => {
 
   return {
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    baseUrl: import.meta.env.VITE_BASE_URL as string,
+    googleMapsMapId: import.meta.env.VITE_GOOGLE_MAPS_MAP_ID,
+    baseUrl: import.meta.env.VITE_BASE_URL as string | undefined,
     appName: (import.meta.env.VITE_APP_NAME as string) || "佐渡飲食店マップ",
     appVersion: (import.meta.env.VITE_APP_VERSION as string) || "1.0.0",
     gaTrackingId: import.meta.env.VITE_GA_MEASUREMENT_ID as string,

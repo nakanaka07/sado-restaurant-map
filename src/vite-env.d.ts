@@ -13,21 +13,24 @@ declare module "*.svg?url" {
 }
 
 interface ImportMetaEnv {
-  // Google Maps API設定（必須）
+  // === 必須環境変数 ===
   readonly VITE_GOOGLE_MAPS_API_KEY: string;
   readonly VITE_GOOGLE_MAPS_MAP_ID: string;
 
-  // Google Sheets API設定（拡張機能用）
+  // === Google Sheets API設定（オプション） ===
   readonly VITE_GOOGLE_SHEETS_API_KEY?: string;
   readonly VITE_SPREADSHEET_ID?: string;
 
-  // アプリケーション設定（オプション）
+  // === アプリケーション設定（オプション） ===
   readonly VITE_APP_TITLE?: string;
   readonly VITE_APP_DESCRIPTION?: string;
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 
-  // 開発・デバッグ設定（オプション）
+  // === 開発・デバッグ設定（オプション） ===
   readonly VITE_DEBUG_MODE?: string;
   readonly VITE_MOCK_DATA?: string;
+  readonly VITE_ENABLE_PWA_DEV?: string;
+  readonly VITE_DEV_DISABLE_SW?: string;
 }
 
 interface ImportMeta {
