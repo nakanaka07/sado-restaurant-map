@@ -41,22 +41,80 @@ AC:
 
 ## 4. Backlog (優先度付き候補)
 
-### カバレッジ50%達成タスク（現在40.52%）
+### Phase 1: Quick Win - カバレッジ50%達成 (Week 1: 2025-11-03~11-10)
 
-- (P1 test) **RestaurantMap.tsx統合テスト** [Issue #TBD] – マップ初期化・マーカー表示テスト、推定+2-3%
-  - 現状: 0% (361行、未テスト)
-  - 効果: カバレッジ大幅向上
-  - 方法: React Testing Library + Google Maps Mock
+- (P0 test) **type-guards.test.ts 実装** [Issue #TBD] – 型ガード包括テスト、+0.7%達成
+  - 現状: ✅ **完了** (72テスト全通過、2時間で実装完了)
+  - 効果: type-guards.ts 11.38% → 100% (+88.62%改善)
+  - カバレッジ影響: プロジェクト全体 +0.7%
+  - テスト範囲: MapPoint型ガード、座標検証、エラー型ガード、配列/React型ガード
 
-- (P1 test) **FilterPanel.txテスト** [Issue #TBD] – フィルターUI操作テスト、推定+2-3%
-  - 現状: 0% (390行、未テスト)
-  - 効果: カバレッジ大幅向上
-  - 方法: React Testing Library + ユーザーインタラクション
+- (P0 test) **RestaurantCategoryChip.test.tsx** [Issue #TBD] – カテゴリチップコンポーネントテスト、推定+0.6%
+  - 現状: 49.38% (243行、19カテゴリ × 4バリアント = 76パターン)
+  - 効果: 49.38% → 90%+ (a11y検証含む)
+  - 工数: 3時間
+  - 方法: Testing Library + jest-axe + スナップショットテスト
 
-- (P2 test) **OptimizedInfoWindow.txテスト** [Issue #TBD] – InfoWindow表示・非表示テスト、推定+1-2%
-  - 現状: 0% (255行、未テスト)
-  - 効果: カバレッジ中程度向上
-  - 方法: React Testing Library + Google Maps Mock
+- (P0 test) **DetailedBusinessHours.test.tsx** [Issue #TBD] – 営業時間表示テスト、推定+0.3%
+  - 現状: 64.44% (135行、時刻計算ロジック)
+  - 効果: 64.44% → 85%
+  - 工数: 1.5時間
+  - 方法: 既存businessHours.test.tsパターン流用
+
+**Phase 1合計**: 6.5時間で50.6%達成見込み ✅
+
+### Phase 2: 重要ロジック - 統計解析強化 (Week 3-4: 2025-11-11~11-24)
+
+- (P1 test) **statisticalSignificance.test.ts** [Issue #TBD] – 統計関数包括テスト、推定+2%
+  - 現状: 9.11% (748行、z-score/p-value/ベイズファクター)
+  - 効果: 9.11% → 70%
+  - 工数: 8時間 (Week 1)
+  - リスク: 統計学知識必須、小数点精度検証
+  - 方法: toBeCloseTo()、参考データセット、エッジケース網羅
+
+- (P1 test) **abTestResultsAnalyzer.test.ts** [Issue #TBD] – A/B判定ロジックテスト、推定+1%
+  - 現状: 3.04% (308行、推奨事項生成)
+  - 効果: 3.04% → 60%
+  - 工数: 8時間 (Week 2)
+  - 方法: シミュレーションデータ分離、ビジネスロジック単体テスト
+
+**Phase 2合計**: 16時間で55%到達 (前提: 統計知識)
+
+### Phase 3: インタラクティブUI - UX品質保証 (Week 5-7: 2025-11-25~12-15)
+
+- (P1 test) **CuisineFilter.test.tsx** [Issue #TBD] – 料理タイプフィルターテスト、推定+1.5%
+  - 現状: 0% (75行、セレクトボックス操作)
+  - 工数: 2時間
+  - 方法: userEvent.setup() + キーボードナビゲーション
+
+- (P1 test) **DistrictFilter.test.tsx** [Issue #TBD] – 地域フィルターテスト、推定+1.5%
+  - 現状: 0% (113行、複数選択・全選択)
+  - 工数: 3時間
+  - 方法: FilterPanel.test.tsxパターン流用
+
+- (P1 test) **FeatureFilter.test.tsx** [Issue #TBD] – 特徴フィルターテスト、推定+1.5%
+  - 現状: 0% (132行、複数条件フィルター)
+  - 工数: 4時間
+  - 方法: チェックボックス群テスト
+
+- (P1 test) **CustomMapControls.test.tsx** [Issue #TBD] – マップコントロールテスト、推定+1%
+  - 現状: 0% (57行、React Portal + Google Maps統合)
+  - 工数: 3時間
+  - 方法: RestaurantMap.test.tsxのモックパターン流用
+
+- (P1 test) **FilterModal.test.tsx** [Issue #TBD] – フィルターモーダルテスト、推定+3%
+  - 現状: 0% (278行、モーダルフォーカストラップ)
+  - 工数: 6時間
+  - リスク: a11y複雑度高 (role="dialog", Escキー, 背景クリック)
+  - 方法: AccessibilityComponents.test.tsxパターン流用
+
+**Phase 3合計**: 18時間で65%到達
+
+### 旧カバレッジ達成タスク (アーカイブ)
+
+- (P2 test) **RestaurantMap.tsx統合テスト** [Issue #TBD] – Phase 3以降で検討
+- (P2 test) **FilterPanel.txテスト** [Issue #TBD] – Phase 3で細分化実装
+- (P2 test) **OptimizedInfoWindow.txテスト** [Issue #TBD] – Phase 3以降で検討
 
 ### Phase 8 残タスク
 
