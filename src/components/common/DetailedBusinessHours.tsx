@@ -34,7 +34,7 @@ export const DetailedBusinessHours = React.memo<DetailedBusinessHoursProps>(
     }
 
     const todayIndex = new Date().getDay();
-    const todayName = ["日", "月", "火", "水", "木", "金", "土"][todayIndex];
+    const todayName = ["日", "月", "火", "水", "木", "金", "土"][todayIndex]!;
 
     return (
       <div className={`detailed-business-hours ${className}`}>
@@ -168,7 +168,7 @@ const TodayHoursHighlight = React.memo<{
       <div style={{ color: "#1e3a8a", marginTop: "2px" }}>
         {todayHours.isHoliday
           ? "定休日"
-          : formatOpeningHours(todayHours.open, todayHours.close, {
+          : formatOpeningHours(todayHours.open ?? "", todayHours.close ?? "", {
               format: "24h",
               showPeriod: true,
             })}

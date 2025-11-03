@@ -84,7 +84,7 @@ describe("DetailedBusinessHours - Basic Rendering", () => {
   it("undefinedの場合、適切なメッセージを表示する", () => {
     render(
       <DetailedBusinessHours
-        openingHours={undefined as unknown as OpeningHours}
+        openingHours={undefined as unknown as readonly OpeningHours[]}
       />
     );
 
