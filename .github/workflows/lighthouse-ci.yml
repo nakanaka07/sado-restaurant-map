@@ -48,17 +48,15 @@ jobs:
       - name: Extract Lighthouse scores
         id: scores
         run: |
-          if [ ! -f ".lighthouseci/manifest.json" ]; then
-            echo "Manifest missing";
-            exit 0;
+          if [ ! -f ".lighthouseci/manifest.json" ]; then 
+            echo "Manifest missing"; 
+            exit 0; 
           fi
-          node scripts/ci/lighthouse-scores.js || echo "Score extraction failed"
+          node scripts/ci/lighthouse-scores.cjs || echo "Score extraction failed"
           if [ -f lh-scores.json ]; then
             echo "perf=$(jq '.performance' lh-scores.json)" >> $GITHUB_OUTPUT
             echo "acc=$(jq '.accessibility' lh-scores.json)" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Post PR comment (if applicable)
+          fi      - name: Post PR comment (if applicable)
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

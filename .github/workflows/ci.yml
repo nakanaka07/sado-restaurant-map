@@ -110,7 +110,7 @@ jobs:
           if [ -f size-limit.json ]; then
             echo "### Bundle Size Report" >> $GITHUB_STEP_SUMMARY
             echo '' >> $GITHUB_STEP_SUMMARY
-            node scripts/ci/bundle-stats.js >> $GITHUB_STEP_SUMMARY
+            node scripts/ci/bundle-stats.cjs >> $GITHUB_STEP_SUMMARY
           else
             echo "size-limit.json not found" >> $GITHUB_STEP_SUMMARY
           fi
@@ -137,7 +137,7 @@ jobs:
           BASE_FILE=metrics/size-limit.json
           if [ -f size-limit.json ] && [ -f "$BASE_FILE" ]; then
             echo "Baseline exists. Computing diff..."
-            node scripts/ci/bundle-diff.js || echo "Bundle diff calculation failed"
+            node scripts/ci/bundle-diff.cjs || echo "Bundle diff calculation failed"
             echo "diff_done=true" >> $GITHUB_OUTPUT
           else
             echo "No baseline. Skipping diff."
