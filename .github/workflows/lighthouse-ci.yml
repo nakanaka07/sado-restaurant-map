@@ -45,20 +45,18 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
 
-      - name: Extract Lighthouse scores & thresholds
+      - name: Extract Lighthouse scores
         id: scores
         run: |
-          manifest=.lighthouseci/manifest.json
-          if [ ! -f "$manifest" ]; then echo "Manifest missing"; exit 0; fi
-          node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('.lighthouseci/manifest.json','utf8'));const rep=m[0];const cat=rep.summary;const pct=v=>Math.round(v*100);const scores={performance:pct(cat.performance||0),accessibility:pct(cat.accessibility||0),seo:pct(cat.seo||0),best:pct(cat['best-practices']||cat.bestPractices||0),pwa:pct(cat.pwa||0)};fs.writeFileSync('lh-scores.json', JSON.stringify(scores,null,2));console.log('Scores:',scores);"
-          cat lh-scores.json
-          PERF_WARN=70; PERF_FAIL=60; ACC_WARN=85; ACC_FAIL=75
-          perf=$(jq '.performance' lh-scores.json); acc=$(jq '.accessibility' lh-scores.json)
-          status="ok"
-          if [ "$perf" -lt $PERF_FAIL ] || [ "$acc" -lt $ACC_FAIL ]; then status="fail"; fi
-          if [ "$status" = "fail" ]; then echo "hard_fail=true" >> $GITHUB_OUTPUT; else echo "hard_fail=false" >> $GITHUB_OUTPUT; fi
-          echo "perf=$perf" >> $GITHUB_OUTPUT
-          echo "acc=$acc" >> $GITHUB_OUTPUT
+          if [ ! -f ".lighthouseci/manifest.json" ]; then
+            echo "Manifest missing";
+            exit 0;
+          fi
+          node scripts/ci/lighthouse-scores.js || echo "Score extraction failed"
+          if [ -f lh-scores.json ]; then
+            echo "perf=$(jq '.performance' lh-scores.json)" >> $GITHUB_OUTPUT
+            echo "acc=$(jq '.accessibility' lh-scores.json)" >> $GITHUB_OUTPUT
+          fi
 
       - name: Post PR comment (if applicable)
         if: always()
@@ -78,13 +76,8 @@ jobs:
       - name: Summary
         run: |
           echo "Lighthouse CI run completed" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.scores.outputs.hard_fail }}" = "true" ]; then echo "One or more scores below hard fail threshold" >> $GITHUB_STEP_SUMMARY; fi
-
-      - name: Enforce fail thresholds
-        if: steps.scores.outputs.hard_fail == 'true'
-        run: |
-          echo "Failing due to Lighthouse score below hard threshold." >&2
-          exit 1
+          echo "Scores: Performance=${{ steps.scores.outputs.perf }}%, Accessibility=${{ steps.scores.outputs.acc }}%" >> $GITHUB_STEP_SUMMARY
+          echo "Thresholds are enforced by lighthouserc.json assertions (Performance ≥90%, Accessibility ≥95%)" >> $GITHUB_STEP_SUMMARY
 
       - name: Persist Lighthouse scores (main only)
         if: github.ref == 'refs/heads/main' && steps.scores.outputs.perf != ''

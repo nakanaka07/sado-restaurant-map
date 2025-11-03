@@ -45,6 +45,7 @@ body:
     id: priority
     attributes:
       label: 優先度
+      description: 詳細は[優先度レベル定義](https://github.com/nakanaka07/sado-restaurant-map/blob/main/docs/guidelines/SHARED_GLOSSARY.md#4-優先度レベル)を参照
       options: [P0, P1, P2, P3]
     validations:
       required: true
