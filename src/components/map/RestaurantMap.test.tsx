@@ -31,10 +31,9 @@ vi.mock("@vis.gl/react-google-maps", () => ({
 vi.mock("@/hooks/map/useABTestIntegration", () => ({
   useABTestIntegration: () => ({
     variant: "original",
-    isDashboardVisible: false,
-    toggleDashboard: vi.fn(),
     trackMarkerInteraction: vi.fn(),
     trackError: vi.fn(),
+    trackSessionStart: vi.fn(),
     totalInteractions: 0,
     sessionDuration: 0,
   }),

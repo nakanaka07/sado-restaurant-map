@@ -93,58 +93,63 @@ AC:
 - 個別実行成功・全体実行失敗の問題パターン解決
 - テスト品質の信頼性回復（913テスト全通過）
 
-### Phase 2: 重要ロジック - 統計解析強化 (Week 3-4: 2025-11-11~11-24)
+### 🎯 Phase 2: インタラクティブUI - UX品質保証 (Week 3-5: 2025-11-11~12-01)
 
-- (P1 test) **statisticalSignificance.test.ts** [Issue #TBD] – 統計関数包括テスト、推定+2%
-  - 現状: 9.11% (748行、z-score/p-value/ベイズファクター)
-  - 効果: 9.11% → 70%
-  - 工数: 8時間 (Week 1)
-  - リスク: 統計学知識必須、小数点精度検証
-  - 方法: toBeCloseTo()、参考データセット、エッジケース網羅
+**目標**: カバレッジ 51.12% → 65% (+13.88%)
 
-- (P1 test) **abTestResultsAnalyzer.test.ts** [Issue #TBD] – A/B判定ロジックテスト、推定+1%
-  - 現状: 3.04% (308行、推奨事項生成)
-  - 効果: 3.04% → 60%
-  - 工数: 8時間 (Week 2)
-  - 方法: シミュレーションデータ分離、ビジネスロジック単体テスト
-
-**Phase 2合計**: 16時間で55%到達 (前提: 統計知識)
-
-### Phase 3: インタラクティブUI - UX品質保証 (Week 5-7: 2025-11-25~12-15)
+**優先タスク** (既存マーカーシステム改善に焦点):
 
 - (P1 test) **CuisineFilter.test.tsx** [Issue #TBD] – 料理タイプフィルターテスト、推定+1.5%
   - 現状: 0% (75行、セレクトボックス操作)
   - 工数: 2時間
   - 方法: userEvent.setup() + キーボードナビゲーション
+  - 実用性: ユーザーが頻繁に使用するフィルター機能
 
 - (P1 test) **DistrictFilter.test.tsx** [Issue #TBD] – 地域フィルターテスト、推定+1.5%
   - 現状: 0% (113行、複数選択・全選択)
   - 工数: 3時間
   - 方法: FilterPanel.test.tsxパターン流用
+  - 実用性: 地域別検索の信頼性向上
 
 - (P1 test) **FeatureFilter.test.tsx** [Issue #TBD] – 特徴フィルターテスト、推定+1.5%
   - 現状: 0% (132行、複数条件フィルター)
   - 工数: 4時間
   - 方法: チェックボックス群テスト
+  - 実用性: 特徴検索の正確性保証
 
 - (P1 test) **CustomMapControls.test.tsx** [Issue #TBD] – マップコントロールテスト、推定+1%
   - 現状: 0% (57行、React Portal + Google Maps統合)
   - 工数: 3時間
   - 方法: RestaurantMap.test.tsxのモックパターン流用
+  - 実用性: マップ操作UIの安定性
 
 - (P1 test) **FilterModal.test.tsx** [Issue #TBD] – フィルターモーダルテスト、推定+3%
   - 現状: 0% (278行、モーダルフォーカストラップ)
   - 工数: 6時間
-  - リスク: a11y複雑度高 (role="dialog", Escキー, 背景クリック)
+  - リスク: a11y複雑度高 (role="dialog", Escキー、背景クリック)
   - 方法: AccessibilityComponents.test.tsxパターン流用
+  - 実用性: アクセシビリティ準拠の確認
 
-**Phase 3合計**: 18時間で65%到達
+**Phase 2合計**: 18時間で65%到達
 
-### 旧カバレッジ達成タスク (アーカイブ)
+### 🗄️ アーカイブ (削除済み・延期)
 
-- (P2 test) **RestaurantMap.tsx統合テスト** [Issue #TBD] – Phase 3以降で検討
-- (P2 test) **FilterPanel.txテスト** [Issue #TBD] – Phase 3で細分化実装
-- (P2 test) **OptimizedInfoWindow.txテスト** [Issue #TBD] – Phase 3以降で検討
+#### ❌ 削除: Phase 2統計解析タスク (2025-11-04)
+
+- **理由**: 開発途中で実ユーザーA/Bテストは想定外
+- **削除ファイル**:
+  - `statisticalSignificance.ts` (748行)
+  - `abTestResultsAnalyzer.ts` (308行)
+  - `abTestMonitoring.ts` (監視システム)
+  - `phase3MigrationPlan.ts` (移行計画)
+  - `ABTestDashboardSimple.tsx` (639行)
+- **方針**: UIテスト・マーカー改善に集中
+
+#### 延期タスク
+
+- (P2 test) **RestaurantMap.tsx統合テスト** – Phase 3以降で検討
+- (P2 test) **FilterPanel.txテスト** – Phase 2で細分化実装
+- (P2 test) **OptimizedInfoWindow.txテスト** – Phase 3以降で検討
 
 ### Phase 8 残タスク
 

@@ -8,26 +8,12 @@ import type { Restaurant } from "@/types";
 import type { MigrationConfig } from "@/types/migration";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
 import { Map } from "@vis.gl/react-google-maps";
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 // Legacy marker has been removed; keep only new migration system path usage
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MarkerMigrationSystem } from "./migration/MarkerMigration";
 import { OptimizedInfoWindow } from "./OptimizedInfoWindow";
 import { UnifiedMarker } from "./UnifiedMarker";
-
-// Phase 8 Task 2.2: ABTestDashboard dynamic import (開発環境のみ使用)
-const ABTestDashboard = lazy(() =>
-  import("@/components/dashboard/ABTestDashboardSimple").then(module => ({
-    default: module.default,
-  }))
-);
 
 interface RestaurantMapProps {
   readonly restaurants: readonly Restaurant[];
@@ -85,7 +71,6 @@ export default function RestaurantMap({
     variant: shouldUseNewMarkerSystem ? "enhanced-png" : "original",
     segment: "general",
     enableTracking: true,
-    enableDashboard: process.env.NODE_ENV === "development",
     debugMode: process.env.NODE_ENV === "development",
   });
 
@@ -202,68 +187,6 @@ export default function RestaurantMap({
       }}
     >
       <div className="map-container">
-        {/* 📊 A/Bテストダッシュボード（開発環境のみ） */}
-        {abTestIntegration.isDashboardVisible && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0,0,0,0.8)",
-              zIndex: 2000,
-              overflow: "auto",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                backgroundColor: "#ffffff",
-                margin: "20px",
-                borderRadius: "8px",
-                maxHeight: "calc(100vh - 40px)",
-                overflow: "auto",
-              }}
-            >
-              <button
-                onClick={abTestIntegration.toggleDashboard}
-                style={{
-                  position: "absolute",
-                  top: "16px",
-                  right: "16px",
-                  background: "#ef4444",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  zIndex: 2001,
-                }}
-              >
-                × 閉じる
-              </button>
-              <Suspense
-                fallback={
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: "20px",
-                      color: "#666",
-                    }}
-                  >
-                    ダッシュボードを読み込み中...
-                  </div>
-                }
-              >
-                <ABTestDashboard />
-              </Suspense>
-            </div>
-          </div>
-        )}
-
         {/* 🎯 デバッグ情報表示（開発環境のみ） */}
         {process.env.NODE_ENV === "development" && (
           <div
@@ -299,20 +222,6 @@ export default function RestaurantMap({
               📈 インタラクション: {abTestIntegration.totalInteractions}
             </div>
             <div>⏱️ セッション: {abTestIntegration.sessionDuration}秒</div>
-            <button
-              onClick={abTestIntegration.toggleDashboard}
-              style={{
-                marginTop: "4px",
-                padding: "2px 6px",
-                fontSize: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "3px",
-                background: "#f8f9fa",
-                cursor: "pointer",
-              }}
-            >
-              📊 ダッシュボード
-            </button>
           </div>
         )}
 

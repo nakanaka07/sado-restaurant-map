@@ -48,33 +48,6 @@ export interface PerformanceMetrics {
   readonly errorRate: number; // エラー率 (%)
 }
 
-/** A/Bテスト結果サマリー */
-export interface ABTestResultSummary {
-  readonly variant: ABTestVariant;
-  readonly totalSessions: number;
-  readonly avgSessionDuration: number;
-  readonly conversionRate: number; // 目標達成率
-  readonly errorRate: number;
-  readonly performanceScore: number; // パフォーマンス総合スコア
-  readonly userSatisfaction: number; // ユーザー満足度
-  readonly statisticalSignificance: number; // 統計的有意性 (p-value)
-}
-
-/** ダッシュボード表示用データ */
-export interface DashboardData {
-  readonly currentPhase: string;
-  readonly rolloutPercentage: number;
-  readonly totalParticipants: number;
-  readonly variants: ABTestResultSummary[];
-  readonly realtimeMetrics: {
-    activeUsers: number;
-    errorCount: number;
-    averageLoadTime: number;
-  };
-  readonly recommendations: string[];
-  readonly lastUpdated: string;
-}
-
 // ==============================
 // データ収集・分析システム
 // ==============================
@@ -318,209 +291,9 @@ class ABTestAnalyticsService {
     );
   }
 
-  /**
-   * バリアント別結果サマリー生成
-   */
-  public generateResultSummary(): ABTestResultSummary[] {
-    const variantGroups = this.groupMetricsByVariant();
-    const summaries: ABTestResultSummary[] = [];
-
-    for (const [variant, metrics] of variantGroups.entries()) {
-      const sessions = this.getUniqueSessions(metrics);
-      const summary: ABTestResultSummary = {
-        variant,
-        totalSessions: sessions.length,
-        avgSessionDuration: this.calculateAvgSessionDuration(metrics),
-        conversionRate: this.calculateConversionRate(metrics),
-        errorRate: this.calculateErrorRate(metrics),
-        performanceScore: this.calculatePerformanceScore(metrics),
-        userSatisfaction: this.calculateUserSatisfaction(metrics),
-        statisticalSignificance: this.calculateStatisticalSignificance(metrics),
-      };
-      summaries.push(summary);
-    }
-
-    return summaries;
-  }
-
-  /**
-   * リアルタイムダッシュボードデータ生成
-   */
-  public generateDashboardData(): DashboardData {
-    const summaries = this.generateResultSummary();
-    const recentMetrics = this.getRecentMetrics(60000); // 過去1分
-
-    return {
-      currentPhase: "phase2",
-      rolloutPercentage: 50,
-      totalParticipants: this.getUniqueUsers().length,
-      variants: summaries,
-      realtimeMetrics: {
-        activeUsers: this.getActiveUsers(recentMetrics),
-        errorCount: this.getErrorCount(recentMetrics),
-        averageLoadTime: this.getAverageLoadTime(recentMetrics),
-      },
-      recommendations: this.generateRecommendations(summaries),
-      lastUpdated: new Date().toISOString(),
-    };
-  }
-
   // ==============================
   // プライベートヘルパーメソッド
   // ==============================
-
-  private groupMetricsByVariant(): Map<ABTestVariant, ABTestMetrics[]> {
-    const groups = new Map<ABTestVariant, ABTestMetrics[]>();
-
-    for (const metric of this.metrics) {
-      if (!groups.has(metric.variant)) {
-        groups.set(metric.variant, []);
-      }
-      const group = groups.get(metric.variant);
-      if (group) {
-        group.push(metric);
-      }
-    }
-
-    return groups;
-  }
-
-  private getUniqueSessions(metrics: ABTestMetrics[]): string[] {
-    return [...new Set(metrics.map(m => m.sessionId))];
-  }
-
-  private getUniqueUsers(): string[] {
-    return [
-      ...new Set(
-        this.metrics
-          .filter((m): m is ABTestMetrics & { userId: string } =>
-            Boolean(m.userId)
-          )
-          .map(m => m.userId)
-      ),
-    ];
-  }
-
-  private calculateAvgSessionDuration(metrics: ABTestMetrics[]): number {
-    const sessions = this.getUniqueSessions(metrics);
-    let totalDuration = 0;
-
-    for (const sessionId of sessions) {
-      const sessionMetrics = metrics.filter(m => m.sessionId === sessionId);
-      if (sessionMetrics.length > 0) {
-        const start = Math.min(...sessionMetrics.map(m => m.timestamp));
-        const end = Math.max(...sessionMetrics.map(m => m.timestamp));
-        totalDuration += end - start;
-      }
-    }
-
-    return sessions.length > 0 ? totalDuration / sessions.length / 1000 : 0; // 秒単位
-  }
-
-  private calculateConversionRate(metrics: ABTestMetrics[]): number {
-    const totalSessions = this.getUniqueSessions(metrics).length;
-    if (totalSessions === 0) return 0;
-
-    // コンバージョン = マーカークリック + フィルター使用
-    const conversionEvents = metrics.filter(
-      m => m.eventType === "marker_clicked" || m.eventType === "filter_used"
-    );
-    const conversionSessions = this.getUniqueSessions(conversionEvents).length;
-
-    return conversionSessions / totalSessions;
-  }
-
-  private calculateErrorRate(metrics: ABTestMetrics[]): number {
-    const totalEvents = metrics.length;
-    if (totalEvents === 0) return 0;
-
-    const errorEvents = metrics.filter(
-      m => m.eventType === "error_encountered"
-    );
-    return errorEvents.length / totalEvents;
-  }
-
-  private calculatePerformanceScore(metrics: ABTestMetrics[]): number {
-    const perfMetrics = metrics.filter(
-      m => m.eventType === "performance_measured"
-    );
-    if (perfMetrics.length === 0) return 0;
-
-    // パフォーマンススコア計算 (0-100)
-    let score = 100;
-
-    for (const metric of perfMetrics) {
-      const type = metric.eventData.metric_type as string;
-      const value = metric.eventData.metric_value as number;
-
-      switch (type) {
-        case "lcp":
-          score -= this.calculateLCPPenalty(value);
-          break;
-        case "cls":
-          score -= this.calculateCLSPenalty(value);
-          break;
-        case "inp":
-        case "event_timing":
-          score -= this.calculateInteractionPenalty(value);
-          break;
-      }
-    }
-
-    return Math.max(0, score);
-  }
-
-  private calculateLCPPenalty(value: number): number {
-    if (value > 2500) return 20;
-    if (value > 1200) return 10;
-    return 0;
-  }
-
-  private calculateCLSPenalty(value: number): number {
-    if (value > 0.25) return 15;
-    if (value > 0.1) return 5;
-    return 0;
-  }
-
-  private calculateInteractionPenalty(value: number): number {
-    if (value > 200) return 15;
-    if (value > 100) return 5;
-    return 0;
-  }
-
-  private calculateUserSatisfaction(metrics: ABTestMetrics[]): number {
-    // ユーザー満足度の代理指標
-    const conversionRate = this.calculateConversionRate(metrics);
-    const errorRate = this.calculateErrorRate(metrics);
-    const avgSessionDuration = this.calculateAvgSessionDuration(metrics);
-
-    // 満足度スコア計算 (0-100)
-    const score =
-      conversionRate * 40 + // コンバージョン率の重み: 40%
-      (1 - errorRate) * 30 + // エラー率の逆数の重み: 30%
-      Math.min(avgSessionDuration / 120, 1) * 30; // セッション時間の重み: 30% (上限2分)
-
-    return Math.round(score * 100) / 100;
-  }
-
-  private calculateStatisticalSignificance(metrics: ABTestMetrics[]): number {
-    // 簡易的なp-value計算（パフォーマンス重視）
-    const sampleSize = this.getUniqueSessions(metrics).length;
-
-    if (sampleSize < 30) return 1.0; // 統計的信頼性なし
-
-    // 高速計算：コンバージョン率ベース
-    const conversionRate = this.calculateConversionRate(metrics);
-    const threshold = 0.1; // ベースライン
-
-    // 簡易z-score近似
-    const zScore =
-      Math.abs(conversionRate - threshold) /
-      Math.sqrt((threshold * (1 - threshold)) / sampleSize);
-
-    // p-value近似（高速計算）
-    return Math.max(0.001, Math.exp(-zScore / 2));
-  }
 
   private getDeviceType(): string {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -567,84 +340,6 @@ class ABTestAnalyticsService {
       return "unknown";
     }
   }
-
-  private getRecentMetrics(timeWindow: number): ABTestMetrics[] {
-    const cutoff = Date.now() - timeWindow;
-    return this.metrics.filter(m => m.timestamp > cutoff);
-  }
-
-  private getActiveUsers(metrics: ABTestMetrics[]): number {
-    return this.getUniqueSessions(metrics).length;
-  }
-
-  private getErrorCount(metrics: ABTestMetrics[]): number {
-    return metrics.filter(m => m.eventType === "error_encountered").length;
-  }
-
-  private getAverageLoadTime(metrics: ABTestMetrics[]): number {
-    const lcpMetrics = metrics.filter(
-      m =>
-        m.eventType === "performance_measured" &&
-        m.eventData.metric_type === "lcp"
-    );
-
-    if (lcpMetrics.length === 0) return 0;
-
-    const totalTime = lcpMetrics.reduce(
-      (sum, m) => sum + (m.eventData.metric_value as number),
-      0
-    );
-
-    return totalTime / lcpMetrics.length;
-  }
-
-  private generateRecommendations(summaries: ABTestResultSummary[]): string[] {
-    const recommendations: string[] = [];
-
-    if (summaries.length < 2) {
-      recommendations.push("複数バリアントでのテストを開始してください");
-      return recommendations;
-    }
-
-    // 最高パフォーマンスバリアント特定
-    const bestVariant = summaries.reduce(
-      (best, current) =>
-        current.performanceScore > best.performanceScore ? current : best,
-      summaries[0]
-    );
-
-    if (bestVariant.statisticalSignificance < 0.05) {
-      recommendations.push(
-        `${bestVariant.variant} バリアントが統計的に有意な改善を示しています (p=${bestVariant.statisticalSignificance.toFixed(3)})`
-      );
-
-      if (bestVariant.conversionRate > 0.15) {
-        recommendations.push(
-          "コンバージョン率が良好です。Phase 3への移行を検討できます"
-        );
-      }
-
-      if (bestVariant.errorRate < 0.01) {
-        recommendations.push("エラー率が低く安定しています");
-      }
-    } else {
-      recommendations.push(
-        "まだ統計的有意性に達していません。もう少しデータ収集を継続してください"
-      );
-    }
-
-    // パフォーマンス改善提案
-    const avgPerformanceScore =
-      summaries.reduce((sum, s) => sum + s.performanceScore, 0) /
-      summaries.length;
-    if (avgPerformanceScore < 80) {
-      recommendations.push(
-        "パフォーマンススコアが低めです。最適化を検討してください"
-      );
-    }
-
-    return recommendations;
-  }
 }
 
 // ==============================
@@ -660,37 +355,17 @@ if (typeof window !== "undefined" && import.meta.env.DEV) {
 }
 
 // ==============================
-// ユーティリティ関数
+// 開発環境デバッグ用ユーティリティ
 // ==============================
 
 /**
- * A/Bテスト結果の簡易表示
+ * 収集したメトリクスの基本情報をコンソール出力（開発用）
  */
-export function displayABTestResults(): void {
-  const data = abTestAnalytics.generateDashboardData();
+export function debugMetrics(): void {
+  if (!import.meta.env.DEV) return;
 
-  console.group("📊 A/Bテスト結果サマリー");
-  console.log(`フェーズ: ${data.currentPhase} (${data.rolloutPercentage}%)`);
-  console.log(`総参加者: ${data.totalParticipants}`);
-  console.log(`アクティブユーザー: ${data.realtimeMetrics.activeUsers}`);
-
-  console.group("バリアント別結果:");
-  for (const variant of data.variants) {
-    console.log(`${variant.variant}:`, {
-      セッション数: variant.totalSessions,
-      コンバージョン率: `${(variant.conversionRate * 100).toFixed(2)}%`,
-      エラー率: `${(variant.errorRate * 100).toFixed(2)}%`,
-      パフォーマンス: `${variant.performanceScore.toFixed(1)}/100`,
-      統計的有意性: `p=${variant.statisticalSignificance.toFixed(3)}`,
-    });
-  }
-  console.groupEnd();
-
-  console.group("推奨事項:");
-  for (const recommendation of data.recommendations) {
-    console.log(`• ${recommendation}`);
-  }
-  console.groupEnd();
-
+  console.group("📊 A/Bテストメトリクス");
+  console.log("総イベント数:", abTestAnalytics["metrics"].length);
+  console.log("セッションID:", abTestAnalytics["sessionId"]);
   console.groupEnd();
 }

@@ -24,7 +24,6 @@ interface ABTestIntegrationOptions {
   readonly variant: ABTestVariant;
   readonly segment: UserSegment;
   readonly enableTracking: boolean;
-  readonly enableDashboard: boolean;
   readonly debugMode?: boolean;
 }
 
@@ -41,8 +40,6 @@ interface ABTestIntegrationReturn {
   ) => void;
   readonly trackSessionStart: () => void;
   readonly trackError: (error: Error, context: string) => void;
-  readonly isDashboardVisible: boolean;
-  readonly toggleDashboard: () => void;
   readonly totalInteractions: number;
   readonly sessionDuration: number;
 }
@@ -54,7 +51,6 @@ interface ABTestIntegrationReturn {
 export function useABTestIntegration(
   options: ABTestIntegrationOptions
 ): ABTestIntegrationReturn {
-  const [isDashboardVisible, setIsDashboardVisible] = useState(false);
   const [sessionStartTime] = useState(Date.now());
   const [totalInteractions, setTotalInteractions] = useState(0);
   const [sessionDuration, setSessionDuration] = useState(0);
@@ -64,7 +60,7 @@ export function useABTestIntegration(
 
   // ABテスト分析モジュールを動的読み込み
   useEffect(() => {
-    if (options.enableTracking || options.enableDashboard) {
+    if (options.enableTracking) {
       import("@/services/abtest")
         .then(module => {
           abTestAnalyticsRef.current = module.abTestAnalytics;
@@ -73,7 +69,7 @@ export function useABTestIntegration(
           console.warn("ABテスト分析モジュールの読み込みに失敗:", error);
         });
     }
-  }, [options.enableTracking, options.enableDashboard]);
+  }, [options.enableTracking]);
 
   // セッション時間の更新
   useEffect(() => {
@@ -123,22 +119,15 @@ export function useABTestIntegration(
         interaction.renderTime
       );
 
-      // 詳細イベント追跡
+      // 簡素化されたイベント追跡
       abTestAnalyticsRef.current.trackABTestEvent(
         options.variant,
         options.segment,
         "marker_clicked",
         {
           restaurant_id: interaction.restaurant.id,
-          restaurant_name: interaction.restaurant.name,
           interaction_type: interaction.interactionType,
           render_time: interaction.renderTime,
-          restaurant_cuisine: interaction.restaurant.cuisineType,
-          restaurant_main_category: interaction.restaurant.mainCategory,
-          viewport_width: window.innerWidth,
-          viewport_height: window.innerHeight,
-          session_duration: sessionDuration,
-          total_interactions: totalInteractions + 1,
         }
       );
 
@@ -152,7 +141,7 @@ export function useABTestIntegration(
         });
       }
     },
-    [options, sessionDuration, totalInteractions]
+    [options, sessionDuration]
   );
 
   // エラー追跡
@@ -179,20 +168,6 @@ export function useABTestIntegration(
     },
     [options]
   );
-
-  // ダッシュボード表示切り替え
-  const toggleDashboard = useCallback(() => {
-    if (!options.enableDashboard) {
-      console.warn("ダッシュボード機能が無効になっています");
-      return;
-    }
-
-    setIsDashboardVisible(prev => !prev);
-
-    if (options.debugMode) {
-      console.log("📊 ダッシュボード表示切り替え:", !isDashboardVisible);
-    }
-  }, [options.enableDashboard, options.debugMode, isDashboardVisible]);
 
   // 初期セットアップ
   useEffect(() => {
@@ -227,8 +202,6 @@ export function useABTestIntegration(
     trackMarkerInteraction,
     trackSessionStart,
     trackError,
-    isDashboardVisible,
-    toggleDashboard,
     totalInteractions,
     sessionDuration,
   };
@@ -262,29 +235,8 @@ export function createMarkerInteraction(
  * A/Bテスト統計情報をコンソールに出力
  */
 export async function logABTestStats(): Promise<void> {
-  const { abTestAnalytics } = await import("@/services/abtest");
-  const data = abTestAnalytics.generateDashboardData();
-
-  console.group("📊 A/Bテスト統計サマリー");
-  console.log("総参加者:", data.totalParticipants);
-  console.log("アクティブユーザー:", data.realtimeMetrics.activeUsers);
-  console.log("エラー数:", data.realtimeMetrics.errorCount);
-  console.log(
-    "平均読み込み時間:",
-    `${data.realtimeMetrics.averageLoadTime.toFixed(1)}ms`
-  );
-
-  console.group("バリアント別結果:");
-  for (const variant of data.variants) {
-    console.log(`${variant.variant}:`, {
-      セッション数: variant.totalSessions,
-      コンバージョン率: `${(variant.conversionRate * 100).toFixed(2)}%`,
-      パフォーマンススコア: `${variant.performanceScore.toFixed(1)}/100`,
-    });
-  }
-  console.groupEnd();
-
-  console.groupEnd();
+  const { debugMetrics } = await import("@/services/abtest");
+  debugMetrics();
 }
 
 // 開発環境でのグローバル公開
