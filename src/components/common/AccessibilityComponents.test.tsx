@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   AccessibleButton,
   AccessibleInput,
@@ -10,6 +10,11 @@ import {
   SkipLink,
   VisuallyHidden,
 } from "./AccessibilityComponents";
+
+// 各テスト後にDOMをクリーンアップ
+afterEach(() => {
+  cleanup();
+});
 
 describe("VisuallyHidden", () => {
   it("視覚的に隠されたテキストをレンダリングする", () => {

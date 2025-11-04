@@ -12,13 +12,18 @@
  */
 
 import { RestaurantCategory } from "@/types";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import { RestaurantCategoryChip } from "../RestaurantCategoryChip";
 
 // ==============================
 // カテゴリー定義
 // ==============================
+
+// 各テスト後にDOMをクリーンアップ
+afterEach(() => {
+  cleanup();
+});
 
 const CUISINE_TYPES = [
   "寿司",
