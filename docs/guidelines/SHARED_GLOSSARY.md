@@ -294,6 +294,68 @@ Start-Process "dist\stats.html"
 
 Last Updated: 2025-10-19
 
-## 13. 参照ドキュメント
+## 13. カバレッジ測定の明確化 (Last-Updated: 2025-11-04)
+
+プロジェクトには**2つの独立したカバレッジシステム**が存在します：
+
+### 13.1. JavaScript/TypeScript カバレッジ (フロントエンド)
+
+**測定コマンド**: `pnpm test:coverage`
+
+**出力先**:
+
+- `coverage/coverage-summary.json` - メインカバレッジデータ ✅
+- `coverage/` - HTML レポート
+
+**設定**: `config/vitest.config.ts`
+
+```typescript
+coverage: {
+  provider: "v8",
+  reporter: ["text", "json", "json-summary", "html"],
+  include: ["src/**/*.{ts,tsx}"],
+  exclude: ["data-platform/", ...], // Python除外
+}
+```
+
+**対象**: React/TypeScript コードベース（`src/` 配下）
+
+**現在の目標**: 51.12% 達成済み → 60% (Phase 2) → 80% (Phase 3)
+
+### 13.2. Python カバレッジ (data-platform ETL)
+
+**測定コマンド**: `pytest --cov` (data-platform内で実行)
+
+**出力先**:
+
+- `python-coverage.json` - Python カバレッジデータ
+- `python-htmlcov/` - HTML レポート
+- `data-platform/coverage.json` - data-platform 内部データ
+
+**設定**: `data-platform/pyproject.toml`
+
+**対象**: ETL スクリプト・データ処理ロジック（`data-platform/` 配下）
+
+### 13.3. 重要な注意点
+
+⚠️ **混同を避ける**:
+
+- ルートの `python-coverage.json` は**JavaScript カバレッジではない**
+- TASKS.md の目標値は**JavaScript カバレッジのみ**を指す
+- CI/CD のカバレッジバッジは `coverage/coverage-summary.json` を使用
+- 両システムは完全に独立しており、混在しない
+
+**ファイル識別**:
+
+```
+✅ JavaScript: coverage/coverage-summary.json  (Vitest v8)
+❌ Python:     python-coverage.json           (pytest-cov)
+```
+
+---
+
+Last Updated: 2025-11-04
+
+## 14. 参照ドキュメント
 
 - A/Bテストとマーカー同期仕様: `docs/ab-test-marker-sync.md` (variant→markerType マッピング / override 表示 / イベント定義)

@@ -137,8 +137,17 @@ workbox-*.js.map
 .workbox/
 
 # === テスト・カバレッジ ===
+# JavaScript/TypeScript カバレッジ (Vitest)
 coverage/
 .nyc_output/
+
+# Python カバレッジ (pytest-cov)
+python-coverage.json
+python-htmlcov/
+.coverage
+*.coverage
+
+# テスト結果
 junit.xml
 test-results/
 playwright-report/
