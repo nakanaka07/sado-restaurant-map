@@ -370,17 +370,18 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
 
+**Phase 8 Complete** (2025-10-19):
+
+- ✅ React.lazy実装: FilterPanel, CustomMapControls, APIProvider, IntegratedMapView
+- ✅ App.js -43.1%削減 (19.56KB → 11.13KB)
+- ✅ Tree-shaking改善、Terser 2-pass圧縮
+
 **Phase 9 Planning (Performance Optimization)**:
 
 - Long Tasks分割: TBT -2,000ms目標
 - Google Maps API遅延化: TBT -5,000ms目標
 - Render Blocking解消: FCP改善
 - E2E testing: Playwright導入検討中
-
-**Phase 8 Incomplete Tasks**:
-
-- React.lazy遅延化: FilterPanel, CustomMapControls (Backlogに移動)
-- OptimizedImage統合: 既存<img>タグの置換 (優先度: P2)
 
 ## 15. Key Documentation References
 
@@ -401,6 +402,6 @@ Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
 
 ---
 
-**Version**: 2.1 (2025-11-01)
+**Version**: 2.2 (2025-11-30)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: Documentation alignment with Phase 7-8 completion status
+**Last Update**: Phase 8完了状態反映、React.lazy実装完了明記、テスト失敗状況更新

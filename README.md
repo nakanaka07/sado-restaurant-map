@@ -9,11 +9,11 @@
 
 - **React 19** / Concurrent 対応構成
 - **Vite 7** による高速 HMR
-- **Vitest** + Testing Library によるユニット/コンポーネントテスト（**405 tests passing**）
+- **Vitest** + Testing Library によるユニット/コンポーネントテスト（**913 tests**, カバレッジ51.12%）
 - **PWA 対応** (vite-plugin-pwa / workbox)
 - **アクセシビリティ検査** (axe, jest-axe)
 - **型安全** & 厳格 TS コンパイラ設定
-- **バンドル最適化**: App.js 11KB, 条件付き初期ロード -78% (Phase 8完了)
+- **バンドル最適化**: React.lazy実装、App.js -43%削減、条件付き初期ロード -78% (Phase 8完了)
 
 ## 🚀 クイックスタート
 
