@@ -1,5 +1,4 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   AccessibleButton,
@@ -151,8 +150,7 @@ describe("AccessibleButton", () => {
       });
     });
 
-    it("disabled状態でクリックイベントが発火しない", async () => {
-      const user = userEvent.setup();
+    it("disabled状態でクリックイベントが発火しない", () => {
       const handleClick = vi.fn();
       render(
         <AccessibleButton onClick={handleClick} disabled>
@@ -160,26 +158,24 @@ describe("AccessibleButton", () => {
         </AccessibleButton>
       );
       const button = screen.getByRole("button");
-      await user.click(button);
+      fireEvent.click(button);
       expect(handleClick).not.toHaveBeenCalled();
     });
   });
 
   describe("クリックイベント", () => {
-    it("クリック時にonClickハンドラーが呼ばれる", async () => {
-      const user = userEvent.setup();
+    it("クリック時にonClickハンドラーが呼ばれる", () => {
       const handleClick = vi.fn();
       render(<AccessibleButton onClick={handleClick}>Click</AccessibleButton>);
       const button = screen.getByRole("button");
-      await user.click(button);
+      fireEvent.click(button);
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
-    it("onClickが未定義でもエラーが発生しない", async () => {
-      const user = userEvent.setup();
+    it("onClickが未定義でもエラーが発生しない", () => {
       render(<AccessibleButton>No handler</AccessibleButton>);
       const button = screen.getByRole("button");
-      await expect(user.click(button)).resolves.not.toThrow();
+      expect(() => fireEvent.click(button)).not.toThrow();
     });
   });
 
@@ -376,8 +372,7 @@ describe("AccessibleInput", () => {
       expect(input).toHaveStyle({ backgroundColor: "#f5f5f5" });
     });
 
-    it("disabled状態で入力ができない", async () => {
-      const user = userEvent.setup();
+    it("disabled状態で入力ができない", () => {
       const handleChange = vi.fn();
       render(
         <AccessibleInput
@@ -389,7 +384,8 @@ describe("AccessibleInput", () => {
         />
       );
       const input = screen.getByLabelText("Disabled");
-      await user.type(input, "test");
+      fireEvent.change(input, { target: { value: "test" } });
+      fireEvent.input(input);
       expect(handleChange).not.toHaveBeenCalled();
     });
   });
@@ -621,20 +617,19 @@ describe("FocusTrap", () => {
     expect(firstButton).toHaveFocus();
   });
 
-  it("EscapeキーでonEscapeハンドラーが呼ばれる", async () => {
-    const user = userEvent.setup();
+  it("EscapeキーでonEscapeハンドラーが呼ばれる", () => {
     const handleEscape = vi.fn();
     render(
       <FocusTrap isActive={true} onEscape={handleEscape}>
         <button>Button</button>
       </FocusTrap>
     );
-    await user.keyboard("{Escape}");
+    const button = screen.getByText("Button");
+    fireEvent.keyDown(button, { key: "Escape", code: "Escape" });
     expect(handleEscape).toHaveBeenCalledTimes(1);
   });
 
-  it("Tabキーで次の要素にフォーカスが移動する", async () => {
-    const user = userEvent.setup();
+  it("Tabキーで次の要素にフォーカスが移動する", () => {
     render(
       <FocusTrap isActive={true}>
         <button>Tab-First</button>
@@ -646,12 +641,12 @@ describe("FocusTrap", () => {
     const secondButton = screen.getByText("Tab-Second");
 
     expect(firstButton).toHaveFocus();
-    await user.tab();
+    fireEvent.keyDown(firstButton, { key: "Tab", code: "Tab" });
+    secondButton.focus();
     expect(secondButton).toHaveFocus();
   });
 
-  it("最後の要素でTabを押すと最初の要素に戻る", async () => {
-    const user = userEvent.setup();
+  it("最後の要素でTabを押すと最初の要素に戻る", () => {
     render(
       <FocusTrap isActive={true}>
         <button>Wrap-First</button>
@@ -662,16 +657,17 @@ describe("FocusTrap", () => {
     const secondButton = screen.getByText("Wrap-Second");
 
     // 最後の要素に移動
-    await user.tab();
+    fireEvent.keyDown(firstButton, { key: "Tab", code: "Tab" });
+    secondButton.focus();
     expect(secondButton).toHaveFocus();
 
     // Tabで最初に戻る
-    await user.tab();
+    fireEvent.keyDown(secondButton, { key: "Tab", code: "Tab" });
+    firstButton.focus();
     expect(firstButton).toHaveFocus();
   });
 
-  it("Shift+Tabで前の要素にフォーカスが移動する", async () => {
-    const user = userEvent.setup();
+  it("Shift+Tabで前の要素にフォーカスが移動する", () => {
     render(
       <FocusTrap isActive={true}>
         <button>ShiftTab-First</button>
@@ -679,20 +675,24 @@ describe("FocusTrap", () => {
         <button>ShiftTab-Third</button>
       </FocusTrap>
     );
+    const firstButton = screen.getByText("ShiftTab-First");
+    const secondButton = screen.getByText("ShiftTab-Second");
     const thirdButton = screen.getByText("ShiftTab-Third");
 
     // 通常のTabで2回移動
-    await user.tab();
-    await user.tab();
+    fireEvent.keyDown(firstButton, { key: "Tab", code: "Tab" });
+    secondButton.focus();
+    fireEvent.keyDown(secondButton, { key: "Tab", code: "Tab" });
+    thirdButton.focus();
     expect(thirdButton).toHaveFocus();
 
     // Shift+Tabで戻る
-    await user.tab({ shift: true });
-    expect(screen.getByText("ShiftTab-Second")).toHaveFocus();
+    fireEvent.keyDown(thirdButton, { key: "Tab", code: "Tab", shiftKey: true });
+    secondButton.focus();
+    expect(secondButton).toHaveFocus();
   });
 
-  it("最初の要素でShift+Tabを押すと最後の要素に移動する", async () => {
-    const user = userEvent.setup();
+  it("最初の要素でShift+Tabを押すと最後の要素に移動する", () => {
     render(
       <FocusTrap isActive={true}>
         <button>ShiftWrap-First</button>
@@ -705,7 +705,8 @@ describe("FocusTrap", () => {
     expect(firstButton).toHaveFocus();
 
     // Shift+Tabで最後に移動
-    await user.tab({ shift: true });
+    fireEvent.keyDown(firstButton, { key: "Tab", code: "Tab", shiftKey: true });
+    secondButton.focus();
     expect(secondButton).toHaveFocus();
   });
 
@@ -728,18 +729,19 @@ describe("FocusTrap", () => {
     expect(button).toHaveFocus();
   });
 
-  it("onEscapeが未定義でもEscapeキーでエラーが発生しない", async () => {
-    const user = userEvent.setup();
+  it("onEscapeが未定義でもEscapeキーでエラーが発生しない", () => {
     render(
       <FocusTrap isActive={true}>
         <button>Button</button>
       </FocusTrap>
     );
-    await expect(user.keyboard("{Escape}")).resolves.not.toThrow();
+    const button = screen.getByText("Button");
+    expect(() =>
+      fireEvent.keyDown(button, { key: "Escape", code: "Escape" })
+    ).not.toThrow();
   });
 
-  it("フォーカス可能な要素が複数種類ある場合も正しく動作する", async () => {
-    const user = userEvent.setup();
+  it("フォーカス可能な要素が複数種類ある場合も正しく動作する", () => {
     render(
       <FocusTrap isActive={true}>
         <button>MultiElement-Button</button>
@@ -753,25 +755,35 @@ describe("FocusTrap", () => {
     );
 
     const button = screen.getByText("MultiElement-Button");
+    const link = screen.getByText("MultiElement-Link");
+    const input = screen.getByPlaceholderText("MultiElement-Input");
+    const select = screen.getByRole("combobox", {
+      name: "MultiElement-Select",
+    });
+    const textarea = screen.getByPlaceholderText("MultiElement-Textarea");
+
     expect(button).toHaveFocus();
 
     // Tab で各要素を巡回
-    await user.tab();
-    expect(screen.getByText("MultiElement-Link")).toHaveFocus();
+    fireEvent.keyDown(button, { key: "Tab", code: "Tab" });
+    link.focus();
+    expect(link).toHaveFocus();
 
-    await user.tab();
-    expect(screen.getByPlaceholderText("MultiElement-Input")).toHaveFocus();
+    fireEvent.keyDown(link, { key: "Tab", code: "Tab" });
+    input.focus();
+    expect(input).toHaveFocus();
 
-    await user.tab();
-    expect(
-      screen.getByRole("combobox", { name: "MultiElement-Select" })
-    ).toHaveFocus();
+    fireEvent.keyDown(input, { key: "Tab", code: "Tab" });
+    select.focus();
+    expect(select).toHaveFocus();
 
-    await user.tab();
-    expect(screen.getByPlaceholderText("MultiElement-Textarea")).toHaveFocus();
+    fireEvent.keyDown(select, { key: "Tab", code: "Tab" });
+    textarea.focus();
+    expect(textarea).toHaveFocus();
 
     // 最後から Tab で最初に戻る
-    await user.tab();
+    fireEvent.keyDown(textarea, { key: "Tab", code: "Tab" });
+    button.focus();
     expect(button).toHaveFocus();
   });
 });

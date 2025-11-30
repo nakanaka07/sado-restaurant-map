@@ -88,8 +88,8 @@ export function IntegratedMapView({
           trackABTestEvent("assigned", {
             variant: classification.variant,
             segment: classification.segment,
-            phase: CURRENT_AB_TEST_CONFIG.currentPhase,
             metadata: {
+              phase: CURRENT_AB_TEST_CONFIG.currentPhase,
               isNewAssignment: true,
               forceVariant: !!forceVariant,
             },
@@ -107,17 +107,14 @@ export function IntegratedMapView({
           console.log("🧪 A/B Test Classification:", {
             classification,
             config: CURRENT_AB_TEST_CONFIG,
-            testingModeActive: classification.testingModeAvailable,
           });
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("A/Bテスト初期化エラー:", error);
         // エラー時はデフォルト設定を使用
-        const fallbackClassification = {
-          segment: "control" as const,
-          variant: "original" as const,
-          isInTest: false,
-          testingModeAvailable: false,
+        const fallbackClassification: UserClassification = {
+          segment: "control",
+          variant: "original",
         };
         setUserClassification(fallbackClassification);
         setCurrentVariant("original");
@@ -151,8 +148,8 @@ export function IntegratedMapView({
         trackABTestEvent("interaction", {
           variant: currentVariant,
           segment: userClassification.segment,
-          phase: CURRENT_AB_TEST_CONFIG.currentPhase,
           metadata: {
+            phase: CURRENT_AB_TEST_CONFIG.currentPhase,
             interactionType: "marker_click",
             pointType: point.type,
             pointId: point.id,
@@ -239,8 +236,11 @@ export function IntegratedMapView({
             trackABTestEvent("override_marker_type", {
               variant: currentVariant,
               segment: userClassification.segment,
-              phase: CURRENT_AB_TEST_CONFIG.currentPhase,
-              metadata: { from: derived, to: next },
+              metadata: {
+                phase: CURRENT_AB_TEST_CONFIG.currentPhase,
+                from: derived,
+                to: next,
+              },
             });
           }
         }}

@@ -34,7 +34,8 @@ export const DetailedBusinessHours = React.memo<DetailedBusinessHoursProps>(
     }
 
     const todayIndex = new Date().getDay();
-    const todayName = ["日", "月", "火", "水", "木", "金", "土"][todayIndex]!;
+    const dayNames = ["日", "月", "火", "水", "木", "金", "土"];
+    const todayName = dayNames[todayIndex] ?? "日";
 
     return (
       <div className={`detailed-business-hours ${className}`}>

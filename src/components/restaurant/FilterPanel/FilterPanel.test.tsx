@@ -1,6 +1,5 @@
 /* @vitest-environment jsdom */
-import { cleanup, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FilterPanel } from "./FilterPanel";
 
@@ -292,13 +291,12 @@ describe("FilterPanel", () => {
   });
 
   describe("評価フィルター", () => {
-    it("評価セレクトボックスが正しく動作する", async () => {
-      const user = userEvent.setup();
+    it("評価セレクトボックスが正しく動作する", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const ratingSelect = screen.getByLabelText("⭐ 評価");
-      await user.selectOptions(ratingSelect, "4");
+      fireEvent.change(ratingSelect, { target: { value: "4" } });
 
       expect(mockFilterState.handleRatingChange).toHaveBeenCalledTimes(1);
     });
@@ -325,15 +323,14 @@ describe("FilterPanel", () => {
   });
 
   describe("営業中フィルター", () => {
-    it("営業中チェックボックスが正しく動作する", async () => {
-      const user = userEvent.setup();
+    it("営業中チェックボックスが正しく動作する", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const checkbox = screen.getByRole("checkbox", {
         name: /営業中のみ表示/,
       });
-      await user.click(checkbox);
+      fireEvent.click(checkbox);
 
       expect(mockFilterState.handleOpenNowChange).toHaveBeenCalledTimes(1);
     });
@@ -362,39 +359,36 @@ describe("FilterPanel", () => {
   });
 
   describe("ポイントタイプフィルター", () => {
-    it("飲食店チェックボックスが正しく動作する", async () => {
-      const user = userEvent.setup();
+    it("飲食店チェックボックスが正しく動作する", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const checkbox = screen.getByRole("checkbox", { name: /飲食店/ });
-      await user.click(checkbox);
+      fireEvent.click(checkbox);
 
       expect(mockFilterState.handlePointTypeToggle).toHaveBeenCalledWith(
         "restaurant"
       );
     });
 
-    it("駐車場チェックボックスが正しく動作する", async () => {
-      const user = userEvent.setup();
+    it("駐車場チェックボックスが正しく動作する", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const checkbox = screen.getByRole("checkbox", { name: /駐車場/ });
-      await user.click(checkbox);
+      fireEvent.click(checkbox);
 
       expect(mockFilterState.handlePointTypeToggle).toHaveBeenCalledWith(
         "parking"
       );
     });
 
-    it("トイレチェックボックスが正しく動作する", async () => {
-      const user = userEvent.setup();
+    it("トイレチェックボックスが正しく動作する", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const checkbox = screen.getByRole("checkbox", { name: /トイレ/ });
-      await user.click(checkbox);
+      fireEvent.click(checkbox);
 
       expect(mockFilterState.handlePointTypeToggle).toHaveBeenCalledWith(
         "toilet"
@@ -419,13 +413,12 @@ describe("FilterPanel", () => {
   });
 
   describe("ソート機能", () => {
-    it("ソートセレクトボックスが正しく動作する", async () => {
-      const user = userEvent.setup();
+    it("ソートセレクトボックスが正しく動作する", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const sortSelect = screen.getByLabelText("📊 並び順");
-      await user.selectOptions(sortSelect, "rating");
+      fireEvent.change(sortSelect, { target: { value: "rating" } });
 
       expect(mockFilterState.handleSortChange).toHaveBeenCalledTimes(1);
     });
@@ -451,13 +444,12 @@ describe("FilterPanel", () => {
   });
 
   describe("リセット機能", () => {
-    it("リセットボタンクリックでhandleResetFiltersが呼ばれる", async () => {
-      const user = userEvent.setup();
+    it("リセットボタンクリックでhandleResetFiltersが呼ばれる", () => {
       const props = createDefaultProps();
       render(<FilterPanel {...props} />);
 
       const resetButton = screen.getByText("🔄 フィルターをリセット");
-      await user.click(resetButton);
+      fireEvent.click(resetButton);
 
       expect(mockFilterState.handleResetFilters).toHaveBeenCalledTimes(1);
     });
