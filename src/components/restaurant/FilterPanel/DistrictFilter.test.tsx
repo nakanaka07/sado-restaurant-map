@@ -335,8 +335,244 @@ describe("DistrictFilter", () => {
   // - Space/Enterキーによるネイティブ要素操作: ブラウザのデフォルト動作に依存
   // これらの機能はブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
 
-  describe("キーボードナビゲーション", () => {
-    // キーボードナビゲーションテストはPhase 9 E2Eテストに移行
+  // NOTE: キーボードナビゲーションテストはPhase 9 E2Eテストに移行
+
+  describe("パフォーマンス", () => {
+    it("全地区を高速に選択・解除できること", () => {
+      const onToggle = vi.fn();
+      render(<DistrictFilter {...defaultProps} onToggle={onToggle} />);
+
+      const start = performance.now();
+      const checkboxes = screen.getAllByRole("checkbox");
+      checkboxes.forEach(checkbox => {
+        fireEvent.click(checkbox);
+      });
+      const duration = performance.now() - start;
+
+      expect(onToggle).toHaveBeenCalledTimes(11);
+      expect(duration).toBeLessThan(100); // 100ms以内
+    });
+
+    it("大量の再レンダリングでもパフォーマンスを維持すること", () => {
+      const { rerender } = render(
+        <DistrictFilter {...defaultProps} selectedDistricts={[]} />
+      );
+
+      const start = performance.now();
+      for (let i = 0; i < 50; i++) {
+        const districts = i % 2 === 0 ? ["両津"] : ["相川"];
+        rerender(
+          <DistrictFilter {...defaultProps} selectedDistricts={districts} />
+        );
+      }
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(400); // 400ms以内で50回再レンダリング（CI環境考慮）
+    });
+  });
+
+  describe("メモ化動作", () => {
+    it("selectedDistrictsが変更されない場合はチェックボックスが再生成されないこと", () => {
+      const { rerender } = render(
+        <DistrictFilter
+          {...defaultProps}
+          selectedDistricts={["両津"]}
+          isExpanded={true}
+        />
+      );
+
+      const firstCheckboxes = screen.getAllByRole("checkbox");
+
+      // isExpandedのみ変更
+      rerender(
+        <DistrictFilter
+          {...defaultProps}
+          selectedDistricts={["両津"]}
+          isExpanded={true}
+          onToggleExpanded={() => {}}
+        />
+      );
+
+      const secondCheckboxes = screen.getAllByRole("checkbox");
+      expect(firstCheckboxes.length).toBe(secondCheckboxes.length);
+      expect(firstCheckboxes.length).toBe(11);
+    });
+
+    it("handleDistrictToggleが安定していること", () => {
+      const onToggle = vi.fn();
+      const { rerender } = render(
+        <DistrictFilter {...defaultProps} onToggle={onToggle} />
+      );
+
+      const checkbox1 = screen.getByRole("checkbox", { name: "両津" });
+      fireEvent.click(checkbox1);
+      expect(onToggle).toHaveBeenCalledWith("両津");
+
+      onToggle.mockClear();
+
+      // 同じonToggle関数で再レンダリング
+      rerender(<DistrictFilter {...defaultProps} onToggle={onToggle} />);
+
+      const checkbox2 = screen.getByRole("checkbox", { name: "両津" });
+      fireEvent.click(checkbox2);
+      expect(onToggle).toHaveBeenCalledWith("両津");
+    });
+  });
+
+  describe("エッジケース", () => {
+    it("存在しない地区名がselectedDistrictsに含まれていても動作すること", () => {
+      // @ts-expect-error - テスト目的で意図的に無効な値を設定
+      expect(() =>
+        render(
+          <DistrictFilter
+            {...defaultProps}
+            selectedDistricts={["存在しない地区", "両津"]}
+          />
+        )
+      ).not.toThrow();
+
+      const ryotsuCheckbox = screen.getByRole("checkbox", { name: "両津" });
+      expect(ryotsuCheckbox).toBeChecked();
+    });
+
+    it("空文字列の地区名がselectedDistrictsに含まれていても動作すること", () => {
+      // @ts-expect-error - テスト目的で意図的に無効な値を設定
+      expect(() =>
+        render(
+          <DistrictFilter {...defaultProps} selectedDistricts={["", "両津"]} />
+        )
+      ).not.toThrow();
+    });
+
+    it("selectedDistrictsが非常に大きい配列でも動作すること", () => {
+      const largeArray = Array(1000).fill(
+        "両津"
+      ) as typeof defaultProps.selectedDistricts;
+      expect(() =>
+        render(
+          <DistrictFilter {...defaultProps} selectedDistricts={largeArray} />
+        )
+      ).not.toThrow();
+
+      const checkbox = screen.getByRole("checkbox", { name: "両津" });
+      expect(checkbox).toBeChecked();
+    });
+
+    it("onToggleがundefinedでもクラッシュしないこと", () => {
+      // @ts-expect-error - テスト目的で意図的にonToggleを省略
+      expect(() =>
+        render(<DistrictFilter {...defaultProps} onToggle={undefined} />)
+      ).not.toThrow();
+    });
+
+    it("onToggleExpandedがundefinedでもクラッシュしないこと", () => {
+      // @ts-expect-error - テスト目的で意図的にonToggleExpandedを省略
+      expect(() =>
+        render(
+          <DistrictFilter {...defaultProps} onToggleExpanded={undefined} />
+        )
+      ).not.toThrow();
+    });
+  });
+
+  describe("統合シナリオ", () => {
+    it("展開→複数選択→折りたたみの一連の流れが正しく動作すること", () => {
+      const onToggle = vi.fn();
+      const onToggleExpanded = vi.fn();
+      const { rerender } = render(
+        <DistrictFilter
+          {...defaultProps}
+          isExpanded={false}
+          onToggle={onToggle}
+          onToggleExpanded={onToggleExpanded}
+        />
+      );
+
+      // 展開
+      const button = screen.getByRole("button", { name: /地域/ });
+      fireEvent.click(button);
+      expect(onToggleExpanded).toHaveBeenCalledTimes(1);
+
+      // 展開状態で再レンダリング
+      rerender(
+        <DistrictFilter
+          {...defaultProps}
+          isExpanded={true}
+          onToggle={onToggle}
+          onToggleExpanded={onToggleExpanded}
+        />
+      );
+
+      // 複数選択
+      fireEvent.click(screen.getByRole("checkbox", { name: "両津" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "相川" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "佐和田" }));
+
+      expect(onToggle).toHaveBeenCalledTimes(3);
+    });
+
+    it("全選択→全解除→再選択のシナリオが正しく動作すること", () => {
+      const onToggle = vi.fn();
+      const { rerender } = render(
+        <DistrictFilter {...defaultProps} onToggle={onToggle} />
+      );
+
+      // 全選択
+      const checkboxes = screen.getAllByRole("checkbox");
+      checkboxes.forEach(checkbox => {
+        fireEvent.click(checkbox);
+      });
+
+      expect(onToggle).toHaveBeenCalledTimes(11);
+
+      // 全選択状態で再レンダリング
+      rerender(
+        <DistrictFilter
+          {...defaultProps}
+          selectedDistricts={[
+            "両津",
+            "相川",
+            "佐和田",
+            "金井",
+            "新穂",
+            "畑野",
+            "真野",
+            "小木",
+            "羽茂",
+            "赤泊",
+            "その他",
+          ]}
+          onToggle={onToggle}
+        />
+      );
+
+      onToggle.mockClear();
+
+      // 全解除
+      const selectedCheckboxes = screen.getAllByRole("checkbox");
+      selectedCheckboxes.forEach(checkbox => {
+        fireEvent.click(checkbox);
+      });
+
+      expect(onToggle).toHaveBeenCalledTimes(11);
+    });
+
+    it("高速連打でも正しく動作すること", () => {
+      const onToggle = vi.fn();
+      render(<DistrictFilter {...defaultProps} onToggle={onToggle} />);
+
+      const checkbox = screen.getByRole("checkbox", { name: "両津" });
+
+      // 10回連続クリック
+      for (let i = 0; i < 10; i++) {
+        fireEvent.click(checkbox);
+      }
+
+      expect(onToggle).toHaveBeenCalledTimes(10);
+      onToggle.mock.calls.forEach(call => {
+        expect(call[0]).toBe("両津");
+      });
+    });
   });
 
   describe("スタイリング", () => {

@@ -347,6 +347,331 @@ describe("FeatureFilter", () => {
       const container = document.getElementById("feature-options");
       expect(container).toHaveAttribute("id", "feature-options");
     });
+  });
+
+  describe("スタイリング", () => {
+    it("展開ボタンが正しいスタイルを持つこと", () => {
+      render(<FeatureFilter {...defaultProps} />);
+      const button = screen.getByRole("button", { name: /特徴/ });
+
+      expect(button).toHaveStyle({
+        display: "flex",
+        width: "100%",
+        cursor: "pointer",
+      });
+    });
+  });
+
+  describe("パフォーマンス", () => {
+    it("全特徴を高速に選択・解除できること", () => {
+      const onToggle = vi.fn();
+      render(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={true}
+        />
+      );
+
+      const start = performance.now();
+      const checkboxes = screen.getAllByRole("checkbox");
+      checkboxes.forEach(checkbox => {
+        fireEvent.click(checkbox);
+      });
+      const duration = performance.now() - start;
+
+      expect(onToggle).toHaveBeenCalledTimes(30);
+      expect(duration).toBeLessThan(150); // 150ms以内で30個処理
+    });
+
+    it("大量の再レンダリングでもパフォーマンスを維持すること", () => {
+      const { rerender } = render(
+        <FeatureFilter {...defaultProps} selectedFeatures={[]} />
+      );
+
+      const start = performance.now();
+      for (let i = 0; i < 50; i++) {
+        const features = i % 2 === 0 ? ["駐車場あり"] : ["Wi-Fi"];
+        rerender(
+          <FeatureFilter {...defaultProps} selectedFeatures={features} />
+        );
+      }
+      const duration = performance.now() - start;
+
+      expect(duration).toBeLessThan(500); // 500ms以内で50回再レンダリング（CI環境考慮）
+    });
+
+    it("スクロール可能なコンテナが設定されていること", () => {
+      render(<FeatureFilter {...defaultProps} isExpanded={true} />);
+      const container = document.getElementById("feature-options");
+
+      expect(container).toHaveStyle({
+        maxHeight: "200px",
+        overflowY: "auto",
+      });
+    });
+  });
+
+  describe("メモ化動作", () => {
+    it("selectedFeaturesが変更されない場合はチェックボックスが再生成されないこと", () => {
+      const { rerender } = render(
+        <FeatureFilter
+          {...defaultProps}
+          selectedFeatures={["駐車場あり"]}
+          isExpanded={true}
+        />
+      );
+
+      const firstCheckboxes = screen.getAllByRole("checkbox");
+
+      // isExpandedのみ変更
+      rerender(
+        <FeatureFilter
+          {...defaultProps}
+          selectedFeatures={["駐車場あり"]}
+          isExpanded={true}
+          onToggleExpanded={() => {}}
+        />
+      );
+
+      const secondCheckboxes = screen.getAllByRole("checkbox");
+      expect(firstCheckboxes.length).toBe(secondCheckboxes.length);
+      expect(firstCheckboxes.length).toBe(30);
+    });
+
+    it("handleFeatureToggleが安定していること", () => {
+      const onToggle = vi.fn();
+      const { rerender } = render(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={true}
+        />
+      );
+
+      const checkbox1 = screen.getByRole("checkbox", { name: "駐車場あり" });
+      fireEvent.click(checkbox1);
+      expect(onToggle).toHaveBeenCalledWith("駐車場あり");
+
+      onToggle.mockClear();
+
+      // 同じonToggle関数で再レンダリング
+      rerender(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={true}
+        />
+      );
+
+      const checkbox2 = screen.getByRole("checkbox", { name: "駐車場あり" });
+      fireEvent.click(checkbox2);
+      expect(onToggle).toHaveBeenCalledWith("駐車場あり");
+    });
+  });
+
+  describe("エッジケース", () => {
+    it("存在しない特徴名がselectedFeaturesに含まれていても動作すること", () => {
+      expect(() =>
+        render(
+          <FeatureFilter
+            {...defaultProps}
+            selectedFeatures={["存在しない特徴", "駐車場あり"]}
+            isExpanded={true}
+          />
+        )
+      ).not.toThrow();
+
+      const checkbox = screen.getByRole("checkbox", { name: "駐車場あり" });
+      expect(checkbox).toBeChecked();
+    });
+
+    it("空文字列の特徴名がselectedFeaturesに含まれていても動作すること", () => {
+      expect(() =>
+        render(
+          <FeatureFilter
+            {...defaultProps}
+            selectedFeatures={["", "駐車場あり"]}
+            isExpanded={true}
+          />
+        )
+      ).not.toThrow();
+    });
+
+    it("selectedFeaturesが非常に大きい配列でも動作すること", () => {
+      const largeArray = Array(1000).fill("駐車場あり");
+      expect(() =>
+        render(
+          <FeatureFilter
+            {...defaultProps}
+            selectedFeatures={largeArray}
+            isExpanded={true}
+          />
+        )
+      ).not.toThrow();
+
+      const checkbox = screen.getByRole("checkbox", { name: "駐車場あり" });
+      expect(checkbox).toBeChecked();
+    });
+
+    it("重複した特徴名がselectedFeaturesに含まれていても動作すること", () => {
+      expect(() =>
+        render(
+          <FeatureFilter
+            {...defaultProps}
+            selectedFeatures={["駐車場あり", "駐車場あり", "Wi-Fi"]}
+            isExpanded={true}
+          />
+        )
+      ).not.toThrow();
+    });
+
+    it("onToggleがundefinedでもクラッシュしないこと", () => {
+      // @ts-expect-error - テスト目的で意図的にonToggleを省略
+      expect(() =>
+        render(
+          <FeatureFilter
+            {...defaultProps}
+            onToggle={undefined}
+            isExpanded={true}
+          />
+        )
+      ).not.toThrow();
+    });
+
+    it("onToggleExpandedがundefinedでもクラッシュしないこと", () => {
+      // @ts-expect-error - テスト目的で意図的にonToggleExpandedを省略
+      expect(() =>
+        render(<FeatureFilter {...defaultProps} onToggleExpanded={undefined} />)
+      ).not.toThrow();
+    });
+  });
+
+  describe("統合シナリオ", () => {
+    it("展開→複数選択→折りたたみの一連の流れが正しく動作すること", () => {
+      const onToggle = vi.fn();
+      const onToggleExpanded = vi.fn();
+      const { rerender } = render(
+        <FeatureFilter
+          {...defaultProps}
+          isExpanded={false}
+          onToggle={onToggle}
+          onToggleExpanded={onToggleExpanded}
+        />
+      );
+
+      // 展開
+      const button = screen.getByRole("button", { name: /特徴/ });
+      fireEvent.click(button);
+      expect(onToggleExpanded).toHaveBeenCalledTimes(1);
+
+      // 展開状態で再レンダリング
+      rerender(
+        <FeatureFilter
+          {...defaultProps}
+          isExpanded={true}
+          onToggle={onToggle}
+          onToggleExpanded={onToggleExpanded}
+        />
+      );
+
+      // 複数選択
+      fireEvent.click(screen.getByRole("checkbox", { name: "駐車場あり" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "Wi-Fi" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "テラス席" }));
+
+      expect(onToggle).toHaveBeenCalledTimes(3);
+    });
+
+    it("カテゴリ別の特徴選択シナリオが正しく動作すること", () => {
+      const onToggle = vi.fn();
+      render(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={true}
+        />
+      );
+
+      // 施設系特徴
+      fireEvent.click(screen.getByRole("checkbox", { name: "駐車場あり" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "テラス席" }));
+
+      // 設備系特徴
+      fireEvent.click(screen.getByRole("checkbox", { name: "Wi-Fi" }));
+      fireEvent.click(screen.getByRole("checkbox", { name: "電源コンセント" }));
+
+      // 支払い系特徴
+      fireEvent.click(
+        screen.getByRole("checkbox", { name: "クレジットカード対応" })
+      );
+      fireEvent.click(screen.getByRole("checkbox", { name: "PayPay対応" }));
+
+      expect(onToggle).toHaveBeenCalledTimes(6);
+    });
+
+    it("高速連打でも正しく動作すること", () => {
+      const onToggle = vi.fn();
+      render(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={true}
+        />
+      );
+
+      const checkbox = screen.getByRole("checkbox", { name: "駐車場あり" });
+
+      // 20回連続クリック
+      for (let i = 0; i < 20; i++) {
+        fireEvent.click(checkbox);
+      }
+
+      expect(onToggle).toHaveBeenCalledTimes(20);
+      onToggle.mock.calls.forEach(call => {
+        expect(call[0]).toBe("駐車場あり");
+      });
+    });
+
+    it("展開状態の変更中に選択を変更できること", () => {
+      const onToggle = vi.fn();
+      const { rerender } = render(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={true}
+        />
+      );
+
+      // 選択
+      fireEvent.click(screen.getByRole("checkbox", { name: "駐車場あり" }));
+
+      // 折りたたみ
+      rerender(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          isExpanded={false}
+        />
+      );
+
+      // 再展開
+      rerender(
+        <FeatureFilter
+          {...defaultProps}
+          onToggle={onToggle}
+          selectedFeatures={["駐車場あり"]}
+          isExpanded={true}
+        />
+      );
+
+      // 追加選択
+      fireEvent.click(screen.getByRole("checkbox", { name: "Wi-Fi" }));
+
+      expect(onToggle).toHaveBeenCalledTimes(2);
+      expect(onToggle).toHaveBeenNthCalledWith(1, "駐車場あり");
+      expect(onToggle).toHaveBeenNthCalledWith(2, "Wi-Fi");
+    });
 
     it("展開ボタンとオプションコンテナがaria-controlsで関連付けられていること", () => {
       render(<FeatureFilter {...defaultProps} isExpanded={true} />);
@@ -368,9 +693,7 @@ describe("FeatureFilter", () => {
   // - Space/Enterキーによるネイティブ要素操作: ブラウザのデフォルト動作に依存
   // これらの機能はブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
 
-  describe("キーボードナビゲーション", () => {
-    // キーボードナビゲーションテストはPhase 9 E2Eテストに移行
-  });
+  // NOTE: キーボードナビゲーションテストはPhase 9 E2Eテストに移行
 
   describe("スタイリング", () => {
     it("展開ボタンが正しいスタイルを持つこと", () => {

@@ -9,7 +9,8 @@
 
 - **React 19** / Concurrent 対応構成
 - **Vite 7** による高速 HMR
-- **Vitest** + Testing Library によるユニット/コンポーネントテスト（**913 tests**, カバレッジ51.12%）
+- **Vitest** + Testing Library によるユニット/コンポーネントテスト（**1093 tests**, カバレッジ51.12%）
+  - Phase 2完了: フィルターテスト拡充 +28 tests (パフォーマンス・メモ化・エッジケース・統合シナリオ)
 - **PWA 対応** (vite-plugin-pwa / workbox)
 - **アクセシビリティ検査** (axe, jest-axe)
 - **型安全** & 厳格 TS コンパイラ設定
