@@ -6,9 +6,14 @@
 import type { LatLngLiteral } from "@/types";
 import { describe, expect, it } from "vitest";
 import {
+  extractPlaceIdFromUrl,
+  generateGoogleMapsEmbedUrl,
   generateGoogleMapsUrl,
   generateMobileGoogleMapsUrl,
   generatePhoneUrl,
+  generatePlaceUrl,
+  generateRouteUrl,
+  isValidUrl,
   normalizeWebsiteUrl,
 } from "../googleMapsUtils";
 
@@ -164,6 +169,297 @@ describe("googleMapsUtils", () => {
       const url = normalizeWebsiteUrl("https://www.example.com/path?query=1");
 
       expect(url).toBe("https://www.example.com/path?query=1");
+    });
+  });
+
+  describe("generateGoogleMapsEmbedUrl", () => {
+    it("基本的なplace埋め込みURLを生成すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates);
+
+      expect(url).toContain("https://www.google.com/maps/embed/v1/place");
+      expect(url).toContain("zoom=15");
+    });
+
+    it("APIキーを含むURLを生成すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        apiKey: "test_api_key_123",
+      });
+
+      expect(url).toContain("key=test_api_key_123");
+    });
+
+    it("カスタムズームレベルを指定できること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        zoom: 20,
+      });
+
+      expect(url).toContain("zoom=20");
+    });
+
+    it("viewモードでURLを生成すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        mode: "view",
+      });
+
+      expect(url).toContain("/view?");
+      expect(url).toContain("center=38%2C138.5");
+    });
+
+    it("directionsモードでURLを生成すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        mode: "directions",
+      });
+
+      expect(url).toContain("/directions?");
+      expect(url).toContain("destination=38%2C138.5");
+    });
+
+    it("searchモードでURLを生成すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        mode: "search",
+        query: "テストレストラン",
+      });
+
+      expect(url).toContain("/search?");
+      expect(url).toContain("q=");
+    });
+
+    it("queryパラメータが指定された場合に使用すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        mode: "place",
+        query: "カスタムクエリ",
+      });
+
+      expect(url).toContain(
+        "q=%E3%82%AB%E3%82%B9%E3%82%BF%E3%83%A0%E3%82%AF%E3%82%A8%E3%83%AA"
+      );
+    });
+
+    it("queryがない場合は座標を使用すること", () => {
+      const url = generateGoogleMapsEmbedUrl(mockCoordinates, {
+        mode: "place",
+      });
+
+      expect(url).toContain("q=38%2C138.5");
+    });
+  });
+
+  describe("generateRouteUrl", () => {
+    it("基本的なルート案内URLを生成すること", () => {
+      const url = generateRouteUrl(mockCoordinates);
+
+      expect(url).toContain("https://www.google.com/maps/dir/");
+      expect(url).toContain("api=1");
+      expect(url).toContain("destination=38%2C138.5");
+      expect(url).toContain("travelmode=driving");
+    });
+
+    it("出発地を指定できること", () => {
+      const origin: LatLngLiteral = { lat: 37.5, lng: 137.0 };
+      const url = generateRouteUrl(mockCoordinates, { origin });
+
+      expect(url).toContain("origin=37.5%2C137");
+      expect(url).toContain("destination=38%2C138.5");
+    });
+
+    it("移動手段を指定できること", () => {
+      const url = generateRouteUrl(mockCoordinates, {
+        mode: "walking",
+      });
+
+      expect(url).toContain("travelmode=walking");
+    });
+
+    it("transitモードでURLを生成すること", () => {
+      const url = generateRouteUrl(mockCoordinates, {
+        mode: "transit",
+      });
+
+      expect(url).toContain("travelmode=transit");
+    });
+
+    it("bicyclingモードでURLを生成すること", () => {
+      const url = generateRouteUrl(mockCoordinates, {
+        mode: "bicycling",
+      });
+
+      expect(url).toContain("travelmode=bicycling");
+    });
+
+    it("有料道路回避オプションを設定できること", () => {
+      const url = generateRouteUrl(mockCoordinates, {
+        avoidTolls: true,
+      });
+
+      expect(url).toContain("avoid=tolls");
+    });
+
+    it("高速道路回避オプションを設定できること", () => {
+      const url = generateRouteUrl(mockCoordinates, {
+        avoidHighways: true,
+      });
+
+      expect(url).toContain("avoid=highways");
+    });
+
+    it("有料道路と高速道路の両方を回避できること", () => {
+      const url = generateRouteUrl(mockCoordinates, {
+        avoidTolls: true,
+        avoidHighways: true,
+      });
+
+      expect(url).toContain("avoid=tolls");
+      expect(url).toContain("highways");
+    });
+
+    it("すべてのオプションを組み合わせられること", () => {
+      const origin: LatLngLiteral = { lat: 37.5, lng: 137.0 };
+      const url = generateRouteUrl(mockCoordinates, {
+        origin,
+        mode: "driving",
+        avoidTolls: true,
+        avoidHighways: true,
+      });
+
+      expect(url).toContain("origin=37.5%2C137");
+      expect(url).toContain("destination=38%2C138.5");
+      expect(url).toContain("travelmode=driving");
+      expect(url).toContain("avoid=");
+    });
+  });
+
+  describe("generatePlaceUrl", () => {
+    it("基本的なPlace URLを生成すること", () => {
+      const url = generatePlaceUrl("ChIJtest123");
+
+      expect(url).toContain("https://www.google.com/maps/place/");
+      expect(url).toContain("place_id=ChIJtest123");
+    });
+
+    it("detailsモードでURLを生成すること", () => {
+      const url = generatePlaceUrl("ChIJtest123", {
+        mode: "details",
+      });
+
+      expect(url).toContain("place_id=ChIJtest123");
+      expect(url).not.toContain("tab=");
+    });
+
+    it("reviewsモードでURLを生成すること", () => {
+      const url = generatePlaceUrl("ChIJtest123", {
+        mode: "reviews",
+      });
+
+      expect(url).toContain("place_id=ChIJtest123");
+      expect(url).toContain("tab=reviews");
+    });
+
+    it("photosモードでURLを生成すること", () => {
+      const url = generatePlaceUrl("ChIJtest123", {
+        mode: "photos",
+      });
+
+      expect(url).toContain("place_id=ChIJtest123");
+      expect(url).toContain("tab=photos");
+    });
+
+    it("Place IDに特殊文字が含まれていても正しくエンコードすること", () => {
+      const url = generatePlaceUrl("ChIJ_test+special/chars");
+
+      expect(url).toContain("place_id=");
+      expect(url).toContain("ChIJ_test");
+    });
+  });
+
+  describe("isValidUrl", () => {
+    it("有効なHTTP URLをtrueと判定すること", () => {
+      expect(isValidUrl("http://example.com")).toBe(true);
+    });
+
+    it("有効なHTTPS URLをtrueと判定すること", () => {
+      expect(isValidUrl("https://example.com")).toBe(true);
+    });
+
+    it("パスとクエリを含むURLをtrueと判定すること", () => {
+      expect(isValidUrl("https://example.com/path?query=value")).toBe(true);
+    });
+
+    it("フラグメントを含むURLをtrueと判定すること", () => {
+      expect(isValidUrl("https://example.com/path#section")).toBe(true);
+    });
+
+    it("プロトコルがないURLをfalseと判定すること", () => {
+      expect(isValidUrl("example.com")).toBe(false);
+    });
+
+    it("無効なURLをfalseと判定すること", () => {
+      expect(isValidUrl("not a url")).toBe(false);
+    });
+
+    it("空文字列をfalseと判定すること", () => {
+      expect(isValidUrl("")).toBe(false);
+    });
+
+    it("特殊なプロトコルのURLをtrueと判定すること", () => {
+      expect(isValidUrl("ftp://example.com")).toBe(true);
+    });
+
+    it("localhostのURLをtrueと判定すること", () => {
+      expect(isValidUrl("http://localhost:3000")).toBe(true);
+    });
+
+    it("IPアドレスのURLをtrueと判定すること", () => {
+      expect(isValidUrl("http://192.168.1.1")).toBe(true);
+    });
+  });
+
+  describe("extractPlaceIdFromUrl", () => {
+    it("place_idパラメータからPlace IDを抽出すること", () => {
+      const url = "https://www.google.com/maps/place/?place_id=ChIJtest123";
+      const placeId = extractPlaceIdFromUrl(url);
+
+      expect(placeId).toBe("ChIJtest123");
+    });
+
+    it("パスからPlace IDを抽出すること", () => {
+      const url =
+        "https://www.google.com/maps/place/Tokyo/something/ChIJ51cu8IcbXWAR_W_a_0q6VDI";
+      const placeId = extractPlaceIdFromUrl(url);
+
+      expect(placeId).toBe("ChIJ51cu8IcbXWAR_W_a_0q6VDI");
+    });
+
+    it("複数のパラメータがある場合でも抽出できること", () => {
+      const url =
+        "https://www.google.com/maps/place/?q=Tokyo&place_id=ChIJtest456&zoom=15";
+      const placeId = extractPlaceIdFromUrl(url);
+
+      expect(placeId).toBe("ChIJtest456");
+    });
+
+    it("Place IDがない場合はnullを返すこと", () => {
+      const url = "https://www.google.com/maps/search/Tokyo";
+      const placeId = extractPlaceIdFromUrl(url);
+
+      expect(placeId).toBeNull();
+    });
+
+    it("無効なURLの場合はnullを返すこと", () => {
+      const placeId = extractPlaceIdFromUrl("not a url");
+
+      expect(placeId).toBeNull();
+    });
+
+    it("空文字列の場合はnullを返すこと", () => {
+      const placeId = extractPlaceIdFromUrl("");
+
+      expect(placeId).toBeNull();
+    });
+
+    it("Google Maps以外のURLの場合はnullを返すこと", () => {
+      const placeId = extractPlaceIdFromUrl("https://example.com");
+
+      expect(placeId).toBeNull();
     });
   });
 });

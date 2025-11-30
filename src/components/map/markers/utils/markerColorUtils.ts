@@ -50,22 +50,21 @@ function getCuisineCategory(
  * @returns カテゴリに対応するHEX色コード
  */
 export function getMarkerColor(point: MapPoint): string {
-  // Parking
-  if ("capacity" in point) {
+  // Type-based discrimination (most reliable)
+  if (point.type === "parking") {
     return CIRCULAR_MARKER_COLORS.parking;
   }
 
-  // Toilet
-  if ("isAccessible" in point) {
+  if (point.type === "toilet") {
     return CIRCULAR_MARKER_COLORS.toilet;
   }
 
   // Restaurant
-  if ("cuisineType" in point) {
+  if (point.type === "restaurant") {
     const category = getCuisineCategory(point.cuisineType);
     return CIRCULAR_MARKER_COLORS[category];
   }
 
-  // Fallback
+  // Fallback (should never reach here with proper typing)
   return CIRCULAR_MARKER_COLORS.general;
 }
