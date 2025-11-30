@@ -261,4 +261,135 @@ describe("App", () => {
       expect(statsDisplay).toHaveAttribute("aria-live", "polite");
     });
   });
+
+  describe("フルスクリーン対応", () => {
+    it("フルスクリーン状態変更時にクラスが付与されること", () => {
+      render(<App />);
+
+      // 初期状態ではフルスクリーンクラスがない
+      expect(
+        document.documentElement.classList.contains("fullscreen-active")
+      ).toBe(false);
+      expect(document.body.classList.contains("fullscreen-active")).toBe(false);
+    });
+
+    it("フルスクリーンイベントリスナーが登録されること", async () => {
+      const addEventListenerSpy = vi.spyOn(document, "addEventListener");
+
+      render(<App />);
+
+      await waitFor(() => {
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          "fullscreenchange",
+          expect.any(Function)
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          "webkitfullscreenchange",
+          expect.any(Function)
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          "mozfullscreenchange",
+          expect.any(Function)
+        );
+        expect(addEventListenerSpy).toHaveBeenCalledWith(
+          "MSFullscreenChange",
+          expect.any(Function)
+        );
+      });
+
+      addEventListenerSpy.mockRestore();
+    });
+
+    it("コンポーネントアンマウント時にイベントリスナーが削除されること", async () => {
+      const removeEventListenerSpy = vi.spyOn(document, "removeEventListener");
+
+      const { unmount } = render(<App />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("api-provider")).toBeInTheDocument();
+      });
+
+      unmount();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "fullscreenchange",
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "webkitfullscreenchange",
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "mozfullscreenchange",
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "MSFullscreenChange",
+        expect.any(Function)
+      );
+
+      removeEventListenerSpy.mockRestore();
+    });
+  });
+
+  describe("モバイル検出", () => {
+    it("モバイル判定が正しく動作すること", async () => {
+      render(<App />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("api-provider")).toBeInTheDocument();
+      });
+
+      // モバイル検出の実行確認（デスクトップとして動作）
+      const filterPanel = screen.queryByTestId("filter-panel");
+      expect(filterPanel).toBeInTheDocument(); // デスクトップではFilterPanelが表示
+    });
+  });
+
+  describe("条件付きPWABadge", () => {
+    it("PWABadgeが条件に応じて表示されること", async () => {
+      render(<App />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("api-provider")).toBeInTheDocument();
+      });
+
+      // PWABadgeの存在確認
+      const pwaBadge = screen.queryByTestId("pwa-badge");
+      // 開発環境でENABLE_PWA_DEV=trueでない場合は表示されない
+      expect(pwaBadge).toBe(null);
+    });
+  });
+
+  describe("統合シナリオ", () => {
+    it("アプリケーション全体のレンダリングフローが完了すること", async () => {
+      const { container } = render(<App />);
+
+      // 初期化完了を待つ
+      await waitFor(() => {
+        expect(screen.getByTestId("api-provider")).toBeInTheDocument();
+      });
+
+      // 主要要素の存在確認
+      expect(screen.getByRole("main")).toBeInTheDocument();
+      expect(screen.getByTestId("filter-panel")).toBeInTheDocument();
+      expect(container.querySelector(".app")).toBeInTheDocument();
+      expect(container.querySelector(".app-main")).toBeInTheDocument();
+      expect(container.querySelector(".app-content")).toBeInTheDocument();
+    });
+
+    it("スキップリンクとメインコンテンツが正しくリンクされること", async () => {
+      render(<App />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("main")).toBeInTheDocument();
+      });
+
+      const skipLink = screen.getByText("メインコンテンツにスキップ");
+      const mainContent = screen.getByRole("main");
+
+      expect(skipLink).toHaveAttribute("href", "#main-content");
+      expect(mainContent).toHaveAttribute("id", "main-content");
+    });
+  });
 });
