@@ -8,14 +8,22 @@
 
 ## 📋 Executive Summary
 
-Phase 9 Week 1の失敗（TBT +49%悪化）と技術スタック調査により、以下の緊急課題を特定:
+**Week 1完了（2025年12月9日）**: Vitest 4マイグレーション成功、Phase 9ロールバック実施、測定により根本原因特定。
 
-1. **Vitest 4.0.15への即時マイグレーション** (既にリリース済み)
-2. **Phase 9 Week 1ロールバック** (逆効果施策の除去)
-3. **依存関係の最新化とセキュリティ対応**
-4. **E2Eテスト環境の構築** (Playwright導入)
+**重大な発見**: Phase 9ロールバックでは**TBT改善なし**（18,935ms → 18,310ms = -3.3%のみ）。真のボトルネックは**Google Maps API同期初期化**（メインスレッド処理32.3秒）と判明。
 
-本計画は4週間の集中期間で技術基盤を刷新し、持続可能な開発体制を確立します。
+**戦略修正**: Week 2-3を統合し、Google Maps API遅延読み込みを最優先実施。依存関係更新は性能改善後に実施。
+
+---
+
+## ✅ Week 1完了サマリー
+
+1. **Vitest 4.0.15マイグレーション** - 成功（1818/1822テスト通過 = 99.8%）
+2. **Phase 9 Week 1ロールバック** - 実施（効果限定的: TBT -625ms = -3.3%）
+3. **Node.js engines設定** - 完了（package.json更新）
+4. **パフォーマンス測定** - 実施（Mobile: 47点/18,310ms、Desktop: 60点/3,550ms）
+
+**教訓**: Phase 9の「最適化」コードは主要ボトルネックではなかった。Google Maps APIの同期初期化（15.4秒のJS実行時間）が真の原因。
 
 ---
 
@@ -168,37 +176,44 @@ pnpm test:run
 
 ## 📅 Week-by-Week Plan
 
-### Week 1 (2025年12月9日-15日) - Emergency Fixes
+### ✅ Week 1 (2025年12月9日) - Emergency Fixes 完了
 
-**目標**: Critical Issues解消、Baseline復旧
+**実績**: 全タスク完了、根本原因特定により戦略修正
 
-| Day | タスク                                 | 工数 | 担当 |
-| --- | -------------------------------------- | ---- | ---- |
-| Mon | Vitest 4マイグレーション準備           | 2h   | Dev  |
-| Tue | Vitest 4実装 + テスト                  | 4h   | Dev  |
-| Wed | Phase 9ロールバック実装                | 4h   | Dev  |
-| Thu | Baseline復旧確認 + Lighthouse測定      | 2h   | Dev  |
-| Fri | Node.js engines設定 + ドキュメント更新 | 2h   | Dev  |
+| タスク                            | 工数実績 | 結果                       |
+| --------------------------------- | -------- | -------------------------- |
+| Vitest 4マイグレーション + テスト | 6h       | ✅ 1818/1822通過 (99.8%)   |
+| Phase 9ロールバック実装           | 4h       | ✅ TBT -3.3%（効果限定的） |
+| Lighthouse測定                    | 0.5h     | ✅ 根本原因特定            |
+| Node.js engines設定               | 5min     | ✅ package.json更新        |
 
 **Deliverables**:
 
-- [ ] Vitest 4.0.15マイグレーション完了
-- [ ] Phase 9ロールバック完了
-- [ ] Performance Baseline復旧確認
-- [ ] TASKS.md更新
+- [x] Vitest 4.0.15マイグレーション完了
+- [x] Phase 9ロールバック完了
+- [x] パフォーマンス測定実施（Baseline復旧せず）
+- [x] TASKS.md更新
+
+**重大な発見**:
+
+- Phase 9コード削除ではTBTほぼ改善なし（-3.3%）
+- 真のボトルネック: Google Maps API同期初期化（JS実行15.4秒）
+- Week 2-3統合し、Google Maps最適化を最優先実施へ
 
 ---
 
-### Week 2 (2025年12月16日-22日) - Dependency Updates
+### Week 2-3統合 (2025年12月10日-22日) - Google Maps Optimization 🔥
 
-**目標**: 依存関係の最新化、セキュリティ対応
+**戦略修正**: Week 1測定でGoogle Maps API同期初期化がTBTボトルネックと判明。依存関係更新より性能改善を最優先。
 
-| Task                                        | Priority | 工数 |
-| ------------------------------------------- | -------- | ---- |
-| Vite 7.2.7アップグレード                    | P1       | 1h   |
-| React 19互換性監査                          | P1       | 4h   |
-| Lighthouse CI修正 (Google Maps API URL制限) | P1       | 2h   |
-| 依存関係セキュリティ監査 (`pnpm audit`)     | P2       | 1h   |
+| Task                            | Priority | 工数 | 期待効果       |
+| ------------------------------- | -------- | ---- | -------------- |
+| Google Maps API遅延読み込み実装 | P0       | 8h   | TBT -5,000ms   |
+| Intersection Observer導入       | P0       | 3h   | 初回描画高速化 |
+| Checkpoint 2測定                | P0       | 1h   | 効果検証       |
+| Vite 7.2.7アップグレード        | P1       | 1h   | 性能改善後     |
+| React 19互換性監査              | P1       | 4h   | -              |
+| Lighthouse CI修正               | P2       | 2h   | 優先度降格     |
 
 **React 19互換性チェックリスト**:
 

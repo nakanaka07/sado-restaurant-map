@@ -169,7 +169,7 @@ describe("FilterModal", () => {
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    it.skip("ESCキーでモーダルを閉じられる (TODO: イベントリスナータイミング修正)", () => {
+    it.skip("ESCキーでモーダルを閉じられる (TODO: イベントリスナータイミング修正)", async () => {
       act(() => {
         render(
           <FilterModal
@@ -226,7 +226,7 @@ describe("FilterModal", () => {
   });
 
   describe("スクロール管理", () => {
-    it.skip("モーダルが開いている時はbodyのスクロールを無効化 (TODO: useEffectタイミング修正)", () => {
+    it.skip("モーダルが開いている時はbodyのスクロールを無効化 (TODO: useEffectタイミング修正)", async () => {
       act(() => {
         render(
           <FilterModal
@@ -248,7 +248,7 @@ describe("FilterModal", () => {
       );
     });
 
-    it.skip("モーダルが閉じたらbodyのスクロールを復元 (TODO: useEffectタイミング修正)", () => {
+    it.skip("モーダルが閉じたらbodyのスクロールを復元 (TODO: useEffectタイミング修正)", async () => {
       let rerender: ReturnType<typeof render>["rerender"];
 
       act(() => {

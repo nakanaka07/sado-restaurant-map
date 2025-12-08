@@ -371,25 +371,37 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 **Project Metrics** (2025-12-09):
 
-- Coverage: **75.88%** (1797 tests, 4 skipped)
-- Tech Stack: React 19.1.1, Vite 7.1.4, TypeScript 5.7.3, Vitest 3.2.4
-- Performance: Mobile Score 58, Desktop Score 59 (Phase 9 Week 1 rollback pending)
+- Coverage: **75.88%** (1818/1822 tests passing = 99.8%, 4 skipped)
+- Tech Stack: React 19.1.1, Vite 7.1.4, TypeScript 5.7.3, **Vitest 4.0.15** ✅
+- Performance: Mobile Score 47, Desktop Score 60 (Phase 9 rollback完了、効果限定的)
 
 **Active Work** (2025 Q1 Project Refresh):
 
 See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.md) for complete 4-week plan.
 
-**Week 1 (12/9-15) - Emergency Fixes**:
+**Week 1完了 (12/9)** - Emergency Fixes ✅:
 
-- 🔥 Vitest 4.0.15 migration (breaking changes: coverage.all, poolOptions)
-- 🔥 Phase 9 Week 1 rollback (TBT +49% degradation)
-- Node.js engines constraint (>=20.19.0)
+- ✅ Vitest 4.0.15 migration (breaking changes: coverage.all, poolOptions)
+- ✅ Phase 9 Week 1 rollback (TBT -3.3%のみ、効果限定的)
+- ✅ Node.js engines constraint (>=20.19.0)
+- ✅ Performance測定（根本原因特定: Google Maps API同期初期化）
 
-**Week 2-4 Highlights**:
+**Week 2-3統合 - Google Maps Optimization** 🔥:
 
-- Vite 7.2.7 upgrade, React 19 compatibility audit
-- Google Maps API lazy loading (TBT -5,000ms target)
+- 🔥 Google Maps API遅延読み込み（Week 3から前倒し、TBT -5,000~10,000ms期待）
+- Vite 7.2.7 upgrade（性能改善後に実施）
+- React 19互換性監査
+- Lighthouse CI修正（優先度P2降格）
+
+**Week 4 Highlights**:
+
 - Playwright E2E introduction (resolve 4 skipped tests)
+
+**Key Lesson from Phase 9 Failure**:
+
+- Micro-optimizations can backfire on small datasets (<1,000 items)
+- Event loop overhead (480ms) > processing savings (150ms) for 623 items
+- Always: Profile → Measure → Optimize (not: Assume → Optimize → Measure)
 
 **Key Lesson from Phase 9 Failure**:
 
@@ -425,4 +437,4 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 **Version**: 2.8 (2025-12-09)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: 2025 Q1プロジェクト刷新計画策定完了 - Phase 9失敗教訓、Vitest 4即時マイグレーション (Week 1)、Google Maps API最適化 (Week 3)、Playwright導入 (Week 4) - 詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated
+**Last Update**: Week 1完了 - Vitest 4マイグレーション成功、Phase 9ロールバック実施（効果-3.3%のみ）、測定により根本原因特定（Google Maps API同期初期化32.3秒）、Week 2-3統合でGoogle Maps最適化最優先実施へ戦略修正 - 詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated

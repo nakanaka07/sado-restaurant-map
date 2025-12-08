@@ -11,14 +11,7 @@
 
 import type { MapPoint } from "@/types";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
-import { yieldToMain } from "@/utils/performanceUtils";
-import {
-  ReactNode,
-  startTransition,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import {
   type ABTestVariant,
   classifyUser,
@@ -176,50 +169,10 @@ export function IntegratedMapView({
     setSelectedPoint(null);
   }, []);
 
-  // 段階的マーカーレンダリング
+  // マーカー表示の同期
   useEffect(() => {
-    if (mapPoints.length === 0) {
-      setVisibleMapPoints([]);
-      setRenderProgress(100);
-      return;
-    }
-
-    let isCancelled = false;
-    const rendered: MapPoint[] = [];
-
-    async function renderMarkersInChunks() {
-      const chunkSize = 50; // 50件ずつ段階的に表示
-
-      for (let i = 0; i < mapPoints.length; i += chunkSize) {
-        if (isCancelled) break;
-
-        const chunk = mapPoints.slice(i, i + chunkSize);
-        rendered.push(...chunk);
-
-        startTransition(() => {
-          setVisibleMapPoints([...rendered]);
-          const progress = Math.min(
-            100,
-            ((i + chunkSize) / mapPoints.length) * 100
-          );
-          setRenderProgress(progress);
-        });
-
-        await yieldToMain();
-      }
-
-      if (!isCancelled) {
-        startTransition(() => {
-          setRenderProgress(100);
-        });
-      }
-    }
-
-    void renderMarkersInChunks();
-
-    return () => {
-      isCancelled = true;
-    };
+    setVisibleMapPoints(mapPoints);
+    setRenderProgress(100);
   }, [mapPoints]);
 
   // ローディング状態

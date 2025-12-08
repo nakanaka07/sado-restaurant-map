@@ -43,38 +43,71 @@ AC:
 **策定日**: 2025年12月9日
 **緊急度**: P0 (Phase 9失敗を受けた技術基盤刷新)
 
-#### Week 1: Emergency Fixes (2025年12月9日-15日)
+#### ✅ Week 1完了: Emergency Fixes (2025年12月9日) - 測定結果により戦略修正
 
-- [P0 fix] **Vitest 4.0.15マイグレーション** [Issue #TBD]
-  - **緊急**: v4.0.15既にリリース済み (2024年10月31日)
-  - 破壊的変更: `coverage.all`削除、poolOptions廃止、browser provider変更
-  - 工数: 6-8時間
-  - AC:
-    - [ ] 1797テスト全通過
-    - [ ] カバレッジ75.88%維持
-    - [ ] `config/vitest.config.ts`更新完了
-  - 優先度: P0 🔥
+**完了サマリ**:
 
-- [P0 perf] **Phase 9 Week 1ロールバック** [Issue #TBD]
-  - **緊急**: TBT +49%悪化 (Mobile: 12,670ms → 18,935ms)
-  - 削除対象: Task 1.2-1.4 (processInChunksSync, 段階的レンダリング)
+- ✅ Vitest 4.0.15マイグレーション成功（1818/1822テスト通過 = 99.8%）
+- ✅ Phase 9ロールバック実装（効果限定的: TBT -3.3%のみ）
+- ✅ Node.js engines設定追加
+- ✅ パフォーマンス測定実施（根本原因特定）
+
+**重大な発見**: Phase 9ロールバックでは**TBT改善なし**（18,935ms → 18,310ms = -625ms）
+**真の原因**: Google Maps API同期初期化がボトルネック（メインスレッド処理32.3秒）
+**戦略変更**: Week 2-3統合し、Google Maps API遅延読み込みを最優先実施
+
+---
+
+**完了タスク詳細**:
+
+- ✅ [P0 fix] **Vitest 4.0.15マイグレーション** (2025-12-09)
+  - 破壊的変更対応: `coverage.all`削除、poolOptions → top-level `isolate`
+  - テスト結果: **1818/1822通過 (99.8%)**、4件スキップ（Week 4 E2E対応予定）
+  - 工数: 6時間（テスト修正含む）
+  - ファイル修正: config/vitest.config.ts、analytics.test.ts、FilterModal.test.tsx、FeatureFilter.test.tsx
+
+- ✅ [P0 perf] **Phase 9 Week 1ロールバック** (2025-12-09)
+  - 削除コード: processInChunksSync（useMarkerOptimization.ts）、段階的レンダリング（IntegratedMapView.tsx）
+  - 測定結果: Mobile TBT **18,310ms**（期待12,670ms、改善-3.3%のみ）
+  - 結論: **Phase 9コードは主要ボトルネックではなかった**（コード品質は向上）
+  - テスト維持: 1818/1822通過
   - 工数: 4時間
+
+- ✅ [P1 chore] **Node.js engines設定追加** (2025-12-09)
+  - 内容: `package.json`に`engines`追加（node>=20.19.0, pnpm>=9.0.0）
+  - 工数: 5分
+
+**Lighthouse測定結果** (2025-12-09):
+
+| 指標               | Mobile実測      | Desktop実測    | 目標値             | 判定       |
+| ------------------ | --------------- | -------------- | ------------------ | ---------- |
+| Performance Score  | **47点** 🔴     | **60点** ✅    | 60点               | Mobile未達 |
+| TBT                | **18,310ms** 🔴 | **3,550ms** ⚠️ | 12,670ms / 2,910ms | 両方未達   |
+| FCP                | 1.8s ✅         | 0.4s ✅        | ~1.8s              | 達成       |
+| LCP                | 3.9s ⚠️         | 0.5s ✅        | <3.0s              | Mobile未達 |
+| Speed Index        | 16.5s 🔴        | 6.2s ⚠️        | -                  | 要改善     |
+| メインスレッド処理 | 32.3秒 🔴       | 8.3秒 ⚠️       | -                  | 深刻       |
+| JS実行時間         | 15.4秒 🔴       | 4.0秒 ⚠️       | -                  | 深刻       |
+| 長時間タスク       | 20件 🔴         | 14件 ⚠️        | -                  | 多数       |
+
+#### Week 2-3統合: Performance Optimization優先 (2025年12月10日-22日) 🔥
+
+**戦略変更理由**: Week 1測定でGoogle Maps API同期初期化がTBTボトルネックと判明。依存関係更新より性能改善を最優先。
+
+- [P0 perf] **Google Maps API遅延読み込み実装** [Issue #TBD] ← Week 3から前倒し 🔥
+  - **緊急度**: P0（現状TBT 18,310msは深刻、Google Maps最適化なしでは改善不可能）
+  - **根拠**: Lighthouse診断でメインスレッド処理32.3秒、JS実行15.4秒が主因
+  - **実装方針**: Intersection Observer + 遅延読み込み（地図スクロール時に初期化）
+  - **期待効果**: TBT -5,000~10,000ms（Google Maps初期化コスト完全除去）
+  - 工数: 8時間
   - AC:
-    - [ ] Mobile TBT: 12,670ms復旧
-    - [ ] Desktop TBT: 2,910ms復旧
-    - [ ] Performance Score: 60点復旧
-    - [ ] 全テスト通過
+    - [ ] Mobile TBT: <10,000ms (Minimum Success: -45%)
+    - [ ] Mobile TBT: <8,000ms (Target Success: -56%)
+    - [ ] Desktop TBT: <2,000ms
+    - [ ] Performance Score: 65+ (Mobile)
   - 優先度: P0 🔥
 
-- [P1 chore] **Node.js engines設定追加** [Issue #TBD]
-  - 内容: `package.json`にenginesフィールド追加 (node>=20.19.0, pnpm>=9.0.0)
-  - 工数: 15分
-  - AC: [ ] package.json更新、CI環境検証
-  - 優先度: P1
-
-#### Week 2: Dependency Updates (2025年12月16日-22日)
-
-- [P1 chore] **Vite 7.2.7アップグレード** [Issue #TBD]
+- [P1 chore] **Vite 7.2.7アップグレード** [Issue #TBD] ← 性能改善後に実施
   - 現状: v7.1.4 → 最新: v7.2.7
   - 工数: 1時間
   - 優先度: P1
@@ -84,21 +117,11 @@ AC:
   - 工数: 4時間
   - 優先度: P1
 
-- [P1 fix] **Lighthouse CI修正** [Issue #TBD]
+- [P2 fix] **Lighthouse CI修正** [Issue #TBD] ← 優先度降格（手動測定で代替可能）
   - 原因: Google Maps API URL制限によるNO_FCP
   - 解決策: Google Cloud ConsoleでHTTPリファラー制限追加
   - 工数: 2時間
-  - 優先度: P1
-
-#### Week 3: Performance Optimization (2025年12月23日-29日)
-
-- [P0 perf] **Google Maps API遅延読み込み実装** [Issue #TBD]
-  - **Phase 9本命施策**: Intersection Observer + 遅延読み込み
-  - 期待効果: TBT -5,000ms (Mobile: 8,000ms目標)
-  - 工数: 8時間
-  - AC:
-    - [ ] Mobile TBT: <10,000ms (Minimum Success)
-    - [ ] Mobile TBT: <8,000ms (Target Success)
+  - 優先度: P2
     - [ ] Desktop TBT: <2,000ms
     - [ ] Performance Score: 65+ (Minimum), 70+ (Target)
   - 優先度: P0 🎯
@@ -381,7 +404,16 @@ AC:
 
 ## 6. Done (最近 10 件のみ保持)
 
-1. **(P0 test) Phase 4: 75%カバレッジ達成完了** ✅ (2025-12-08)
+1. **(P0 fix) Week 1完了: Vitest 4 + Phase 9ロールバック + 測定** ✅ (2025-12-09)
+   - Vitest 4.0.15マイグレーション成功（1818/1822テスト通過 = 99.8%）
+   - Phase 9ロールバック実装（TBT改善-3.3%のみ、効果限定的）
+   - Node.js engines設定追加（package.json更新）
+   - Lighthouse測定実施（Mobile: 47点/18,310ms、Desktop: 60点/3,550ms）
+   - 重大発見: Google Maps API同期初期化がボトルネック（メインスレッド32.3秒）
+   - 戦略変更: Week 2-3統合、Google Maps最適化を最優先実施
+   - 工数: 10時間（調査・実装・測定）
+
+2. **(P0 test) Phase 4: 75%カバレッジ達成完了** ✅ (2025-12-08)
    - テスト追加: 1444 → 1797 (+353 tests, +24.4%)
    - カバレッジ: 71.32% → **75.88%** (+4.56%, **目標75%超過達成**)
    - 詳細: Lines 75.88%, Functions 87.46%, Branches 81.25%
@@ -394,7 +426,7 @@ AC:
    - スキップテスト: 4件（FilterModal timing issues、Phase 9でE2Eテスト対応予定）
    - 品質ゲート: 1797/1801通過（99.8%）、0 errors
    - 工数: 6時間
-2. **(P0 fix) Phase 4初期: テスト品質向上完了** ✅ (2025-12-07)
+3. **(P0 fix) Phase 4初期: テスト品質向上完了** ✅ (2025-12-07)
    - テスト修正: 2 failed → 1488/1488 passing (100%)
    - カバレッジ: 71.5% → **72.56%** (+1.06%)
    - 詳細: Lines 72.56%, Functions 85.25%, Branches 77.65%
@@ -402,7 +434,7 @@ AC:
    - 技術的成果: スキップテスト完全削除、クリーンなテストスイート実現、エラーハンドリングコメント追加
    - 品質ゲート復旧: 1488/1488通過（100%）
    - 工数: 2時間
-3. **(P1 test) Phase 3: 残存コンポーネントテスト完了** ✅ (2025-12-07)
+4. **(P1 test) Phase 3: 残存コンポーネントテスト完了** ✅ (2025-12-07)
    - テスト追加: 1213 → 1489 tests (+276 tests, +22.7%)
    - カバレッジ: 64.31% → **71.5%** (+7.19%, **目標70%超過達成**)
    - 詳細: Lines 71.5%, Functions 83.04%, Branches 77.34%
@@ -416,7 +448,7 @@ AC:
      - Barrel export tests: 14 tests (5ファイル)
    - 技術的成果: TypeScript strict mode完全対応、マーカーシステム包括テスト完了
    - 注意: ⚠️ 2テスト失敗 (abTestAnalytics.test.ts) - Phase 4で修正予定
-4. **(P1 test) Phase 2: インタラクティブUI - UX品質保証完了** ✅ (2025-12-06)
+5. **(P1 test) Phase 2: インタラクティブUI - UX品質保証完了** ✅ (2025-12-06)
    - テスト追加: 1065 → 1213 tests (+148 tests, +13.9%)
    - カバレッジ: 51.12% → **64.31%** (+13.19%, 目標65%達成)
    - 詳細: Lines 64.31%, Functions 75.47%, Branches 74.32%
@@ -425,7 +457,7 @@ AC:
      - FeatureFilter.test.tsx: +16 tests (エッジケース・統合)
      - 追加コンポーネントテスト多数 (+120 tests)
    - 品質ゲート: 1213/1213 tests全通過、0 errors
-5. **(P1 test) Phase 2初期: フィルターテスト拡充** ✅ (2025-11-30)
+6. **(P1 test) Phase 2初期: フィルターテスト拡充** ✅ (2025-11-30)
    - テスト追加: DistrictFilter +12, FeatureFilter +16 (合計 +28 tests)
    - テスト総数: 1065 → 1093 (+2.63%)
    - カバレッジ: 51.12%維持（質的カバレッジ向上）
@@ -435,14 +467,14 @@ AC:
      - エッジケース: 無効データ、1000要素配列、undefined props
      - 統合シナリオ: 展開→複数選択→折りたたみ、高速連打、状態変更中操作
    - 品質ゲート: 1093/1093 tests全通過、0 errors
-6. **(P0 perf) Phase 8: JavaScript最適化** ✅ (2025-10-19)
+7. **(P0 perf) Phase 8: JavaScript最適化** ✅ (2025-10-19)
    - React.lazy実装: FilterPanel, CustomMapControls, APIProvider, IntegratedMapView
    - App.js: 19.56KB → 11.13KB (-43.1%)
    - 条件付き初期ロード: -78.7% (-42.21KB)
    - Tree-shaking改善: Barrel exports完全削除
    - Terser 2-pass圧縮: 追加 -1.07KB
    - 品質ゲート: 405 tests全通過
-7. **(P0 test) Phase 1: カバレッジ50%達成** ✅ (2025-11-04)
+8. **(P0 test) Phase 1: カバレッジ50%達成** ✅ (2025-11-04)
    - カバレッジ: 40.52% → **51.12%** (+10.6%)
    - テスト数: 410 → 913 (+503 tests)
    - 失敗テスト: 50件 → 0件（100%修正）
@@ -454,7 +486,7 @@ AC:
      - AccessibilityComponents.test.tsx: 修正完了
    - 工数: 30分（見積6.5時間の8%）
    - 品質ゲート: 全通過（TypeScript 0エラー、ESLint 1警告、Tests 913/913通過）
-8. **(P2 test) Phase 8.3: Code Quality Improvement** ✅ (2025-11-03)
+9. **(P2 test) Phase 8.3: Code Quality Improvement** ✅ (2025-11-03)
    - IntegratedMapView.tsx: exhaustive-deps warning修正（useCallback化）
    - App.test.tsx: +2テストケース（エラーハンドリング、フィルター機能）
    - useMapPoints.test.ts: +3テストケース（統計情報、フィルター、エラー処理）
@@ -462,12 +494,12 @@ AC:
    - Coverage: 40.34% → 40.52% (+0.18%)
    - ESLint warnings: 1 → 0 (100%解消)
    - useMapPoints.ts coverage: 49.66% → 58.33% (+8.67%)
-9. **(P2 perf) OptimizedImage統合** ✅ (2025-11-01)
-   - IcooonMarker.tsx: `<img>` → OptimizedImage置換
-   - AVIF → WebP → PNG フォールバックチェーン実装
-   - Quality Gates全通過: 405 tests, 0 errors
-   - Size Limit全チャンク制限内: markers 4.32KB (20KB制限)
-   - 画像最適化効果: -50% (611KB削減)
+10. **(P2 perf) OptimizedImage統合** ✅ (2025-11-01)
+    - IcooonMarker.tsx: `<img>` → OptimizedImage置換
+    - AVIF → WebP → PNG フォールバックチェーン実装
+    - Quality Gates全通過: 405 tests, 0 errors
+    - Size Limit全チャンク制限内: markers 4.32KB (20KB制限)
+    - 画像最適化効果: -50% (611KB削減)
 
 **以下はアーカイブ候補（詳細略）:**
 

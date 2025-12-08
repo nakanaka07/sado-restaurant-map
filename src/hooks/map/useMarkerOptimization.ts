@@ -5,7 +5,6 @@
  */
 
 import type { Restaurant } from "@/types";
-import { processInChunksSync } from "@/utils/performanceUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Phase 4: ClusterMarker統合
@@ -126,22 +125,20 @@ export const useMarkerOptimization = (
 
   /**
    * ビューポート内のレストランをフィルタリング
-   * Phase 9: チャンク処理で最適化（100件ずつ処理）
    */
   const filterByViewport = useCallback(
     (restaurants: readonly Restaurant[], bounds?: ViewportBounds) => {
       if (!bounds) return restaurants;
 
-      // Phase 9: 100件ずつチャンク処理
-      return processInChunksSync(restaurants, 100, restaurant => {
+      return restaurants.filter(restaurant => {
         const { lat, lng } = restaurant.coordinates;
-        const isInViewport =
+        return (
           lat >= bounds.south &&
           lat <= bounds.north &&
           lng >= bounds.west &&
-          lng <= bounds.east;
-        return isInViewport ? restaurant : null;
-      }).filter((r): r is Restaurant => r !== null);
+          lng <= bounds.east
+        );
+      });
     },
     []
   );

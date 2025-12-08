@@ -8,13 +8,10 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: [path.resolve(__dirname, "../src/test/setup.ts")],
-    // React 19 Concurrent Features 対応
+    // Vitest 4: poolOptions廃止、トップレベルに移動
     pool: "forks",
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    // Vitest 4では isolate: true がデフォルト（テストの分離性を保つため）
+    isolate: true,
     // テスト環境の安定化
     testTimeout: 10000,
     hookTimeout: 10000,
@@ -24,6 +21,7 @@ export default defineConfig({
       // Vitest で json-summary レポーターを追加し coverage/coverage-summary.json を生成する。
       // 以前は reporter に含まれておらず artifact が空 -> badge 生成失敗していた。
       reporter: ["text", "json", "json-summary", "html"],
+      // Vitest 4: coverage.all削除、includeで明示的にカバレッジ対象を指定
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "node_modules/",
@@ -41,13 +39,12 @@ export default defineConfig({
         "src/main.tsx",
         "src/vite-env.d.ts",
       ],
-      // カバレッジ閾値: 現在34.74%達成済み、30%を最低基準として設定
-      // Week 1目標: 35% | Week 2目標: 40%
+      // カバレッジ閾値: 現在75.88%達成済み、75%を最低基準として設定
       thresholds: {
-        lines: 30,
-        functions: 30,
-        branches: 30,
-        statements: 30,
+        lines: 75,
+        functions: 85,
+        branches: 77,
+        statements: 75,
       },
     },
   },
