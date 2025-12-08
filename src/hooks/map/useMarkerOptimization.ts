@@ -1,9 +1,11 @@
 /**
  * @fileoverview マーカー表示最適化Hook
  * 大量マーカーの効率的な管理とパフォーマンス向上
+ * Phase 9: チャンク処理とキャッシュによる最適化
  */
 
 import type { Restaurant } from "@/types";
+import { processInChunksSync } from "@/utils/performanceUtils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // Phase 4: ClusterMarker統合
@@ -124,28 +126,43 @@ export const useMarkerOptimization = (
 
   /**
    * ビューポート内のレストランをフィルタリング
+   * Phase 9: チャンク処理で最適化（100件ずつ処理）
    */
   const filterByViewport = useCallback(
     (restaurants: readonly Restaurant[], bounds?: ViewportBounds) => {
       if (!bounds) return restaurants;
 
-      return restaurants.filter(restaurant => {
+      // Phase 9: 100件ずつチャンク処理
+      return processInChunksSync(restaurants, 100, restaurant => {
         const { lat, lng } = restaurant.coordinates;
-        return (
+        const isInViewport =
           lat >= bounds.south &&
           lat <= bounds.north &&
           lng >= bounds.west &&
-          lng <= bounds.east
-        );
-      });
+          lng <= bounds.east;
+        return isInViewport ? restaurant : null;
+      }).filter((r): r is Restaurant => r !== null);
     },
     []
   );
 
   /**
+   * 優先度計算キャッシュ
+   * Phase 9: 同一レストランの再計算を防ぐ
+   */
+  const priorityCache = useRef(new Map<string, number>());
+
+  /**
    * マーカーの優先度計算
+   * Phase 9: キャッシュによる最適化
    */
   const calculatePriority = useCallback((restaurant: Restaurant): number => {
+    // キャッシュチェック
+    const cached = priorityCache.current.get(restaurant.id);
+    if (cached !== undefined) {
+      return cached;
+    }
+
     let priority = 0;
 
     // 評価による優先度
@@ -169,6 +186,9 @@ export const useMarkerOptimization = (
     if (restaurant.priceRange) {
       priority *= priceMultiplier[restaurant.priceRange] || 1.0;
     }
+
+    // キャッシュに保存
+    priorityCache.current.set(restaurant.id, priority);
 
     return priority;
   }, []);

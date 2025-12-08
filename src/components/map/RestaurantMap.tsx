@@ -7,8 +7,15 @@ import { useSimpleMarkerOptimization } from "@/hooks/map/useMarkerOptimization";
 import type { Restaurant } from "@/types";
 import type { MigrationConfig } from "@/types/migration";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
+import { yieldToMain } from "@/utils/performanceUtils";
 import { Map } from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 // Legacy marker has been removed; keep only new migration system path usage
 import { MapErrorBoundary } from "./MapErrorBoundary";
 import { MarkerMigrationSystem } from "./migration/MarkerMigration";
@@ -29,6 +36,10 @@ export default function RestaurantMap({
   const mapId = import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
   const [selectedRestaurant, setSelectedRestaurant] =
     useState<Restaurant | null>(null);
+  const [visibleRestaurants, setVisibleRestaurants] = useState<
+    readonly Restaurant[]
+  >([]);
+  const [renderProgress, setRenderProgress] = useState(0);
 
   // 🚀 高速化: 最適化されたマーカー表示
   const optimizedRestaurants = useSimpleMarkerOptimization(restaurants, 200);
@@ -133,6 +144,52 @@ export default function RestaurantMap({
     debugging.logEvent("marker_click", { action: "close_info_window" });
   }, [debugging]);
 
+  // 段階的マーカーレンダリング
+  useEffect(() => {
+    if (optimizedRestaurants.length === 0) {
+      setVisibleRestaurants([]);
+      setRenderProgress(100);
+      return;
+    }
+
+    let isCancelled = false;
+    const rendered: Restaurant[] = [];
+
+    async function renderMarkersInChunks() {
+      const chunkSize = 50; // 50件ずつ段階的に表示
+
+      for (let i = 0; i < optimizedRestaurants.length; i += chunkSize) {
+        if (isCancelled) break;
+
+        const chunk = optimizedRestaurants.slice(i, i + chunkSize);
+        rendered.push(...chunk);
+
+        startTransition(() => {
+          setVisibleRestaurants([...rendered]);
+          const progress = Math.min(
+            100,
+            ((i + chunkSize) / optimizedRestaurants.length) * 100
+          );
+          setRenderProgress(progress);
+        });
+
+        await yieldToMain();
+      }
+
+      if (!isCancelled) {
+        startTransition(() => {
+          setRenderProgress(100);
+        });
+      }
+    }
+
+    void renderMarkersInChunks();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [optimizedRestaurants]);
+
   // パフォーマンス統計の更新
   useEffect(() => {
     debugging.updateDebugStats(
@@ -187,6 +244,38 @@ export default function RestaurantMap({
       }}
     >
       <div className="map-container">
+        {/* ローディングインジケーター（ARIA対応） */}
+        {renderProgress > 0 && renderProgress < 100 && (
+          <div
+            className="marker-loading-indicator"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 1002,
+              background: "rgba(0,0,0,0.85)",
+              color: "white",
+              padding: "16px 24px",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+              backdropFilter: "blur(4px)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ marginBottom: "8px" }}>🗺️ マーカー読み込み中...</div>
+            <div style={{ fontSize: "12px", color: "#aaa" }}>
+              {Math.round(renderProgress)}% ({visibleRestaurants.length}/
+              {optimizedRestaurants.length}件)
+            </div>
+          </div>
+        )}
+
         {/* 🎯 デバッグ情報表示（開発環境のみ） */}
         {process.env.NODE_ENV === "development" && (
           <div
@@ -205,7 +294,8 @@ export default function RestaurantMap({
             }}
           >
             <div>
-              📊 表示中: {optimizedRestaurants.length}/{restaurants.length}
+              📊 表示中: {visibleRestaurants.length}/
+              {optimizedRestaurants.length} (元: {restaurants.length})
             </div>
             <div>
               ⏱️ レンダリング: {debugging.debugStats.renderTime.toFixed(1)}ms
@@ -222,6 +312,7 @@ export default function RestaurantMap({
               📈 インタラクション: {abTestIntegration.totalInteractions}
             </div>
             <div>⏱️ セッション: {abTestIntegration.sessionDuration}秒</div>
+            <div>🔄 読込進捗: {Math.round(renderProgress)}%</div>
           </div>
         )}
 
@@ -237,9 +328,9 @@ export default function RestaurantMap({
           streetViewControl={true}
           zoomControl={true}
         >
-          {/* 🎯 最適化されたマーカー表示 - A/Bテスト対応 */}
+          {/* 🎯 段階的マーカー表示 - A/Bテスト対応 */}
           {shouldUseNewMarkerSystem
-            ? optimizedRestaurants.map(restaurant => (
+            ? visibleRestaurants.map(restaurant => (
                 <MarkerMigrationSystem
                   key={restaurant.id}
                   restaurant={restaurant}
@@ -247,7 +338,7 @@ export default function RestaurantMap({
                   config={migrationConfig}
                 />
               ))
-            : optimizedRestaurants.map(restaurant => (
+            : visibleRestaurants.map(restaurant => (
                 <UnifiedMarker
                   key={restaurant.id}
                   point={restaurant}

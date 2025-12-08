@@ -37,7 +37,91 @@ AC:
 
 ## 3. Active (作業中)
 
-なし（Phase 4完了、1797/1801テスト通過、75.88%カバレッジ達成 🎉）
+### 🚨 2025 Q1 プロジェクト刷新計画 (Week 1-4)
+
+**参照**: [PROJECT_REFRESH_PLAN_2025Q1.md](./PROJECT_REFRESH_PLAN_2025Q1.md)
+**策定日**: 2025年12月9日
+**緊急度**: P0 (Phase 9失敗を受けた技術基盤刷新)
+
+#### Week 1: Emergency Fixes (2025年12月9日-15日)
+
+- [P0 fix] **Vitest 4.0.15マイグレーション** [Issue #TBD]
+  - **緊急**: v4.0.15既にリリース済み (2024年10月31日)
+  - 破壊的変更: `coverage.all`削除、poolOptions廃止、browser provider変更
+  - 工数: 6-8時間
+  - AC:
+    - [ ] 1797テスト全通過
+    - [ ] カバレッジ75.88%維持
+    - [ ] `config/vitest.config.ts`更新完了
+  - 優先度: P0 🔥
+
+- [P0 perf] **Phase 9 Week 1ロールバック** [Issue #TBD]
+  - **緊急**: TBT +49%悪化 (Mobile: 12,670ms → 18,935ms)
+  - 削除対象: Task 1.2-1.4 (processInChunksSync, 段階的レンダリング)
+  - 工数: 4時間
+  - AC:
+    - [ ] Mobile TBT: 12,670ms復旧
+    - [ ] Desktop TBT: 2,910ms復旧
+    - [ ] Performance Score: 60点復旧
+    - [ ] 全テスト通過
+  - 優先度: P0 🔥
+
+- [P1 chore] **Node.js engines設定追加** [Issue #TBD]
+  - 内容: `package.json`にenginesフィールド追加 (node>=20.19.0, pnpm>=9.0.0)
+  - 工数: 15分
+  - AC: [ ] package.json更新、CI環境検証
+  - 優先度: P1
+
+#### Week 2: Dependency Updates (2025年12月16日-22日)
+
+- [P1 chore] **Vite 7.2.7アップグレード** [Issue #TBD]
+  - 現状: v7.1.4 → 最新: v7.2.7
+  - 工数: 1時間
+  - 優先度: P1
+
+- [P1 feat] **React 19互換性監査** [Issue #TBD]
+  - 対象: forwardRef、Context.Provider、ref cleanup
+  - 工数: 4時間
+  - 優先度: P1
+
+- [P1 fix] **Lighthouse CI修正** [Issue #TBD]
+  - 原因: Google Maps API URL制限によるNO_FCP
+  - 解決策: Google Cloud ConsoleでHTTPリファラー制限追加
+  - 工数: 2時間
+  - 優先度: P1
+
+#### Week 3: Performance Optimization (2025年12月23日-29日)
+
+- [P0 perf] **Google Maps API遅延読み込み実装** [Issue #TBD]
+  - **Phase 9本命施策**: Intersection Observer + 遅延読み込み
+  - 期待効果: TBT -5,000ms (Mobile: 8,000ms目標)
+  - 工数: 8時間
+  - AC:
+    - [ ] Mobile TBT: <10,000ms (Minimum Success)
+    - [ ] Mobile TBT: <8,000ms (Target Success)
+    - [ ] Desktop TBT: <2,000ms
+    - [ ] Performance Score: 65+ (Minimum), 70+ (Target)
+  - 優先度: P0 🎯
+
+- [P0 perf] **Checkpoint 2測定** [Issue #TBD]
+  - 測定環境: Chrome DevTools Lighthouse (Manual)
+  - 工数: 1時間
+  - 優先度: P0
+
+#### Week 4: E2E Testing Setup (2025年12月30日-2026年1月5日)
+
+- [P1 test] **Playwright導入** [Issue #TBD]
+  - 目的: FilterModal skipped tests解消 (4件 → 0件)
+  - 工数: 4時間
+  - 優先度: P1
+
+- [P1 test] **FilterModal E2Eテスト実装** [Issue #TBD]
+  - シナリオ: ESCキー、スワイプ、スクロール管理、高速連打
+  - 工数: 6時間
+  - AC: [ ] Skipped Tests 0件達成
+  - 優先度: P1
+
+---
 
 ## 4. Backlog (優先度付き候補)
 
@@ -253,32 +337,47 @@ AC:
 - (P2 test) **FilterPanel.txテスト** – Phase 2で細分化実装
 - (P2 test) **OptimizedInfoWindow.txテスト** – Phase 3以降で検討
 
-### 🚀 Phase 9候補: Long Tasks & Rendering Optimization + E2E Testing
+### ❌ Phase 9 Week 1: Performance Optimization Failure (2025-12-08)
 
-#### パフォーマンス最適化
+**結果**: チャンク処理施策が**逆効果**と判明 (TBT +49%悪化) 🔴
+**教訓**: セクション5「Lessons Learned」参照
+**次期戦略**: [PROJECT_REFRESH_PLAN_2025Q1.md](./PROJECT_REFRESH_PLAN_2025Q1.md)
 
-- (P1 perf) **Long Tasks分割** [Issue #TBD] – processInChunks実装、623 POI分割処理、TBT -2,000ms
-- (P1 perf) **Google Maps API遅延化** [Issue #TBD] – useGoogleMapsLoader + Intersection Observer、TBT -5,000ms
-- (P2 perf) **Render Blocking解消** [Issue #TBD] – Font Display最適化、Critical CSS Inline化
-- (P3 perf) **Dashboard遅延化** [Issue #TBD] – React.lazy + Suspense、初期ロード高速化（Dashboard実装時）
+#### ⚠️ Checkpoint 1測定結果 (失敗)
 
-#### E2Eテスト基盤構築
+| 環境        | Performance Score | TBT変化             | Long Tasks変化 | 評価        |
+| ----------- | ----------------- | ------------------- | -------------- | ----------- |
+| **Mobile**  | 60→58 (-2)        | **+6,265ms (+49%)** | 0個 (変化なし) | 🔴 大幅悪化 |
+| **Desktop** | 61→59 (-2)        | **+840ms (+29%)**   | +4個 (+29%)    | 🔴 悪化     |
 
-- (P1 test) **Playwright導入** [Issue #TBD] – E2Eテスト環境セットアップ
-  - 目的: FilterModal skipped tests (4件) の包括的カバー
-  - 対象テスト:
-    1. ESCキーでモーダルを閉じる（useEffectタイミング問題解決）
-    2. bodyスクロール無効化・復元（useEffectタイミング問題解決）
-    3. 下方向スワイプでモーダルを閉じる（実ブラウザのタッチイベント検証）
-  - 追加カバー: Critical user flows（マップ操作、フィルター適用、POI選択）
-  - 工数: 4-6時間（セットアップ + 初期テスト実装）
-  - 優先度: P1（Phase 4でユニットテスト完了、E2Eで統合検証）
+**詳細**: [CHECKPOINT1_GUIDE.md](../reports/phases/phase9/CHECKPOINT1_GUIDE.md) v2.0
 
-- (P2 test) **E2Eテスト拡充** [Issue #TBD] – Critical paths包括カバー
-  - マップ初期ロード→POI表示→詳細表示フロー
-  - フィルター適用→結果更新→リセットフロー
-  - オフラインモード→PWAキャッシュ動作検証
-  - 工数: 3-4時間
+#### 📋 採用戦略: 2025 Q1プロジェクト刷新計画
+
+**決定**: Option A実施 + 技術基盤刷新
+**参照**: [PROJECT_REFRESH_PLAN_2025Q1.md](./PROJECT_REFRESH_PLAN_2025Q1.md)
+
+**Week 1-4計画**:
+
+1. Week 1: Vitest 4マイグレーション + Phase 9ロールバック
+2. Week 2: 依存関係更新 (Vite 7.2.7, React 19互換性監査)
+3. Week 3: Google Maps API遅延読み込み実装 (TBT -5,000ms目標)
+4. Week 4: Playwright導入 + FilterModal E2Eテスト (Skipped Tests解消)
+
+#### 保留タスク（Week 1失敗により凍結）
+
+- ❌ **Task 1.1**: processInChunks実装 (完了済み、効果なし)
+- ❌ **Task 1.2**: useMapPoints最適化 (完了済み、悪化)
+- ❌ **Task 1.3**: useMarkerOptimization改善 (完了済み、悪化)
+- ❌ **Task 1.4**: 段階的レンダリング (完了済み、悪化)
+- ⏸️ **Task 2.1-2.3**: requestIdleCallback統合 (保留)
+
+#### 検討中タスク
+
+- (P1 perf) **Google Maps API遅延読み込み** [Issue #TBD] – Intersection Observer、TBT -5,000ms見込み
+- (P1 test) **Playwright導入** [Issue #TBD] – E2Eテスト環境、FilterModal skippedテスト解決
+- (P2 perf) **Render Blocking解消** [Issue #TBD] – Font Display最適化、FCP改善
+- (P3 perf) **Virtual Scrolling** [Issue #TBD] – 大規模データ対応 (将来的拡張用)
 
 ## 6. Done (最近 10 件のみ保持)
 

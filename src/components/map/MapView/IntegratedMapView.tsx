@@ -11,7 +11,14 @@
 
 import type { MapPoint } from "@/types";
 import { trackMapInteraction, trackRestaurantClick } from "@/utils/analytics";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { yieldToMain } from "@/utils/performanceUtils";
+import {
+  ReactNode,
+  startTransition,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   type ABTestVariant,
   classifyUser,
@@ -52,6 +59,10 @@ export function IntegratedMapView({
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [userClassification, setUserClassification] =
     useState<UserClassification | null>(null);
+  const [visibleMapPoints, setVisibleMapPoints] = useState<readonly MapPoint[]>(
+    []
+  );
+  const [renderProgress, setRenderProgress] = useState(0);
   const [currentVariant, setCurrentVariant] =
     useState<ABTestVariant>("original");
   // EnhancedMapContainer と整合するローカル型
@@ -165,6 +176,52 @@ export function IntegratedMapView({
     setSelectedPoint(null);
   }, []);
 
+  // 段階的マーカーレンダリング
+  useEffect(() => {
+    if (mapPoints.length === 0) {
+      setVisibleMapPoints([]);
+      setRenderProgress(100);
+      return;
+    }
+
+    let isCancelled = false;
+    const rendered: MapPoint[] = [];
+
+    async function renderMarkersInChunks() {
+      const chunkSize = 50; // 50件ずつ段階的に表示
+
+      for (let i = 0; i < mapPoints.length; i += chunkSize) {
+        if (isCancelled) break;
+
+        const chunk = mapPoints.slice(i, i + chunkSize);
+        rendered.push(...chunk);
+
+        startTransition(() => {
+          setVisibleMapPoints([...rendered]);
+          const progress = Math.min(
+            100,
+            ((i + chunkSize) / mapPoints.length) * 100
+          );
+          setRenderProgress(progress);
+        });
+
+        await yieldToMain();
+      }
+
+      if (!isCancelled) {
+        startTransition(() => {
+          setRenderProgress(100);
+        });
+      }
+    }
+
+    void renderMarkersInChunks();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [mapPoints]);
+
   // ローディング状態
   if (loading) {
     return (
@@ -212,12 +269,44 @@ export function IntegratedMapView({
 
   return (
     <MapErrorBoundary>
+      {/* ローディングインジケーター（ARIA対応） */}
+      {renderProgress > 0 && renderProgress < 100 && (
+        <div
+          className="marker-loading-indicator"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1002,
+            background: "rgba(0,0,0,0.85)",
+            color: "white",
+            padding: "16px 24px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            fontFamily: "system-ui, -apple-system, sans-serif",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+            backdropFilter: "blur(4px)",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ marginBottom: "8px" }}>🗺️ マーカー読み込み中...</div>
+          <div style={{ fontSize: "12px", color: "#aaa" }}>
+            {Math.round(renderProgress)}% ({visibleMapPoints.length}/
+            {mapPoints.length}件)
+          </div>
+        </div>
+      )}
+
       {/**
        * 仕様簡素化: 常に EnhancedMapContainer を使用し、パネル表示有無で挙動制御。
        * 本番ではユーザー変更を許さないため showSelectionPanel = shouldUseTestingMode
        */}
       <EnhancedMapContainer
-        mapPoints={mapPoints}
+        mapPoints={visibleMapPoints}
         center={center}
         mapId={mapId}
         selectedPoint={selectedPoint}

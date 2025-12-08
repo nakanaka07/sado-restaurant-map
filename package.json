@@ -29,6 +29,10 @@
     "clean": "pwsh -Command \"Remove-Item -Path dist,dev-dist,coverage,.vite,node_modules/.vite -Recurse -Force -ErrorAction SilentlyContinue\"",
     "generate:pwa-assets": "pwa-assets-generator --config config/pwa-assets.config.ts",
     "optimize-svg": "node scripts/optimize-svg.js",
+    "lighthouse": "pwsh -File scripts/lighthouse-measure.ps1",
+    "lighthouse:mobile": "pwsh -File scripts/lighthouse-measure.ps1 -MobileOnly",
+    "lighthouse:desktop": "pwsh -File scripts/lighthouse-measure.ps1 -DesktopOnly",
+    "lighthouse:quick": "pwsh -File scripts/lighthouse-measure.ps1 -SkipBuild",
     "optimize-images": "node scripts/optimize-images.js",
     "optimize-assets": "pnpm optimize-svg && pnpm optimize-images",
     "size-limit": "size-limit"

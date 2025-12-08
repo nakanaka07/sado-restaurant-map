@@ -29,10 +29,11 @@ on Sado Island, Japan.
 **Tech Stack**:
 
 - Frontend: React 19 + TypeScript 5.7 (strict) + Vite 7
-- Testing: Vitest 3 + Testing Library + jest-axe
+- Testing: Vitest 3 → **Vitest 4 migration planned (Week 1)** + Testing Library + jest-axe
 - PWA: vite-plugin-pwa (Workbox) + offline support
 - Maps: Google Maps JavaScript API
 - CI/CD: GitHub Actions (lint, test, build, size-limit, Lighthouse CI)
+- E2E Testing: **Playwright (Week 4 introduction planned)**
 
 **Key Priorities**: Performance, Accessibility (WCAG AA), Type Safety, Offline Support, Developer Experience
 
@@ -115,16 +116,16 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 ## 5. Testing Strategy
 
-**Test Framework**: Vitest 3 + jsdom + Testing Library + jest-axe
+**Test Framework**: Vitest 3 → **Vitest 4 (Week 1 migration)** + jsdom + Testing Library + jest-axe
 
 **Test Types**:
 
-| Layer         | Strategy             | Tools                | Priority                        |
-| ------------- | -------------------- | -------------------- | ------------------------------- |
-| Unit          | Logic/Hook isolation | Vitest               | High for utils, hooks, services |
-| Component     | User behavior-based  | Testing Library      | High for interactive components |
-| Accessibility | Automated + manual   | jest-axe, axe-core   | Required for all interactive UI |
-| Integration   | Future E2E           | Playwright (planned) | Critical user flows             |
+| Layer         | Strategy             | Tools                                | Priority                        |
+| ------------- | -------------------- | ------------------------------------ | ------------------------------- |
+| Unit          | Logic/Hook isolation | Vitest                               | High for utils, hooks, services |
+| Component     | User behavior-based  | Testing Library                      | High for interactive components |
+| Accessibility | Automated + manual   | jest-axe, axe-core                   | Required for all interactive UI |
+| Integration   | E2E Testing          | **Playwright (Week 4 introduction)** | Critical user flows             |
 
 **Coverage**:
 
@@ -366,59 +367,50 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 - Incremental PRs for large refactors
 - Document architectural decisions
 
-## 14. Future Work Markers
+## 14. Current Status & Priorities
 
-Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
+**Project Metrics** (2025-12-09):
 
-**Phase 8 Complete** (2025-10-19):
+- Coverage: **75.88%** (1797 tests, 4 skipped)
+- Tech Stack: React 19.1.1, Vite 7.1.4, TypeScript 5.7.3, Vitest 3.2.4
+- Performance: Mobile Score 58, Desktop Score 59 (Phase 9 Week 1 rollback pending)
 
-- ✅ React.lazy実装: FilterPanel, CustomMapControls, APIProvider, IntegratedMapView
-- ✅ App.js -43.1%削減 (19.56KB → 11.13KB)
-- ✅ Tree-shaking改善、Terser 2-pass圧縮
+**Active Work** (2025 Q1 Project Refresh):
 
-**Phase 2 Complete** (2025-12-06):
+See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.md) for complete 4-week plan.
 
-- ✅ フィルターテスト拡充完了: 1065 → 1213 tests (+148 tests, +13.9%)
-- ✅ カバレッジ目標達成: 51.12% → 64.31% (+13.19%)
-- ✅ 目標65%に到達 (64.31%達成)
-- ✅ パフォーマンス・メモ化・エッジケース・統合シナリオをカバー
+**Week 1 (12/9-15) - Emergency Fixes**:
 
-**Phase 3 Complete** (2025-12-07):
+- 🔥 Vitest 4.0.15 migration (breaking changes: coverage.all, poolOptions)
+- 🔥 Phase 9 Week 1 rollback (TBT +49% degradation)
+- Node.js engines constraint (>=20.19.0)
 
-- ✅ TypeScript strict mode: 10 errors → 0 resolved (SVGMarker, markerColorUtils)
-- ✅ Marker tests expansion: +145 tests (SVGMarker 35, IconMarker 47, PinMarker 21, UnifiedMarker 23, markerColorUtils 19)
-- ✅ Barrel export tests: +14 tests (5 new test files for hooks/api, hooks/map, hooks/ui, services/sheets, config)
-- ✅ Coverage milestone: 64.31% → **71.32%** (+7.01%, **70% target exceeded**)
-- ✅ Test count: 1213 → 1444 (+231 tests, +19.0%)
-- ✅ Keyword mapping: Enhanced "日本料理" recognition with "日本", "寿司" keywords
+**Week 2-4 Highlights**:
 
-**Phase 4 Complete** (2025-12-08):
+- Vite 7.2.7 upgrade, React 19 compatibility audit
+- Google Maps API lazy loading (TBT -5,000ms target)
+- Playwright E2E introduction (resolve 4 skipped tests)
 
-- ✅ Coverage target achieved: 71.32% → **75.88%** (+4.56%, **75% target exceeded**)
-- ✅ Hook tests expansion: useMapPoints (28 tests), useMarkerOptimization (34 tests)
-- ✅ Component tests expansion: BusinessStatusBadge (20 tests), CircularMarker (27 tests)
-- ✅ Test count: 1444 → 1797 (+353 tests, +24.4%)
-- ✅ TypeScript strict compliance: All exactOptionalPropertyTypes issues resolved
-- ✅ Test quality: 1797 passing, 4 skipped (FilterModal timing issues), 0 failed
+**Key Lesson from Phase 9 Failure**:
 
-**Phase 9 Planning (Performance Optimization & E2E Testing)**:
+- Micro-optimizations can backfire on small datasets (<1,000 items)
+- Event loop overhead (480ms) > processing savings (150ms) for 623 items
+- Always: Profile → Measure → Optimize (not: Assume → Optimize → Measure)
 
-- Long Tasks分割: TBT -2,000ms目標
-- Google Maps API遅延化: TBT -5,000ms目標
-- Render Blocking解消: FCP改善
-- **E2E testing: Playwright導入**
-  - FilterModal skipped tests (4件) をE2Eテストで包括的にカバー
-  - ESCキー、スクロール管理、スワイプジェスチャーの実ブラウザ検証
-  - Critical user flows の統合テスト
-  - タイミング依存テストの自然な解決
+**Phase History**: See [TASKS.md Done section](../docs/tasks/TASKS.md) for Phase 2-8 completion details.
 
 ## 15. Key Documentation References
 
-- `docs/guidelines/SHARED_GLOSSARY.md`: Terms and concepts
-- `docs/guidelines/COLLAB_PROMPT.md`: AI collaboration details
-- `docs/design/pwa-implementation-notes.md`: PWA implementation specs
-- `docs/design/ab-test-marker-sync.md`: A/B test and marker sync specs
-- `docs/tasks/TASKS.md`: Current tasks and priorities
+**Essential**:
+
+- [TASKS.md](../docs/tasks/TASKS.md): Current tasks, phase history, priorities
+- [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.md): 4-week technical refresh strategy
+- [SHARED_GLOSSARY.md](../docs/guidelines/SHARED_GLOSSARY.md): Terms, quality standards, thresholds
+
+**Implementation Details**:
+
+- [pwa-implementation-notes.md](../docs/design/pwa-implementation-notes.md): Service Worker, caching strategies
+- [COLLAB_PROMPT.md](../docs/guidelines/COLLAB_PROMPT.md): AI collaboration patterns
 
 ## 16. Python Data Platform
 
@@ -431,6 +423,6 @@ Use `// TODO(debt:reason)` comments for technical debt. Weekly review (manual).
 
 ---
 
-**Version**: 2.6 (2025-12-08)
+**Version**: 2.8 (2025-12-09)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: Phase 4完了 - 75%カバレッジ達成 (1797 tests, 75.88%カバレッジ、目標75%超過)、E2Eテスト計画策定
+**Last Update**: 2025 Q1プロジェクト刷新計画策定完了 - Phase 9失敗教訓、Vitest 4即時マイグレーション (Week 1)、Google Maps API最適化 (Week 3)、Playwright導入 (Week 4) - 詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated

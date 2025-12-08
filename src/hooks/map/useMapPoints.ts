@@ -10,6 +10,7 @@ import type {
   MapPoint,
   SortOrder,
 } from "@/types";
+import { processInChunksSync } from "@/utils/performanceUtils";
 import {
   startTransition,
   useCallback,
@@ -94,14 +95,16 @@ export function useMapPoints() {
   }, [fetchData]);
 
   /**
-   * フィルタリング処理
+   * フィルタリング処理（チャンク処理で最適化）
+   * Phase 9: 623件を50件ずつ処理してメインスレッド負荷を軽減
    */
   const filteredMapPoints = useMemo(() => {
     if (!state.data) return [];
 
-    return state.data.filter(point => {
-      return isPointMatchingFilters(point, filters);
-    });
+    // 50件ずつ処理（1チャンク<10ms目標）
+    return processInChunksSync(state.data, 50, point =>
+      isPointMatchingFilters(point, filters) ? point : null
+    ).filter((point): point is MapPoint => point !== null);
   }, [state.data, filters]);
 
   /**
