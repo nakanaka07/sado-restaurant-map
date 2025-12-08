@@ -25,8 +25,8 @@ describe("markerColorUtils", () => {
         };
 
         const color = getMarkerColor(restaurant);
-        // "日本料理"はキーワードマップにマッチしないのでgeneral色
-        expect(color).toBe("#00A693");
+        // "日本料理"は"日本"キーワードでjapaneseカテゴリにマッチ
+        expect(color).toBe("#E53E3E");
       });
     });
 

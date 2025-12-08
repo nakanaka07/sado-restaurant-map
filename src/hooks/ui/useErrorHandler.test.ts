@@ -255,4 +255,350 @@ describe("useErrorHandler", () => {
       context: "TestComponent",
     });
   });
+
+  // ==============================
+  // Additional Coverage Tests
+  // ==============================
+
+  describe("エラーコード処理", () => {
+    it("error.codeプロパティが存在する場合は抽出されるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const errorWithCode = new Error("API Error");
+        (errorWithCode as { code: string }).code = "ERR_NETWORK";
+        result.current.handleError({
+          error: errorWithCode,
+          context: "API",
+        });
+      });
+
+      expect(result.current.error?.code).toBe("ERR_NETWORK");
+    });
+
+    it("error.codeが存在しない場合はundefinedになるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const errorWithoutCode = new Error("Simple Error");
+        result.current.handleError({
+          error: errorWithoutCode,
+          context: "Component",
+        });
+      });
+
+      expect(result.current.error?.code).toBeUndefined();
+    });
+
+    it("error.codeが数値の場合は文字列に変換されるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const errorWithNumericCode = new Error("HTTP Error");
+        (errorWithNumericCode as { code: number }).code = 404;
+        result.current.handleError({
+          error: errorWithNumericCode,
+          context: "HTTP",
+        });
+      });
+
+      expect(result.current.error?.code).toBe("404");
+      expect(typeof result.current.error?.code).toBe("string");
+    });
+  });
+
+  describe("ネットワークエラー特殊処理", () => {
+    it("fetch含むエラーメッセージは専用メッセージに置換されるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const fetchError = new Error("Failed to fetch data from API");
+        result.current.handleNetworkError(fetchError, "DataService");
+      });
+
+      expect(result.current.error?.message).toBe(
+        "ネットワーク接続を確認してください"
+      );
+    });
+
+    it("fetch以外のネットワークエラーは元のメッセージを保持するべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const networkError = new Error("Connection timeout");
+        result.current.handleNetworkError(networkError, "DataService");
+      });
+
+      expect(result.current.error?.message).toBe("Connection timeout");
+    });
+
+    it("ネットワークエラーのコンテキストがデフォルトで'Network'になるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const networkError = new Error("Connection refused");
+        result.current.handleNetworkError(networkError);
+      });
+
+      expect(result.current.error?.context).toBe("Network");
+    });
+
+    it("ネットワークエラーの重要度はmediumであるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const networkError = new Error("Network error");
+        result.current.handleNetworkError(networkError);
+      });
+
+      expect(result.current.error?.severity).toBe("medium");
+    });
+  });
+
+  describe("バリデーションエラー特殊処理", () => {
+    it("バリデーションエラーのコンテキストがデフォルトで'Validation'になるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const validationError = new Error("Invalid input");
+        result.current.handleValidationError(validationError);
+      });
+
+      expect(result.current.error?.context).toBe("Validation");
+    });
+
+    it("バリデーションエラーの重要度はlowであるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const validationError = new Error("Required field");
+        result.current.handleValidationError(validationError);
+      });
+
+      expect(result.current.error?.severity).toBe("low");
+    });
+  });
+
+  describe("デフォルト値とフォールバック", () => {
+    it("コンテキストが未指定の場合はUnknownになるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const testError = new Error("Test error");
+        result.current.handleError({ error: testError });
+      });
+
+      expect(result.current.error?.context).toBe("Unknown");
+    });
+
+    it("タイムスタンプが自動的に設定されるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+      const beforeTime = new Date();
+
+      act(() => {
+        const testError = new Error("Test error");
+        result.current.handleError({ error: testError });
+      });
+
+      const afterTime = new Date();
+      const timestamp = result.current.error?.timestamp;
+
+      expect(timestamp).toBeDefined();
+      if (timestamp) {
+        expect(timestamp.getTime()).toBeGreaterThanOrEqual(
+          beforeTime.getTime()
+        );
+        expect(timestamp.getTime()).toBeLessThanOrEqual(afterTime.getTime());
+      }
+    });
+  });
+
+  describe("エラー履歴の順序", () => {
+    it("最新のエラーが常に先頭に追加されるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        result.current.handleError({ error: new Error("Error 1") });
+        result.current.handleError({ error: new Error("Error 2") });
+        result.current.handleError({ error: new Error("Error 3") });
+      });
+
+      expect(result.current.errorHistory[0].message).toBe("Error 3");
+      expect(result.current.errorHistory[1].message).toBe("Error 2");
+      expect(result.current.errorHistory[2].message).toBe("Error 1");
+    });
+  });
+
+  describe("エッジケース", () => {
+    it("空のエラーメッセージでも動作するべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const emptyError = new Error("");
+        result.current.handleError({ error: emptyError });
+      });
+
+      expect(result.current.error?.message).toBe("");
+    });
+
+    it("非常に長いエラーメッセージでも処理できるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+      const longMessage = "A".repeat(1000);
+
+      act(() => {
+        const longError = new Error(longMessage);
+        result.current.handleError({ error: longError });
+      });
+
+      expect(result.current.error?.message).toBe(longMessage);
+      expect(result.current.error?.message.length).toBe(1000);
+    });
+
+    it("特殊文字を含むエラーメッセージでも処理できるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+
+      act(() => {
+        const specialCharError = new Error(
+          "Error: <script>alert('XSS')</script>"
+        );
+        result.current.handleError({ error: specialCharError });
+      });
+
+      expect(result.current.error?.message).toBe(
+        "Error: <script>alert('XSS')</script>"
+      );
+    });
+  });
+
+  describe("重要度の組み合わせ", () => {
+    it("すべての重要度レベルが正しく設定できるべき", () => {
+      const { result } = renderHook(() => useErrorHandler());
+      const severities = ["low", "medium", "high", "critical"] as const;
+
+      severities.forEach(severity => {
+        act(() => {
+          result.current.handleError({
+            error: new Error(`${severity} error`),
+            severity,
+          });
+        });
+
+        expect(result.current.error?.severity).toBe(severity);
+      });
+    });
+  });
+});
+
+// ==============================
+// Global Functions Tests
+// ==============================
+
+describe("setupGlobalErrorHandling", () => {
+  let setupGlobalErrorHandling: () => void;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    mockAddEventListener.mockClear();
+
+    // 動的インポートで関数を取得
+    const module = await import("./useErrorHandler");
+    setupGlobalErrorHandling = module.setupGlobalErrorHandling;
+  });
+
+  it("unhandledrejectionイベントリスナーが登録されるべき", () => {
+    setupGlobalErrorHandling();
+
+    expect(mockAddEventListener).toHaveBeenCalledWith(
+      "unhandledrejection",
+      expect.any(Function)
+    );
+  });
+
+  it("errorイベントリスナーが登録されるべき", () => {
+    setupGlobalErrorHandling();
+
+    expect(mockAddEventListener).toHaveBeenCalledWith(
+      "error",
+      expect.any(Function)
+    );
+  });
+
+  it("loadイベントリスナーが登録されるべき", () => {
+    setupGlobalErrorHandling();
+
+    expect(mockAddEventListener).toHaveBeenCalledWith(
+      "load",
+      expect.any(Function)
+    );
+  });
+
+  it("最低3つのイベントリスナーが登録されるべき", () => {
+    setupGlobalErrorHandling();
+
+    expect(mockAddEventListener).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("reportErrorBoundaryError", () => {
+  let reportErrorBoundaryError: (
+    error: Error,
+    errorInfo: { componentStack: string }
+  ) => void;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "group").mockImplementation(() => {});
+    vi.spyOn(console, "groupEnd").mockImplementation(() => {});
+
+    // 動的インポートで関数を取得
+    const module = await import("./useErrorHandler");
+    reportErrorBoundaryError = module.reportErrorBoundaryError;
+  });
+
+  it("Error Boundaryエラーを正しく処理できるべき", () => {
+    const testError = new Error("Component render error");
+    const errorInfo = {
+      componentStack: "at Component\nat App",
+    };
+
+    expect(() => reportErrorBoundaryError(testError, errorInfo)).not.toThrow();
+  });
+
+  it("開発環境ではconsole.groupが呼ばれるべき", () => {
+    const originalEnv = import.meta.env.DEV;
+    import.meta.env.DEV = true;
+
+    const testError = new Error("Component error");
+    const errorInfo = { componentStack: "at Component" };
+
+    reportErrorBoundaryError(testError, errorInfo);
+
+    expect(console.group).toHaveBeenCalledWith(
+      expect.stringContaining("React Error Boundary")
+    );
+    expect(console.groupEnd).toHaveBeenCalled();
+
+    import.meta.env.DEV = originalEnv;
+  });
+
+  it("コンポーネントスタックが正しく記録されるべき", () => {
+    const testError = new Error("Render error");
+    const errorInfo = {
+      componentStack: "at ErrorComponent\nat ParentComponent\nat App",
+    };
+
+    reportErrorBoundaryError(testError, errorInfo);
+
+    // console.errorが呼ばれることを確認
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  it("エラー名がmetadataに含まれるべき", () => {
+    const testError = new Error("Custom error");
+    testError.name = "CustomErrorType";
+    const errorInfo = { componentStack: "at Component" };
+
+    expect(() => reportErrorBoundaryError(testError, errorInfo)).not.toThrow();
+  });
 });

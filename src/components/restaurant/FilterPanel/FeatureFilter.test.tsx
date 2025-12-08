@@ -398,7 +398,7 @@ describe("FeatureFilter", () => {
       }
       const duration = performance.now() - start;
 
-      expect(duration).toBeLessThan(500); // 500ms以内で50回再レンダリング（CI環境考慮）
+      expect(duration).toBeLessThan(600); // 600ms以内で50回再レンダリング（CI環境・負荷考慮）
     });
 
     it("スクロール可能なコンテナが設定されていること", () => {

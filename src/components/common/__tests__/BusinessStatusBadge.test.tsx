@@ -62,4 +62,150 @@ describe("BusinessStatusBadge", () => {
       render(<BusinessStatusBadge status={BusinessStatus.UNKNOWN} />);
     }).not.toThrow();
   });
+
+  describe("サイズバリエーション", () => {
+    it("smallサイズが正しく表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} size="small" />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toHaveStyle({ fontSize: "10px" });
+      expect(badge).toHaveStyle({ padding: "2px 6px" });
+    });
+
+    it("mediumサイズ（デフォルト）が正しく表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} size="medium" />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toHaveStyle({ fontSize: "12px" });
+      expect(badge).toHaveStyle({ padding: "4px 8px" });
+    });
+
+    it("largeサイズが正しく表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} size="large" />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toHaveStyle({ fontSize: "14px" });
+      expect(badge).toHaveStyle({ padding: "6px 12px" });
+    });
+
+    it("サイズ指定なしの場合mediumになる", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toHaveStyle({ fontSize: "12px" });
+    });
+  });
+
+  describe("アイコン表示制御", () => {
+    it("showIcon=trueの場合アイコンが表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} showIcon={true} />
+      );
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon).toBeInTheDocument();
+      expect(icon?.textContent).toBe("🟢");
+    });
+
+    it("showIcon=falseの場合アイコンが非表示になる", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} showIcon={false} />
+      );
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon).not.toBeInTheDocument();
+    });
+
+    it("デフォルトでアイコンが表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} />
+      );
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  describe("カスタムクラス", () => {
+    it("classNameが正しく適用される", () => {
+      const { container } = render(
+        <BusinessStatusBadge
+          status={BusinessStatus.OPEN}
+          className="custom-class"
+        />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toHaveClass("business-status-badge");
+      expect(badge).toHaveClass("custom-class");
+    });
+
+    it("className未指定の場合はデフォルトクラスのみ", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toHaveClass("business-status-badge");
+      expect(badge.className).not.toContain("custom");
+    });
+  });
+
+  describe("ステータスごとのアイコン", () => {
+    it("営業中は緑のアイコンが表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.OPEN} />
+      );
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon?.textContent).toBe("🟢");
+    });
+
+    it("閉店中は赤のアイコンが表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.CLOSED} />
+      );
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon?.textContent).toBe("🔴");
+    });
+
+    it("不明は黄色のアイコンが表示される", () => {
+      const { container } = render(
+        <BusinessStatusBadge status={BusinessStatus.UNKNOWN} />
+      );
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon?.textContent).toBe("🟡");
+    });
+  });
+
+  describe("複合パターン", () => {
+    it("全オプション指定時も正常に動作する", () => {
+      const { container } = render(
+        <BusinessStatusBadge
+          status={BusinessStatus.CLOSED}
+          size="large"
+          showIcon={false}
+          className="test-badge"
+        />
+      );
+
+      const badge = container.firstChild as HTMLElement;
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveClass("test-badge");
+      expect(badge).toHaveStyle({ fontSize: "14px" });
+
+      const icon = container.querySelector('[aria-hidden="true"]');
+      expect(icon).not.toBeInTheDocument();
+    });
+  });
 });

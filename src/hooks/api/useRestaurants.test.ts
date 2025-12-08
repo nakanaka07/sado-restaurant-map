@@ -1,8 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // localStorage モックをグローバルスコープで設定
 const createLocalStorageMock = () => {
@@ -276,5 +276,186 @@ describe("useRestaurants Hook", () => {
     if (ratings.length > 1) {
       expect(ratings[0]).toBeGreaterThanOrEqual(ratings[1]);
     }
+  });
+
+  describe("営業中フィルター", () => {
+    it("should apply openNow filter to filtered restaurants", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      const initialCount = result.current.filteredRestaurants.length;
+
+      act(() => {
+        result.current.setFilters({ openNow: true });
+      });
+
+      await waitFor(() => {
+        // フィルター適用後もレストランが存在することを確認
+        expect(result.current.filteredRestaurants).toBeDefined();
+        expect(
+          result.current.filteredRestaurants.length
+        ).toBeGreaterThanOrEqual(0);
+        expect(result.current.filteredRestaurants.length).toBeLessThanOrEqual(
+          initialCount
+        );
+      });
+    });
+  });
+
+  describe("距離フィルター", () => {
+    it("should apply distance filter to filtered restaurants", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      const userLocation = { lat: 38.018611, lng: 138.367222 };
+      const radius = 5; // 5km
+
+      act(() => {
+        result.current.setFilters({
+          currentLocation: userLocation,
+          radius: radius,
+        });
+      });
+
+      await waitFor(() => {
+        // 距離フィルターが適用されていることを確認
+        expect(result.current.filteredRestaurants).toBeDefined();
+        expect(
+          result.current.filteredRestaurants.length
+        ).toBeGreaterThanOrEqual(0);
+      });
+    });
+  });
+
+  describe("選択機能", () => {
+    it("should select a restaurant", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      const firstRestaurant = result.current.restaurants[0];
+
+      act(() => {
+        result.current.selectRestaurant(firstRestaurant);
+      });
+
+      expect(result.current.selectedRestaurant).toEqual(firstRestaurant);
+    });
+
+    it("should deselect restaurant by passing null", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      const firstRestaurant = result.current.restaurants[0];
+
+      act(() => {
+        result.current.selectRestaurant(firstRestaurant);
+      });
+
+      expect(result.current.selectedRestaurant).toEqual(firstRestaurant);
+
+      act(() => {
+        result.current.selectRestaurant(null);
+      });
+
+      expect(result.current.selectedRestaurant).toBeNull();
+    });
+  });
+
+  describe("エラーハンドリング", () => {
+    it("should load restaurants successfully", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      // データが正常にロードされることを確認
+      expect(result.current.restaurants.length).toBeGreaterThan(0);
+      expect(result.current.asyncState.error).toBe(null);
+    });
+  });
+
+  describe("ソート機能拡張", () => {
+    it("should sort by priceRange", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      act(() => {
+        result.current.setSortOrder("priceRange");
+      });
+
+      // 価格順にソートされていることを確認
+      const priceRanges = result.current.filteredRestaurants.map(
+        r => r.priceRange
+      );
+      expect(priceRanges[0]).toBe("～1000円");
+    });
+
+    it("should apply distance sort when sorting by distance", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      const userLocation = { lat: 38.0, lng: 138.0 };
+
+      act(() => {
+        result.current.setFilters({ currentLocation: userLocation });
+        result.current.setSortOrder("distance");
+      });
+
+      await waitFor(() => {
+        // 距離順にソートが適用されていることを確認
+        expect(result.current.filteredRestaurants.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  describe("フィルターリセット", () => {
+    it("should reset all filters", async () => {
+      const { result } = renderHook(() => useRestaurants());
+
+      await waitFor(() => {
+        expect(result.current.asyncState.loading).toBe(false);
+      });
+
+      // 複数のフィルターを設定
+      act(() => {
+        result.current.setFilters({
+          cuisineTypes: ["寿司"],
+          priceRanges: ["3000円～"],
+          searchQuery: "金峰",
+        });
+      });
+
+      expect(result.current.filteredRestaurants.length).toBe(1);
+
+      // フィルターをリセット
+      act(() => {
+        result.current.setFilters({
+          cuisineTypes: [],
+          priceRanges: [],
+          searchQuery: "",
+        });
+      });
+
+      expect(result.current.filteredRestaurants.length).toBe(4);
+    });
   });
 });

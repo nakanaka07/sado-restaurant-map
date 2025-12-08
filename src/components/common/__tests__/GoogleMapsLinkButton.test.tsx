@@ -55,4 +55,75 @@ describe("GoogleMapsLinkButton", () => {
     expect(icons.length).toBeGreaterThan(0);
     expect(icons[0]).toBeInTheDocument();
   });
+
+  describe("モード切り替え", () => {
+    it("directions モードでルート検索ボタンを表示", () => {
+      render(<GoogleMapsLinkButton {...mockProps} mode="directions" />);
+
+      const button = screen.getByRole("button", {
+        name: /ルート案内/,
+      });
+      expect(button).toBeInTheDocument();
+    });
+
+    it("streetview モードでストリートビューボタンを表示", () => {
+      render(<GoogleMapsLinkButton {...mockProps} mode="streetview" />);
+
+      const button = screen.getByRole("button", {
+        name: /ストリートビュー/,
+      });
+      expect(button).toBeInTheDocument();
+    });
+  });
+
+  describe("バリアント", () => {
+    it("secondary バリアントを適用できる", () => {
+      render(<GoogleMapsLinkButton {...mockProps} variant="secondary" />);
+
+      const button = screen.getByRole("button");
+      expect(button).toBeInTheDocument();
+    });
+
+    it("text バリアントを適用できる", () => {
+      render(<GoogleMapsLinkButton {...mockProps} variant="text" />);
+
+      const button = screen.getByRole("button");
+      expect(button).toBeInTheDocument();
+    });
+  });
+
+  describe("サイズ", () => {
+    it("small サイズを適用できる", () => {
+      render(<GoogleMapsLinkButton {...mockProps} size="small" />);
+
+      const button = screen.getByRole("button");
+      expect(button).toBeInTheDocument();
+    });
+
+    it("large サイズを適用できる", () => {
+      render(<GoogleMapsLinkButton {...mockProps} size="large" />);
+
+      const button = screen.getByRole("button");
+      expect(button).toBeInTheDocument();
+    });
+  });
+
+  describe("アイコン表示", () => {
+    it("showIcon=false でアイコンを非表示にできる", () => {
+      render(<GoogleMapsLinkButton {...mockProps} showIcon={false} />);
+
+      const icons = screen.queryAllByText("📍");
+      expect(icons).toHaveLength(0);
+    });
+  });
+
+  describe("カスタムクラス", () => {
+    it("className を適用できる", () => {
+      render(<GoogleMapsLinkButton {...mockProps} className="custom-class" />);
+
+      const button = screen.getByRole("button");
+      expect(button).toHaveClass("google-maps-link-button");
+      expect(button).toHaveClass("custom-class");
+    });
+  });
 });

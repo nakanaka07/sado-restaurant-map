@@ -3,8 +3,13 @@
  * WCAG 2.2 AA準拠の自動検証
  */
 
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+
+// 全体テストスイート実行時のDOM累積を防ぐクリーンアップ
+afterEach(() => {
+  cleanup();
+});
 
 describe("Marker Accessibility Tests", () => {
   describe("コントラスト比検証", () => {

@@ -15,7 +15,7 @@ import { CIRCULAR_MARKER_COLORS } from "../constants";
 const CUISINE_KEYWORD_MAP: ReadonlyArray<
   readonly [keywords: readonly string[], category: IcooonMarkerCategory]
 > = [
-  [["japanese", "和食"], "japanese"],
+  [["japanese", "和食", "日本", "寿司"], "japanese"],
   [["noodle", "麺"], "noodles"],
   [["yakiniku", "焼肉"], "yakiniku"],
   [["cafe", "カフェ"], "cafe"],

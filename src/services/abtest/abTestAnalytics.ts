@@ -52,7 +52,7 @@ export interface PerformanceMetrics {
 // データ収集・分析システム
 // ==============================
 
-class ABTestAnalyticsService {
+export class ABTestAnalyticsService {
   private readonly storageKey = "ab-test-metrics";
   private readonly maxStorageEntries = 10000;
   private readonly sessionId: string;
@@ -95,6 +95,10 @@ class ABTestAnalyticsService {
 
   /**
    * メトリクスの保存
+   *
+   * NOTE: localStorage.setItem エラー（QuotaExceededError等）は
+   * try-catch で補足し、console.warn で通知。
+   * エラー時もアプリケーションは正常動作を継続。
    */
   private saveMetrics(): void {
     try {

@@ -82,16 +82,12 @@ export function EnhancedMapContainer({
     if (initialMarkerType) {
       return initialMarkerType;
     }
-    // A/Bテストが有効でテスト対象の場合はUnifiedMarkerを使用
-    // (開発環境でのtestingModeAvailableチェックを含む)
-    if (
-      abTestClassification.testingModeAvailable &&
-      abTestClassification.isInTest
-    ) {
+    // A/Bテストvariantがoriginal以外の場合はUnifiedMarkerを使用
+    if (abTestClassification.variant !== "original") {
       return "unified-marker";
     }
     return "circular-icooon";
-  }, [initialMarkerType, abTestClassification]);
+  }, [initialMarkerType, abTestClassification.variant]);
 
   const [selectedMarkerType, setSelectedMarkerType] =
     useState<MarkerType>(defaultMarkerType);
@@ -333,7 +329,7 @@ export function EnhancedMapContainer({
           </div>
 
           {/* A/Bテスト情報（開発環境のみ） */}
-          {showSelectionPanel && abTestClassification.testingModeAvailable && (
+          {showSelectionPanel && (
             <div
               style={{
                 marginTop: "12px",
@@ -359,10 +355,7 @@ export function EnhancedMapContainer({
                   バリアント: {abTestClassification.variant} → variant=
                   {unifiedMarkerVariant}
                 </div>
-                <div>
-                  テスト参加:{" "}
-                  {abTestClassification.isInTest ? "Yes ✓" : "No (Control)"}
-                </div>
+                <div>マーカータイプ: {selectedMarkerType}</div>
               </div>
             </div>
           )}

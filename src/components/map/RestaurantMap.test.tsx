@@ -427,5 +427,44 @@ describe("RestaurantMap", () => {
       const maps = screen.getAllByTestId("google-map");
       expect(maps.length).toBeGreaterThan(0);
     });
+
+    it("空の配列でもレンダリング成功", () => {
+      render(<RestaurantMap {...defaultProps} restaurants={[]} />);
+
+      const maps = screen.getAllByTestId("google-map");
+      expect(maps.length).toBeGreaterThan(0);
+    });
+
+    it("複数のレストランが同じ座標でもレンダリング成功", () => {
+      const sameLocation = [
+        { ...mockRestaurant, id: "rest-1", name: "店舗1" },
+        { ...mockRestaurant, id: "rest-2", name: "店舗2" },
+        { ...mockRestaurant, id: "rest-3", name: "店舗3" },
+      ];
+
+      render(<RestaurantMap {...defaultProps} restaurants={sameLocation} />);
+
+      const maps = screen.getAllByTestId("google-map");
+      expect(maps.length).toBeGreaterThan(0);
+    });
+
+    it("異なるタイプのマーカーが混在しても正常動作", () => {
+      const mixedRestaurants = [
+        { ...mockRestaurant, id: "rest-1", cuisineType: "日本料理" as const },
+        { ...mockRestaurant, id: "rest-2", cuisineType: "イタリアン" as const },
+        {
+          ...mockRestaurant,
+          id: "rest-3",
+          cuisineType: "カフェ・喫茶店" as const,
+        },
+      ];
+
+      render(
+        <RestaurantMap {...defaultProps} restaurants={mixedRestaurants} />
+      );
+
+      const maps = screen.getAllByTestId("google-map");
+      expect(maps.length).toBeGreaterThan(0);
+    });
   });
 });

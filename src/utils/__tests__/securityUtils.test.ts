@@ -149,6 +149,30 @@ describe("securityUtils", () => {
       const sanitized = sanitizeUserInput(input);
       expect(sanitized).not.toContain("javascript:");
     });
+
+    it("vbscript:プロトコルを削除すること", () => {
+      const input = "vbscript:msgbox";
+      const sanitized = sanitizeUserInput(input);
+      expect(sanitized).not.toContain("vbscript:");
+    });
+
+    it("data:プロトコルを削除すること", () => {
+      const input = "data:text/html,<script>alert(1)</script>";
+      const sanitized = sanitizeUserInput(input);
+      expect(sanitized).not.toContain("data:");
+    });
+
+    it("1000文字を超える入力を制限すること", () => {
+      const longInput = "a".repeat(2000);
+      const sanitized = sanitizeUserInput(longInput);
+      expect(sanitized.length).toBe(1000);
+    });
+
+    it("大文字小文字を区別せず危険なプロトコルを削除", () => {
+      const mixedCase = "JaVaScRiPt:alert('xss')";
+      const sanitized = sanitizeUserInput(mixedCase);
+      expect(sanitized).not.toContain("JaVaScRiPt:");
+    });
   });
 
   describe("validateApiKey", () => {
