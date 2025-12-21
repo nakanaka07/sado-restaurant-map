@@ -121,10 +121,40 @@ AC:
 
 **スキップした破壊的更新**:
 
-- eslint-plugin-react-hooks 7.x（eslint-config変更必要）
+- ~~eslint-plugin-react-hooks 7.x（eslint-config変更必要）~~ → ✅ 2025-12-22完了
 - jsdom 27.x（Node.js 22+必須）
 - lint-staged 16.x（設定形式変更）
 - size-limit 12.x（設定形式変更）
+
+---
+
+#### ✅ Week 2-3 追加完了: 2025年12月22日 - eslint-plugin-react-hooks v7 + TypeScript 5.9
+
+- ✅ [P1 chore] **eslint-plugin-react-hooks 5.2.0 → 7.0.1** (2025-12-22)
+  - 新ルール対応:
+    - `react-hooks/set-state-in-effect`: Effect内のsetState禁止 → lazy initializer/派生状態パターン適用
+    - `react-hooks/purity`: レンダリング中の不純関数禁止 → useState lazy initializer移行
+  - 修正ファイル（13ファイル）:
+    - LazyMapContainer.tsx: IntersectionObserver fallback判定をlazy initializerに
+    - EnhancedMapContainer.tsx: useEffect同期削除、派生状態パターン適用
+    - IntegratedMapView.tsx: visibleMapPoints/renderProgressを派生変数に
+    - RestaurantMap.tsx: Date.now()+Math.random()をlazy initializerに
+    - MarkerMigration.tsx: performance.now()をlazy initializerに、elapsedMs state追加
+    - migrationUtils.ts: ロールアウト判定をuseState initializerに
+    - useMapDebugging.ts: logEvent setState→純粋なconsole.log
+    - useMapPoints.ts: async data fetchingパターンにeslint-disable追加
+    - performanceUtils.ts: processor戻り値をPromise.resolveでラップ
+    - テストファイル（4件）: ConsoleSpy型定義追加
+  - テスト結果: **1827/1831通過 (99.8%)**
+  - ビルド: 成功
+
+- ✅ [P1 chore] **TypeScript 5.8.3 → 5.9.3** (2025-12-22)
+  - メジャー更新成功、型チェック通過
+  - 破壊的変更なし
+
+- ✅ [P2 chore] **@types/node 22.19.3 → 25.0.3** (2025-12-22)
+  - 型定義のみの更新、低リスク
+  - 型チェック通過
 
 ---
 

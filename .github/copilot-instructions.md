@@ -1,6 +1,6 @@
 # GitHub Copilot Repository Instructions
 
-> **Last Updated**: 2025-01-21
+> **Last Updated**: 2025-12-22
 > **Philosophy**: Trust these instructions first. Search workspace only when information is incomplete or outdated.
 
 ## 0. Development Context & Partnership
@@ -28,10 +28,11 @@ on Sado Island, Japan.
 
 **Tech Stack**:
 
-- Frontend: React 19 + TypeScript 5.7 (strict) + Vite 7
-- Testing: Vitest 3 → **Vitest 4 migration planned (Week 1)** + Testing Library + jest-axe
-- PWA: vite-plugin-pwa (Workbox) + offline support
-- Maps: Google Maps JavaScript API
+- Frontend: React 19.2.3 + TypeScript 5.9.3 (strict) + Vite 7.3.0
+- Testing: Vitest 4.0.16 + Testing Library + jest-axe
+- Linting: ESLint 9.39 + eslint-plugin-react-hooks 7.0.1 (strict rules)
+- PWA: vite-plugin-pwa 1.2.0 (Workbox) + offline support
+- Maps: Google Maps JavaScript API (@vis.gl/react-google-maps 1.7.1)
 - CI/CD: GitHub Actions (lint, test, build, size-limit, Lighthouse CI)
 - E2E Testing: **Playwright (Week 4 introduction planned)**
 
@@ -388,7 +389,8 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 **Week 2-3完了 (12/22)** - Dependency Updates & Performance ✅:
 
-- ✅ 依存関係更新（20+パッケージ: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3等）
+- ✅ 依存関係更新（20+パッケージ: React 19.2.3, Vite 7.3.0, TypeScript 5.9.3等）
+- ✅ eslint-plugin-react-hooks 7.0.1 アップグレード（新ルール対応: set-state-in-effect, purity）
 - ✅ カバレッジ閾値調整（Vitest 4 coverage.all廃止対応）
 - ✅ LazyMapContainer実装（Intersection Observer + onLoad callback）
 - ✅ geometry library削除（Desktop LCP 1.5s → 0.5s改善）
@@ -434,6 +436,6 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 ---
 
-**Version**: 2.10 (2025-12-22)
+**Version**: 2.11 (2025-12-22)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: Week 2-3完了 - Checkpoint 4測定（TBT -30%達成）、geometry library削除、遅延データ取得実装。Google Maps API (~900KiB) が支配的なため最適化限界到達。Week 4: Playwright E2E導入予定。詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated
+**Last Update**: Week 2-3追加完了 - eslint-plugin-react-hooks 7.0.1アップグレード、TypeScript 5.9.3。新ルール対応（set-state-in-effect, purity）。詳細: TASKS.md updated
