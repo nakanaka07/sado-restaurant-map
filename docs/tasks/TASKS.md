@@ -132,22 +132,28 @@ AC:
 
 **戦略変更理由**: Week 1測定でGoogle Maps API同期初期化がTBTボトルネックと判明。
 
-- [P0 perf] **Google Maps API遅延読み込み実装** [Issue #TBD] 🔥
-  - **緊急度**: P0（現状TBT 18,310msは深刻、Google Maps最適化なしでは改善不可能）
+- ✅ [P0 perf] **Google Maps API遅延読み込み実装** (2025-12-21) 🔥
+  - **実装完了**: LazyMapContainer + Intersection Observer
   - **根拠**: Lighthouse診断でメインスレッド処理32.3秒、JS実行15.4秒が主因
-  - **実装方針**: Intersection Observer + 遅延読み込み（地図スクロール時に初期化）
   - **期待効果**: TBT -5,000~10,000ms（Google Maps初期化コスト完全除去）
   - 工数: 8時間
+  - ファイル: src/components/map/LazyMapContainer.tsx, App.tsx統合
+  - テスト: LazyMapContainer.test.tsx追加（9テスト）
+  - 優先度: P0 🔥
+
+- [P0 perf] **Checkpoint 2測定** [Issue #TBD] ← 次のアクション 🎯
+  - 測定環境: Chrome DevTools Lighthouse (Manual)
+  - 目的: LazyMapContainer実装後のTBT改善を検証
   - AC:
     - [ ] Mobile TBT: <10,000ms (Minimum Success: -45%)
     - [ ] Mobile TBT: <8,000ms (Target Success: -56%)
     - [ ] Desktop TBT: <2,000ms
     - [ ] Performance Score: 65+ (Mobile)
-  - 優先度: P0 🔥
-
-- [P1 chore] **Vite 7.2.7アップグレード** [Issue #TBD] ← 性能改善後に実施
-  - 現状: v7.1.4 → 最新: v7.2.7
   - 工数: 1時間
+  - 優先度: P0 🎯
+
+- [P1 chore] **Vite 7.3.0アップグレード済み** ✅
+  - 完了: v7.1.4 → v7.3.0（最新）
   - 優先度: P1
 
 - [P1 feat] **React 19互換性監査** [Issue #TBD]
