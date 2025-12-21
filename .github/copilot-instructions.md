@@ -369,11 +369,11 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 ## 14. Current Status & Priorities
 
-**Project Metrics** (2025-12-09):
+**Project Metrics** (2025-12-21):
 
-- Coverage: **75.88%** (1818/1822 tests passing = 99.8%, 4 skipped)
-- Tech Stack: React 19.1.1, Vite 7.1.4, TypeScript 5.7.3, **Vitest 4.0.15** ✅
-- Performance: Mobile Score 47, Desktop Score 60 (Phase 9 rollback完了、効果限定的)
+- Coverage: **67.32%** (1827/1831 tests passing = 99.8%, 4 skipped)
+- Tech Stack: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3, **Vitest 4.0.16** ✅
+- Performance: Mobile Score 47, Desktop Score 60 (Google Maps API最適化が残存課題)
 
 **Active Work** (2025 Q1 Project Refresh):
 
@@ -386,16 +386,17 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 - ✅ Node.js engines constraint (>=20.19.0)
 - ✅ Performance測定（根本原因特定: Google Maps API同期初期化）
 
-**Week 2-3統合 - Google Maps Optimization** 🔥:
+**Week 2-3完了 (12/21)** - Dependency Updates ✅:
 
-- 🔥 Google Maps API遅延読み込み（Week 3から前倒し、TBT -5,000~10,000ms期待）
-- Vite 7.2.7 upgrade（性能改善後に実施）
-- React 19互換性監査
-- Lighthouse CI修正（優先度P2降格）
+- ✅ 依存関係更新（20+パッケージ: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3等）
+- ✅ カバレッジ閾値調整（Vitest 4 coverage.all廃止対応）
+- ⏸️ Google Maps API遅延読み込み（継続課題）
+- ⏸️ Lighthouse CI修正（優先度P2降格）
 
 **Week 4 Highlights**:
 
 - Playwright E2E introduction (resolve 4 skipped tests)
+- Google Maps API遅延読み込み実装（P0優先度継続）
 
 **Key Lesson from Phase 9 Failure**:
 
@@ -435,6 +436,7 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 ---
 
-**Version**: 2.8 (2025-12-09)
+**Version**: 2.9 (2025-12-21)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
+**Last Update**: Week 2-3完了 - 依存関係更新（20+パッケージ）、カバレッジ閾値調整完了。Google Maps API遅延読み込みは継続課題。詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated
 **Last Update**: Week 1完了 - Vitest 4マイグレーション成功、Phase 9ロールバック実施（効果-3.3%のみ）、測定により根本原因特定（Google Maps API同期初期化32.3秒）、Week 2-3統合でGoogle Maps最適化最優先実施へ戦略修正 - 詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated

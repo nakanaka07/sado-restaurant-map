@@ -150,13 +150,13 @@ describe("App", () => {
     it("アプリケーションが正常にレンダリングされること", async () => {
       render(<App />);
 
-      // 初期化完了を待つ
+      // LazyMapContainer導入により、初期状態ではプレースホルダーが表示される
       await waitFor(() => {
-        expect(screen.getByText("🔍 フィルター")).toBeInTheDocument();
+        expect(screen.getByText("地図を準備中...")).toBeInTheDocument();
       });
 
-      // アプリケーションの基本要素の確認
-      expect(screen.getByTestId("api-provider")).toBeInTheDocument();
+      // LazyMapContainerが存在することを確認
+      expect(screen.getByTestId("lazy-map-container")).toBeInTheDocument();
     });
 
     it("フィルターコンテナが適切なARIA属性を持つこと", async () => {
@@ -886,9 +886,8 @@ describe("App", () => {
 
   describe("初期化エラーハンドリング", () => {
     it("validateApiKey失敗時にエラーメッセージを表示すること", async () => {
-      const { validateApiKey: mockValidateApiKey } = await import(
-        "../utils/securityUtils"
-      );
+      const { validateApiKey: mockValidateApiKey } =
+        await import("../utils/securityUtils");
       vi.mocked(mockValidateApiKey).mockReturnValueOnce(false);
 
       render(<App />);

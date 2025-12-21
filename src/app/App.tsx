@@ -77,6 +77,13 @@ const CustomMapControls = lazy(() =>
   }))
 );
 
+// Week 2-3: Google Maps API遅延読み込みコンテナ
+const LazyMapContainer = lazy(() =>
+  import("../components/map/LazyMapContainer").then(module => ({
+    default: module.LazyMapContainer,
+  }))
+);
+
 // 条件付きPWABadgeコンポーネント
 const ConditionalPWABadge = () => {
   const [PWABadge, setPWABadge] = useState<React.ComponentType | null>(null);
@@ -614,78 +621,81 @@ function App() {
         <main id="main-content" className="app-main">
           {/* Suspense: Google Maps関連の動的import用フォールバック */}
           <Suspense fallback={<LoadingSpinner message="地図を読み込み中..." />}>
-            <APIProvider
-              apiKey={apiKey}
-              libraries={["maps", "marker", "geometry"]}
-            >
-              <div className="app-content">
-                {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
-                {!isMobile && !isFullscreen && (
-                  <Suspense
-                    fallback={
-                      <div style={{ width: "320px", height: "100%" }} />
-                    }
-                  >
-                    <FilterPanel
-                      loading={loading}
-                      resultCount={filteredMapPoints.length}
-                      stats={stats}
-                      onCuisineFilter={handleCuisineFilter}
-                      onPriceFilter={handlePriceFilter}
-                      onDistrictFilter={handleDistrictFilter}
-                      onRatingFilter={handleRatingFilter}
-                      onOpenNowFilter={handleOpenNowFilter}
-                      onSearchFilter={handleSearchFilter}
-                      onSortChange={updateSortOrder}
-                      onFeatureFilter={handleFeatureFilter}
-                      onPointTypeFilter={handlePointTypeFilter}
-                      onResetFilters={handleResetFilters}
-                    />
-                  </Suspense>
-                )}
+            {/* Week 2-3: Intersection Observer による遅延読み込み */}
+            <LazyMapContainer>
+              <APIProvider
+                apiKey={apiKey}
+                libraries={["maps", "marker", "geometry"]}
+              >
+                <div className="app-content">
+                  {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
+                  {!isMobile && !isFullscreen && (
+                    <Suspense
+                      fallback={
+                        <div style={{ width: "320px", height: "100%" }} />
+                      }
+                    >
+                      <FilterPanel
+                        loading={loading}
+                        resultCount={filteredMapPoints.length}
+                        stats={stats}
+                        onCuisineFilter={handleCuisineFilter}
+                        onPriceFilter={handlePriceFilter}
+                        onDistrictFilter={handleDistrictFilter}
+                        onRatingFilter={handleRatingFilter}
+                        onOpenNowFilter={handleOpenNowFilter}
+                        onSearchFilter={handleSearchFilter}
+                        onSortChange={updateSortOrder}
+                        onFeatureFilter={handleFeatureFilter}
+                        onPointTypeFilter={handlePointTypeFilter}
+                        onResetFilters={handleResetFilters}
+                      />
+                    </Suspense>
+                  )}
 
-                {/* Fullscreen Map with A/B Testing Integration */}
-                <IntegratedMapView
-                  mapPoints={filteredMapPoints}
-                  center={SADO_CENTER}
-                  loading={loading}
-                  error={error}
-                  userId={userId}
-                  customControls={
-                    isMobile || isFullscreen ? (
-                      <Suspense
-                        fallback={
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: "10px",
-                              left: "10px",
-                            }}
+                  {/* Fullscreen Map with A/B Testing Integration */}
+                  <IntegratedMapView
+                    mapPoints={filteredMapPoints}
+                    center={SADO_CENTER}
+                    loading={loading}
+                    error={error}
+                    userId={userId}
+                    customControls={
+                      isMobile || isFullscreen ? (
+                        <Suspense
+                          fallback={
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "10px",
+                                left: "10px",
+                              }}
+                            />
+                          }
+                        >
+                          <CustomMapControls
+                            loading={loading}
+                            resultCount={filteredMapPoints.length}
+                            stats={stats}
+                            onCuisineFilter={handleCuisineFilter}
+                            onPriceFilter={handlePriceFilter}
+                            onDistrictFilter={handleDistrictFilter}
+                            onRatingFilter={handleRatingFilter}
+                            onOpenNowFilter={handleOpenNowFilter}
+                            onSearchFilter={handleSearchFilter}
+                            onSortChange={updateSortOrder}
+                            onFeatureFilter={handleFeatureFilter}
+                            onPointTypeFilter={handlePointTypeFilter}
+                            onResetFilters={handleResetFilters}
+                            position={DEFAULT_CONTROL_POSITION}
                           />
-                        }
-                      >
-                        <CustomMapControls
-                          loading={loading}
-                          resultCount={filteredMapPoints.length}
-                          stats={stats}
-                          onCuisineFilter={handleCuisineFilter}
-                          onPriceFilter={handlePriceFilter}
-                          onDistrictFilter={handleDistrictFilter}
-                          onRatingFilter={handleRatingFilter}
-                          onOpenNowFilter={handleOpenNowFilter}
-                          onSearchFilter={handleSearchFilter}
-                          onSortChange={updateSortOrder}
-                          onFeatureFilter={handleFeatureFilter}
-                          onPointTypeFilter={handlePointTypeFilter}
-                          onResetFilters={handleResetFilters}
-                          position={DEFAULT_CONTROL_POSITION}
-                        />
-                      </Suspense>
-                    ) : null
-                  }
-                />
-              </div>
-            </APIProvider>
+                        </Suspense>
+                      ) : null
+                    }
+                  />
+                </div>
+              </APIProvider>
+            </LazyMapContainer>
           </Suspense>
         </main>
 
