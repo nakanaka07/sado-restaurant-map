@@ -141,16 +141,20 @@ AC:
   - テスト: LazyMapContainer.test.tsx追加（9テスト）
   - 優先度: P0 🔥
 
-- [P0 perf] **Checkpoint 2測定** [Issue #TBD] ← 次のアクション 🎯
+- ✅ [P0 perf] **Checkpoint 2測定完了** (2025-12-21) 🎯
   - 測定環境: Chrome DevTools Lighthouse (Manual)
-  - 目的: LazyMapContainer実装後のTBT改善を検証
-  - AC:
-    - [ ] Mobile TBT: <10,000ms (Minimum Success: -45%)
-    - [ ] Mobile TBT: <8,000ms (Target Success: -56%)
-    - [ ] Desktop TBT: <2,000ms
-    - [ ] Performance Score: 65+ (Mobile)
-  - 工数: 1時間
-  - 優先度: P0 🎯
+  - **結果**:
+    | 環境 | TBT | Score | LCP | 判定 |
+    |------|-----|-------|-----|------|
+    | Mobile | 12,770ms (-30%) | 59点 (+26%) | 1.9s (-51%) | ✅ 改善 |
+    | Desktop | 2,550ms (-28%) | 55点 (-8%) | 1.5s (+200%) | ⚠️ 課題あり |
+  - **AC達成状況**:
+    - [x] TBT改善: -30% (Mobile), -28% (Desktop)
+    - [ ] Mobile TBT <10,000ms: 未達成 (12,770ms)
+    - [ ] Desktop TBT <2,000ms: 未達成 (2,550ms)
+    - [ ] Performance Score 65+: 未達成 (59点)
+  - **課題**: Desktop LCPがプレースホルダー影響で悪化
+  - **次期対策**: さらなる最適化（Code Splitting強化、Critical CSS）検討
 
 - [P1 chore] **Vite 7.3.0アップグレード済み** ✅
   - 完了: v7.1.4 → v7.3.0（最新）
@@ -166,14 +170,6 @@ AC:
   - 解決策: Google Cloud ConsoleでHTTPリファラー制限追加
   - 工数: 2時間
   - 優先度: P2
-    - [ ] Desktop TBT: <2,000ms
-    - [ ] Performance Score: 65+ (Minimum), 70+ (Target)
-  - 優先度: P0 🎯
-
-- [P0 perf] **Checkpoint 2測定** [Issue #TBD]
-  - 測定環境: Chrome DevTools Lighthouse (Manual)
-  - 工数: 1時間
-  - 優先度: P0
 
 #### Week 4: E2E Testing Setup (2025年12月30日-2026年1月5日)
 

@@ -373,7 +373,7 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 - Coverage: **67.32%** (1827/1831 tests passing = 99.8%, 4 skipped)
 - Tech Stack: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3, **Vitest 4.0.16** ✅
-- Performance: Mobile Score 47, Desktop Score 60 (Google Maps API最適化が残存課題)
+- Performance: Mobile Score 59 (+26%), Desktop Score 55 (-8%) (LazyMapContainer実装済み、さらなる最適化が必要)
 
 **Active Work** (2025 Q1 Project Refresh):
 
@@ -386,17 +386,18 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 - ✅ Node.js engines constraint (>=20.19.0)
 - ✅ Performance測定（根本原因特定: Google Maps API同期初期化）
 
-**Week 2-3完了 (12/21)** - Dependency Updates ✅:
+**Week 2-3完了 (12/21)** - Dependency Updates & Performance ✅:
 
 - ✅ 依存関係更新（20+パッケージ: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3等）
 - ✅ カバレッジ閾値調整（Vitest 4 coverage.all廃止対応）
-- ⏸️ Google Maps API遅延読み込み（継続課題）
+- ✅ LazyMapContainer実装（TBT -30%達成、ただし目標未達）
+- ✅ Checkpoint 2測定完了（Mobile TBT 12,770ms、Desktop TBT 2,550ms）
 - ⏸️ Lighthouse CI修正（優先度P2降格）
 
 **Week 4 Highlights**:
 
 - Playwright E2E introduction (resolve 4 skipped tests)
-- Google Maps API遅延読み込み実装（P0優先度継続）
+- さらなるパフォーマンス最適化検討（Code Splitting強化等）
 
 **Key Lesson from Phase 9 Failure**:
 
