@@ -10,11 +10,11 @@
 
 **Week 1完了（2025年12月9日）**: Vitest 4マイグレーション成功、Phase 9ロールバック実施、測定により根本原因特定。
 
-**Week 2-3完了（2025年12月21日）**: 依存関係更新（20+パッケージ）、カバレッジ閾値調整、**LazyMapContainer実装**完了。
+**Week 2-3完了（2025年12月22日）**: 依存関係更新（20+パッケージ）、カバレッジ閾値調整、**LazyMapContainer実装**、**Checkpoint 4測定**完了。
 
-**重大な発見**: Phase 9ロールバックでは**TBT改善なし**（18,935ms → 18,310ms = -3.3%のみ）。真のボトルネックは**Google Maps API同期初期化**（メインスレッド処理32.3秒）と判明。
+**最終結果**: **TBT -30%達成**（Mobile: 18,310ms → 12,850ms）。Google Maps API (~900KiB) が支配的なため、ローカル最適化の限界に到達。
 
-**次期アクション**: Checkpoint 2測定（LazyMapContainer効果検証）、Playwright E2E導入（Week 4）。
+**次期アクション**: Week 4 Playwright E2E導入、アーキテクチャ変更検討（Mapbox/SSR等）。
 
 ---
 

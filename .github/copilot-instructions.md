@@ -369,11 +369,11 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 ## 14. Current Status & Priorities
 
-**Project Metrics** (2025-12-21):
+**Project Metrics** (2025-12-22):
 
 - Coverage: **67.32%** (1827/1831 tests passing = 99.8%, 4 skipped)
 - Tech Stack: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3, **Vitest 4.0.16** ✅
-- Performance: Mobile Score 59 (+26%), Desktop Score 55 (-8%) (LazyMapContainer実装済み、さらなる最適化が必要)
+- Performance: Mobile TBT 12,850ms (-30%), Desktop TBT 2,560ms (-28%) - **最適化限界到達**
 
 **Active Work** (2025 Q1 Project Refresh):
 
@@ -386,30 +386,27 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 - ✅ Node.js engines constraint (>=20.19.0)
 - ✅ Performance測定（根本原因特定: Google Maps API同期初期化）
 
-**Week 2-3完了 (12/21)** - Dependency Updates & Performance ✅:
+**Week 2-3完了 (12/22)** - Dependency Updates & Performance ✅:
 
 - ✅ 依存関係更新（20+パッケージ: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3等）
 - ✅ カバレッジ閾値調整（Vitest 4 coverage.all廃止対応）
-- ✅ LazyMapContainer実装（TBT -30%達成、ただし目標未達）
-- ✅ Checkpoint 2測定完了（Mobile TBT 12,770ms、Desktop TBT 2,550ms）
-- ⏸️ Lighthouse CI修正（優先度P2降格）
+- ✅ LazyMapContainer実装（Intersection Observer + onLoad callback）
+- ✅ geometry library削除（Desktop LCP 1.5s → 0.5s改善）
+- ✅ CSS @import削除（Viteバンドル最適化）
+- ✅ 遅延データ取得（useMapPoints deferFetch + triggerFetch）
+- ✅ Checkpoint 4測定完了（Mobile TBT 12,850ms、Desktop TBT 2,560ms）
+- **結論**: TBT -30%達成。Google Maps API (~900KiB) が支配的、ローカル最適化限界
 
 **Week 4 Highlights**:
 
 - Playwright E2E introduction (resolve 4 skipped tests)
-- さらなるパフォーマンス最適化検討（Code Splitting強化等）
+- アーキテクチャ変更検討（Mapbox/SSR等）
 
-**Key Lesson from Phase 9 Failure**:
+**Key Lesson from Week 2-3**:
 
-- Micro-optimizations can backfire on small datasets (<1,000 items)
-- Event loop overhead (480ms) > processing savings (150ms) for 623 items
-- Always: Profile → Measure → Optimize (not: Assume → Optimize → Measure)
-
-**Key Lesson from Phase 9 Failure**:
-
-- Micro-optimizations can backfire on small datasets (<1,000 items)
-- Event loop overhead (480ms) > processing savings (150ms) for 623 items
-- Always: Profile → Measure → Optimize (not: Assume → Optimize → Measure)
+- Google Maps JavaScript API is the dominant performance bottleneck
+- Local optimizations yield -30% TBT improvement max
+- Further gains require architectural changes (Mapbox GL JS, SSR, etc.)
 
 **Phase History**: See [TASKS.md Done section](../docs/tasks/TASKS.md) for Phase 2-8 completion details.
 
@@ -437,7 +434,6 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 ---
 
-**Version**: 2.9 (2025-12-21)
+**Version**: 2.10 (2025-12-22)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: Week 2-3完了 - 依存関係更新（20+パッケージ）、カバレッジ閾値調整完了。Google Maps API遅延読み込みは継続課題。詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated
-**Last Update**: Week 1完了 - Vitest 4マイグレーション成功、Phase 9ロールバック実施（効果-3.3%のみ）、測定により根本原因特定（Google Maps API同期初期化32.3秒）、Week 2-3統合でGoogle Maps最適化最優先実施へ戦略修正 - 詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated
+**Last Update**: Week 2-3完了 - Checkpoint 4測定（TBT -30%達成）、geometry library削除、遅延データ取得実装。Google Maps API (~900KiB) が支配的なため最適化限界到達。Week 4: Playwright E2E導入予定。詳細: PROJECT_REFRESH_PLAN_2025Q1.md, TASKS.md updated
