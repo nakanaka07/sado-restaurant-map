@@ -2,7 +2,7 @@
   {
     "name": "react-vendor (React + Google Maps)",
     "passed": true,
-    "size": 57527,
+    "size": 59445,
     "sizeLimit": 250000
   },
   {
@@ -14,13 +14,13 @@
   {
     "name": "ui-components",
     "passed": true,
-    "size": 7925,
+    "size": 7943,
     "sizeLimit": 40000
   },
   {
     "name": "markers",
     "passed": true,
-    "size": 4345,
+    "size": 4351,
     "sizeLimit": 20000
   }
 ]
