@@ -17,6 +17,8 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 
 interface LazyMapContainerProps {
   readonly children: ReactNode;
+  /** 地図読み込み開始時に呼ばれるコールバック（データ取得トリガー用） */
+  readonly onLoad?: () => void;
 }
 
 /**
@@ -81,11 +83,21 @@ function MapPlaceholder() {
  * 子コンポーネント（APIProvider含む）をレンダリング
  *
  * @param children - Google Maps APIProviderを含む子要素
+ * @param onLoad - 読み込み開始時のコールバック（データ取得トリガー等）
  */
-export function LazyMapContainer({ children }: LazyMapContainerProps) {
+export function LazyMapContainer({ children, onLoad }: LazyMapContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldLoadMap, setShouldLoadMap] = useState(false);
   const [isFallbackTriggered, setIsFallbackTriggered] = useState(false);
+  const onLoadCalledRef = useRef(false);
+
+  // onLoadコールバック呼び出し
+  useEffect(() => {
+    if (shouldLoadMap && onLoad && !onLoadCalledRef.current) {
+      onLoadCalledRef.current = true;
+      onLoad();
+    }
+  }, [shouldLoadMap, onLoad]);
 
   useEffect(() => {
     // Intersection Observerが利用可能かチェック

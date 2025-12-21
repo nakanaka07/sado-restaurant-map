@@ -1,6 +1,7 @@
 /**
  * 統合マップポイント管理Hook（飲食店・駐車場・トイレ）
  * React 19 + Concurrent Features + TypeScript 5.7対応
+ * Week 2-3: 遅延データ取得オプション追加でTBT改善
  */
 
 import { fetchAllMapPoints, SheetsApiError } from "@/services";
@@ -16,6 +17,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -32,13 +34,28 @@ const INITIAL_FILTERS: ExtendedMapFilters = {
 };
 
 /**
- * 統合マップポイント管理Hook
+ * useMapPointsオプション
  */
-export function useMapPoints() {
+interface UseMapPointsOptions {
+  /** データ取得を遅延するか（デフォルト: false） */
+  readonly deferFetch?: boolean;
+}
+
+/**
+ * 統合マップポイント管理Hook
+ * @param options - オプション設定
+ */
+export function useMapPoints(options: UseMapPointsOptions = {}) {
+  const { deferFetch = false } = options;
+
+  // 遅延フェッチ制御
+  const [shouldFetch, setShouldFetch] = useState(!deferFetch);
+  const hasFetchedRef = useRef(false);
+
   // ステート管理
   const [state, setState] = useState<AsyncState<MapPoint[]>>({
     data: null,
-    loading: true,
+    loading: !deferFetch, // 遅延時は初期loading=false
     error: null,
   });
 
@@ -89,10 +106,25 @@ export function useMapPoints() {
 
   /**
    * 初期データ読み込み
+   * deferFetch=true の場合、triggerFetch() が呼ばれるまで待機
    */
   useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+    if (shouldFetch && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      void fetchData();
+    }
+  }, [fetchData, shouldFetch]);
+
+  /**
+   * 遅延フェッチのトリガー関数
+   * deferFetch=true の場合に手動でデータ取得を開始
+   */
+  const triggerFetch = useCallback(() => {
+    if (!hasFetchedRef.current) {
+      setState(prev => ({ ...prev, loading: true }));
+      setShouldFetch(true);
+    }
+  }, []);
 
   /**
    * フィルタリング処理（チャンク処理で最適化）
@@ -223,6 +255,7 @@ export function useMapPoints() {
     resetFilters,
     updateSortOrder,
     refetch: fetchData,
+    triggerFetch, // 遅延フェッチ用トリガー
   };
 }
 

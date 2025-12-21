@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "../components/common/ErrorBoundary";
 import "../styles/App.css"; // App.cssを最優先で読み込み
+import "../styles/CompactModalFilter.css"; // @import削除でViteバンドル最適化
 import "../styles/index.css";
 import { autoApplySuppression } from "./suppressLogs"; // log suppression
 

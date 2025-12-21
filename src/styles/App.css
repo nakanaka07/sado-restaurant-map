@@ -1,11 +1,11 @@
-/* 佐渡飲食店マップ - 最適化されたフルスクリーンマップUI v3.1 */
-/* Last Updated: 2025-09-12 - Compact Modal Filter統合版 */
+/* 佐渡飲食店マップ - 最適化されたフルスクリーンマップUI v3.2 */
+/* Last Updated: 2025-12-22 - CSS @import削除でFCP改善 */
 /* !importantを適切に削減し、CSS詳細度で管理 */
 
 /* ==============================================
-   Modal Filter Import (Modern CSS Features)
+   Modal Filter CSS (Vite bundleで最適化済み)
+   CompactModalFilter.css は main.tsx でインポート
    ============================================== */
-@import url("./CompactModalFilter.css");
 
 /* CSS Variables for Design System */
 :root {

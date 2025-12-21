@@ -167,6 +167,7 @@ const ErrorDisplay = ({
 );
 
 function App() {
+  // Week 2-3: 遅延データ取得（地図表示開始時にトリガー）
   const {
     mapPoints,
     loading,
@@ -175,10 +176,19 @@ function App() {
     updateFilters,
     updateSortOrder,
     stats,
-  } = useMapPoints();
+    triggerFetch,
+  } = useMapPoints({ deferFetch: true });
 
   const filteredMapPoints = mapPoints; // フィルタリング済みのマップポイント
   const isMobile = useIsMobile(); // モバイル検出
+
+  // 地図表示開始時にデータ取得をトリガー
+  const handleMapLoad = useCallback(() => {
+    if (import.meta.env.DEV) {
+      console.log("🚀 Map load triggered, starting data fetch...");
+    }
+    triggerFetch();
+  }, [triggerFetch]);
 
   const [appError, setAppError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -621,12 +631,9 @@ function App() {
         <main id="main-content" className="app-main">
           {/* Suspense: Google Maps関連の動的import用フォールバック */}
           <Suspense fallback={<LoadingSpinner message="地図を読み込み中..." />}>
-            {/* Week 2-3: Intersection Observer による遅延読み込み */}
-            <LazyMapContainer>
-              <APIProvider
-                apiKey={apiKey}
-                libraries={["maps", "marker", "geometry"]}
-              >
+            {/* Week 2-3: Intersection Observer による遅延読み込み + データ取得トリガー */}
+            <LazyMapContainer onLoad={handleMapLoad}>
+              <APIProvider apiKey={apiKey} libraries={["maps", "marker"]}>
                 <div className="app-content">
                   {/* Desktop Filter Panel - デスクトップ用のフローティングフィルター（フルスクリーン時は非表示） */}
                   {!isMobile && !isFullscreen && (
