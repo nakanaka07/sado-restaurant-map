@@ -19,10 +19,12 @@ const NormalComponent: React.FC = () => <div>Map is working</div>;
 
 describe("MapErrorBoundary", () => {
   const originalEnv = process.env.NODE_ENV;
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let consoleGroupSpy: ReturnType<typeof vi.spyOn>;
-  let consoleGroupEndSpy: ReturnType<typeof vi.spyOn>;
-  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
+  // 型安全なmock spy定義
+  type ConsoleSpy = ReturnType<typeof vi.spyOn<Console, "error">>;
+  let consoleErrorSpy: ConsoleSpy;
+  let consoleGroupSpy: ConsoleSpy;
+  let consoleGroupEndSpy: ConsoleSpy;
+  let consoleWarnSpy: ConsoleSpy;
 
   beforeEach(() => {
     // コンソールスパイをセットアップ
@@ -37,7 +39,7 @@ describe("MapErrorBoundary", () => {
   afterEach(() => {
     // DOMをクリーンアップ（全体テストスイート実行時の累積を防ぐ）
     cleanup();
-    // モックをクリーンアップ
+    // モックをクリーンアップ (type-safe mockRestore)
     consoleErrorSpy.mockRestore();
     consoleGroupSpy.mockRestore();
     consoleGroupEndSpy.mockRestore();

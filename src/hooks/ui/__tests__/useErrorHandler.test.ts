@@ -8,9 +8,11 @@ import {
 } from "../useErrorHandler";
 
 describe("useErrorHandler", () => {
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-  let consoleGroupSpy: ReturnType<typeof vi.spyOn>;
-  let consoleGroupEndSpy: ReturnType<typeof vi.spyOn>;
+  // 型安全なmock spy定義
+  type ConsoleSpy = ReturnType<typeof vi.spyOn<Console, "error">>;
+  let consoleErrorSpy: ConsoleSpy;
+  let consoleGroupSpy: ConsoleSpy;
+  let consoleGroupEndSpy: ConsoleSpy;
 
   beforeEach(() => {
     // console.errorなどのスパイを設定

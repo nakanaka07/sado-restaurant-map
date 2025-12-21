@@ -71,8 +71,11 @@ export async function processInChunks<T>(
     const chunk = items.slice(i, i + chunkSize);
 
     // チャンク内のアイテムを並列処理
+    // processor が void を返す可能性があるため、Promise.resolve でラップ
     await Promise.all(
-      chunk.map((item, chunkIndex) => processor(item, i + chunkIndex))
+      chunk.map((item, chunkIndex) =>
+        Promise.resolve(processor(item, i + chunkIndex))
+      )
     );
 
     // メインスレッドに制御を返す

@@ -87,7 +87,10 @@ function MapPlaceholder() {
  */
 export function LazyMapContainer({ children, onLoad }: LazyMapContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldLoadMap, setShouldLoadMap] = useState(false);
+  // IntersectionObserver非対応環境では初期状態でtrueにする（Effect内でのsetState回避）
+  const [shouldLoadMap, setShouldLoadMap] = useState(
+    () => typeof window !== "undefined" && !("IntersectionObserver" in window)
+  );
   const [isFallbackTriggered, setIsFallbackTriggered] = useState(false);
   const onLoadCalledRef = useRef(false);
 
@@ -100,15 +103,14 @@ export function LazyMapContainer({ children, onLoad }: LazyMapContainerProps) {
   }, [shouldLoadMap, onLoad]);
 
   useEffect(() => {
-    // Intersection Observerが利用可能かチェック
+    // IntersectionObserver非対応環境は初期状態で処理済み（useState lazy initializer）
     if (!("IntersectionObserver" in window)) {
-      // 非対応環境では即座にロード（フォールバック）
       if (import.meta.env.DEV) {
         console.warn(
           "⚠️ IntersectionObserver not supported, loading map immediately"
         );
       }
-      setShouldLoadMap(true);
+      // 初期状態で既にtrue設定済みのため、ここでのsetStateは不要
       return;
     }
 

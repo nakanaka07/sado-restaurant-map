@@ -7,7 +7,7 @@ import type { ABTestVariant } from "@/config/abTestConfig";
 import { classifyUser } from "@/config/abTestConfig";
 import type { MapPoint } from "@/types";
 import { InfoWindow, Map } from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { MarkerVariant } from "../UnifiedMarker";
 import { UnifiedMarker } from "../UnifiedMarker";
 import { CircularMarkerContainer } from "./CircularMarkerContainer";
@@ -89,15 +89,14 @@ export function EnhancedMapContainer({
     return "circular-icooon";
   }, [initialMarkerType, abTestClassification.variant]);
 
-  const [selectedMarkerType, setSelectedMarkerType] =
+  // 外部 initialMarkerType が優先される: initialMarkerType がある場合はそれを使用
+  // そうでなければ内部状態を使用（ユーザー選択を保持）
+  const [internalMarkerType, setInternalMarkerType] =
     useState<MarkerType>(defaultMarkerType);
 
-  // 外部 initialMarkerType 変更を同期
-  useEffect(() => {
-    if (initialMarkerType && initialMarkerType !== selectedMarkerType) {
-      setSelectedMarkerType(initialMarkerType);
-    }
-  }, [initialMarkerType, selectedMarkerType]);
+  // 実際に使用するマーカータイプ: 外部指定優先
+  const selectedMarkerType = initialMarkerType ?? internalMarkerType;
+  const setSelectedMarkerType = setInternalMarkerType;
 
   // エラー防止のためのクリックハンドラーをメモ化
   const handleMarkerClick = useCallback(

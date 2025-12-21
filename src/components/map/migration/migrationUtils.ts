@@ -3,7 +3,7 @@
  * React Fast Refresh対応のため、コンポーネントと分離
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type {
   MigrationConfig,
   MigrationState,
@@ -21,26 +21,18 @@ export const useMigrationControl = (
   reportIssue: (issue: string) => void;
   clearErrors: () => void;
 } => {
-  const [state, setState] = useState<MigrationState>({
-    isUsingNewSystem: false,
-    errors: [],
-    lastUpdate: new Date().toISOString(),
-  });
-
-  // 初期化時にロールアウト率に基づいて決定
-  useEffect(() => {
-    if (!config.enabled) return;
-
+  // ロールアウト判定はstate初期化時に実行 (react-hooks/set-state-in-effect 対応)
+  const [state, setState] = useState<MigrationState>(() => {
     const shouldUseNewSystem =
-      config.useNewSystemForced ||
-      Math.random() * 100 < config.rolloutPercentage;
-
-    setState((prev: MigrationState) => ({
-      ...prev,
+      config.enabled &&
+      (config.useNewSystemForced ||
+        Math.random() * 100 < config.rolloutPercentage);
+    return {
       isUsingNewSystem: shouldUseNewSystem,
+      errors: [],
       lastUpdate: new Date().toISOString(),
-    }));
-  }, [config]);
+    };
+  });
 
   const toggleSystem = useCallback(() => {
     setState((prev: MigrationState) => ({

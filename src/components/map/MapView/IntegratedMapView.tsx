@@ -52,10 +52,8 @@ export function IntegratedMapView({
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [userClassification, setUserClassification] =
     useState<UserClassification | null>(null);
-  const [visibleMapPoints, setVisibleMapPoints] = useState<readonly MapPoint[]>(
-    []
-  );
-  const [renderProgress, setRenderProgress] = useState(0);
+  // visibleMapPoints と renderProgress は派生状態として処理 (react-hooks/set-state-in-effect 対応)
+  // 実際の値は後で derivedVisibleMapPoints, derivedRenderProgress として定義
   const [currentVariant, setCurrentVariant] =
     useState<ABTestVariant>("original");
   // EnhancedMapContainer と整合するローカル型
@@ -169,11 +167,9 @@ export function IntegratedMapView({
     setSelectedPoint(null);
   }, []);
 
-  // マーカー表示の同期
-  useEffect(() => {
-    setVisibleMapPoints(mapPoints);
-    setRenderProgress(100);
-  }, [mapPoints]);
+  // マーカー表示の同期: useMemo で派生状態として処理 (react-hooks/set-state-in-effect 対応)
+  const derivedVisibleMapPoints = mapPoints;
+  const derivedRenderProgress = mapPoints.length > 0 ? 100 : 0;
 
   // ローディング状態
   if (loading) {
@@ -223,7 +219,7 @@ export function IntegratedMapView({
   return (
     <MapErrorBoundary>
       {/* ローディングインジケーター（ARIA対応） */}
-      {renderProgress > 0 && renderProgress < 100 && (
+      {derivedRenderProgress > 0 && derivedRenderProgress < 100 && (
         <div
           className="marker-loading-indicator"
           role="status"
@@ -248,8 +244,8 @@ export function IntegratedMapView({
         >
           <div style={{ marginBottom: "8px" }}>🗺️ マーカー読み込み中...</div>
           <div style={{ fontSize: "12px", color: "#aaa" }}>
-            {Math.round(renderProgress)}% ({visibleMapPoints.length}/
-            {mapPoints.length}件)
+            {Math.round(derivedRenderProgress)}% (
+            {derivedVisibleMapPoints.length}/{mapPoints.length}件)
           </div>
         </div>
       )}
@@ -259,7 +255,7 @@ export function IntegratedMapView({
        * 本番ではユーザー変更を許さないため showSelectionPanel = shouldUseTestingMode
        */}
       <EnhancedMapContainer
-        mapPoints={visibleMapPoints}
+        mapPoints={derivedVisibleMapPoints}
         center={center}
         mapId={mapId}
         selectedPoint={selectedPoint}

@@ -107,13 +107,16 @@ export function useMapPoints(options: UseMapPointsOptions = {}) {
   /**
    * 初期データ読み込み
    * deferFetch=true の場合、triggerFetch() が呼ばれるまで待機
+   * Note: 非同期データ取得はReactパターンとして許容される (react-hooks/set-state-in-effect)
    */
+  /* eslint-disable react-hooks/set-state-in-effect -- async data fetching pattern is acceptable */
   useEffect(() => {
     if (shouldFetch && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
       void fetchData();
     }
   }, [fetchData, shouldFetch]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /**
    * 遅延フェッチのトリガー関数

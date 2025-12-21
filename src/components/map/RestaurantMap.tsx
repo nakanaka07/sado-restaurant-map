@@ -59,23 +59,30 @@ export default function RestaurantMap({
   );
 
   // 🔄 移行判定: ユーザーIDベースの一貫した振り分け
+  // セッションseedは初回マウント時にのみ生成 (react-hooks impure function 対応)
+  const [userSeedState] = useState(() => {
+    const stored = sessionStorage.getItem("markerSystemSeed");
+    if (stored) return stored;
+    const newSeed = String(Date.now() + Math.random());
+    sessionStorage.setItem("markerSystemSeed", newSeed);
+    return newSeed;
+  });
+
   const shouldUseNewMarkerSystem = useMemo(() => {
     if (migrationConfig.useNewSystemForced !== undefined) {
       return migrationConfig.useNewSystemForced;
     }
 
-    // ユーザーセッションベースの安定した振り分け
-    const userSeed =
-      sessionStorage.getItem("markerSystemSeed") ||
-      String(Date.now() + Math.random());
-    sessionStorage.setItem("markerSystemSeed", userSeed);
-
-    const hash = userSeed.split("").reduce((acc, char) => {
+    const hash = userSeedState.split("").reduce((acc, char) => {
       return ((acc << 5) - acc + char.charCodeAt(0)) & 0x7fffffff;
     }, 0);
 
     return hash % 100 < migrationConfig.rolloutPercentage;
-  }, [migrationConfig.rolloutPercentage, migrationConfig.useNewSystemForced]);
+  }, [
+    migrationConfig.rolloutPercentage,
+    migrationConfig.useNewSystemForced,
+    userSeedState,
+  ]);
 
   // 📊 A/Bテスト統合: 分析・監視機能
   const abTestIntegration = useABTestIntegration({
@@ -145,10 +152,10 @@ export default function RestaurantMap({
   }, [debugging]);
 
   // 段階的マーカーレンダリング
+  // 空配列の場合は初期値で処理されるためeffect内での同期setStateは不要
   useEffect(() => {
+    // 空配列の場合は何もしない (react-hooks/set-state-in-effect 対応)
     if (optimizedRestaurants.length === 0) {
-      setVisibleRestaurants([]);
-      setRenderProgress(100);
       return;
     }
 

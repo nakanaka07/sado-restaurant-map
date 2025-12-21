@@ -3,9 +3,13 @@ import { vi } from "vitest";
 import PWABadge from "../PWABadge";
 
 describe("PWABadge", () => {
-  const getListener = (spy: ReturnType<typeof vi.spyOn>, type: string) => {
-    const call = spy.mock.calls.find(args => args[0] === type);
-    return call?.[1] as (e: Event) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type SpyType = ReturnType<typeof vi.spyOn<any, any>>;
+
+  const getListener = (spy: SpyType, type: string) => {
+    const calls = spy.mock.calls as unknown as [string, EventListener][];
+    const call = calls.find(args => args[0] === type);
+    return call?.[1] as ((e: Event) => void) | undefined;
   };
 
   test("shows offlineReady message and can close", async () => {

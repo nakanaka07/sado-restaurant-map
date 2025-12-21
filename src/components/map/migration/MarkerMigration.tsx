@@ -43,13 +43,14 @@ export const MarkerMigrationSystem: FC<MarkerMigrationSystemProps> = ({
   onPerformanceMetric,
 }) => {
   const migrationControl = useMigrationControl(config);
+  // performance.now() をlazy initializerに移動 (react-hooks/purity 対応)
   const [performanceData, setPerformanceData] = useState<{
     startTime: number;
     interactions: number;
-  }>({
+  }>(() => ({
     startTime: performance.now(),
     interactions: 0,
-  });
+  }));
 
   // パフォーマンス測定
   useEffect(() => {
@@ -152,6 +153,15 @@ export const MarkerMigrationSystem: FC<MarkerMigrationSystemProps> = ({
   }, [migrationControl, restaurant, handleClick, config.enableFallback]);
 
   // デバッグ情報表示
+  // レンダリング用の経過時間を計算 (performance.nowは既にキャプチャされたstartTimeを使用)
+  const [elapsedMs, setElapsedMs] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsedMs(Math.round(performance.now() - performanceData.startTime));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [performanceData.startTime]);
+
   const debugInfo = config.debugMode && (
     <div
       style={{
@@ -168,8 +178,7 @@ export const MarkerMigrationSystem: FC<MarkerMigrationSystemProps> = ({
       }}
     >
       {migrationControl.isUsingNewSystem ? "v2" : "legacy"} |
-      {performanceData.interactions}i |
-      {Math.round(performance.now() - performanceData.startTime)}ms
+      {performanceData.interactions}i |{elapsedMs}ms
     </div>
   );
 

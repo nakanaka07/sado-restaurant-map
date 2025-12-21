@@ -296,15 +296,16 @@ export const useMapDebugging = (
     console.groupEnd();
   }, [exportDebugData, debugStats, eventHistory, finalConfig]);
 
-  // レストランデータの変更を監視
+  // レストランデータの変更を監視 (consoleログのみ、setStateは行わない)
   useEffect(() => {
-    if (finalConfig.enabled) {
-      logEvent("data_filter", {
+    if (finalConfig.enabled && finalConfig.trackPerformance) {
+      // ログのみ出力、stateは更新しない (react-hooks/set-state-in-effect 対応)
+      console.log("[MapDebug] data_filter:", {
         totalRestaurants: restaurants.length,
         timestamp: new Date().toISOString(),
       });
     }
-  }, [restaurants.length, finalConfig.enabled, logEvent]);
+  }, [restaurants.length, finalConfig.enabled, finalConfig.trackPerformance]);
 
   // 開発モードでグローバルデバッグ関数を登録
   useEffect(() => {
