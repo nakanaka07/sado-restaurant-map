@@ -373,7 +373,7 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 **Project Metrics** (2025-12-22):
 
 - Coverage: **67.32%** (1827/1831 tests passing = 99.8%, 4 skipped)
-- Tech Stack: React 19.2.3, Vite 7.3.0, TypeScript 5.8.3, **Vitest 4.0.16** ✅
+- Tech Stack: React 19.2.3, Vite 7.3.0, TypeScript 5.9.3, **Vitest 4.0.16** ✅
 - Performance: Mobile TBT 12,850ms (-30%), Desktop TBT 2,560ms (-28%) - **最適化限界到達**
 
 **Active Work** (2025 Q1 Project Refresh):
@@ -436,6 +436,6 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 ---
 
-**Version**: 2.11 (2025-12-22)
+**Version**: 2.12 (2025-12-23)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: Week 2-3追加完了 - eslint-plugin-react-hooks 7.0.1アップグレード、TypeScript 5.9.3。新ルール対応（set-state-in-effect, purity）。詳細: TASKS.md updated
+**Last Update**: Week 2-3追加 - lint-staged 16.2.7、size-limit 12.0.0アップグレード完了。jsdom 27.x Vitest 4互換性問題によりスキップ。

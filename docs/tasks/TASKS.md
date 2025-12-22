@@ -122,9 +122,9 @@ AC:
 **スキップした破壊的更新**:
 
 - ~~eslint-plugin-react-hooks 7.x（eslint-config変更必要）~~ → ✅ 2025-12-22完了
-- jsdom 27.x（Node.js 22+必須）
-- lint-staged 16.x（設定形式変更）
-- size-limit 12.x（設定形式変更）
+- ~~jsdom 27.x（Node.js 22+必須）~~ → ⚠️ Vitest 4互換性問題、26.1.0維持
+- ~~lint-staged 16.x（設定形式変更）~~ → ✅ 2025-12-23完了（16.2.7）
+- ~~size-limit 12.x（設定形式変更）~~ → ✅ 2025-12-23完了（12.0.0）
 
 ---
 
@@ -155,6 +155,18 @@ AC:
 - ✅ [P2 chore] **@types/node 22.19.3 → 25.0.3** (2025-12-22)
   - 型定義のみの更新、低リスク
   - 型チェック通過
+
+- ✅ [P2 chore] **lint-staged 15.5.2 → 16.2.7** (2025-12-23)
+  - ESM-only移行、既存設定は互換維持
+  - テスト通過
+
+- ✅ [P2 chore] **size-limit/file 11.2.0 → 12.0.0** (2025-12-23)
+  - 設定形式変更なし、動作確認済み
+  - バンドルサイズ確認: 全チャンク制限内
+
+- ⚠️ [P3 chore] **jsdom 27.x スキップ**
+  - 理由: Vitest 4との互換性問題（ReferenceError: document is not defined）
+  - 対応: 26.1.0維持、Vitest側修正待ち
 
 ---
 
@@ -619,7 +631,7 @@ AC:
 
 ## 9. 同期手順 (AI/人間)
 
-Last Updated: 2025-12-22 (Week 2-3完了: Checkpoint 4測定 - TBT -30%達成。Google Maps API最適化限界確認。Week 4: Playwright E2E導入予定）
+Last Updated: 2025-12-23 (Week 2-3追加: lint-staged 16.2.7, size-limit 12.0.0完了。jsdom 27.x Vitest互換性問題によりスキップ）
 
 1. 新アイデア → Backlog 追記 (+ Issue 起票)
 2. 着手決定 → Issue を Active に移動 (ラベル/優先度調整)
