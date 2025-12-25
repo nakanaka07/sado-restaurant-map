@@ -17,6 +17,7 @@ export default tseslint.config(
       "config/**.config.ts",
       "../*.config.js",
       ".vscode/**", // 開発者環境ローカル設定は lint 対象外
+      "e2e/**", // Playwright E2Eテストはeslint対象外（型推論が異なるため）
     ],
   },
   {

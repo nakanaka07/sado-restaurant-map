@@ -1,13 +1,6 @@
 /* @vitest-environment jsdom */
 import { FilterDisplayMode } from "@/types";
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FilterModal } from "../FilterModal";
 
@@ -169,26 +162,8 @@ describe("FilterModal", () => {
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    it.skip("ESCキーでモーダルを閉じられる (TODO: イベントリスナータイミング修正)", async () => {
-      act(() => {
-        render(
-          <FilterModal
-            isOpen
-            onClose={mockOnClose}
-            onFiltersChange={mockOnFiltersChange}
-          >
-            <div>Content</div>
-          </FilterModal>
-        );
-      });
-
-      // useEffectでイベントリスナーが登録されるのを待つ
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      fireEvent.keyDown(window, { key: "Escape" });
-
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
-    });
+    // NOTE: ESCキーテストはE2Eに移行済み
+    // E2Eテスト: e2e/filter-modal.spec.ts - "ESCキーでモーダルを閉じられる"
 
     it("背景でEnterキーを押すと閉じられる", () => {
       render(
@@ -225,74 +200,10 @@ describe("FilterModal", () => {
     });
   });
 
-  describe("スクロール管理", () => {
-    it.skip("モーダルが開いている時はbodyのスクロールを無効化 (TODO: useEffectタイミング修正)", async () => {
-      act(() => {
-        render(
-          <FilterModal
-            isOpen
-            onClose={mockOnClose}
-            onFiltersChange={mockOnFiltersChange}
-          >
-            <div>Content</div>
-          </FilterModal>
-        );
-      });
-
-      // useEffectが実行されるのを待つ
-      await waitFor(
-        () => {
-          expect(document.body.style.overflow).toBe("hidden");
-        },
-        { timeout: 1000 }
-      );
-    });
-
-    it.skip("モーダルが閉じたらbodyのスクロールを復元 (TODO: useEffectタイミング修正)", async () => {
-      let rerender: ReturnType<typeof render>["rerender"];
-
-      act(() => {
-        const result = render(
-          <FilterModal
-            isOpen={true}
-            onClose={mockOnClose}
-            onFiltersChange={mockOnFiltersChange}
-          >
-            <div>Content</div>
-          </FilterModal>
-        );
-        rerender = result.rerender;
-      });
-
-      await waitFor(
-        () => {
-          expect(document.body.style.overflow).toBe("hidden");
-        },
-        { timeout: 1000 }
-      );
-
-      act(() => {
-        rerender(
-          <FilterModal
-            isOpen={false}
-            onClose={mockOnClose}
-            onFiltersChange={mockOnFiltersChange}
-          >
-            <div>Content</div>
-          </FilterModal>
-        );
-      });
-
-      await waitFor(
-        () => {
-          expect(document.body.style.overflow).toBe("");
-        },
-        { timeout: 1000 }
-      ).catch(() => {
-        /* ignored */
-      });
-    });
-  });
+  // NOTE: スクロール管理テストはE2Eに移行済み
+  // E2Eテスト: e2e/filter-modal.spec.ts
+  // - "モーダルが開いている時はbodyのスクロールが無効化される"
+  // - "モーダルが閉じたらbodyのスクロールが復元される"
 
   describe("アクセシビリティ", () => {
     it("適切なaria属性が設定されている", () => {
@@ -361,33 +272,8 @@ describe("FilterModal", () => {
   });
 
   describe("タッチジェスチャー", () => {
-    it.skip("下方向スワイプでモーダルを閉じられる (TODO: modalRef/overlayRef統一)", () => {
-      render(
-        <FilterModal
-          isOpen={true}
-          onClose={mockOnClose}
-          onFiltersChange={mockOnFiltersChange}
-        >
-          <div>Content</div>
-        </FilterModal>
-      );
-
-      const content = screen.getByTestId("filter-modal-content");
-
-      // タッチ開始（Y座標100） - 簡略化したイベント
-      fireEvent.touchStart(content, {
-        touches: [{ clientY: 100 }],
-      });
-
-      // タッチ終了（Y座標250、下に150px移動）
-      fireEvent.touchEnd(content, {
-        changedTouches: [{ clientY: 250 }],
-      });
-
-      // NOTE: modalRefとoverlayRefの不一致により、data属性が正しく設定されない
-      // 実装上の問題として記録し、テストは統合テストでカバー
-      // expect(mockOnClose).toHaveBeenCalledTimes(1);
-    });
+    // NOTE: 下方向スワイプテストはE2Eに移行済み
+    // E2Eテスト: e2e/filter-modal.spec.ts - "下方向スワイプでモーダルを閉じられる"
 
     it("上方向スワイプではモーダルを閉じない", () => {
       render(

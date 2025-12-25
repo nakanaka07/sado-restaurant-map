@@ -8,6 +8,8 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: [path.resolve(__dirname, "../src/test/setup.ts")],
+    // E2Eテストディレクトリを除外（Playwright用）
+    exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],
     // Vitest 4: poolOptions廃止、トップレベルに移動
     pool: "forks",
     // Vitest 4では isolate: true がデフォルト（テストの分離性を保つため）

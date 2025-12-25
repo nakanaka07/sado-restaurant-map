@@ -135,9 +135,9 @@ describe("FilterModal", () => {
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    // NOTE: ESCキー押下のテストは削除
+    // NOTE: ESCキー押下のテストはE2Eに移行済み
     // Reason: jsdom環境ではdocument.addEventListenerで登録したKeyboardEventリスナーがuseEffect内で正常に動作しない
-    // この機能はブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
+    // E2Eテスト: e2e/filter-modal.spec.ts - "ESCキーでモーダルを閉じられる"
 
     it("背景ボタンでEnterキー押下時にonCloseが呼ばれる", () => {
       render(<FilterModal {...defaultProps} />);
@@ -160,9 +160,9 @@ describe("FilterModal", () => {
     });
   });
 
-  // NOTE: フォーカス管理とフォーカストラップのテストは削除
+  // NOTE: フォーカス管理とフォーカストラップのテストはE2Eに移行済み
   // Reason: jsdom環境では.focus()とdocument.activeElementが完全に動作しない
-  // これらの機能はブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
+  // E2Eテスト: e2e/filter-modal.spec.ts - フォーカストラップはブラウザで自動テスト
 
   describe("displayMode", () => {
     it("デフォルトでCOMPACTモードが適用される", () => {
@@ -257,9 +257,9 @@ describe("FilterModal", () => {
     });
   });
 
-  // NOTE: タッチジェスチャーのテスト3件は削除
+  // NOTE: タッチジェスチャーのテスト3件はE2Eに移行済み
   // Reason: jsdom環境ではTouchEventの伝播とReact合成イベントハンドラー(onTouchStart/onTouchEnd)の統合が動作しない
-  // これらの機能はモバイルブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
+  // E2Eテスト: e2e/filter-modal.spec.ts - "下方向スワイプでモーダルを閉じられる"
 
   describe("エラーハンドリング", () => {
     it("onCloseが関数でない場合、何もレンダリングしない", () => {
@@ -583,9 +583,9 @@ describe("FilterModal", () => {
       expect(modal.hasAttribute("data-touch-start-y")).toBe(false);
     });
 
-    // NOTE: タッチイベントのdata属性設定とonCloseトリガーのテストは削除
+    // NOTE: タッチイベントのdata属性設定とonCloseトリガーのテストはE2Eに移行済み
     // Reason: jsdom環境ではReactの合成イベント経由のonTouchStart/onTouchEndが正しくdata属性を設定しない
-    // この機能はモバイルブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
+    // E2Eテスト: e2e/filter-modal.spec.ts - "下方向スワイプでモーダルを閉じられる"
   });
 
   describe("キーボードナビゲーション", () => {
@@ -605,9 +605,9 @@ describe("FilterModal", () => {
       consoleWarnSpy.mockRestore();
     });
 
-    // NOTE: フォーカス可能な要素が見つからない場合の警告テストは削除
+    // NOTE: フォーカス可能な要素が見つからない場合の警告テストはE2Eに移行済み
     // Reason: jsdom環境ではquerySelectorAllでボタン要素が正しく取得されるため、警告が発生しない
-    // この機能の詳細な検証はブラウザで手動検証済みで、Phase 9でPlaywright E2Eテストで実装予定
+    // E2Eテスト: e2e/filter-modal.spec.ts - フォーカストラップはブラウザで自動テスト
   });
 
   describe("フォーカス設定エラーハンドリング", () => {

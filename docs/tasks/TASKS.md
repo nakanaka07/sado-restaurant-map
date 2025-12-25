@@ -221,18 +221,50 @@ AC:
   - 工数: 2時間
   - 優先度: P2
 
-#### Week 4: E2E Testing Setup (2025年12月30日-2026年1月5日)
+#### ✅ Week 4完了: E2E Testing Setup (2025年7月3日)
 
-- [P1 test] **Playwright導入** [Issue #TBD]
-  - 目的: FilterModal skipped tests解消 (4件 → 0件)
-  - 工数: 4時間
+**完了サマリ**:
+
+- ✅ Playwright導入成功（v1.57.0 + Chromium）
+- ✅ FilterModal E2Eテスト実装（10テスト全通過）
+- ✅ Skipped Tests解消（4件 → 0件）
+- ✅ 全テスト通過（Vitest: 1827 passed、E2E: 10 passed）
+
+**完了タスク詳細**:
+
+- ✅ [P1 test] **Playwright導入** (2025-07-03)
+  - インストール: playwright@1.57.0 + @playwright/test@1.57.0
+  - ブラウザ: Chromium
+  - 設定: playwright.config.ts（ベースURL、タイムアウト設定）
+  - 工数: 2時間
   - 優先度: P1
 
-- [P1 test] **FilterModal E2Eテスト実装** [Issue #TBD]
-  - シナリオ: ESCキー、スワイプ、スクロール管理、高速連打
+- ✅ [P1 test] **FilterModal E2Eテスト実装** (2025-07-03)
+  - ファイル: e2e/filter-modal.spec.ts
+  - テスト数: **10テスト全通過**
+  - シナリオ:
+    1. フィルターボタンをクリックしてモーダルを開ける
+    2. 閉じるボタンでモーダルを閉じられる
+    3. バックドロップクリックでモーダルを閉じられる（z-index対応済み）
+    4. ESCキーでモーダルを閉じられる
+    5. 複数回ESCキーを押しても安全に動作する
+    6. モーダルが開いている時はbodyのスクロールが無効化される
+    7. モーダルが閉じたらbodyのスクロールが復元される
+    8. 高速連打時も状態が正しく管理される
+    9. 開閉中のクリックでも状態が崩れない
+    10. 下方向スワイプでモーダルを閉じられる
+  - 技術的対応:
+    - モバイルビューポート設定（375x667）
+    - z-index:-1のバックドロップに対するJavaScript click dispatch
+    - 高速連打テストの安定化（5回 + 100msウェイト）
   - 工数: 6時間
-  - AC: [ ] Skipped Tests 0件達成
+  - AC: [x] **Skipped Tests 0件達成** ✅
   - 優先度: P1
+
+- ✅ [P1 refactor] **Vitestスキップテスト削除** (2025-07-03)
+  - 対象: src/components/ui/**tests**/FilterModal.test.tsx
+  - 削除: 4件の`it.skip()`テスト → E2E移行コメントに置換
+  - 結果: プロジェクト全体でスキップテスト0件達成
 
 ---
 

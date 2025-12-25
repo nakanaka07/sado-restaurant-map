@@ -7,6 +7,8 @@
   },
   "include": [
     "../../vite.config.ts",
+    "../../playwright.config.ts",
+    "../../e2e/**/*.ts",
     "../pwa-assets.config.ts",
     "../eslint.config.js"
   ]
