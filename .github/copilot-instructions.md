@@ -1,6 +1,6 @@
 # GitHub Copilot Repository Instructions
 
-> **Last Updated**: 2025-12-22
+> **Last Updated**: 2025-12-30
 > **Philosophy**: Trust these instructions first. Search workspace only when information is incomplete or outdated.
 
 ## 0. Development Context & Partnership
@@ -34,7 +34,7 @@ on Sado Island, Japan.
 - PWA: vite-plugin-pwa 1.2.0 (Workbox) + offline support
 - Maps: Google Maps JavaScript API (@vis.gl/react-google-maps 1.7.1)
 - CI/CD: GitHub Actions (lint, test, build, size-limit, Lighthouse CI)
-- E2E Testing: **Playwright (Week 4 introduction planned)**
+- E2E Testing: **Playwright 1.57.0** + Chromium (10シナリオ、20テスト)
 
 **Key Priorities**: Performance, Accessibility (WCAG AA), Type Safety, Offline Support, Developer Experience
 
@@ -117,16 +117,16 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 ## 5. Testing Strategy
 
-**Test Framework**: Vitest 3 → **Vitest 4 (Week 1 migration)** + jsdom + Testing Library + jest-axe
+**Test Framework**: Vitest 4.0.16 + jsdom + Testing Library + jest-axe
 
 **Test Types**:
 
-| Layer         | Strategy             | Tools                                | Priority                        |
-| ------------- | -------------------- | ------------------------------------ | ------------------------------- |
-| Unit          | Logic/Hook isolation | Vitest                               | High for utils, hooks, services |
-| Component     | User behavior-based  | Testing Library                      | High for interactive components |
-| Accessibility | Automated + manual   | jest-axe, axe-core                   | Required for all interactive UI |
-| Integration   | E2E Testing          | **Playwright (Week 4 introduction)** | Critical user flows             |
+| Layer         | Strategy             | Tools                        | Priority                        |
+| ------------- | -------------------- | ---------------------------- | ------------------------------- |
+| Unit          | Logic/Hook isolation | Vitest                       | High for utils, hooks, services |
+| Component     | User behavior-based  | Testing Library              | High for interactive components |
+| Accessibility | Automated + manual   | jest-axe, axe-core           | Required for all interactive UI |
+| Integration   | E2E Testing          | Playwright 1.57.0 + Chromium | Critical user flows             |
 
 **Coverage**:
 
@@ -370,11 +370,11 @@ JavaScript. Uses `requirements.txt`. Future: pytest integration.
 
 ## 14. Current Status & Priorities
 
-**Project Metrics** (2025-07-03):
+**Project Metrics** (2025-12-30):
 
-- Coverage: **67.32%** (1827/1831 tests passing = 99.8%, **0 skipped** ✅)
+- Coverage: **71.51%** (1928/1928 tests passing = 100%, **0 skipped** ✅)
 - Tech Stack: React 19.2.3, Vite 7.3.0, TypeScript 5.9.3, **Vitest 4.0.16** ✅
-- E2E Testing: **Playwright 1.57.0** + Chromium ✅
+- E2E Testing: **Playwright 1.57.0** + Chromium (10シナリオ、20テスト全通過) ✅
 - Performance: Mobile TBT 12,850ms (-30%), Desktop TBT 2,560ms (-28%) - **最適化限界到達**
 
 **Active Work** (2025 Q1 Project Refresh):
@@ -400,10 +400,10 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 - ✅ Checkpoint 4測定完了（Mobile TBT 12,850ms、Desktop TBT 2,560ms）
 - **結論**: TBT -30%達成。Google Maps API (~900KiB) が支配的、ローカル最適化限界
 
-**Week 4完了 (7/3)** - E2E Testing Setup ✅:
+**Week 4完了 (12/30)** - E2E Testing Setup ✅:
 
 - ✅ Playwright 1.57.0導入（Chromiumブラウザ）
-- ✅ FilterModal E2Eテスト実装（10テスト全通過）
+- ✅ FilterModal E2Eテスト実装（10シナリオ、20テスト全通過）
 - ✅ Skipped Tests解消（4件 → 0件）
 - ✅ モバイルビューポート対応（375x667）
 
@@ -412,6 +412,7 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 - E2Eテストでjsdomでは実現困難なテスト（ESCキー、スクロール管理、スワイプ）を解決
 - page.evaluate()でz-index問題を回避
 - Playwright + Chromiumで安定したクロスブラウザテスト基盤構築
+- 2ワーカー並列実行で約2.3分で完了
 
 **Key Lesson from Week 2-3**:
 
@@ -445,6 +446,6 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 ---
 
-**Version**: 2.13 (2025-07-03)
+**Version**: 2.14 (2025-12-30)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: Week 4完了 - Playwright E2E導入、FilterModal 10テスト全通過、Skipped Tests 0件達成。
+**Last Update**: ドキュメント同期 - テスト1928件、カバレッジ71.51%、E2E 20テスト全通過。
