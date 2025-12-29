@@ -37,8 +37,14 @@ htmlcov/
 .tox/
 .nox/
 coverage.xml
+coverage.json
 *.cover
 *.log
+
+# Test results
+*test_result*.json
+*_test_results_*.json
+phase*_test_results_*.json
 
 # IDEs
 .vscode/
