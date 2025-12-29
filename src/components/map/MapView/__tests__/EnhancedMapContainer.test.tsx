@@ -304,8 +304,10 @@ describe("EnhancedMapContainer", () => {
       const marker = screen.getByTestId("unified-marker-restaurant-1");
       await user.click(marker);
 
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
       expect(mockOnMarkerClick).toHaveBeenCalledTimes(1);
-      expect(mockOnMarkerClick).toHaveBeenCalledWith(mockMapPoints[0]!);
+      expect(mockOnMarkerClick).toHaveBeenCalledWith(firstMapPoint);
     });
 
     it("複数のマーカーでそれぞれクリックイベントが動作する", async () => {
@@ -325,9 +327,13 @@ describe("EnhancedMapContainer", () => {
       await user.click(screen.getByTestId("unified-marker-restaurant-1"));
       await user.click(screen.getByTestId("unified-marker-parking-1"));
 
+      const firstMapPoint = mockMapPoints[0];
+      const thirdMapPoint = mockMapPoints[2];
+      expect(firstMapPoint).toBeDefined();
+      expect(thirdMapPoint).toBeDefined();
       expect(mockOnMarkerClick).toHaveBeenCalledTimes(2);
-      expect(mockOnMarkerClick).toHaveBeenNthCalledWith(1, mockMapPoints[0]!);
-      expect(mockOnMarkerClick).toHaveBeenNthCalledWith(2, mockMapPoints[2]!);
+      expect(mockOnMarkerClick).toHaveBeenNthCalledWith(1, firstMapPoint);
+      expect(mockOnMarkerClick).toHaveBeenNthCalledWith(2, thirdMapPoint);
     });
 
     it("マーカークリック時のエラーをキャッチしてコンソールに出力する", async () => {
@@ -363,12 +369,15 @@ describe("EnhancedMapContainer", () => {
 
   describe("InfoWindow処理", () => {
     it("selectedPointがある場合はMapInfoWindowを表示する", () => {
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
+
       render(
         <EnhancedMapContainer
           mapPoints={mockMapPoints}
           center={mockCenter}
           mapId={mockMapId}
-          selectedPoint={mockMapPoints[0]!}
+          selectedPoint={firstMapPoint}
           onMarkerClick={mockOnMarkerClick}
           onCloseInfoWindow={mockOnCloseInfoWindow}
         />
@@ -397,13 +406,15 @@ describe("EnhancedMapContainer", () => {
 
     it("InfoWindow閉じるボタンでonCloseInfoWindowが呼ばれる", async () => {
       const user = userEvent.setup();
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
 
       render(
         <EnhancedMapContainer
           mapPoints={mockMapPoints}
           center={mockCenter}
           mapId={mockMapId}
-          selectedPoint={mockMapPoints[0]!}
+          selectedPoint={firstMapPoint}
           onMarkerClick={mockOnMarkerClick}
           onCloseInfoWindow={mockOnCloseInfoWindow}
         />
@@ -422,13 +433,15 @@ describe("EnhancedMapContainer", () => {
       const errorOnClose = vi.fn(() => {
         throw new Error("Close error");
       });
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
 
       render(
         <EnhancedMapContainer
           mapPoints={mockMapPoints}
           center={mockCenter}
           mapId={mockMapId}
-          selectedPoint={mockMapPoints[0]!}
+          selectedPoint={firstMapPoint}
           onMarkerClick={mockOnMarkerClick}
           onCloseInfoWindow={errorOnClose}
         />
@@ -447,10 +460,15 @@ describe("EnhancedMapContainer", () => {
 
   describe("重複除去機能", () => {
     it("重複したtype+idを持つpointを除去する", () => {
+      const firstMapPoint = mockMapPoints[0];
+      const secondMapPoint = mockMapPoints[1];
+      expect(firstMapPoint).toBeDefined();
+      expect(secondMapPoint).toBeDefined();
+
       const duplicatePoints: MapPoint[] = [
         ...mockMapPoints,
-        mockMapPoints[0]!, // 重複
-        mockMapPoints[1]!, // 重複
+        firstMapPoint, // 重複
+        secondMapPoint, // 重複
       ];
 
       render(
@@ -473,7 +491,9 @@ describe("EnhancedMapContainer", () => {
       const consoleDebugSpy = vi
         .spyOn(console, "debug")
         .mockImplementation(() => {});
-      const duplicatePoints: MapPoint[] = [...mockMapPoints, mockMapPoints[0]!];
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
+      const duplicatePoints: MapPoint[] = [...mockMapPoints, firstMapPoint];
 
       render(
         <EnhancedMapContainer
@@ -628,9 +648,12 @@ describe("EnhancedMapContainer", () => {
 
   describe("エッジケース", () => {
     it("mapPointsが更新されるとマーカーが再レンダリングされる", () => {
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
+
       const { rerender } = render(
         <EnhancedMapContainer
-          mapPoints={[mockMapPoints[0]!]}
+          mapPoints={[firstMapPoint]}
           center={mockCenter}
           mapId={mockMapId}
           selectedPoint={null}
@@ -696,12 +719,15 @@ describe("EnhancedMapContainer", () => {
     });
 
     it("selectedPointが変更されるとInfoWindowが更新される", () => {
+      const firstMapPoint = mockMapPoints[0];
+      expect(firstMapPoint).toBeDefined();
+
       const { rerender } = render(
         <EnhancedMapContainer
           mapPoints={mockMapPoints}
           center={mockCenter}
           mapId={mockMapId}
-          selectedPoint={mockMapPoints[0]!}
+          selectedPoint={firstMapPoint}
           onMarkerClick={mockOnMarkerClick}
           onCloseInfoWindow={mockOnCloseInfoWindow}
         />
@@ -711,12 +737,15 @@ describe("EnhancedMapContainer", () => {
         "Test Restaurant 1"
       );
 
+      const secondMapPoint = mockMapPoints[1];
+      expect(secondMapPoint).toBeDefined();
+
       rerender(
         <EnhancedMapContainer
           mapPoints={mockMapPoints}
           center={mockCenter}
           mapId={mockMapId}
-          selectedPoint={mockMapPoints[1]!}
+          selectedPoint={secondMapPoint}
           onMarkerClick={mockOnMarkerClick}
           onCloseInfoWindow={mockOnCloseInfoWindow}
         />

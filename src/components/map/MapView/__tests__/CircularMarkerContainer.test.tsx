@@ -276,7 +276,9 @@ describe("CircularMarkerContainer", () => {
       const markers = screen.getAllByRole("button", {
         name: /テストレストラン/,
       });
-      fireEvent.click(markers[0]!);
+      const firstMarker = markers[0];
+      expect(firstMarker).toBeDefined();
+      fireEvent.click(firstMarker as HTMLElement);
 
       // AdvancedMarker + CircularMarkerの両方でonClickが発火するため2回
       expect(handleClick).toHaveBeenCalledTimes(2);
@@ -289,7 +291,9 @@ describe("CircularMarkerContainer", () => {
       const markers = screen.getAllByRole("button", {
         name: /テストレストラン/,
       });
-      expect(() => fireEvent.click(markers[0]!)).not.toThrow();
+      const firstMarker = markers[0];
+      expect(firstMarker).toBeDefined();
+      expect(() => fireEvent.click(firstMarker as HTMLElement)).not.toThrow();
     });
 
     it("複数マーカーのクリックをそれぞれ正しく処理する", () => {
@@ -308,10 +312,15 @@ describe("CircularMarkerContainer", () => {
         name: /駐車場/,
       });
 
-      fireEvent.click(restaurantMarkers[0]!);
+      const firstRestaurantMarker = restaurantMarkers[0];
+      const firstParkingMarker = parkingMarkers[0];
+      expect(firstRestaurantMarker).toBeDefined();
+      expect(firstParkingMarker).toBeDefined();
+
+      fireEvent.click(firstRestaurantMarker as HTMLElement);
       expect(handleClick).toHaveBeenLastCalledWith(restaurantPoint);
 
-      fireEvent.click(parkingMarkers[0]!);
+      fireEvent.click(firstParkingMarker as HTMLElement);
       expect(handleClick).toHaveBeenLastCalledWith(parkingPoint);
 
       // 各マーカーで2回ずつ発火（AdvancedMarker + CircularMarker）
@@ -370,7 +379,9 @@ describe("CircularMarkerContainer", () => {
       const closeButtons = within(container).getAllByRole("button", {
         name: /Close info window/,
       });
-      fireEvent.click(closeButtons[0]!);
+      const firstCloseButton = closeButtons[0];
+      expect(firstCloseButton).toBeDefined();
+      fireEvent.click(firstCloseButton as HTMLElement);
 
       expect(handleClose).toHaveBeenCalledTimes(1);
     });
@@ -388,7 +399,11 @@ describe("CircularMarkerContainer", () => {
       const closeButtons = within(container).getAllByRole("button", {
         name: /Close info window/,
       });
-      expect(() => fireEvent.click(closeButtons[0]!)).not.toThrow();
+      const firstCloseButton = closeButtons[0];
+      expect(firstCloseButton).toBeDefined();
+      expect(() =>
+        fireEvent.click(firstCloseButton as HTMLElement)
+      ).not.toThrow();
     });
   });
 
