@@ -117,29 +117,35 @@ export default function RestaurantMap({
   );
 
   // レストランマーカークリック時の処理（メモ化）
+  // 🚀 最適化: 状態更新を即座に行い、追跡処理は非同期で実行
   const handleMarkerClick = useCallback(
     (restaurant: Restaurant) => {
       const startTime = performance.now();
-      debugging.startPerformanceTimer("marker_click");
 
+      // 状態更新を最優先で実行（UIの即時反映）
       setSelectedRestaurant(restaurant);
-      trackingFunctions.trackRestaurantClick(restaurant);
-      trackingFunctions.trackMapInteraction();
 
-      // A/Bテストイベント追跡
-      const renderTime = performance.now() - startTime;
-      abTestIntegration.trackMarkerInteraction(
-        createMarkerInteraction(restaurant, "click", renderTime)
-      );
+      // 追跡処理は非同期で実行（UIブロッキングを回避）
+      queueMicrotask(() => {
+        debugging.startPerformanceTimer("marker_click");
+        trackingFunctions.trackRestaurantClick(restaurant);
+        trackingFunctions.trackMapInteraction();
 
-      debugging.endPerformanceTimer("marker_click", {
-        restaurantId: restaurant.id,
-        restaurantName: restaurant.name,
-      });
+        // A/Bテストイベント追跡
+        const renderTime = performance.now() - startTime;
+        abTestIntegration.trackMarkerInteraction(
+          createMarkerInteraction(restaurant, "click", renderTime)
+        );
 
-      debugging.logEvent("marker_click", {
-        restaurant: restaurant.name,
-        cuisine: restaurant.cuisineType,
+        debugging.endPerformanceTimer("marker_click", {
+          restaurantId: restaurant.id,
+          restaurantName: restaurant.name,
+        });
+
+        debugging.logEvent("marker_click", {
+          restaurant: restaurant.name,
+          cuisine: restaurant.cuisineType,
+        });
       });
     },
     [trackingFunctions, debugging, abTestIntegration]

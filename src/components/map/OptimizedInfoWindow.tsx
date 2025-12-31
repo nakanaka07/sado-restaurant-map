@@ -18,14 +18,6 @@ interface OptimizedInfoWindowProps {
  * メモ化されたInfoWindow内容
  */
 const InfoWindowContent = memo<{ restaurant: Restaurant }>(({ restaurant }) => {
-  // デバッグ: lastUpdated値を確認
-  console.log("🔍 RestaurantデータのlastUpdated確認:", {
-    name: restaurant.name,
-    lastUpdated: restaurant.lastUpdated,
-    hasLastUpdated: !!restaurant.lastUpdated,
-    lastUpdatedType: typeof restaurant.lastUpdated,
-  });
-
   // 電話クリックハンドラー
   const handlePhoneClick = useCallback(
     (e: React.MouseEvent | React.KeyboardEvent) => {

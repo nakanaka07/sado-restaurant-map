@@ -399,24 +399,4 @@ describe("OptimizedInfoWindow", () => {
       expect(OptimizedInfoWindow.displayName).toBe("OptimizedInfoWindow");
     });
   });
-
-  describe("デバッグログ", () => {
-    it("レストランデータのlastUpdatedがログ出力される", () => {
-      const restaurant = createMockRestaurant();
-
-      render(
-        <OptimizedInfoWindow restaurant={restaurant} onClose={mockOnClose} />
-      );
-
-      expect(console.log).toHaveBeenCalledWith(
-        "🔍 RestaurantデータのlastUpdated確認:",
-        expect.objectContaining({
-          name: "テスト和食レストラン",
-          lastUpdated: "2025-01-01",
-          hasLastUpdated: true,
-          lastUpdatedType: "string",
-        })
-      );
-    });
-  });
 });
