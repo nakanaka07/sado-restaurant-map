@@ -113,8 +113,10 @@ export interface FilterTriggerButtonProps {
 
 /**
  * モーダルフィルタープロップス
+ * React 19: refをpropsとして直接受け取る（forwardRef不要）
  */
 export interface FilterModalProps {
+  readonly ref?: React.Ref<HTMLDialogElement>;
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onFiltersChange: (

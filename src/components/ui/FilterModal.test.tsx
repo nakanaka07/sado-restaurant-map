@@ -316,8 +316,8 @@ describe("FilterModal", () => {
     });
   });
 
-  describe("ref forwarding", () => {
-    it("refが正しくdialog要素に転送される", () => {
+  describe("ref prop (React 19 style)", () => {
+    it("refがdialog要素に正しく設定される", () => {
       const ref = vi.fn();
       render(<FilterModal {...defaultProps} ref={ref} />);
 
