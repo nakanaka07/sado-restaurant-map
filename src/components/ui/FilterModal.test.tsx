@@ -445,9 +445,10 @@ describe("FilterModal", () => {
   });
 
   describe("Portal container動的切り替え", () => {
-    it("フルスクリーン要素検出時にコンソールログが出力される", () => {
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation();
+    it("フルスクリーン要素検出時にPortalがフルスクリーン要素内にレンダリングされる", () => {
       const mockFullscreenElement = document.createElement("div");
+      mockFullscreenElement.id = "fullscreen-container";
+      document.body.appendChild(mockFullscreenElement);
 
       Object.defineProperty(document, "fullscreenElement", {
         writable: true,
@@ -457,36 +458,41 @@ describe("FilterModal", () => {
 
       render(<FilterModal {...defaultProps} />);
 
-      // フルスクリーン検出のログを確認
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("フルスクリーンモード検出")
+      // フルスクリーン要素内にモーダルがレンダリングされることを確認
+      const modal = mockFullscreenElement.querySelector(
+        '[data-testid="filter-modal-overlay"]'
       );
+      expect(modal).toBeInTheDocument();
 
-      consoleLogSpy.mockRestore();
       Object.defineProperty(document, "fullscreenElement", {
         writable: true,
         configurable: true,
         value: null,
       });
+      document.body.removeChild(mockFullscreenElement);
     });
 
-    it("通常モードに戻る際にコンソールログが出力される", () => {
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation();
+    it("通常モードではbodyにPortalがレンダリングされる", () => {
+      // fullscreenElementがnullの状態でレンダリング
+      Object.defineProperty(document, "fullscreenElement", {
+        writable: true,
+        configurable: true,
+        value: null,
+      });
 
-      // 最初はnullの状態でレンダリング
       render(<FilterModal {...defaultProps} />);
 
-      // 通常モードのログを確認
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining("通常モードに戻しました")
+      // bodyにモーダルがレンダリングされることを確認
+      const modal = document.body.querySelector(
+        '[data-testid="filter-modal-overlay"]'
       );
-
-      consoleLogSpy.mockRestore();
+      expect(modal).toBeInTheDocument();
     });
 
     it("webkitFullscreenElementが検出されること", () => {
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation();
       const mockElement = document.createElement("div");
+      mockElement.id = "webkit-fullscreen";
+      document.body.appendChild(mockElement);
 
       Object.defineProperty(document, "webkitFullscreenElement", {
         writable: true,
@@ -496,19 +502,24 @@ describe("FilterModal", () => {
 
       render(<FilterModal {...defaultProps} />);
 
-      expect(consoleLogSpy).toHaveBeenCalled();
+      // webkitフルスクリーン要素内にモーダルがレンダリングされることを確認
+      const modal = mockElement.querySelector(
+        '[data-testid="filter-modal-overlay"]'
+      );
+      expect(modal).toBeInTheDocument();
 
-      consoleLogSpy.mockRestore();
       Object.defineProperty(document, "webkitFullscreenElement", {
         writable: true,
         configurable: true,
         value: undefined,
       });
+      document.body.removeChild(mockElement);
     });
 
     it("mozFullScreenElementが検出されること", () => {
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation();
       const mockElement = document.createElement("div");
+      mockElement.id = "moz-fullscreen";
+      document.body.appendChild(mockElement);
 
       Object.defineProperty(document, "mozFullScreenElement", {
         writable: true,
@@ -518,19 +529,24 @@ describe("FilterModal", () => {
 
       render(<FilterModal {...defaultProps} />);
 
-      expect(consoleLogSpy).toHaveBeenCalled();
+      // mozフルスクリーン要素内にモーダルがレンダリングされることを確認
+      const modal = mockElement.querySelector(
+        '[data-testid="filter-modal-overlay"]'
+      );
+      expect(modal).toBeInTheDocument();
 
-      consoleLogSpy.mockRestore();
       Object.defineProperty(document, "mozFullScreenElement", {
         writable: true,
         configurable: true,
         value: undefined,
       });
+      document.body.removeChild(mockElement);
     });
 
     it("msFullscreenElementが検出されること", () => {
-      const consoleLogSpy = vi.spyOn(console, "log").mockImplementation();
       const mockElement = document.createElement("div");
+      mockElement.id = "ms-fullscreen";
+      document.body.appendChild(mockElement);
 
       Object.defineProperty(document, "msFullscreenElement", {
         writable: true,
@@ -540,14 +556,18 @@ describe("FilterModal", () => {
 
       render(<FilterModal {...defaultProps} />);
 
-      expect(consoleLogSpy).toHaveBeenCalled();
+      // msフルスクリーン要素内にモーダルがレンダリングされることを確認
+      const modal = mockElement.querySelector(
+        '[data-testid="filter-modal-overlay"]'
+      );
+      expect(modal).toBeInTheDocument();
 
-      consoleLogSpy.mockRestore();
       Object.defineProperty(document, "msFullscreenElement", {
         writable: true,
         configurable: true,
         value: undefined,
       });
+      document.body.removeChild(mockElement);
     });
   });
 

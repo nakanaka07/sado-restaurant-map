@@ -51,13 +51,9 @@ export function FilterModal({
 
       if (fullscreenElement) {
         // フルスクリーン時はフルスクリーン要素内にPortalを作成
-        console.log(
-          "🔧 フルスクリーンモード検出: モーダルPortalをフルスクリーン要素内に移動"
-        );
         setPortalContainer(fullscreenElement);
       } else {
         // 通常時はbodyに戻す
-        console.log("🔄 通常モードに戻しました: モーダルPortalをbodyに配置");
         setPortalContainer(document.body);
       }
     };
@@ -295,13 +291,9 @@ export function FilterModal({
       <button
         type="button"
         className="filter-modal-backdrop"
-        onClick={e => {
-          console.log("🎯 Backdrop clicked!", e.target);
-          onClose();
-        }}
+        onClick={() => onClose()}
         onKeyDown={e => {
           if (e.key === "Enter" || e.key === " ") {
-            console.log("⌨️ Backdrop keyboard activated:", e.key);
             e.preventDefault();
             onClose();
           }
