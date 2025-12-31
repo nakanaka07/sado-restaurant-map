@@ -1,6 +1,6 @@
 # GitHub Copilot Repository Instructions
 
-> **Last Updated**: 2025-12-30
+> **Last Updated**: 2025-12-31
 > **Philosophy**: Trust these instructions first. Search workspace only when information is incomplete or outdated.
 
 ## 0. Development Context & Partnership
@@ -407,6 +407,12 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 - ✅ Skipped Tests解消（4件 → 0件）
 - ✅ モバイルビューポート対応（375x667）
 
+**追加完了 (12/31)** - React 19互換性対応 ✅:
+
+- ✅ forwardRefからref-as-propパターンへの移行（FilterModal.tsx）
+- ✅ modalFilter.types.tsに`ref?: React.Ref<HTMLDialogElement>`追加
+- ✅ 関連テスト更新完了
+
 **Key Lesson from Week 4**:
 
 - E2Eテストでjsdomでは実現困難なテスト（ESCキー、スクロール管理、スワイプ）を解決
@@ -446,6 +452,6 @@ See [PROJECT_REFRESH_PLAN_2025Q1.md](../docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.m
 
 ---
 
-**Version**: 2.14 (2025-12-30)
+**Version**: 2.15 (2025-12-31)
 **Based on**: GitHub Copilot Custom Instructions Best Practices (Jan 2025)
-**Last Update**: ドキュメント同期 - テスト1928件、カバレッジ71.51%、E2E 20テスト全通過。
+**Last Update**: React 19互換性対応完了（forwardRef→ref-as-prop）、テスト1928件、カバレッジ71.51%、E2E 20テスト全通過。

@@ -255,14 +255,14 @@ pnpm test:run
 
 **戦略修正**: Week 1測定でGoogle Maps API同期初期化がTBTボトルネックと判明。依存関係更新より性能改善を最優先。
 
-| Task                            | Priority | 工数 | 期待効果       |
-| ------------------------------- | -------- | ---- | -------------- |
-| Google Maps API遅延読み込み実装 | P0       | 8h   | TBT -5,000ms   |
-| Intersection Observer導入       | P0       | 3h   | 初回描画高速化 |
-| Checkpoint 2測定                | P0       | 1h   | 効果検証       |
-| Vite 7.2.7アップグレード        | P1       | 1h   | 性能改善後     |
-| React 19互換性監査              | P1       | 4h   | -              |
-| Lighthouse CI修正               | P2       | 2h   | 優先度降格     |
+| Task                            | Priority | 工数 | 期待効果       | 状態            |
+| ------------------------------- | -------- | ---- | -------------- | --------------- |
+| Google Maps API遅延読み込み実装 | P0       | 8h   | TBT -5,000ms   | ✅ 完了         |
+| Intersection Observer導入       | P0       | 3h   | 初回描画高速化 | ✅ 完了         |
+| Checkpoint 2測定                | P0       | 1h   | 効果検証       | ✅ 完了         |
+| Vite 7.2.7アップグレード        | P1       | 1h   | 性能改善後     | ✅ 7.3.0        |
+| React 19互換性監査              | P1       | 4h   | -              | ✅ 完了 (12/31) |
+| Lighthouse CI修正               | P2       | 2h   | 優先度降格     | ⚠️ 保留         |
 
 **React 19互換性チェックリスト**:
 
