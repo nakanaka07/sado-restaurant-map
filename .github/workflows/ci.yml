@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload coverage summary artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-summary
           path: coverage/coverage-summary.json
@@ -77,7 +77,7 @@ jobs:
 
       - name: Artifact coverage html
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-html
           path: coverage
@@ -116,7 +116,7 @@ jobs:
           fi
 
       - name: Upload dist artifacts (for reuse)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: dist-build
           path: dist
@@ -124,7 +124,7 @@ jobs:
           retention-days: 1
 
       - name: Upload bundle stats
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: bundle-stats
           path: dist/stats.html
@@ -145,7 +145,7 @@ jobs:
           fi
       - name: Upload size diff artifact
         if: steps.size-diff.outputs.diff_done == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: size-diff
           path: size-diff.json

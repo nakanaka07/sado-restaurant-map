@@ -41,7 +41,7 @@ jobs:
         run: npx lhci autorun --config=lighthouserc-mobile.json || echo "LHCI Mobile finished with non-zero exit (soft fail)"
 
       - name: Upload Lighthouse report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: lighthouse-report
           path: .lighthouseci
