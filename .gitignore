@@ -144,6 +144,7 @@ coverage/
 # Python カバレッジ (pytest-cov)
 python-coverage.json
 python-htmlcov/
+data-platform/htmlcov/
 .coverage
 *.coverage
 

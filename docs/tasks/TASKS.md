@@ -338,6 +338,28 @@ AC:
 
 **備考**: 段階的アプローチにより、各マイルストーンで進捗確認可能。Phase 5-1完了時点で73.47%到達により、目標達成の確実性が向上。
 
+---
+
+### 🐍 data-platform (Python ETL) 改善タスク
+
+**現状**: カバレッジ **20.06%** (225 tests) - 独立したPython環境
+**目標**: カバレッジ 30% (短期)、50% (長期)
+**参照**: [data-platform/README.md](../../data-platform/README.md)
+
+- (P3 test) **Pythonカバレッジ30%達成** [Issue #TBD]
+  - 現状: 20.06% (225 tests)
+  - 目標: 30% (+10%, 推定+50 tests)
+  - 対象モジュール: shared/config.py, shared/container.py, core/domain/interfaces.py
+  - 工数: 4-6時間
+  - 優先度: P3 (フロントエンド優先)
+
+- (P3 docs) **data-platform README更新** [Issue #TBD]
+  - 内容: セットアップ手順簡略化、CI統合ガイド追加
+  - 工数: 1時間
+  - 優先度: P3
+
+---
+
 ### ✅ Phase 4: テスト品質向上完了 (2025-12-07)
 
 **実績サマリ**:

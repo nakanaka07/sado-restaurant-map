@@ -41,12 +41,12 @@
 
 ## 5. 品質ゲート (提案)
 
-| ゲート      | 指標               | 最低ライン(初期) | 将来目標                   |
+| ゲート      | 指標               | 最低ライン(現在) | 将来目標                   |
 | ----------- | ------------------ | ---------------- | -------------------------- |
 | Lint        | ESLint error 0     | 100% パス        | 維持                       |
 | Type Check  | `tsc --noEmit`     | error 0          | 維持                       |
-| Test        | Vitest pass rate   | 90%+ pass        | 95%+                       |
-| Coverage    | line               | 50% 以上         | 70% → 80% → 90% 段階引上げ |
+| Test        | Vitest pass rate   | 100% pass        | 維持                       |
+| Coverage    | line               | 65% 以上         | 75% → 80% → 90% 段階引上げ |
 | A11y        | axe / 手動チェック | 重大違反 0       | 0 維持                     |
 | Bundle      | main chunk         | < 250KB gzip     | < 180KB gzip               |
 | Performance | LCP (CI計測)       | < 3.0s           | < 2.0s                     |
@@ -292,7 +292,7 @@ Start-Process "dist\stats.html"
 
 ---
 
-Last Updated: 2025-10-19
+Last Updated: 2026-01-01
 
 ## 13. カバレッジ測定の明確化 (Last-Updated: 2025-11-04)
 
@@ -320,7 +320,8 @@ coverage: {
 
 **対象**: React/TypeScript コードベース（`src/` 配下）
 
-**現在の目標**: 51.12% 達成済み → 60% (Phase 2) → 80% (Phase 3)
+**現在の状態**: 71.51% 達成済み（2025-12-31時点）
+**次期目標**: 75% (Phase 5) → 80% → 90% 段階引上げ
 
 ### 13.2. Python カバレッジ (data-platform ETL)
 
@@ -354,8 +355,97 @@ coverage: {
 
 ---
 
-Last Updated: 2025-11-04
+Last Updated: 2026-01-01
 
-## 14. 参照ドキュメント
+## 14. E2Eテスト (Last-Updated: 2026-01-01)
 
-- A/Bテストとマーカー同期仕様: `docs/ab-test-marker-sync.md` (variant→markerType マッピング / override 表示 / イベント定義)
+Playwright 1.57.0を使用したE2Eテスト環境が構築済み。
+
+### 14.1. 実行コマンド
+
+```bash
+# E2Eテスト実行
+pnpm test:e2e
+
+# UIモードで実行
+pnpm exec playwright test --ui
+
+# 特定ファイルのみ
+pnpm exec playwright test e2e/filter-modal.spec.ts
+```
+
+### 14.2. テスト対象
+
+| ファイル             | テスト数 | 対象                   |
+| -------------------- | -------- | ---------------------- |
+| filter-modal.spec.ts | 20       | FilterModalのE2Eテスト |
+
+### 14.3. jsdomでは困難なテスト
+
+以下はE2Eテストで実施:
+
+- ESCキーでモーダルを閉じる
+- バックドロップクリック（z-index問題）
+- スクロール管理（body overflow制御）
+- スワイプジェスチャー
+- 高速連打時の状態管理
+
+---
+
+## 15. data-platform品質基準 (Last-Updated: 2026-01-01)
+
+`data-platform/`はPython ETLシステムで、フロントエンドとは**独立した環境**。
+
+### 15.1. 品質ゲート
+
+| ゲート     | 指標             | 最低ライン(現在) | 将来目標  |
+| ---------- | ---------------- | ---------------- | --------- |
+| Lint       | flake8 error 0   | 100% パス        | 維持      |
+| Type Check | mypy --strict    | error 0          | 維持      |
+| Test       | pytest pass rate | 100% pass        | 維持      |
+| Coverage   | line             | 20% 以上         | 30% → 50% |
+
+### 15.2. 実行コマンド
+
+```bash
+# data-platformディレクトリで実行
+cd data-platform
+
+# 仮想環境セットアップ
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1  # Windows
+pip install -r config/requirements.txt
+
+# テスト実行
+pytest
+
+# カバレッジ付きテスト
+pytest --cov=. --cov-report=html
+```
+
+### 15.3. アーキテクチャ
+
+Clean Architectureを採用:
+
+| レイヤー       | ディレクトリ      | 責務                     |
+| -------------- | ----------------- | ------------------------ |
+| Interface      | `interface/`      | CLI (ユーザー入力処理)   |
+| Application    | `application/`    | Use Cases (ワークフロー) |
+| Domain         | `core/`           | ビジネスロジック         |
+| Infrastructure | `infrastructure/` | 外部サービス接続         |
+| Shared         | `shared/`         | 共有コンポーネント       |
+
+---
+
+## 16. 参照ドキュメント
+
+- A/Bテストとマーカー同期仕様: `docs/design/ab-test-marker-sync.md`
+- UnifiedMarker設計: `docs/design/unified-marker-design.md`
+- PWA実装メモ: `docs/design/pwa-implementation-notes.md`
+- タスク管理: `docs/tasks/TASKS.md`
+- 2025 Q1刷新計画: `docs/tasks/PROJECT_REFRESH_PLAN_2025Q1.md`
+- data-platform README: `data-platform/README.md`
+
+---
+
+Last Updated: 2026-01-01
