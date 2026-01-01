@@ -37,28 +37,28 @@ jobs:
             echo "Lines Coverage: ${lines}%" >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Enforce coverage threshold (>=38%, target 50%)
+      - name: Enforce coverage threshold (>=65%)
         run: |
           if [ -f coverage/coverage-summary.json ]; then
             pct=$(jq '.total.lines.pct' coverage/coverage-summary.json || echo 0)
             echo "Detected coverage lines pct=${pct}%" >> $GITHUB_STEP_SUMMARY
-            echo "Current baseline: 38.22% (CI), Target: 40% → 50% by Phase 10" >> $GITHUB_STEP_SUMMARY
+            echo "Coverage threshold: 65% (current ~71%)" >> $GITHUB_STEP_SUMMARY
 
             # Use bc for reliable floating point comparison
             if command -v bc >/dev/null 2>&1; then
-              if (( $(echo "${pct} >= 38" | bc -l) )); then
-                echo "✅ Coverage ${pct}% meets 38% threshold"
+              if (( $(echo "${pct} >= 65" | bc -l) )); then
+                echo "✅ Coverage ${pct}% meets 65% threshold"
               else
-                echo "❌ Coverage ${pct}% < 38% threshold (gradually increase to 50%)" >&2
+                echo "❌ Coverage ${pct}% < 65% threshold" >&2
                 exit 1
               fi
             else
               # Fallback: Use awk with proper variable substitution
-              result=$(awk -v pct="$pct" 'BEGIN { print (pct >= 38) ? "pass" : "fail" }')
+              result=$(awk -v pct="$pct" 'BEGIN { print (pct >= 65) ? "pass" : "fail" }')
               if [ "$result" = "pass" ]; then
-                echo "✅ Coverage ${pct}% meets 38% threshold"
+                echo "✅ Coverage ${pct}% meets 65% threshold"
               else
-                echo "❌ Coverage ${pct}% < 38% threshold (gradually increase to 50%)" >&2
+                echo "❌ Coverage ${pct}% < 65% threshold" >&2
                 exit 1
               fi
             fi

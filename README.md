@@ -72,7 +72,7 @@ scripts/       分析・デプロイ支援スクリプト
 | Lint       | ESLint error 0  | 100%           | `pnpm lint`               | ✅ 0 errors       |
 | Type Check | tsc             | error 0        | `pnpm type-check`         | ✅ 0 errors       |
 | Tests      | Vitest          | pass rate 90%+ | `pnpm test`               | ✅ 1213/1213 pass |
-| Coverage   | line            | ≥50%           | `pnpm test:coverage`      | ✅ 64.31%         |
+| Coverage   | line            | ≥65%           | `pnpm test:coverage`      | ✅ 71.51%         |
 | A11y       | axe             | 重大違反 0     | `pnpm test:accessibility` | ✅ 0 violations   |
 | Bundle     | main chunk gzip | <250KB         | `pnpm analyze`            | ✅ App 11KB       |
 
