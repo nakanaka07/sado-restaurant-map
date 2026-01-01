@@ -185,6 +185,7 @@ docker-compose.override.yml
 # === パフォーマンス・メトリクス ===
 .lighthouseci/
 web-vitals-report/
+lighthouse-report.html
 
 # === 2025年新規追加項目 ===
 # Bun (新しいパッケージマネージャー)
