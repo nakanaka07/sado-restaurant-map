@@ -1,9 +1,11 @@
+/* @vitest-environment jsdom */
 /**
  * LoadingSpinner コンポーネントのテスト
  *
  * Phase 8 Task 1.2.1 実装
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
 import { afterEach, describe, expect, it } from "vitest";

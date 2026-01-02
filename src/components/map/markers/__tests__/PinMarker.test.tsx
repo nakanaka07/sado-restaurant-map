@@ -1,3 +1,5 @@
+/* @vitest-environment jsdom */
+import "@testing-library/jest-dom";
 /**
  * @fileoverview PinMarker comprehensive tests
  *

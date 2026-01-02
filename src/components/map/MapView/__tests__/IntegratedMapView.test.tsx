@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 import type { MapPoint } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IntegratedMapView } from "../IntegratedMapView";
@@ -220,9 +221,8 @@ describe("IntegratedMapView", () => {
 
   describe("A/Bテスト統合", () => {
     it("A/Bテスト分類を実行する", async () => {
-      const { classifyUser, saveABTestState, trackABTestEvent } = await import(
-        "@/config/abTestConfig"
-      );
+      const { classifyUser, saveABTestState, trackABTestEvent } =
+        await import("@/config/abTestConfig");
 
       render(
         <IntegratedMapView
@@ -303,9 +303,8 @@ describe("IntegratedMapView", () => {
 
   describe("マーカークリックイベント", () => {
     it("マーカークリック時にトラッキングイベントを送信", async () => {
-      const { trackRestaurantClick, trackMapInteraction } = await import(
-        "@/utils/analytics"
-      );
+      const { trackRestaurantClick, trackMapInteraction } =
+        await import("@/utils/analytics");
       const { trackABTestEvent } = await import("@/config/abTestConfig");
 
       render(

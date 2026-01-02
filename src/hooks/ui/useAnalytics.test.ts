@@ -1,4 +1,7 @@
 /**
+ * @vitest-environment jsdom
+ */
+/**
  * @fileoverview Tests for useAnalytics hook
  * アナリティクスフックのテスト
  */

@@ -1,3 +1,4 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview DetailedBusinessHours Comprehensive Tests
  * カバレッジ目標: 0% → 100%
@@ -15,6 +16,7 @@
  */
 
 import type { OpeningHours } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DetailedBusinessHours } from "../DetailedBusinessHours";

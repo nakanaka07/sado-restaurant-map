@@ -1,5 +1,7 @@
+/* @vitest-environment jsdom */
+import "@testing-library/jest-dom";
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import PWABadge from "../PWABadge";
 
 describe("PWABadge", () => {

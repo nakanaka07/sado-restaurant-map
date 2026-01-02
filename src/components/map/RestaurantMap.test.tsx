@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 import type { Restaurant } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { type ReactNode } from "react";
@@ -316,9 +317,8 @@ describe("RestaurantMap", () => {
   describe("アナリティクス", () => {
     it("マーカークリック時にアナリティクスイベントが送信される", async () => {
       const user = userEvent.setup();
-      const { trackRestaurantClick, trackMapInteraction } = await import(
-        "@/utils/analytics"
-      );
+      const { trackRestaurantClick, trackMapInteraction } =
+        await import("@/utils/analytics");
 
       render(<RestaurantMap {...defaultProps} />);
 

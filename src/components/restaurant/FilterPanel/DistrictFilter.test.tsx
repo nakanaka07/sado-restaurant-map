@@ -5,6 +5,7 @@
  */
 
 import type { SadoDistrict } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { DistrictFilter } from "./DistrictFilter";

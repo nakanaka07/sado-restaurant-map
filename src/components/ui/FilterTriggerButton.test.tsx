@@ -1,8 +1,10 @@
 /**
  * @fileoverview FilterTriggerButton Component Tests
  * フィルタートリガーボタンの包括的テスト
+ * @vitest-environment jsdom
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";

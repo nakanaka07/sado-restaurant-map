@@ -13,8 +13,10 @@
  *
  * Expected: 36 lines, 16.66% → 100% coverage (+0.23% overall)
  */
+/* @vitest-environment jsdom */
 
 import type { Parking, Restaurant, Toilet } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type {

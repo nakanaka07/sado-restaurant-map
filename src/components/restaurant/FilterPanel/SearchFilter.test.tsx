@@ -1,8 +1,10 @@
 /**
  * @fileoverview Tests for SearchFilter component
  * 検索フィルターコンポーネントのテスト
+ * @vitest-environment jsdom
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SearchFilter } from "./SearchFilter";

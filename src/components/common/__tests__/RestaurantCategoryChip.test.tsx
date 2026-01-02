@@ -1,3 +1,4 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview RestaurantCategoryChip Comprehensive Tests
  * カバレッジ目標: 0% → 100%
@@ -12,6 +13,7 @@
  */
 
 import { RestaurantCategory } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { RestaurantCategoryChip } from "../RestaurantCategoryChip";

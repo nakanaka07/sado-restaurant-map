@@ -1,8 +1,10 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview OptimizedImage Component Tests
  * 最適化画像コンポーネントのテスト
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OptimizedImage } from "./OptimizedImage";

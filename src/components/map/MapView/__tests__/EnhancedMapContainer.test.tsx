@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 import { classifyUser } from "@/config/abTestConfig";
 import type { MapPoint, Parking, Restaurant } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

@@ -1,3 +1,4 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview Analytics Utility Tests
  * カバレッジ目標: 0% → 60%
@@ -587,8 +588,8 @@ describe("analytics - checkGAStatus", () => {
     expect(status).not.toHaveProperty("error");
 
     if (!("error" in status)) {
-      // G-で始まる測定IDは有効
-      expect(status.measurementId).toBe("G-TEST123456");
+      // G-で始まる測定IDは有効（環境変数またはモック値）
+      expect(status.measurementId).toMatch(/^G-[A-Z0-9]+$/);
       expect(status.measurementIdValid).toBe(true);
     }
   });

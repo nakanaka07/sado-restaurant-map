@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useMapPoints } from "./useMapPoints";
@@ -367,9 +370,8 @@ describe("useMapPoints", () => {
 
   describe("SheetsApiError ハンドリング", () => {
     it("SheetsApiErrorが適切にハンドリングされるべき", async () => {
-      const { fetchAllMapPoints, SheetsApiError } = await import(
-        "../../services"
-      );
+      const { fetchAllMapPoints, SheetsApiError } =
+        await import("../../services");
       vi.mocked(fetchAllMapPoints).mockRejectedValue(
         new SheetsApiError("API接続エラー", 500)
       );

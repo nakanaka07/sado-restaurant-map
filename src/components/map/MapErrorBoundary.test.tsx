@@ -1,9 +1,11 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview MapErrorBoundary コンポーネントのテスト
  * エラーハンドリング、フォールバックUI、リトライロジック、エラー分類、
  * アクセシビリティ、エラータイプ別処理をテスト
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

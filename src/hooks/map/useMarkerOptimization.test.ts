@@ -1,4 +1,7 @@
 /**
+ * @vitest-environment jsdom
+ */
+/**
  * @fileoverview useMarkerOptimization Hook Tests
  * カバレッジ目標: 0% → 60%
  */

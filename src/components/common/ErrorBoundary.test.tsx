@@ -1,9 +1,11 @@
+/* @vitest-environment jsdom */
 /**
  * ErrorBoundary コンポーネントのテスト
  *
  * Phase 8 Task 1.2.2 実装
  */
 
+import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";

@@ -1,4 +1,5 @@
 /* @vitest-environment jsdom */
+import "@testing-library/jest-dom";
 /**
  * @fileoverview MapContainer テスト
  * 地図コンテナコンポーネントの包括的テスト

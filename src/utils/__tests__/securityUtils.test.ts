@@ -1,3 +1,4 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview セキュリティユーティリティのテスト
  * securityUtils.ts の単体テスト

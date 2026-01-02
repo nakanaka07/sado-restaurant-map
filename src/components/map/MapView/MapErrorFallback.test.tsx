@@ -1,8 +1,10 @@
+/* @vitest-environment jsdom */
 /**
  * @fileoverview Tests for MapErrorFallback component
  * 地図エラーフォールバックコンポーネントのテスト
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { MapErrorFallback } from "./MapErrorFallback";

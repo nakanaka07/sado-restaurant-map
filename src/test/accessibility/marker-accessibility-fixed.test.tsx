@@ -1,8 +1,12 @@
 /**
+ * @vitest-environment jsdom
+ */
+/**
  * マーカーアクセシビリティテスト（修正版）
  * WCAG 2.2 AA準拠の自動検証
  */
 
+import "@testing-library/jest-dom";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 

@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 import type { MapPoint } from "@/types";
+import "@testing-library/jest-dom";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { CircularMarkerContainer } from "../CircularMarkerContainer";

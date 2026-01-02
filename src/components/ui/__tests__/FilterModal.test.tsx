@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 import { FilterDisplayMode } from "@/types";
+import "@testing-library/jest-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FilterModal } from "../FilterModal";

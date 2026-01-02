@@ -1,4 +1,7 @@
 /**
+ * @vitest-environment jsdom
+ */
+/**
  * @fileoverview A/Bテスト分析システムのテスト
  * カバレッジ目標: 22.62% → 60%
  *

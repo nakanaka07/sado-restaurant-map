@@ -1,5 +1,6 @@
 /* @vitest-environment jsdom */
 import type { MapPoint } from "@/types";
+import "@testing-library/jest-dom";
 import {
   cleanup,
   fireEvent,
