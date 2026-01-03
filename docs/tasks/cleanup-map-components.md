@@ -12,7 +12,8 @@ This document tracks the cleanup around `src/components/map` and `src/components
 
 - Barrel (map/MapView/index.ts): removed `../legacy/MapView/MapMarker` export.
 - RestaurantMap: replaced legacy `OptimizedRestaurantMarker` usage with `UnifiedMarker`.
-- MarkerMigration: removed legacy imports and used `UnifiedMarker` variants: `svg` (new), `icon` (legacy), `pin` (final fallback).
+- MarkerMigration: removed legacy imports and used `UnifiedMarker` variants:
+  `svg` (new), `icon` (legacy), `pin` (final fallback).
 - Do not export `MapViewWithTesting` from `map/index.ts` to avoid accidental usage.
 
 ## Candidates for deletion (need confirmation)
