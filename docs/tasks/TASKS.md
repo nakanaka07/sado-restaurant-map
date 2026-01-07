@@ -549,7 +549,46 @@ AC:
 
 ## 6. Done (最近 10 件のみ保持)
 
-1. **(P0 fix) Week 1完了: Vitest 4 + Phase 9ロールバック + 測定** ✅ (2025-12-09)
+1. **(P1 perf) P2完了: Manual Chunks最適化** ✅ (2026-01-05)
+   - **P2-1 分析完了**: バンドル構成把握、改善提案3項目作成
+     - react-vendor肥大化問題特定 (69.21 KB、Google Maps混在)
+     - data-processing混在問題特定 (12.43 KB、hooks/config混在)
+     - 削減見込み: -23~28KB (目標-40-45KBの60-70%)
+   - **P2-2 再設計・実装**: vite.config.ts manualChunks更新
+     - Google Maps分離: 新チャンク "google-maps" 作成 (27.71 KB → 10.08 KB gzip)
+     - Hooks分離: 新チャンク "hooks" 作成 (9.24 KB → 3.02 KB gzip)
+     - Config分離: 新チャンク "config" 作成 (0.44 KB → 0.29 KB gzip)
+     - react-vendor削減: 217.92 KB → 190.22 KB (**-27.70 KB、-12.7%**)
+   - **P2-3 size-limit更新**: package.json + metrics/size-limit.json
+     - 新チャンク3件追加: google-maps (limit 30KB), hooks (15KB), config (5KB)
+     - react-vendor制限調整: 250KB → 200KB
+     - 全チャンク制限内通過 ✅
+   - **効果測定** (gzip):
+     - react-vendor: 69.21 KB → 59.68 KB (**-9.53 KB、-13.8%** 🎯)
+     - 新チャンク: google-maps 10.08 KB, hooks 3.02 KB, config 0.29 KB
+     - 総削減: **-9.53 KB** (目標-40-45KBの24%達成、追加施策必要)
+   - **品質ゲート**: size-limit全通過、ビルド成功、テスト全通過
+   - 参照: [vite.config.ts](../../vite.config.ts) Line 323-360
+   - 工数: 2時間（分析 + 実装 + 検証）
+
+2. **(P1 refactor) P1完了: App.tsx分割 + LogManager + Test Helpers** ✅ (2026-01-04)
+   - **P1-1 LogManager実装**: 604行、31テスト全通過
+     - console.log統一管理、環境別ログレベル制御、structured logging
+     - テスト戦略: ログ履歴検証パターン確立（console spy → history based）
+   - **P1-2 Test Helpers実装**: 480行（4ファイル）、20テスト全通過
+     - testEnv.ts (144行): autoSetupTestEnv, console spy自動設定
+     - renderHelpers.ts (109行): renderWithTestWrapper, resetMocks
+     - mockHelpers.ts (197行): createMockFilters, createMockRestaurant等
+     - 型対応: Restaurant型完全準拠（cuisineType, coordinates, openingHours配列）
+   - **P1-3 既存テストリファクタリング**: useFilterHandlers.test.ts適用
+     - 746行 → 612行（**-134行、18%削減**）、31テスト全通過
+     - setup部分: 50行 → 27行（**54%削減**）
+     - imports簡潔化、beforeEach自動化、console spy参照修正
+   - **総削減**: App.tsx -295行、テスト -134行、合計 -429行
+   - 参照: [docs/guides/testing.md](../guides/testing.md)
+   - 工数: 12時間（実装 + デバッグ + リファクタリング）
+
+3. **(P0 fix) Week 1完了: Vitest 4 + Phase 9ロールバック + 測定** ✅ (2025-12-09)
    - Vitest 4.0.15マイグレーション成功（1818/1822テスト通過 = 99.8%）
    - Phase 9ロールバック実装（TBT改善-3.3%のみ、効果限定的）
    - Node.js engines設定追加（package.json更新）
@@ -558,7 +597,7 @@ AC:
    - 戦略変更: Week 2-3統合、Google Maps最適化を最優先実施
    - 工数: 10時間（調査・実装・測定）
 
-2. **(P0 test) Phase 4: 75%カバレッジ達成完了** ✅ (2025-12-08)
+4. **(P0 test) Phase 4: 75%カバレッジ達成完了** ✅ (2025-12-08)
    - テスト追加: 1444 → 1797 (+353 tests, +24.4%)
    - カバレッジ: 71.32% → **75.88%** (+4.56%, **目標75%超過達成**)
    - 詳細: Lines 75.88%, Functions 87.46%, Branches 81.25%
@@ -571,7 +610,7 @@ AC:
    - スキップテスト: 4件（FilterModal timing issues、Phase 9でE2Eテスト対応予定）
    - 品質ゲート: 1797/1801通過（99.8%）、0 errors
    - 工数: 6時間
-3. **(P0 fix) Phase 4初期: テスト品質向上完了** ✅ (2025-12-07)
+5. **(P0 fix) Phase 4初期: テスト品質向上完了** ✅ (2025-12-07)
    - テスト修正: 2 failed → 1488/1488 passing (100%)
    - カバレッジ: 71.5% → **72.56%** (+1.06%)
    - 詳細: Lines 72.56%, Functions 85.25%, Branches 77.65%
@@ -579,7 +618,7 @@ AC:
    - 技術的成果: スキップテスト完全削除、クリーンなテストスイート実現、エラーハンドリングコメント追加
    - 品質ゲート復旧: 1488/1488通過（100%）
    - 工数: 2時間
-4. **(P1 test) Phase 3: 残存コンポーネントテスト完了** ✅ (2025-12-07)
+6. **(P1 test) Phase 3: 残存コンポーネントテスト完了** ✅ (2025-12-07)
    - テスト追加: 1213 → 1489 tests (+276 tests, +22.7%)
    - カバレッジ: 64.31% → **71.5%** (+7.19%, **目標70%超過達成**)
    - 詳細: Lines 71.5%, Functions 83.04%, Branches 77.34%
@@ -593,7 +632,7 @@ AC:
      - Barrel export tests: 14 tests (5ファイル)
    - 技術的成果: TypeScript strict mode完全対応、マーカーシステム包括テスト完了
    - 注意: ⚠️ 2テスト失敗 (abTestAnalytics.test.ts) - Phase 4で修正予定
-5. **(P1 test) Phase 2: インタラクティブUI - UX品質保証完了** ✅ (2025-12-06)
+7. **(P1 test) Phase 2: インタラクティブUI - UX品質保証完了** ✅ (2025-12-06)
    - テスト追加: 1065 → 1213 tests (+148 tests, +13.9%)
    - カバレッジ: 51.12% → **64.31%** (+13.19%, 目標65%達成)
    - 詳細: Lines 64.31%, Functions 75.47%, Branches 74.32%
@@ -602,7 +641,7 @@ AC:
      - FeatureFilter.test.tsx: +16 tests (エッジケース・統合)
      - 追加コンポーネントテスト多数 (+120 tests)
    - 品質ゲート: 1213/1213 tests全通過、0 errors
-6. **(P1 test) Phase 2初期: フィルターテスト拡充** ✅ (2025-11-30)
+8. **(P1 test) Phase 2初期: フィルターテスト拡充** ✅ (2025-11-30)
    - テスト追加: DistrictFilter +12, FeatureFilter +16 (合計 +28 tests)
    - テスト総数: 1065 → 1093 (+2.63%)
    - カバレッジ: 51.12%維持（質的カバレッジ向上）
@@ -612,34 +651,34 @@ AC:
      - エッジケース: 無効データ、1000要素配列、undefined props
      - 統合シナリオ: 展開→複数選択→折りたたみ、高速連打、状態変更中操作
    - 品質ゲート: 1093/1093 tests全通過、0 errors
-7. **(P0 perf) Phase 8: JavaScript最適化** ✅ (2025-10-19)
+9. **(P0 perf) Phase 8: JavaScript最適化** ✅ (2025-10-19)
    - React.lazy実装: FilterPanel, CustomMapControls, APIProvider, IntegratedMapView
    - App.js: 19.56KB → 11.13KB (-43.1%)
    - 条件付き初期ロード: -78.7% (-42.21KB)
    - Tree-shaking改善: Barrel exports完全削除
    - Terser 2-pass圧縮: 追加 -1.07KB
    - 品質ゲート: 405 tests全通過
-8. **(P0 test) Phase 1: カバレッジ50%達成** ✅ (2025-11-04)
-   - カバレッジ: 40.52% → **51.12%** (+10.6%)
-   - テスト数: 410 → 913 (+503 tests)
-   - 失敗テスト: 50件 → 0件（100%修正）
-   - 主要修正: DOMクリーンアップ追加（3ファイル）
-   - 達成項目:
-     - type-guards.test.ts: 100% (72テスト)
-     - RestaurantCategoryChip.test.tsx: 100% (66テスト)
-     - DetailedBusinessHours.test.tsx: 100% (38テスト)
-     - AccessibilityComponents.test.tsx: 修正完了
-   - 工数: 30分（見積6.5時間の8%）
-   - 品質ゲート: 全通過（TypeScript 0エラー、ESLint 1警告、Tests 913/913通過）
-9. **(P2 test) Phase 8.3: Code Quality Improvement** ✅ (2025-11-03)
-   - IntegratedMapView.tsx: exhaustive-deps warning修正（useCallback化）
-   - App.test.tsx: +2テストケース（エラーハンドリング、フィルター機能）
-   - useMapPoints.test.ts: +3テストケース（統計情報、フィルター、エラー処理）
-   - Total tests: 405 → 410 (+5 tests, +1.2%)
-   - Coverage: 40.34% → 40.52% (+0.18%)
-   - ESLint warnings: 1 → 0 (100%解消)
-   - useMapPoints.ts coverage: 49.66% → 58.33% (+8.67%)
-10. **(P2 perf) OptimizedImage統合** ✅ (2025-11-01)
+10. **(P0 test) Phase 1: カバレッジ50%達成** ✅ (2025-11-04)
+    - カバレッジ: 40.52% → **51.12%** (+10.6%)
+    - テスト数: 410 → 913 (+503 tests)
+    - 失敗テスト: 50件 → 0件（100%修正）
+    - 主要修正: DOMクリーンアップ追加（3ファイル）
+    - 達成項目:
+      - type-guards.test.ts: 100% (72テスト)
+      - RestaurantCategoryChip.test.tsx: 100% (66テスト)
+      - DetailedBusinessHours.test.tsx: 100% (38テスト)
+      - AccessibilityComponents.test.tsx: 修正完了
+    - 工数: 30分（見積6.5時間の8%）
+    - 品質ゲート: 全通過（TypeScript 0エラー、ESLint 1警告、Tests 913/913通過）
+11. **(P2 test) Phase 8.3: Code Quality Improvement** ✅ (2025-11-03)
+    - IntegratedMapView.tsx: exhaustive-deps warning修正（useCallback化）
+    - App.test.tsx: +2テストケース（エラーハンドリング、フィルター機能）
+    - useMapPoints.test.ts: +3テストケース（統計情報、フィルター、エラー処理）
+    - Total tests: 405 → 410 (+5 tests, +1.2%)
+    - Coverage: 40.34% → 40.52% (+0.18%)
+    - ESLint warnings: 1 → 0 (100%解消)
+    - useMapPoints.ts coverage: 49.66% → 58.33% (+8.67%)
+12. **(P2 perf) OptimizedImage統合** ✅ (2025-11-01)
     - IcooonMarker.tsx: `<img>` → OptimizedImage置換
     - AVIF → WebP → PNG フォールバックチェーン実装
     - Quality Gates全通過: 405 tests, 0 errors

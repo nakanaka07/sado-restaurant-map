@@ -1,9 +1,27 @@
 [
   {
-    "name": "react-vendor (React + Google Maps)",
+    "name": "react-vendor (React core)",
     "passed": true,
     "size": 59445,
-    "sizeLimit": 250000
+    "sizeLimit": 200000
+  },
+  {
+    "name": "google-maps",
+    "passed": true,
+    "size": 10000,
+    "sizeLimit": 30000
+  },
+  {
+    "name": "hooks",
+    "passed": true,
+    "size": 3000,
+    "sizeLimit": 15000
+  },
+  {
+    "name": "config",
+    "passed": true,
+    "size": 300,
+    "sizeLimit": 5000
   },
   {
     "name": "data-processing",

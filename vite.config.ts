@@ -320,14 +320,30 @@ export default defineConfig(({ mode }) => {
         input: "index.html",
         output: {
           manualChunks: (id: string) => {
-            // React vendor libraries including Google Maps (React components)
-            // Note: Google Maps must stay with React to avoid circular dependencies
+            // Google Maps library separation (P2-2: -15KB target)
+            // Separate from react-vendor for better caching and tree-shaking
+            if (id.includes("@vis.gl/react-google-maps")) {
+              return "google-maps";
+            }
+
+            // React core vendor libraries (optimized)
             if (
               id.includes("node_modules/react") ||
-              id.includes("node_modules/react-dom") ||
-              id.includes("@vis.gl/react-google-maps")
+              id.includes("node_modules/react-dom")
             ) {
               return "react-vendor";
+            }
+
+            // Application hooks separation (P2-2: -5~8KB target)
+            // Separate from data-processing for cleaner dependencies
+            if (id.includes("src/hooks/")) {
+              return "hooks";
+            }
+
+            // Application config separation (P2-2: -3~5KB target)
+            // Separate from data-processing for better modularity
+            if (id.includes("src/config/")) {
+              return "config";
             }
 
             // Marker components (Phase 8 optimization)

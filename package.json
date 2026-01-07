@@ -91,9 +91,24 @@
   },
   "size-limit": [
     {
-      "name": "react-vendor (React + Google Maps)",
+      "name": "react-vendor (React core)",
       "path": "dist/assets/react-vendor-*.js",
-      "limit": "250 KB"
+      "limit": "200 KB"
+    },
+    {
+      "name": "google-maps",
+      "path": "dist/assets/google-maps-*.js",
+      "limit": "30 KB"
+    },
+    {
+      "name": "hooks",
+      "path": "dist/assets/hooks-*.js",
+      "limit": "15 KB"
+    },
+    {
+      "name": "config",
+      "path": "dist/assets/config-*.js",
+      "limit": "5 KB"
     },
     {
       "name": "data-processing",

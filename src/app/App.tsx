@@ -1,18 +1,7 @@
 import { SADO_CENTER } from "@/config";
 import { useMapPoints } from "@/hooks/map/useMapPoints";
-import type {
-  CuisineType,
-  ExtendedMapFilters,
-  MapPointType,
-  PriceRange,
-  SadoDistrict,
-} from "@/types";
-import {
-  checkGAStatus,
-  initGA,
-  initializeDevLogging,
-  sanitizeInput,
-} from "@/utils";
+import { useFilterHandlers } from "@/hooks/ui/useFilterHandlers";
+import { checkGAStatus, initGA, initializeDevLogging } from "@/utils";
 import {
   logUnknownAddressStats,
   testDistrictAccuracy,
@@ -197,6 +186,13 @@ function App() {
   // 一度だけ生成される簡易ユーザーID（再レンダーで変わらない）
   const userId = useMemo(() => `user_${Date.now()}`, []);
 
+  // フィルターハンドラーをカスタムフックで統合管理
+  const filterHandlers = useFilterHandlers({
+    filters,
+    updateFilters,
+    onError: (error: string) => setAppError(error || null),
+  });
+
   // フルスクリーン要素の検出を関数化して複雑度を削減
   const getFullscreenElement = () => {
     return (
@@ -334,53 +330,6 @@ function App() {
     };
   }, [apiKey, scheduleGAStatusCheck]);
 
-  // 汎用フィルターエラーハンドラ
-  const handleFilterError = useCallback((error: unknown, context: string) => {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    if (import.meta.env.DEV) {
-      console.error(`${context}エラー:`, errorMessage);
-    }
-    setAppError("フィルター設定中にエラーが発生しました");
-  }, []);
-
-  // 共通のフィルター更新ヘルパ（型/上限制約/サニタイズを集約）
-  const updateFiltersSafe = useCallback(
-    (partial: Partial<ExtendedMapFilters>) => {
-      try {
-        // 事前にサニタイズ/検証した partial を構築（不変）
-        let sanitizedPartial: Partial<ExtendedMapFilters> = { ...partial };
-
-        if (typeof partial.searchQuery === "string") {
-          const sq = sanitizeInput(partial.searchQuery);
-          if (sq.length > 100) {
-            setAppError("検索クエリは100文字以下で入力してください");
-            return;
-          }
-          sanitizedPartial = { ...sanitizedPartial, searchQuery: sq };
-        }
-
-        if (Array.isArray(sanitizedPartial.features)) {
-          if (sanitizedPartial.features.length > 20) {
-            setAppError("特徴フィルターは20個以下で選択してください");
-            return;
-          }
-        }
-        if (Array.isArray(sanitizedPartial.districts)) {
-          if (sanitizedPartial.districts.length > 10) {
-            setAppError("地区は10個以下で選択してください");
-            return;
-          }
-        }
-        // filters 全体は useMapPoints 側で保持しているためここでは使用しない
-        // Hook 側で部分更新をマージするため、部分のみ渡す
-        updateFilters(sanitizedPartial);
-      } catch (e) {
-        handleFilterError(e, "フィルター更新");
-      }
-    },
-    [updateFilters, handleFilterError]
-  );
-
   // データロード完了時の統計表示（開発環境のみ）
   useEffect(() => {
     if (!loading && mapPoints.length > 0 && import.meta.env.DEV) {
@@ -417,191 +366,6 @@ function App() {
       // No cleanup needed when condition is false
     };
   }, [loading, mapPoints.length]);
-
-  // セキュリティ強化: 入力サニタイズ付きフィルター関数
-  const handleCuisineFilter = useCallback(
-    (cuisine: CuisineType | "") => {
-      try {
-        if (cuisine !== "" && typeof cuisine !== "string") {
-          if (import.meta.env.DEV) {
-            console.warn("無効な料理タイプが指定されました");
-          }
-          return;
-        }
-        updateFiltersSafe({ cuisineTypes: cuisine ? [cuisine] : [] });
-      } catch (error) {
-        handleFilterError(error, "料理タイプフィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handlePriceFilter = useCallback(
-    (price: PriceRange | "") => {
-      try {
-        if (price !== "" && typeof price !== "string") {
-          if (import.meta.env.DEV) {
-            console.warn("無効な価格範囲が指定されました");
-          }
-          return;
-        }
-        updateFiltersSafe({ priceRanges: price ? [price] : [] });
-      } catch (error) {
-        handleFilterError(error, "価格フィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handleDistrictFilter = useCallback(
-    (districts: SadoDistrict[]) => {
-      try {
-        if (!Array.isArray(districts)) {
-          if (import.meta.env.DEV) {
-            console.warn("地区フィルターは配列である必要があります");
-          }
-          return;
-        }
-        if (districts.length > 10) {
-          if (import.meta.env.DEV) {
-            console.warn("選択できる地区数が多すぎます");
-          }
-          setAppError("地区は10個以下で選択してください");
-          return;
-        }
-        updateFiltersSafe({ districts });
-      } catch (error) {
-        handleFilterError(error, "地区フィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handleRatingFilter = useCallback(
-    (minRating: number | undefined) => {
-      try {
-        if (typeof minRating === "number") {
-          updateFiltersSafe({ ...filters, minRating });
-        } else {
-          // minRatingを除外したフィルターでリセット
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { minRating, ...filtersWithoutRating } = filters;
-          updateFiltersSafe(filtersWithoutRating);
-        }
-      } catch (error) {
-        handleFilterError(error, "評価フィルター");
-      }
-    },
-    [filters, updateFiltersSafe, handleFilterError]
-  );
-
-  const handleOpenNowFilter = useCallback(
-    (openNow: boolean) => {
-      try {
-        updateFiltersSafe({ openNow });
-      } catch (error) {
-        handleFilterError(error, "営業中フィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handleSearchFilter = useCallback(
-    (search: string) => {
-      try {
-        if (typeof search !== "string") {
-          if (import.meta.env.DEV) {
-            console.warn("検索クエリは文字列である必要があります");
-          }
-          return;
-        }
-        const sanitizedSearch = sanitizeInput(search);
-        if (sanitizedSearch.length > 100) {
-          if (import.meta.env.DEV) {
-            console.warn("検索クエリが長すぎます");
-          }
-          setAppError("検索クエリは100文字以下で入力してください");
-          return;
-        }
-        updateFiltersSafe({ searchQuery: sanitizedSearch });
-      } catch (error) {
-        handleFilterError(error, "検索フィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handleFeatureFilter = useCallback(
-    (features: string[]) => {
-      try {
-        if (!Array.isArray(features)) {
-          if (import.meta.env.DEV) {
-            console.warn("特徴フィルターは配列である必要があります");
-          }
-          return;
-        }
-        const sanitizedFeatures = features
-          .filter((feature): feature is string => typeof feature === "string")
-          .map(feature => {
-            const sanitized = sanitizeInput(feature);
-            if (sanitized.length > 50) {
-              if (import.meta.env.DEV) {
-                console.warn(`特徴アイテムが長すぎます: ${feature}`);
-              }
-              return sanitized.slice(0, 50);
-            }
-            return sanitized;
-          })
-          .filter(feature => feature.length > 0);
-
-        if (sanitizedFeatures.length > 20) {
-          if (import.meta.env.DEV) {
-            console.warn("特徴フィルターの数が多すぎます");
-          }
-          setAppError("特徴フィルターは20個以下で選択してください");
-          return;
-        }
-        updateFiltersSafe({ features: sanitizedFeatures });
-      } catch (error) {
-        handleFilterError(error, "特徴フィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handlePointTypeFilter = useCallback(
-    (pointTypes: MapPointType[]) => {
-      try {
-        updateFiltersSafe({ pointTypes });
-      } catch (error) {
-        handleFilterError(error, "ポイントタイプフィルター");
-      }
-    },
-    [updateFiltersSafe, handleFilterError]
-  );
-
-  const handleResetFilters = useCallback(() => {
-    try {
-      const defaultPointTypes: MapPointType[] = [
-        "restaurant",
-        "parking",
-        "toilet",
-      ];
-      const resetFilters: Partial<ExtendedMapFilters> = {
-        cuisineTypes: [] as CuisineType[],
-        priceRanges: [] as PriceRange[],
-        districts: [] as SadoDistrict[],
-        features: [] as string[],
-        searchQuery: "",
-        openNow: false,
-        pointTypes: defaultPointTypes,
-      };
-      updateFiltersSafe(resetFilters);
-      setAppError(null);
-    } catch (error) {
-      handleFilterError(error, "フィルターリセット");
-    }
-  }, [updateFiltersSafe, handleFilterError]);
 
   // アプリケーションエラー表示
   if (appError) {
@@ -646,16 +410,16 @@ function App() {
                         loading={loading}
                         resultCount={filteredMapPoints.length}
                         stats={stats}
-                        onCuisineFilter={handleCuisineFilter}
-                        onPriceFilter={handlePriceFilter}
-                        onDistrictFilter={handleDistrictFilter}
-                        onRatingFilter={handleRatingFilter}
-                        onOpenNowFilter={handleOpenNowFilter}
-                        onSearchFilter={handleSearchFilter}
+                        onCuisineFilter={filterHandlers.handleCuisineFilter}
+                        onPriceFilter={filterHandlers.handlePriceFilter}
+                        onDistrictFilter={filterHandlers.handleDistrictFilter}
+                        onRatingFilter={filterHandlers.handleRatingFilter}
+                        onOpenNowFilter={filterHandlers.handleOpenNowFilter}
+                        onSearchFilter={filterHandlers.handleSearchFilter}
                         onSortChange={updateSortOrder}
-                        onFeatureFilter={handleFeatureFilter}
-                        onPointTypeFilter={handlePointTypeFilter}
-                        onResetFilters={handleResetFilters}
+                        onFeatureFilter={filterHandlers.handleFeatureFilter}
+                        onPointTypeFilter={filterHandlers.handlePointTypeFilter}
+                        onResetFilters={filterHandlers.handleResetFilters}
                       />
                     </Suspense>
                   )}
@@ -684,16 +448,20 @@ function App() {
                             loading={loading}
                             resultCount={filteredMapPoints.length}
                             stats={stats}
-                            onCuisineFilter={handleCuisineFilter}
-                            onPriceFilter={handlePriceFilter}
-                            onDistrictFilter={handleDistrictFilter}
-                            onRatingFilter={handleRatingFilter}
-                            onOpenNowFilter={handleOpenNowFilter}
-                            onSearchFilter={handleSearchFilter}
+                            onCuisineFilter={filterHandlers.handleCuisineFilter}
+                            onPriceFilter={filterHandlers.handlePriceFilter}
+                            onDistrictFilter={
+                              filterHandlers.handleDistrictFilter
+                            }
+                            onRatingFilter={filterHandlers.handleRatingFilter}
+                            onOpenNowFilter={filterHandlers.handleOpenNowFilter}
+                            onSearchFilter={filterHandlers.handleSearchFilter}
                             onSortChange={updateSortOrder}
-                            onFeatureFilter={handleFeatureFilter}
-                            onPointTypeFilter={handlePointTypeFilter}
-                            onResetFilters={handleResetFilters}
+                            onFeatureFilter={filterHandlers.handleFeatureFilter}
+                            onPointTypeFilter={
+                              filterHandlers.handlePointTypeFilter
+                            }
+                            onResetFilters={filterHandlers.handleResetFilters}
                             position={DEFAULT_CONTROL_POSITION}
                           />
                         </Suspense>
