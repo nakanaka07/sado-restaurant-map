@@ -2,43 +2,43 @@
   {
     "name": "react-vendor (React core)",
     "passed": true,
-    "size": 59445,
+    "size": 51189,
     "sizeLimit": 200000
   },
   {
     "name": "google-maps",
     "passed": true,
-    "size": 10000,
+    "size": 8962,
     "sizeLimit": 30000
   },
   {
     "name": "hooks",
     "passed": true,
-    "size": 3000,
+    "size": 2620,
     "sizeLimit": 15000
   },
   {
     "name": "config",
     "passed": true,
-    "size": 300,
+    "size": 252,
     "sizeLimit": 5000
   },
   {
     "name": "data-processing",
     "passed": true,
-    "size": 10388,
+    "size": 10384,
     "sizeLimit": 40000
   },
   {
     "name": "ui-components",
     "passed": true,
-    "size": 7943,
+    "size": 7909,
     "sizeLimit": 40000
   },
   {
     "name": "markers",
     "passed": true,
-    "size": 4351,
+    "size": 4363,
     "sizeLimit": 20000
   }
 ]
