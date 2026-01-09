@@ -14,7 +14,7 @@
   {
     "name": "hooks",
     "passed": true,
-    "size": 2620,
+    "size": 3128,
     "sizeLimit": 15000
   },
   {
@@ -32,13 +32,13 @@
   {
     "name": "ui-components",
     "passed": true,
-    "size": 7909,
+    "size": 7795,
     "sizeLimit": 40000
   },
   {
     "name": "markers",
     "passed": true,
-    "size": 4363,
+    "size": 4438,
     "sizeLimit": 20000
   }
 ]
