@@ -14,7 +14,7 @@
  */
 
 import type { MapPoint } from "@/types";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { IconMarker } from "./markers/IconMarker";
 import { PinMarker } from "./markers/PinMarker";
 import { SVGMarker } from "./markers/SVGMarker";
@@ -74,7 +74,7 @@ export interface MarkerStrategyProps {
  * />
  * ```
  */
-export function UnifiedMarker({
+function UnifiedMarkerImpl({
   point,
   onClick,
   variant = "icon", // デフォルトは既存実装と同等のアイコン版
@@ -110,4 +110,37 @@ export function UnifiedMarker({
   return <MarkerComponent {...strategyProps} />;
 }
 
+// ==============================
+// React.memo with Custom Comparator
+// ==============================
+
+/**
+ * マーカー623個に対するパフォーマンス最適化
+ *
+ * カスタム比較関数で必要な場合のみ再レンダリング
+ * - point.id: マーカーのアイデンティティ
+ * - variant/size: 表示形式
+ * - isSelected/isHovered: インタラクション状態
+ *
+ * @see docs/design/ab-test-marker-sync.md
+ */
+function arePropsEqual(
+  prevProps: UnifiedMarkerProps,
+  nextProps: UnifiedMarkerProps
+): boolean {
+  // ポイントIDが同じかつ他のpropsも同じなら再レンダリング不要
+  return (
+    prevProps.point.id === nextProps.point.id &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.size === nextProps.size &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isHovered === nextProps.isHovered &&
+    prevProps.ariaLabel === nextProps.ariaLabel
+    // onClick参照は安定していることを期待（useCallback使用前提）
+  );
+}
+
+export const UnifiedMarker = memo(UnifiedMarkerImpl, arePropsEqual);
+
+// デフォルトエクスポート
 export default UnifiedMarker;

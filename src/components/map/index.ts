@@ -25,3 +25,6 @@ export type {
 export { IconMarker } from "./markers/IconMarker";
 export { PinMarker } from "./markers/PinMarker";
 export { SVGMarker } from "./markers/SVGMarker";
+
+// Context-Connected Components (Week 2 P2-2)
+export { ConnectedCustomMapControls } from "./ConnectedCustomMapControls";
